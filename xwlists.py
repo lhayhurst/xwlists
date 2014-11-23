@@ -4,7 +4,7 @@ import urllib
 
 from flask import render_template, request, url_for, redirect
 import myapp
-from persistence import Tourney, TourneyList, PersistenceManager
+from persistence import Tourney, TourneyList, PersistenceManager, List, Faction, Ship
 
 import xwingmetadata
 
@@ -65,25 +65,57 @@ def tourney_entry_status():
     summary = PersistenceManager(myapp.db_connector).get_tourney_summary()
     return render_template('tourney_summary.html', tourneys=summary )
 
-@app.route("/enter_list")
-def enter_list():
+@app.route("/browse_list")
+def browse_list():
     tourney_name = request.args.get('tourney')
     pm = PersistenceManager(myapp.db_connector)
     tourney = pm.get_tourney(tourney_name)
-    tourney_list = pm.get_random_tourney_list(tourney)
+    tourney_lists = tourney.tourney_lists
+    return render_template( 'tourney_lists.html', tourney=tourney, tourney_lists=tourney_lists)
+
+@app.route("/enter_list")
+def enter_list():
+    tourney_name    = request.args.get('tourney')
+    tourney_list_id = request.args.get('tourney_list_id')
+
+    pm = PersistenceManager(myapp.db_connector)
+    tourney_list = None
+
+    if tourney_list_id is None:
+        tourney = pm.get_tourney(tourney_name)
+        tourney_list = pm.get_random_tourney_list(tourney)
+    else:
+        tourney_list = pm.get_tourney_list(tourney_list_id)
+
     m = xwingmetadata.XWingMetaData()
     return render_template('worlds.html', meta=m, image_src=urllib.quote(tourney_list.image), tourney_list=tourney_list )
 
 @app.route("/add_squad",methods=['POST'])
 def add_squad():
-    list = xwingmetadata.XWingList(request.form )
-    print list.player
-    print list.faction
-    print list.points
-    i = 1
-    for ship in list.ships_submitted:
-        for upgrade in ship.keys():
-            print "Ship %d: %s : %s " % (i, upgrade, ship[upgrade ] )
+    tourney_list_id = request.form['tourney_list_id']
+    pm = PersistenceManager(myapp.db_connector)
+    tourney_list = pm.get_tourney_list(tourney_list_id)
+
+    faction = request.form['faction']
+    points  = request.form['points']
+
+    list_data = xwingmetadata.XWingList(request.form )
+
+    list = List(faction=Faction.from_string(faction), points=points)
+    pm.db_connector.get_session().add( list )
+    pm.db_connector.get_session().commit()
+
+    i = 0
+    for ship_hash in list_data.ships_submitted:
+        ship_pilot = pm.get_ship_pilot( ship_hash[ 'ship.' + str(i)], ship_hash[ 'pilot.' + str(i) ] )
+        ship = Ship( ship_pilot_id=ship_pilot.id, list_id=list.id)
+        list.ships.append( ship )
+        i = i + 1
+#        for upgrade in ship.keys():
+#            print "Ship %d: %s : %s " % (i, upgrade, ship[upgrade ] )
+
+    tourney_list.list_id = list.id
+    pm.db_connector.get_session().commit()
     return redirect(url_for('new'))
 
 

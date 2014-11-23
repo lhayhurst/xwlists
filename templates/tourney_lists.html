@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+.tg .tg-3i0c{font-weight:bold;background-color:#ffce93}
+</style>
+
+<h3>Tourney {{ tourney.tourney_name }} lists summary</h3>
+<table class="tg">
+  <tr>
+    <th class="tg-3i0c">Tourney</th>
+    <th class="tg-3i0c">Player</th>
+    <th class="tg-3i0c">Faction</th>
+    <th class="tg-3i0c">Points</th>
+    <th class="tg-3i0c">List</th>
+  </tr>
+      {% for tourney_list in tourney_lists %}
+      <tr>
+         <td class="tg-031e">{{ tourney.tourney_name }}</td>
+         <td class="tg-031e">{{  tourney_list.player_name }}</td>
+         {% if tourney_list.list %}
+             <td class="tg-031e">{{  tourney_list.list.faction }}</td>
+             <td class="tg-031e">{{  tourney_list.list.points }}</td>
+         {%  else %}
+             <td class="tg-031e">No list entered (<a href="{{ url_for( 'enter_list', tourney_list_id=tourney_list.id) }}">enter it now!</a>) </td>
+             <td class="tg-031e">No list entered </td>
+         {%  endif %}
+         <td class="tg-031e">list details here ... </td>
+      </tr>
+      {% endfor %}
+</table>
+
+{% endblock %}

@@ -274,6 +274,8 @@ torpedos = ('Advanced Proton Torpedoes',
 turrets = ('Ion Cannon Turret', 'Blaster Turret')
 
 
+
+
 class XWingMetaData:
     def is_rebel(self):
         self.is_rebel = True
@@ -352,10 +354,5 @@ class XWingList:
         return ret
 
     def __init__(self, request_form):
-
-        self.player = request_form['player']
-        self.faction = request_form['faction']
-        self.points = request_form['points']
-
         self.ships_submitted = self.get_ships_submitted(request_form)
 

@@ -12,16 +12,16 @@
 <table class="tg">
   <tr>
     <th class="tg-3i0c">Tourney</th>
-    <th class="tg-3i0c">Total Games</th>
-    <th class="tg-3i0c">Games Entered</th>
-    <th class="tg-3i0c">Games Not Entered</th>
+    <th class="tg-3i0c">Total Lists</th>
+    <th class="tg-3i0c">Lists Entered</th>
+    <th class="tg-3i0c">Lists Not Entered</th>
   </tr>
       {% for key, value in tourneys.iteritems() %}
       <tr>
          <td class="tg-031e">{{ key }}</td>
          <td class="tg-031e">{{  value['num_entered'] + value['num_not_entered']  }}</td>
-         <td class="tg-031e">{{ value['num_entered'] }}</td>
-         <td class="tg-031e">{{ value['num_not_entered'] }} ( <a href="{{ url_for( 'enter_list', tourney=key) }}">enter a game!</a>)</td>
+         <td class="tg-031e">{{ value['num_entered'] }} (<a href="{{ url_for( 'browse_list', tourney=key) }}">browse submitted lists!</a>) </td>
+         <td class="tg-031e">{{ value['num_not_entered'] }} ( <a href="{{ url_for( 'enter_list', tourney=key) }}">enter a list!</a>)</td>
       </tr>
       {% endfor %}
 </table>

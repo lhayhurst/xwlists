@@ -33,29 +33,37 @@
     </style>
     <script>
         var entryCount = 0;
-        var data = {{ meta.ships_full()|tojson|safe }}
+        var ships_and_pilots = {{ meta.ships_full()|tojson|safe }}
+        var upgrades         = {{ meta.upgrades()|tojson|safe }}
+
         function addEntry() {
             var entry = $('.entry.template').clone().removeClass('template').appendTo('.entry-group');
             entry.find('.indexed').each(function(i, el) {
                 el.name = el.name + '.' + entryCount;
                 console.log(el);
             });
+
             var pilot = entry.find('.pilot')
             pilot.empty();
 
             entry.find('.ship').on("select2-close", function(e) {
                 pilot.empty();
                 var results = [];
-                var pilots = data[ e.target.value ]
-                jQuery.each( data[e.target.value], function(i,val) {
+                var pilots = ships_and_pilots[ e.target.value ]
+                pilot.append('<option></option>');
+                jQuery.each( ships_and_pilots[e.target.value], function(i,val) {
                     var pname = val[ 'name'];
-                    pilot.append( '<option value="' + pname + '.' + i + '">'+pname+'</option>');
-                    jquery.each( val['upgrades'], function(j,upgrade) {
-
-
-                    });
+                    pilot.append( '<option value="' + pname + '">'+pname+'</option>');
+                    pilot['upgrade_types_for_pilot'] = val['upgrades']
                 });
                 pilot.select2();
+                pilot.on("select2-close", function(e) {
+                    upgrades_for_ship_and_pilot =  pilot['upgrade_types_for_pilot'];
+                    console.log(upgrades_for_ship_and_pilot);
+                    jQuery.each( ships_and_pilots[e.target.value], function(i,val) {
+
+                    } );
+                } );
             } );
             entry.find('select').css({width:300}).select2();
 
@@ -102,6 +110,7 @@
                 <script>addEntry()</script>
 
                 <input type=submit value="Submit squad!">
+                <input name="tourney_list_id" value="{{ tourney_list.id }}" type="hidden">
 
             </form>
 

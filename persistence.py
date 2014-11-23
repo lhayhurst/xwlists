@@ -1,6 +1,6 @@
 import random
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from myapp import db_connector
 from xwingmetadata import XWingMetaData
 import xwingmetadata
@@ -30,8 +30,8 @@ tourney_list_table = "tourney_list"
 Base = db_connector.get_base()
 
 class Faction(DeclEnum):
-    IMPERIAL = "imperial", "imperial"
-    REBEL    = "rebel", "rebel"
+    IMPERIAL = "Imperial", "Imperial"
+    REBEL    = "Rebel", "Rebel"
 
 class UpgradeType(DeclEnum):
     TITLE = xwingmetadata.TITLE, xwingmetadata.TITLE
@@ -82,8 +82,9 @@ class ShipPilot(Base):
 class Ship(Base):
     __tablename__ = ship_table
     id = Column(Integer, primary_key=True)
-    ship_pilot = Column(Integer, ForeignKey('{0}.id'.format(ship_pilot_table)))
+    ship_pilot_id = Column(Integer, ForeignKey('{0}.id'.format(ship_pilot_table)))
     list_id = Column(Integer, ForeignKey('{0}.id'.format(list_table)))  #parent
+    ship_pilot = relationship(ShipPilot.__name__, uselist=False)
 
 class ShipUpgrade(Base):
     __tablename__ = upgrade_table
@@ -98,11 +99,9 @@ class List(Base):
     name   = Column(String(128))
     faction     = Column(Faction.db_type())
     ships       = relationship(Ship.__name__)
+    points      = Column(Integer)
 
-class Tourney(Base):
-    __tablename__ = tourney_table
-    id = Column(Integer, primary_key=True)
-    tourney_name  = Column(String(128))
+
 
 class TourneyList(Base):
     __tablename__ = tourney_list_table
@@ -111,9 +110,14 @@ class TourneyList(Base):
     list_id     = Column(Integer, ForeignKey('{0}.id'.format(list_table)))
     player_name = Column(String(128))
     image  = Column(String(128))
-    tourney = relationship( Tourney.__name__, uselist=False)
+    list    = relationship( List.__name__, uselist=False)
+    tourney = relationship( "Tourney", backref=backref('tourney_lists', order_by=id))
 
 
+class Tourney(Base):
+    __tablename__ = tourney_table
+    id = Column(Integer, primary_key=True)
+    tourney_name  = Column(String(128))
 
 class PersistenceManager:
 
@@ -155,6 +159,16 @@ class PersistenceManager:
 
     def get_tourney(self,tourney_name):
         return self.db_connector.get_session().query(Tourney).filter_by(tourney_name=tourney_name).first()
+
+    def get_tourney_list(self,tourney_list_id):
+        return self.db_connector.get_session().query(TourneyList).filter_by(id=tourney_list_id).first()
+
+    def get_ship_pilot(self, ship_type, pilot):
+        return \
+        self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_string(ship_type)). \
+            filter(ShipPilot.pilot_id == Pilot.id). \
+            filter(pilot == Pilot.name).first()[0]
+
 
     def get_random_tourney_list(self, tourney):
         session = self.db_connector.get_session()
