@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Post a chat file</h2>
+ <form action="{{ url_for('add_tourney') }}" method=post class="add-entry">
+    <dl>
+        <dt>What is the name of the tourney?</dt>
+        <dd><textarea rows="1" cols="100" name="name"></textarea></dd>
+        <dt>What folder does it live in?</dt>
+        <dd><textarea rows="1" cols="100" name="folder"></textarea></dd>
+        <dd><input type=submit value="Generate stats!">
+    </dl>
+ </form>
+{% endblock %}

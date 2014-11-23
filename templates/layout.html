@@ -1,0 +1,47 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html>
+	<head>
+         <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+		<title>XWing Lists</title>
+		<link rel="stylesheet" href="static/style.css" />
+        <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
+        <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+        <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+        <script src="static/select2.min.js"></script>
+	    <script src="static/jquery.validate.min.js"></script>
+	</head>
+
+	<body>
+
+	<div id="conteneur" style="overflow:hidden; width:85%;">
+		  <div id="header">Lists</div>
+
+		  <div id="haut" >
+			<ul class="menuhaut" >
+				<li><a href="new">New tourney</a></li>
+				<li><a href="tourney_entry_status">Tourney entry status</a></li>
+				<li><a href="about">About</a></li>
+				<li><a href="worlds">2014 worlds list entry</a></li>
+
+			</ul>
+     </div>
+     <div id="centre" >
+      {% block content %}{% endblock %}</div>
+	</div>
+	</body>
+
+    <script type="text/javascript">
+        $(function(){
+        $('#tabs')
+        .tabs()
+        .addClass('ui-tabs-vertical ui-helper-clearfix');
+        });
+
+    </script>
+
+
+</html>
+

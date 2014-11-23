@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <style>
+        .main-section {
+            width: 100%;
+            height: 500px;
+        }
+        .image {
+            width: 66%;
+            float: left;
+        }
+        .image img {
+            width: 100%;
+            height: auto;
+        }
+        .entries, .image {
+            height: 100%;
+            overflow-y: scroll;
+        }
+        .entries {
+            margin-left: 66%;
+            padding: 20px;
+        }
+        .template {
+            display: none;
+        }
+        .entry {
+            background-color: #eeeeee;
+            margin: 5px;
+            padding: 0 5px;
+        }
+    </style>
+    <script>
+        var entryCount = 0;
+        var data = {{ meta.ships_full()|tojson|safe }}
+        function addEntry() {
+            var entry = $('.entry.template').clone().removeClass('template').appendTo('.entry-group');
+            entry.find('.indexed').each(function(i, el) {
+                el.name = el.name + '.' + entryCount;
+                console.log(el);
+            });
+            var pilot = entry.find('.pilot')
+            pilot.empty();
+
+            entry.find('.ship').on("select2-close", function(e) {
+                pilot.empty();
+                var results = [];
+                var pilots = data[ e.target.value ]
+                jQuery.each( data[e.target.value], function(i,val) {
+                    var pname = val[ 'name'];
+                    pilot.append( '<option value="' + pname + '.' + i + '">'+pname+'</option>');
+                    jquery.each( val['upgrades'], function(j,upgrade) {
+
+
+                    });
+                });
+                pilot.select2();
+            } );
+            entry.find('select').css({width:300}).select2();
+
+            entryCount++;
+            $('.count').val(entryCount);
+        }
+    </script>
+
+    <div class="main-section">
+        <div class="image">
+            {{ tourney_list.player_name }}
+            <img src={{ image_src }}>
+        </div>
+        <div class="entries">
+
+
+            <form action="/add_squad" id="listForm" method=post class="add-entry">
+                <input type="hidden" name="count" class="count" value="0">
+                <div>
+                    <b>Player name</b><textarea rows="1" cols="30" name="player" required></textarea>
+                    <b>Faction</b><input type="radio" name="faction" id="Rebel" value="Rebel"required>Rebel</input><input type="radio" name="faction" id="Imperial" value="Imperial"required>Imperial</input>
+                    <b>points spent</b><textarea rows="1" cols="5" name="points" required></textarea>
+                </div>
+                <br>
+                <div class="entry-group">
+                    <div class="entry template">
+                        <b>Ship</b>
+                        <select name="ship" class="ship indexed" placeholder="Select a ship" >
+                            <option></option>
+                            {% for ship in meta.ships() %}
+                            <option value="{{ ship }}">{{ ship }}</option>
+                            {% endfor %}
+                        </select>
+                        <br>
+                        <b>Pilot</b>
+                        <select name="pilot" class="pilot indexed" placeholder="Select a pilot" >
+                            <option></option>
+                        </select>
+                        <br>
+                    </div>
+                </div>
+
+                <button onclick="addEntry(); return false">Add another</button>
+                <script>addEntry()</script>
+
+                <input type=submit value="Submit squad!">
+
+            </form>
+
+            <script>
+               $("#listForm").validate();
+            </script>
+
+        </div>
+    </div>
+
+
+{% endblock %}

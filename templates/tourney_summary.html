@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+.tg .tg-3i0c{font-weight:bold;background-color:#ffce93}
+</style>
+
+<h3>Tourney entry summary</h3>
+<table class="tg">
+  <tr>
+    <th class="tg-3i0c">Tourney</th>
+    <th class="tg-3i0c">Total Games</th>
+    <th class="tg-3i0c">Games Entered</th>
+    <th class="tg-3i0c">Games Not Entered</th>
+  </tr>
+      {% for key, value in tourneys.iteritems() %}
+      <tr>
+         <td class="tg-031e">{{ key }}</td>
+         <td class="tg-031e">{{  value['num_entered'] + value['num_not_entered']  }}</td>
+         <td class="tg-031e">{{ value['num_entered'] }}</td>
+         <td class="tg-031e">{{ value['num_not_entered'] }} ( <a href="{{ url_for( 'enter_list', tourney=key) }}">enter a game!</a>)</td>
+      </tr>
+      {% endfor %}
+</table>
+
+{% endblock %}
