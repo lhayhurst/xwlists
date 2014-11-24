@@ -109,6 +109,7 @@ class Tourney(Base):
     id = Column(Integer, primary_key=True)
     tourney_name  = Column(String(128))
     tourney_date  = Column(Date)
+    tourney_type  = Column(String(128))
     tourney_lists = relationship( "TourneyList", back_populates="tourney", order_by="asc(TourneyList.tourney_standing)")
 
 class TourneyList(Base):

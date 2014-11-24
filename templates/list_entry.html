@@ -42,6 +42,7 @@
                 el.name = el.name + '.' + entryCount;
                 console.log(el);
             });
+            entry.find("#entry-number").val(entryCount)
 
             var pilot = entry.find('.pilot')
             pilot.empty();
@@ -54,14 +55,44 @@
                 jQuery.each( ships_and_pilots[e.target.value], function(i,val) {
                     var pname = val[ 'name'];
                     pilot.append( '<option value="' + pname + '">'+pname+'</option>');
-                    pilot['upgrade_types_for_pilot'] = val['upgrades']
                 });
+
                 pilot.select2();
                 pilot.on("select2-close", function(e) {
-                    upgrades_for_ship_and_pilot =  pilot['upgrade_types_for_pilot'];
-                    console.log(upgrades_for_ship_and_pilot);
-                    jQuery.each( ships_and_pilots[e.target.value], function(i,val) {
-                    } );
+                    var parentDiv = $(e.target).parent("div");
+                    var shipName = parentDiv.find("select.ship")[0].value;
+                    var pilotName = e.target.value;
+                    var listOfPilots = ships_and_pilots[shipName];
+
+                    var filteredPilots = _.select(listOfPilots, function (p) {
+                        return p.name == pilotName
+                    });
+                    var pilotOptions = _.first(filteredPilots);
+
+                    _.each(pilotOptions.upgrades, function(upgradeTitle){
+                        var entryNumber = parentDiv.find("#entry-number").val();
+
+                        var upgradeTitleEntryNumber = "#" + upgradeTitle + "." + entryNumber;
+                        //console.log(upgradeTitleEntryNumber);
+                        var select = $(upgradeTitleEntryNumber).select2();
+                        console.log(select);
+                        $("#after-pilot-placeholder").append( select );
+                        //console.log(parentDiv);
+
+                        //var html = "<br><b>" + upgradeTitle + "</b><br><select name='" + upgradeTitle + "' class='" + upgradeTitle + " indexed' placeholder='Select a " + upgradeTitle + "'>";
+                        //html = html.concat("<option></option>");
+                        //upgrade_options = upgrades[upgradeTitle];
+                        //_.each(upgrade_options, function(upgrade_option_value) {
+                        //    html = html.concat("<option value='" + upgrade_option_value.name + "." + entryNumber +  "'>" + upgrade_option_value.name + "</option>");
+                        //});
+                        //html = html.concat("</select>");
+                        //console.log( html );
+                        //parentDiv.find("#after-pilot-placeholder").append(html);
+
+{#                        console.log(upgradeTitle);#}
+{#                        console.log(upgrades[upgradeTitle]);#}
+
+                    });
                 } );
             } );
             entry.find('select').css({width:300}).select2();
@@ -89,6 +120,7 @@
                 <br>
                 <div class="entry-group">
                     <div class="entry template">
+                        <input type="hidden" id="entry-number">
                         <b>Ship</b>
                         <select name="ship" class="ship indexed" placeholder="Select a ship" >
                             <option></option>
@@ -102,6 +134,7 @@
                             <option></option>
                         </select>
                         <br>
+                        <div id="after-pilot-placeholder"></div>
                     </div>
                 </div>
 

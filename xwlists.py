@@ -57,6 +57,7 @@ def delete_tourney():
 def add_tourney():
     name   = request.form['name']
     folder = request.form['folder']
+    type   = request.form['tourney_type']
     mmddyyyy = request.form['date'].split('/')
     date   = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[1]), int(mmddyyyy[0]))
 
@@ -68,7 +69,7 @@ def add_tourney():
             player_name = os.path.splitext(f)[0]
             tourney_files[player_name] = UPLOAD_FOLDER +  "/" + folder + "/" + f
 
-    tourney = Tourney(tourney_name=name, tourney_date=date)
+    tourney = Tourney(tourney_name=name, tourney_date=date, tourney_type=type)
     myapp.db_connector.get_session().add(tourney)
     myapp.db_connector.get_session().commit()
 
