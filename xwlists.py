@@ -2,6 +2,7 @@ from genericpath import isfile
 import os
 import re
 import urllib
+import datetime
 
 from flask import render_template, request, url_for, redirect
 import myapp
@@ -56,6 +57,9 @@ def delete_tourney():
 def add_tourney():
     name   = request.form['name']
     folder = request.form['folder']
+    mmddyyyy = request.form['date'].split('/')
+    date   = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[1]), int(mmddyyyy[0]))
+
     #load all the files in the folder
     folder_path = os.path.join(static_dir, folder)
     tourney_files = {}
@@ -64,7 +68,7 @@ def add_tourney():
             player_name = os.path.splitext(f)[0]
             tourney_files[player_name] = UPLOAD_FOLDER +  "/" + folder + "/" + f
 
-    tourney = Tourney(tourney_name=name)
+    tourney = Tourney(tourney_name=name, tourney_date=date)
     myapp.db_connector.get_session().add(tourney)
     myapp.db_connector.get_session().commit()
 

@@ -1,5 +1,6 @@
 import random
 import re
+import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from myapp import db_connector
@@ -11,7 +12,7 @@ __author__ = 'lhayhurst'
 
 import time
 from decl_enum import DeclEnum
-from sqlalchemy import Column, Integer, String, DateTime, Table, desc, Float, asc, func
+from sqlalchemy import Column, Integer, String, DateTime, Table, desc, Float, asc, func, Date
 from sqlalchemy import ForeignKey
 
 
@@ -102,10 +103,12 @@ class List(Base):
     ships       = relationship(Ship.__name__)
     points      = Column(Integer)
 
+
 class Tourney(Base):
     __tablename__ = tourney_table
     id = Column(Integer, primary_key=True)
     tourney_name  = Column(String(128))
+    tourney_date  = Column(Date)
     tourney_lists = relationship( "TourneyList", back_populates="tourney", order_by="asc(TourneyList.tourney_standing)")
 
 class TourneyList(Base):
@@ -204,12 +207,11 @@ class PersistenceManager:
         for tl in tourney_lists:
             tourney_name = tl.tourney.tourney_name
             if not ret.has_key(tourney_name):
-                ret[tourney_name] = { 'num_entered' : 0, 'num_not_entered' : 0}
+                ret[tourney_name] = { 'num_entered' : 0, 'num_not_entered' : 0, 'tourney': tl.tourney}
             if tl.list_id is None:
                 ret[tourney_name]['num_not_entered'] += 1
             else:
                 ret[tourney_name]['num_entered'] += 1
-
         return ret
 
 
