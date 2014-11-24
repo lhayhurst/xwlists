@@ -1,5 +1,6 @@
 from genericpath import isfile
 import os
+import re
 import urllib
 
 from flask import render_template, request, url_for, redirect
@@ -52,7 +53,13 @@ def add_tourney():
     lists   = []
     for player_name in tourney_files.keys():
         f = tourney_files[player_name]
-        tourney_list = TourneyList( tourney_id=tourney.id, image=f, player_name=player_name)
+
+        match = re.match(r'^(.*?)\s+(\d+)',player_name)
+
+        tourney_list = TourneyList( tourney_id=tourney.id,
+                                    image=f,
+                                    player_name=match.group(1),
+                                    tourney_standing=match.group(2))
         lists.append( tourney_list )
     myapp.db_connector.get_session().add_all( lists )
     myapp.db_connector.get_session().commit()

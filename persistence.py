@@ -1,4 +1,5 @@
 import random
+import re
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from myapp import db_connector
@@ -101,23 +102,30 @@ class List(Base):
     ships       = relationship(Ship.__name__)
     points      = Column(Integer)
 
-
-
-class TourneyList(Base):
-    __tablename__ = tourney_list_table
-    id          = Column( Integer, primary_key=True)
-    tourney_id  = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
-    list_id     = Column(Integer, ForeignKey('{0}.id'.format(list_table)))
-    player_name = Column(String(128))
-    image  = Column(String(128))
-    list    = relationship( List.__name__, uselist=False)
-    tourney = relationship( "Tourney", backref=backref('tourney_lists', order_by=id))
-
-
 class Tourney(Base):
     __tablename__ = tourney_table
     id = Column(Integer, primary_key=True)
     tourney_name  = Column(String(128))
+    tourney_lists = relationship( "TourneyList", back_populates="tourney", order_by="asc(TourneyList.tourney_standing)")
+
+class TourneyList(Base):
+    __tablename__ = tourney_list_table
+    id               = Column( Integer, primary_key=True)
+    tourney_id       = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
+    list_id          = Column(Integer, ForeignKey('{0}.id'.format(list_table)))
+    player_name      = Column(String(128))
+    tourney_standing = Column(Integer)
+    image            = Column(String(128))
+    list             = relationship( List.__name__, uselist=False)
+    tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
+
+    def player_name_stripped(self):
+        regex = re.compile('[^a-zA-Z ]')
+        return regex.sub('', self.player_name)
+
+
+
+
 
 class PersistenceManager:
 

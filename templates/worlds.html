@@ -74,7 +74,7 @@
 
     <div class="main-section">
         <div class="image">
-            {{ tourney_list.player_name }}
+            {{  tourney_list.player_name_stripped()  }}
             <img src={{ image_src }}>
         </div>
         <div class="entries">
@@ -83,7 +83,7 @@
             <form action="/add_squad" id="listForm" method=post class="add-entry">
                 <input type="hidden" name="count" class="count" value="0">
                 <div>
-                    <b>Player name</b><textarea rows="1" cols="30" name="player" required></textarea>
+                    <b>Player name</b><textarea rows="1" cols="30" name="player" required>{{ tourney_list.player_name_stripped() }}</textarea>
                     <b>Faction</b><input type="radio" name="faction" id="Rebel" value="Rebel"required>Rebel</input><input type="radio" name="faction" id="Imperial" value="Imperial"required>Imperial</input>
                     <b>points spent</b><textarea rows="1" cols="5" name="points" required></textarea>
                 </div>
