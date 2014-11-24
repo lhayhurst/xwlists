@@ -144,7 +144,7 @@ def add_squad():
 
     tourney_list.list_id = list.id
     pm.db_connector.get_session().commit()
-    return redirect(url_for('new'))
+    return redirect(url_for('tourneys'))
 
 
 @app.route('/')
