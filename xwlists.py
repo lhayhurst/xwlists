@@ -112,7 +112,7 @@ def enter_list():
         tourney_list = pm.get_tourney_list(tourney_list_id)
 
     m = xwingmetadata.XWingMetaData()
-    return render_template('worlds.html', meta=m, image_src=urllib.quote(tourney_list.image), tourney_list=tourney_list )
+    return render_template('list_entry.html', meta=m, image_src=urllib.quote(tourney_list.image), tourney_list=tourney_list )
 
 @app.route("/add_squad",methods=['POST'])
 def add_squad():
