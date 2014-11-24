@@ -139,6 +139,7 @@ def add_squad():
         ship = Ship( ship_pilot_id=ship_pilot.id, list_id=list.id)
         list.ships.append( ship )
         i = i + 1
+# new stuff here
 #        for upgrade in ship.keys():
 #            print "Ship %d: %s : %s " % (i, upgrade, ship[upgrade ] )
 
