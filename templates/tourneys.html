@@ -7,14 +7,19 @@
 .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
 .tg .tg-3i0c{font-weight:bold;background-color:#ffce93}
 </style>
-
-<h3>Tourney entry summary</h3>
+<br>
+<a href="/new">add a new tourney</a>
+<br>
+<h3>Tourneys</h3>
 <table class="tg">
   <tr>
-    <th class="tg-3i0c">Tourney</th>
+    <th class="tg-3i0c">Name</th>
     <th class="tg-3i0c">Total Lists</th>
     <th class="tg-3i0c">Lists Entered</th>
     <th class="tg-3i0c">Lists Not Entered</th>
+    {% if admin %}
+    <th class="tg-3i0c">Admin</th>
+    {% endif %}
   </tr>
       {% for key, value in tourneys.iteritems() %}
       <tr>
@@ -22,6 +27,9 @@
          <td class="tg-031e">{{  value['num_entered'] + value['num_not_entered']  }}</td>
          <td class="tg-031e">{{ value['num_entered'] }} (<a href="{{ url_for( 'browse_list', tourney=key) }}">browse submitted lists!</a>) </td>
          <td class="tg-031e">{{ value['num_not_entered'] }} ( <a href="{{ url_for( 'enter_list', tourney=key) }}">enter a list!</a>)</td>
+         {% if admin %}
+         <td class="tg-031e"><a href="{{ url_for( 'delete_tourney', tourney=key) }}">delete tourney</a></td>
+         {%  endif %}
       </tr>
       {% endfor %}
 </table>

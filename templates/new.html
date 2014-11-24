@@ -4,10 +4,10 @@
  <form action="{{ url_for('add_tourney') }}" method=post class="add-entry">
     <dl>
         <dt>What is the name of the tourney?</dt>
-        <dd><textarea rows="1" cols="100" name="name"></textarea></dd>
+        <dd><textarea rows="1" cols="100" name="name" required></textarea></dd>
         <dt>What folder does it live in?</dt>
-        <dd><textarea rows="1" cols="100" name="folder"></textarea></dd>
-        <dd><input type=submit value="Generate stats!">
+        <dd><textarea rows="1" cols="100" name="folder" required></textarea></dd>
+        <dd><input type=submit value="Create tourney!">
     </dl>
  </form>
 {% endblock %}

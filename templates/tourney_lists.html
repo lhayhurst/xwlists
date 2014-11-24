@@ -26,11 +26,13 @@
          {% if tourney_list.list %}
              <td class="tg-031e">{{  tourney_list.list.faction }}</td>
              <td class="tg-031e">{{  tourney_list.list.points }}</td>
+             <td class="tg-031e">list details here ... </td>
          {%  else %}
-             <td class="tg-031e">No list entered (<a href="{{ url_for( 'enter_list', tourney_list_id=tourney_list.id) }}">enter it now!</a>) </td>
-             <td class="tg-031e">No list entered </td>
+             <td class="tg-031e">Faction unknown </td>
+             <td class="tg-031e">Points unknown </td>
+             <td class="tg-031e"><a href="{{ url_for( 'enter_list', tourney_list_id=tourney_list.id) }}">Enter it now!</a> </td>
+
          {%  endif %}
-         <td class="tg-031e">list details here ... </td>
       </tr>
       {% endfor %}
 </table>

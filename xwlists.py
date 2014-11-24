@@ -30,9 +30,27 @@ def shutdown_session(exception=None):
 def about():
     return render_template('about.html')
 
+@app.route("/tourneys")
+def tourneys():
+    admin_on = request.args.get('admin')
+    if admin_on is not None:
+        admin_on = True
+    else:
+        admin_on = False
+    summary = PersistenceManager(myapp.db_connector).get_tourney_summary()
+    return render_template('tourneys.html', tourneys=summary, admin=admin_on )
+
+
 @app.route("/new")
 def new():
     return render_template('new.html')
+
+@app.route("/delete_tourney")
+def delete_tourney():
+    tourney_name = request.args.get('tourney')
+    pm = PersistenceManager(myapp.db_connector)
+    pm.delete_tourney(tourney_name)
+    return redirect(url_for('tourneys') )
 
 @app.route("/add_tourney",methods=['POST'])
 def add_tourney():
@@ -54,23 +72,22 @@ def add_tourney():
     for player_name in tourney_files.keys():
         f = tourney_files[player_name]
 
-        match = re.match(r'^(.*?)\s+(\d+)',player_name)
+        try:
 
-        tourney_list = TourneyList( tourney_id=tourney.id,
-                                    image=f,
-                                    player_name=match.group(1),
-                                    tourney_standing=match.group(2))
-        lists.append( tourney_list )
+            match = re.match(r'^(.*?)\s+(\d+)',player_name)
+
+            tourney_list = TourneyList( tourney_id=tourney.id,
+                                        image=f,
+                                        player_name=match.group(1),
+                                        tourney_standing=match.group(2))
+            lists.append( tourney_list )
+        except:
+            print ("unable to load file name %s" % ( player_name ))
+
     myapp.db_connector.get_session().add_all( lists )
     myapp.db_connector.get_session().commit()
 
-
-    return render_template( 'tourney_load_results.html', name=name, lists=lists, num_lists=len(lists))
-
-@app.route("/tourney_entry_status")
-def tourney_entry_status():
-    summary = PersistenceManager(myapp.db_connector).get_tourney_summary()
-    return render_template('tourney_summary.html', tourneys=summary )
+    return redirect(url_for('tourneys') )
 
 @app.route("/browse_list")
 def browse_list():
@@ -126,11 +143,9 @@ def add_squad():
     return redirect(url_for('new'))
 
 
-
-#redirect '/' to new
 @app.route('/')
 def index():
-    return redirect(url_for('new') )
+    return redirect(url_for('tourneys') )
 
 if __name__ == '__main__':
     app.debug = True

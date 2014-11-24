@@ -1,8 +1,0 @@
-{% extends "layout.html" %}
-{% block content %}
-
-    <h3>{{ name }} : {{  num_lists }} found</h3>
-    {% for list in lists %}
-       <hr>{{ list.image }}
-    {%  endfor %}
-{% endblock %}
