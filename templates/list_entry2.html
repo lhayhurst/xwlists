@@ -1,0 +1,194 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <script>
+        var entryCount = 0;
+        var ships_and_pilots = {{ meta.ships_full()|tojson|safe }}
+        var upgrades         = {{ meta.upgrades()|tojson|safe }}
+    </script>
+
+    <style>
+
+        .squad {
+            display: none;
+        }
+
+        .squad-member {
+            width: 350px;
+            background-color: #ddd;
+            margin: 10px;
+            padding: 20px;
+        }
+
+        .row {
+            margin: 5px 0;
+        }
+
+        .row-label {
+            display: inline-block;
+            width: 100px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .row-value {
+            display: inline-block;
+            width: 150px;
+        }
+
+        .row-value .select {
+            width: 150px;
+        }
+
+        .row-cost {
+            display: inline-block;
+            width: 20px;
+            text-align: right;
+        }
+
+        .sub-total {
+            text-align: right;
+            margin-left: 258px;
+            width: 20px;
+            border-top: 1px solid #000;
+        }
+
+        .total {
+            text-align: right;
+            margin-left: 288px;
+            width: 20px;
+            border-top: 1px solid #000;
+            font-weight: bold;
+        }
+
+        .template {
+            display: none !important;
+        }
+
+        .add-squad-member {
+
+        }
+    </style>
+    <div class="main-section">
+
+        <div class="choose-faction">
+            Faction?
+            <button class="faction-choice">Imperial</button>
+            <button class="faction-choice">Rebel</button>
+        </div>
+
+        <div class="squad">
+            <h2 class="faction-label"></h2>
+            <div class="squad-member template">
+                <div class="row template">
+                    <span class="row-label"></span>
+                    <span class="row-value"><div class="select"></div></span>
+                    <span class="row-cost"></span>
+                </div>
+                <div class="sub-total"></div>
+            </div>
+            <div class="total"></div>
+            <button class="add-squad-member">Add squad member</button>
+        </div>
+
+    </div>
+
+    <script>
+
+        function init() {
+            $('.faction-choice').click(factionChosen);
+        }
+
+        function factionChosen() {
+            var faction = $(this).text();
+            $('.choose-faction').hide();
+            $('.squad').show();
+            $('.faction-label').text(faction);
+            $('.add-squad-member').click(function() { addSquadMember(faction) });
+            addSquadMember(faction);
+            updateTotals();
+        }
+
+        function addSquadMember(faction) {
+            var squadMemberEl = $('.squad-member.template').clone().removeClass('template').appendTo('.squad');
+            var ships = _.keys(ships_and_pilots).filter(function(ship) { return ships_and_pilots[ship][0].faction == faction });
+            var items = ships.map(function (ship) {
+                return { text: ship, id: ship }
+            });
+            addRow(squadMemberEl, 'ship', 'Ship', items, function(ship) { shipChosen(squadMemberEl, ship) });
+            updateTotals();
+        }
+
+        function shipChosen(squadMemberEl, ship) {
+            var pilotItems = ships_and_pilots[ship].map(function(pilot) { return { text:pilot.name, id:pilot.name }});
+            addRow(squadMemberEl, 'pilot', 'Pilot', pilotItems, function(pilot) { pilotChosen(squadMemberEl, ship, pilot) });
+            updateTotals();
+        }
+
+        function pilotChosen(squadMemberEl, ship, pilot) {
+            var upgrades = _.select(ships_and_pilots[ship], function(p) { return p.name == pilot })[0].upgrades;
+            upgrades.forEach(function(upgrade) {
+                var upgradeItems = upgrades[upgrade].map(function(u) { return {text: u.name, id: u.name}});
+                addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function(upgradeValue) {
+                    upgradeChosen(squadMemberEl, ship, pilot, upgrade, upgradeValue);
+                });
+            });
+            updateTotals();
+        }
+
+        function upgradeChosen(squadMemberEl, ship, pilot, upgradeName, upgradeValue) {
+            updateTotals();
+        }
+
+        function addRow(parentEl, className, label, items, changeHandler) {
+            var rowEl = parentEl.find('.row.template').clone().removeClass('template').appendTo(parentEl);
+            rowEl.addClass(className);
+            rowEl.find('.row-label').text(label);
+            rowEl.find('.row-value .select')
+                    .select2({data:items})
+                    .on('select2-close', function(e) {
+                        changeHandler(e.target.value);
+                    });
+        }
+
+        function getRowValue(rowEl) {
+
+        }
+
+        function updateTotals() {
+            console.log('--')
+            var squadTotal = 0;
+            $('.squad-member').not('.template').each(function(i, member) {
+                var memberEl = $(member);
+                //var ship = getSelectedValue($(member).find('.ship')
+                //console.log(memberEl);
+                console.log('ship', memberEl.find('.ship'));
+                console.log('pilot', memberEl.find('.pilot'));
+                console.log('upgrade', memberEl.find('.upgrade'));
+                var memberSubtotal = 0;
+            //   var pilotCost = ...
+            //   showPilotCost()
+            //   memberSubtotal += pilotCost;
+            //   for each upgrade {
+            //     var upgradeCost = ...
+            //     show(upgradeCost)
+            //     memberSubtotal += upgradeCost;
+            //   }
+                memberEl.find('.sub-total').text(memberSubtotal);
+                squadTotal += memberSubtotal;
+
+            });
+            $('.total').text(squadTotal);
+        }
+        init();
+    /*
+        function addSquadMember() {
+
+
+        }
+
+        addSquadMember();
+        $('.add-squad-member').click(addSquadMember);
+*/
+    </script>
+{% endblock %}
