@@ -37,25 +37,25 @@
         }
 
         .row-value .select {
-            width: 200px;
+            width: 150px;
         }
 
         .row-cost {
             display: inline-block;
-            width: 20px;
+            width: 31px;
             text-align: right;
         }
 
         .sub-total {
             text-align: right;
-            margin-left: 258px;
+            margin-left: 271px;
             width: 20px;
             border-top: 1px solid #000;
         }
 
         .total {
             text-align: right;
-            margin-left: 288px;
+            margin-left: 300px;
             width: 20px;
             border-top: 1px solid #000;
             font-weight: bold;
@@ -241,7 +241,6 @@
         {
             ret = {text: upgrade.name, id: upgrade.name, cost: upgrade.cost, disabled: false };
             constraints = convertToArray(constraints);
-            console.log(constraints);
             for ( var i = 0; i < constraints.length; i++ ) {
                 var u = constraints[i];
 
@@ -287,7 +286,6 @@
                 } );
 
                 //filter down the upgrade items to ones that aren't disabled, and unique ones that haven't already been selected.
-                console.log(upgrade);
                 upgradeItems = _.filter( upgradeItems, function(ui) { return 'disabled' in ui && ui.disabled == false} );
                 //var uniqueSelectedUpgrades = getUniqueSelectedUpgrades( squadMemberEl );
                 //console.log( uniqueSelectedUpgrades );
