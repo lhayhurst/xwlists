@@ -119,13 +119,57 @@
             updateTotals();
         }
 
+
+        function removeUpgrades( squadMemberEl ) {
+            squadMemberEl.find('.upgrade').each(function(i, upgrade) {  $(upgrade).remove(); });
+
+        }
         function removePilot( squadMemberEl ) {
             squadMemberEl.find('.pilot').each(function(i, pilot) {  $(pilot).remove(); });
 
         }
 
-        function removeUpgrades( squadMemberEl ) {
-            squadMemberEl.find('.upgrade').each(function(i, upgrade) {  $(upgrade).remove(); });
+
+        function getShipForSquadMember( squadMemberEl )
+        {
+            var shipName = squadMemberEl.find( '.ship .row-value .select').select2('data').text;
+            return shipName;
+        }
+
+        function getPilotHref( shipName, pilotName )
+        {
+            return _.select(ships_and_pilots[shipName], function(p) { return p.name == pilotName })[0]
+        }
+
+        function getUniqueSelectedPilots( squadMemberEl )
+        {
+            var ret = {};
+            //get all the pilots, and cherry pick out hte ones that arent for this squad member
+            var pilots = $('.pilot').filter(function(i, pilot) {
+               if ( pilot != null ) {
+                   pilotEl = $(pilot);
+                   var parentSquad = pilotEl.parent();
+                   if ( ! parentSquad.is( squadMemberEl ) ) {
+                       var pilotSelect =  pilotEl.find('.row-value .select');
+                       if ( pilotSelect != null ) {
+                           var pilotName = pilotSelect.select2('data').text;
+                           //get the ship for the pilot
+                           var shipName = getShipForSquadMember( parentSquad );
+                           var pilotHref =  getPilotHref(shipName, pilotName );
+                           if ( pilotHref != null && 'constraints' in pilotHref ) {
+                               var constraints = pilotHref.constraints;
+                               _.each(constraints, function (u) {
+                                   if (u.type == 'PER_SQUAD' && u.value == 'UNIQUE')
+                                   {
+                                       ret[pilotHref.name] = pilotHref.name;
+                                   }
+                               });
+                           }
+                       }
+                   }
+               }
+            });
+            return ret;
 
         }
 
@@ -134,68 +178,83 @@
             removeUpgrades(squadMemberEl);
 
             var pilotItems = ships_and_pilots[ship].map(function(pilot) { return { text:pilot.name, id:pilot.name, cost:pilot.cost }});
+
+            //remove any pilots that are unique and have already been selected
+            var uniqueSelectedPilots = getUniqueSelectedPilots(squadMemberEl);
+            //remove the unique selected pilots from the pilotItems
+            pilotItems = _.filter( pilotItems, function (pi) { return ! ( pi.text in uniqueSelectedPilots ) } );
+
             addRow(squadMemberEl, 'pilot', 'Pilot', pilotItems, function(pilot) { pilotChosen(faction, squadMemberEl, ship, pilot) });
             updateTotals();
         }
 
-        function pilotChosen(faction, squadMemberEl, ship, pilot) {
+        function manageConstraints( constraints, faction  )
+        {
+            _.each(constraints, function (u) {
+                //console.log(u);
+                var defaultEntry = {text: u.name, id: u.name, cost: u.cost, disabled: true};
+                //todo  ,  , SMALL_SHIP, LARGE_SHIP,PER_SQUAD,UNIQUE
+                //done FACTION SHIP_SIZE SHIP_TYPE
+                if (u.type == 'FACTION') {
+                    if (u.value != faction) {
+                        return defaultEntry;
+                    }
+                }
+                else if (u.type == 'SHIP_SIZE') {
+                    if (u.value != pilotHref.ship_size) {
+                        return defaultEntry;
+                    }
+                }
+                else if (u.type == 'SHIP_TYPE') {
+                    if (u.value != ship) {
+                        return defaultEntry;
+                    }
+                }
+                //else if (u.type == 'UNIQUE') {
+                //    //others. ..
+               // }
+                else {
+                    return {text: u.name, id: u.name, cost: u.cost};
+                }
+            } );
+        }
+
+        function pilotChosen(faction, squadMemberEl, ship, pilot)
+        {
             removeUpgrades(squadMemberEl);
-            var pilotHref =  _.select(ships_and_pilots[ship], function(p) { return p.name == pilot })[0]
+            var pilotHref = getPilotHref( ship, pilot );
             var upgrades_for_pilot = pilotHref.upgrades;
             upgrades_for_pilot.forEach(function(upgrade) {
-
                 var upgradeItems = upgrades[upgrade].map(function(u) {
-                    if (_.has(u, 'constraint') )
+
+                    if (_.has(u, 'constraints') )
                     {
-                        var defaultEntry = {text: u.name, id: u.name, cost: u.cost, disabled:true};
-                        //console.log(u);
-//todo  ,  , SMALL_SHIP, LARGE_SHIP,PER_SQUAD,UNIQUE
-//done FACTION SHIP_SIZE SHIP_TYPE
-                        if (u.constraint.type == 'FACTION') {
-                            if (u.constraint.value != faction) {
-                                return defaultEntry;
-                            }
-                        }
-                        else if (u.constraint.type == 'SHIP_SIZE') {
-                            if (u.constraint.value != pilotHref.ship_size) {
-                                return defaultEntry;
-                            }
-                        }
-                        else if (u.constraint.type == 'SHIP_TYPE') {
-                           if (u.constraint.value != ship ) {
-                                return defaultEntry;
-                            }
-                        }
-
-                        //others. ..
-
-
+                        //console.log( u );
+                        //console.log( upgrade);
+                        return manageConstraints( u.constraints, faction );
                     }
-
-                    if (_.has(u, 'action')) {
-                        if (u.action.type == 'ADD_EPT')
-                        {
-                            //console.log("add EPT action: " + u.action.value);
-                        }
+                    else
+                    {
+                        return {text: u.name, id: u.name, cost: u.cost};
                     }
-                    return {text: u.name, id: u.name, cost: u.cost};
-                });
-                upgradeItems = _.filter( upgradeItems, function(ui) { return ui.disabled != true} );
+                } );
+
+                upgradeItems = _.filter( upgradeItems, function(ui) { return _.has(ui, 'disabled') && ui.disabled != true} );
 
                 addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function(upgradeValue) {
                     upgradeChosen(squadMemberEl, ship, pilot, upgrade, upgradeValue);
                 });
-            });
+            } );
 
             updateTotals();
         }
 
         function upgradeChosen(squadMemberEl, ship, pilot, upgradeName, upgradeValue) {
-            //console.log("upgrade chosen: " + upgradeValue)
             updateTotals();
         }
 
-        function addRow(parentEl, className, label, items, changeHandler) {
+        function addRow(parentEl, className, label, items, changeHandler)
+        {
             var rowEl = parentEl.find('.row.template').clone().removeClass('template').appendTo(parentEl);
             rowEl.addClass(className);
             rowEl.find('.row-label').text(label);
@@ -207,7 +266,8 @@
         }
 
 
-        function updateTotals() {
+        function updateTotals()
+        {
 
             var squadTotal = 0;
             $('.squad-member').not('.template').each(function(i, member) {
@@ -242,6 +302,7 @@
             });
             $('.total').text(squadTotal);
         }
+
         init();
     </script>
 {% endblock %}
