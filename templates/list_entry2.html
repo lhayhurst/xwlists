@@ -37,7 +37,7 @@
         }
 
         .row-value .select {
-            width: 150px;
+            width: 200px;
         }
 
         .row-cost {
@@ -119,14 +119,27 @@
             updateTotals();
         }
 
+        function removePilot( squadMemberEl ) {
+            squadMemberEl.find('.pilot').each(function(i, pilot) {  $(pilot).remove(); });
+
+        }
+
+        function removeUpgrades( squadMemberEl ) {
+            squadMemberEl.find('.upgrade').each(function(i, upgrade) {  $(upgrade).remove(); });
+
+        }
+
         function shipChosen(faction, squadMemberEl, ship) {
+            removePilot(squadMemberEl);
+            removeUpgrades(squadMemberEl);
+
             var pilotItems = ships_and_pilots[ship].map(function(pilot) { return { text:pilot.name, id:pilot.name, cost:pilot.cost }});
             addRow(squadMemberEl, 'pilot', 'Pilot', pilotItems, function(pilot) { pilotChosen(faction, squadMemberEl, ship, pilot) });
             updateTotals();
         }
 
         function pilotChosen(faction, squadMemberEl, ship, pilot) {
-
+            removeUpgrades(squadMemberEl);
             var pilotHref =  _.select(ships_and_pilots[ship], function(p) { return p.name == pilot })[0]
             var upgrades_for_pilot = pilotHref.upgrades;
             upgrades_for_pilot.forEach(function(upgrade) {
@@ -174,8 +187,6 @@
                 });
             });
 
-            console.log(pilot);
-
             updateTotals();
         }
 
@@ -204,22 +215,25 @@
                 var memberEl = $(member);
 
                 var pilot = memberEl.find('.pilot');
-                memberCost     = pilot.find('.row-value .select').select2('data').cost;
-                pilot.find( '.row-cost').text( memberCost );
+                pilotSelect =  pilot.find('.row-value .select');
+                if ( pilotSelect != null ) {
+                    memberCost     = pilotSelect.select2('data').cost || 0;
+                    pilot.find( '.row-cost').text( memberCost );
 
-                //get all the upgrades
-                var upgradeCosts = 0;
-                memberEl.find('.upgrade').each( function(k, upgrade) {
-                    var upgradeEl     = $(upgrade);
-                    var upgradeSelect = upgradeEl.find('.row-value .select');
-                    if ( upgradeSelect != null ) {
-                        var upgradeSelectEl = $(upgradeSelect).select2('data');
-                        if ( upgradeSelectEl != null ) {
-                            upgradeCosts += upgradeSelectEl.cost;
-                            upgradeEl.find('.row-cost').text(upgradeSelectEl.cost);
+                    //get all the upgrades
+                    var upgradeCosts = 0;
+                    memberEl.find('.upgrade').each( function(k, upgrade) {
+                        var upgradeEl     = $(upgrade);
+                        var upgradeSelect = upgradeEl.find('.row-value .select');
+                        if ( upgradeSelect != null ) {
+                            var upgradeSelectEl = $(upgradeSelect).select2('data');
+                            if ( upgradeSelectEl != null ) {
+                                upgradeCosts += upgradeSelectEl.cost;
+                                upgradeEl.find('.row-cost').text(upgradeSelectEl.cost);
+                            }
                         }
-                    }
-                } ) ;
+                    } ) ;
+                }
 
                 memberCost += upgradeCosts;
                 memberEl.find('.sub-total').text( memberCost );
@@ -229,14 +243,5 @@
             $('.total').text(squadTotal);
         }
         init();
-    /*
-        function addSquadMember() {
-
-
-        }
-
-        addSquadMember();
-        $('.add-squad-member').click(addSquadMember);
-*/
     </script>
 {% endblock %}
