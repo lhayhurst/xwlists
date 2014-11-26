@@ -237,9 +237,9 @@
             return someObject;
         }
 
-        function manageConstraints( ship, constraints, faction, pilotHref, upgrade )
+        function manageConstraints( ship, constraints, faction, pilotHref, upgrade, upgradeType )
         {
-            ret = {text: upgrade.name, id: upgrade.name, cost: upgrade.cost, disabled: false };
+            ret = {text: upgrade.name, id: upgrade.name, cost: upgrade.cost, type: upgradeType, disabled: false };
             constraints = convertToArray(constraints);
             for ( var i = 0; i < constraints.length; i++ ) {
                 var u = constraints[i];
@@ -272,26 +272,26 @@
             var pilotHref = getPilotHref( ship, pilot );
             var upgrades_for_pilot = pilotHref.upgrades;
             upgrades_for_pilot = convertToArray(upgrades_for_pilot);
-            upgrades_for_pilot.forEach(function(upgrade) {
-                var upgradeItems = upgrades[upgrade].map(function(u) {
+            upgrades_for_pilot.forEach(function(upgradeType) {
+                var upgradeItems = upgrades[upgradeType].map(function(u) {
 
                     if ( 'constraints' in u )
                     {
-                        return manageConstraints( ship, u.constraints, faction, pilotHref, u );
+                        return manageConstraints( ship, u.constraints, faction, pilotHref, u, upgradeType );
                     }
                     else
                     {
-                        return {text: u.name, id: u.name, cost: u.cost, disabled:false};
+                        return {text: u.name, id: u.name, cost: u.cost, type: upgradeType, disabled:false};
                     }
                 } );
 
                 //filter down the upgrade items to ones that aren't disabled, and unique ones that haven't already been selected.
                 upgradeItems = _.filter( upgradeItems, function(ui) { return 'disabled' in ui && ui.disabled == false} );
-                //var uniqueSelectedUpgrades = getUniqueSelectedUpgrades( squadMemberEl );
-                //console.log( uniqueSelectedUpgrades );
+                var uniqueSelectedUpgrades = getUniqueSelectedUpgrades( squadMemberEl );
+                upgradeItems = _.filter( upgradeItems, function(ui) { return ! ( ui.text in uniqueSelectedUpgrades ) } );
 
-                addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function(upgradeValue) {
-                    upgradeChosen(squadMemberEl, ship, pilot, upgrade, upgradeValue);
+                addRow(squadMemberEl, 'upgrade', upgradeType, upgradeItems, function(upgradeValue) {
+                    upgradeChosen(squadMemberEl, ship, pilot, upgradeType, upgradeValue);
                 });
             } );
 
