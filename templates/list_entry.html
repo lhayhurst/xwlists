@@ -37,14 +37,14 @@
         var upgrades         = {{ meta.upgrades()|tojson|safe }}
 
         function addEntry() {
-            var entry = $('.entry.template').clone().removeClass('template').appendTo('.entry-group');
+            var entry = $('.entry.shipspilots').clone().removeClass('shipspilots').appendTo('.entry-group');
             entry.find('.indexed').each(function(i, el) {
                 el.name = el.name + '.' + entryCount;
                 console.log(el);
             });
-            entry.find("#entry-number").val(entryCount)
+            entry.find("#entry-number").val(entryCount);
 
-            var pilot = entry.find('.pilot')
+            var pilot = entry.find('.pilot');
             pilot.empty();
 
             entry.find('.ship').on("select2-close", function(e) {
@@ -74,24 +74,20 @@
 
                         var upgradeTitleEntryNumber = "#" + upgradeTitle + "." + entryNumber;
                         //console.log(upgradeTitleEntryNumber);
-                        var select = $(upgradeTitleEntryNumber).select2();
-                        console.log(select);
-                        $("#after-pilot-placeholder").append( select );
-                        //console.log(parentDiv);
+                        upgrade_options = upgrades[upgradeTitle];
 
-                        //var html = "<br><b>" + upgradeTitle + "</b><br><select name='" + upgradeTitle + "' class='" + upgradeTitle + " indexed' placeholder='Select a " + upgradeTitle + "'>";
-                        //html = html.concat("<option></option>");
-                        //upgrade_options = upgrades[upgradeTitle];
-                        //_.each(upgrade_options, function(upgrade_option_value) {
-                        //    html = html.concat("<option value='" + upgrade_option_value.name + "." + entryNumber +  "'>" + upgrade_option_value.name + "</option>");
-                        //});
-                        //html = html.concat("</select>");
-                        //console.log( html );
-                        //parentDiv.find("#after-pilot-placeholder").append(html);
-
-{#                        console.log(upgradeTitle);#}
-{#                        console.log(upgrades[upgradeTitle]);#}
-
+                        var upgrade_entries = $('.entry.upgrades.' + upgradeTitle).clone().removeClass('upgrades ' + upgradeTitle).appendTo('.entry-group');
+                        //console.log(upgrade_entries);
+                        upgrade_entries.find('.indexed').each(function(i, el) {
+                            el.name = el.name + '.' + entryCount;
+                            console.log(el);
+                            $(el).select2();
+                        });
+                        //var upgrade_entry = $('.entry.upgrades').clone().removeClass('upgrade').appendTo('.entry-group');
+                        //    upgrade_entry.find('.indexed').each(function(i, el) {
+                        //    el.name = el.name + '.' + entryCount;
+                        //    console.log(el);
+                        // });
                     });
                 } );
             } );
@@ -113,28 +109,50 @@
             <form action="/add_squad" id="listForm" method=post class="add-entry">
                 <input type="hidden" name="count" class="count" value="0">
                 <div>
-                    <b>Player name</b><textarea rows="1" cols="30" name="player" required>{{ tourney_list.player_name_stripped() }}</textarea>
-                    <b>Faction</b><input type="radio" name="faction" id="Rebel" value="Rebel"required>Rebel</input><input type="radio" name="faction" id="Imperial" value="Imperial"required>Imperial</input>
-                    <b>points spent</b><textarea rows="1" cols="5" name="points" required></textarea>
+                    <b>Player name</b><textarea rows="1" cols="30" name="player" required >{{ tourney_list.player_name_stripped() }}</textarea>
+                    <b>Faction</b><input type="radio" name="faction" id="Rebel" value="Rebel" required >Rebel</input><input type="radio" name="faction" id="Imperial" value="Imperial"required>Imperial</input>
+                    <b>points spent</b><textarea rows="1" cols="5" name="points" required ></textarea>
                 </div>
                 <br>
                 <div class="entry-group">
                     <div class="entry template">
-                        <input type="hidden" id="entry-number">
-                        <b>Ship</b>
-                        <select name="ship" class="ship indexed" placeholder="Select a ship" >
-                            <option></option>
-                            {% for ship in meta.ships() %}
-                            <option value="{{ ship }}">{{ ship }}</option>
-                            {% endfor %}
-                        </select>
-                        <br>
-                        <b>Pilot</b>
-                        <select name="pilot" class="pilot indexed" placeholder="Select a pilot" >
-                            <option></option>
-                        </select>
-                        <br>
-                        <div id="after-pilot-placeholder"></div>
+                        <div class="entry shipspilots">
+                            <input type="hidden" id="entry-number">
+                            <b>Ship</b>
+                            <select name="ship" class="ship indexed" placeholder="Select a ship" >
+                                <option></option>
+                                {% for ship in meta.ships() %}
+                                <option value="{{ ship }}">{{ ship }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <b>Pilot</b>
+                            <select name="pilot" class="pilot indexed" placeholder="Select a pilot" >
+                                <option></option>
+                            </select>
+                        </div>
+                        <div class="entry upgrades">
+                            <div class="entry upgrades Title">
+                                <b>Title</b><br>
+                                <select name="Title" class="Title indexed" placeholder="Select a title">
+                                    <option></option>
+                                    {% for title in meta.titles() %}
+                                        <option value="{{ title['name'] }}">{{ title['name'] }}</option>
+                                    {% endfor %}
+                                </select>
+                                <br>
+                            </div>
+                            <div class="entry upgrades Modification">
+                                <b>Modification</b><br>
+                                <select name="Modification" class="Modification indexed" placeholder="Select a Modification">
+                                    <option></option>
+                                    {% for mod in meta.mods() %}
+                                        <option value="{{ mod['name'] }}">{{ mod['name'] }}</option>
+                                    {% endfor %}
+                                </select>
+                                <br>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

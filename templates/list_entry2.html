@@ -115,20 +115,61 @@
             var items = ships.map(function (ship) {
                 return { text: ship, id: ship }
             });
-            addRow(squadMemberEl, 'ship', 'Ship', items, function(ship) { shipChosen(squadMemberEl, ship) });
+            addRow(squadMemberEl, 'ship', 'Ship', items, function(ship) { shipChosen(faction, squadMemberEl, ship) });
             updateTotals();
         }
 
-        function shipChosen(squadMemberEl, ship) {
-            var pilotItems = ships_and_pilots[ship].map(function(pilot) { return { text:pilot.name, id:pilot.name }});
-            addRow(squadMemberEl, 'pilot', 'Pilot', pilotItems, function(pilot) { pilotChosen(squadMemberEl, ship, pilot) });
+        function shipChosen(faction, squadMemberEl, ship) {
+            var pilotItems = ships_and_pilots[ship].map(function(pilot) { return { text:pilot.name, id:pilot.name, cost:pilot.cost }});
+            addRow(squadMemberEl, 'pilot', 'Pilot', pilotItems, function(pilot) { pilotChosen(faction, squadMemberEl, ship, pilot) });
             updateTotals();
         }
 
-        function pilotChosen(squadMemberEl, ship, pilot) {
-            var upgrades = _.select(ships_and_pilots[ship], function(p) { return p.name == pilot })[0].upgrades;
-            upgrades.forEach(function(upgrade) {
-                var upgradeItems = upgrades[upgrade].map(function(u) { return {text: u.name, id: u.name}});
+        function pilotChosen(faction, squadMemberEl, ship, pilot) {
+            pilotHref =  _.select(ships_and_pilots[ship], function(p) { return p.name == pilot })[0]
+            var upgrades_for_pilot = pilotHref.upgrades;
+            upgrades_for_pilot.forEach(function(upgrade) {
+                //console.log(upgrade);
+                //console.log(upgrades[upgrade]);
+
+                var upgradeItems = upgrades[upgrade].map(function(u) {
+                    if (_.has(u, 'constraint') )
+                    {
+                        var defaultEntry = {text: u.name, id: u.name, cost: u.cost, disabled:true};
+                        console.log(u);
+//todo  ,  , SMALL_SHIP, LARGE_SHIP,PER_SQUAD,UNIQUE
+//done FACTION SHIP_SIZE SHIP_TYPE
+                        if (u.constraint.type == 'FACTION') {
+                            if (u.constraint.value != faction) {
+                                return defaultEntry;
+                            }
+                        }
+                        else if (u.constraint.type == 'SHIP_SIZE') {
+                            if (u.constraint.value != pilotHref.ship_size) {
+                                return defaultEntry;
+                            }
+                        }
+                        else if (u.constraint.type == 'SHIP_TYPE') {
+                           if (u.constraint.value != ship ) {
+                                return defaultEntry;
+                            }
+                        }
+
+                        //others. ..
+
+
+                    }
+
+                    if (_.has(u, 'action')) {
+                        if (u.action.type == 'ADD_EPT')
+                        {
+                            console.log("add EPT action: " + u.action.value);
+                        }
+                    }
+                    return {text: u.name, id: u.name, cost: u.cost};
+                });
+                upgradeItems = _.filter( upgradeItems, function(ui) { return ui.disabled != true} );
+
                 addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function(upgradeValue) {
                     upgradeChosen(squadMemberEl, ship, pilot, upgrade, upgradeValue);
                 });
@@ -137,6 +178,7 @@
         }
 
         function upgradeChosen(squadMemberEl, ship, pilot, upgradeName, upgradeValue) {
+            console.log("upgrade chosen: " + upgradeValue)
             updateTotals();
         }
 
@@ -162,10 +204,28 @@
                 var memberEl = $(member);
                 //var ship = getSelectedValue($(member).find('.ship')
                 //console.log(memberEl);
-                console.log('ship', memberEl.find('.ship'));
-                console.log('pilot', memberEl.find('.pilot'));
-                console.log('upgrade', memberEl.find('.upgrade'));
-                var memberSubtotal = 0;
+                var ship  = memberEl.find('.ship');
+                var pilot = memberEl.find('.pilot');
+                ship_name      = ship.find('.row-value .select').select2('data').text;
+                pilot_cost     = pilot.find('.row-value .select').select2('data').cost;
+
+                //var memberSubtotal = pilot_cost;
+                squadTotal += pilot_cost;
+
+                //get all the upgrades
+                upgrades      = memberEl.find('.upgrade');
+                _.each( upgrades, function(upgrade)
+                {
+                    console.log(upgrade);
+                    //upgrade_cost = upgrade.find('.row_value .select').select2('data');
+                    //console.log(upgrade_cost);
+//                    squadTotal += upgrade_cost;
+                });
+
+               // ._each(upgrades.find('.row-value .select' ), function ( upgradeTitle) {
+                //   console.log(upgradeTitle);
+                //});
+
             //   var pilotCost = ...
             //   showPilotCost()
             //   memberSubtotal += pilotCost;
@@ -174,8 +234,7 @@
             //     show(upgradeCost)
             //     memberSubtotal += upgradeCost;
             //   }
-                memberEl.find('.sub-total').text(memberSubtotal);
-                squadTotal += memberSubtotal;
+                memberEl.find('.sub-total').text(squadTotal);
 
             });
             $('.total').text(squadTotal);
