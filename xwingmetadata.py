@@ -95,10 +95,10 @@ upgrades = {
         {'name': 'R2-D2', 'cost': 4, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )}
     ),
     TITLE: (
-        {'name': 'Slave 1', 'cost': 0, 'constrainst': ( {'type': SHIP_TYPE, 'value': FIRESPRAY_31})},
+        {'name': 'Slave 1', 'cost': 0, 'constraints': ( {'type': SHIP_TYPE, 'value': FIRESPRAY_31})},
         {'name': 'Royal Guard TIE', 'cost': 0, 'constraints': ( {'type': SHIP_TYPE, 'value': TIE_INTERCEPTOR})},
         {'name': 'A-Wing Test Pilot', 'cost': 0, 'constraints': ({'type': SHIP_TYPE, 'value': A_WING}),
-         'action': {'type': 'ADD_EPT', 'value': 'EPT'}},
+         'action': {'type': 'ADD_UPGRADE', 'value': EPT }},
         {'name': 'Millennium Falcon', 'cost': 1, 'constraints': ({'type': SHIP_TYPE, 'value': YT_1300})},
         {'name': 'Dauntless', 'cost': 2, 'constraints': ( {'type': SHIP_TYPE, 'value': VT_DECIMATOR})},
         {'name': 'Moldy Crow', 'cost': 3, 'constraints': ( {'type': SHIP_TYPE, 'value': HWK_290} )},
