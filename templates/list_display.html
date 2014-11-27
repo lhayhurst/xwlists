@@ -5,8 +5,9 @@
         var entryCount = 0;
         var ships_and_pilots = {{ meta.ships_full()|tojson }};
         var upgrades         = {{ meta.upgrades()|tojson }};
-        var tourney_id       = {{ tourney_id }};
         var tourney_list_id  = {{ tourney_list_id }};
+        var tourney_id       = {{ tourney_id }}
+
     </script>
 
     <style>
@@ -68,10 +69,24 @@
                     <i class="tab">{{ upgrade.upgrade }}</i>  <p class="alignright">{{ meta.get_upgrade_cost( upgrade ) }}</p><br>
                 {% endfor %}
             {%  endfor %}
+        <br>
+        <i>Thanks for entering this list?  What next?</i>
+        <br><button type="button" onclick="doAnotherList()">Looks good, I want to do another!</button>
+        <br>
+        <br>
+        <button type="button" onclick="deleteAndStartOver()">Oops, its wrong, let me try that again</button>
+
         </div>
     </div>
 
     <script>
+        function doAnotherList() {
+            window.location.replace("/enter_list?tourney=" + tourney_id);
+        }
+
+        function deleteAndStartOver() {
+            window.location.replace("/delete_list_and_retry?tourney_list_id=" + tourney_list_id );
+        }
 
     </script>
 {% endblock %}

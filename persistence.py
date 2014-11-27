@@ -187,8 +187,12 @@ class PersistenceManager:
         self.db_connector.get_session().delete(tourney)
         self.db_connector.get_session().commit()
 
-    def delete_tourney_list(self, tourney_list):
-        self.db_connector.get_session().delete(tourney_list)
+    def delete_tourney_list_details(self, tourney_list):
+
+        for ship in tourney_list.list.ships:
+            self.db_connector.get_session().delete(ship)
+        self.db_connector.get_session().delete(tourney_list.list)
+        tourney_list.list = None
         self.db_connector.get_session().commit()
 
 

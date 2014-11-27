@@ -94,6 +94,8 @@ def add_tourney():
 
     return redirect(url_for('tourneys') )
 
+
+
 @app.route("/browse_list")
 def browse_list():
     tourney_name = request.args.get('tourney')
@@ -103,6 +105,16 @@ def browse_list():
     tourney_lists = tourney.tourney_lists
     return render_template( 'tourney_lists.html', tourney=tourney, tourney_lists=tourney_lists, admin=admin)
 
+@app.route("/delete_list_and_retry")
+def delete_list_and_retry():
+    tourney_list_id = request.args.get('tourney_list_id')
+
+    pm = PersistenceManager(myapp.db_connector)
+    tourney_list = pm.get_tourney_list(tourney_list_id)
+    pm.delete_tourney_list_details( tourney_list )
+    return redirect( url_for('enter_list', tourney=tourney_list.tourney.id, tourney_list_id=tourney_list.id ) )
+
+
 @app.route("/delete_list")
 def delete_list():
     tourney_list_id = request.args.get('tourney_list_id')
@@ -111,7 +123,7 @@ def delete_list():
 
     pm = PersistenceManager(myapp.db_connector)
     tourney_list = pm.get_tourney_list(tourney_list_id)
-    pm.delete_tourney_list( tourney_list )
+    pm.delete_tourney_list_details( tourney_list )
     return redirect( url_for('browse_list', tourney=tourney_name, admin=admin ) )
 
 @app.route("/enter_list")
@@ -184,7 +196,8 @@ def display_list():
                            image_src=urllib.quote(tourney_list.image),
                            tourney_list=tourney_list,
                            tourney_list_id=tourney_list.id,
-                           tourney=tourney_list.tourney )
+                           tourney=tourney_list.tourney,
+                           tourney_id=tourney_list.tourney.id )
 
 @app.route('/')
 def index():
