@@ -45,8 +45,8 @@ class UpgradeType(DeclEnum):
     BOMB_MINES = xwingmetadata.BOMB, xwingmetadata.BOMB
     CANNON = xwingmetadata.CANNON, xwingmetadata.CANNON
     TURRET = xwingmetadata.TURRET, xwingmetadata.TURRET
-    TORPEDO1 = xwingmetadata.TORPEDO, xwingmetadata.TORPEDO
-    MISSILE = xwingmetadata.MISSILE
+    TORPEDO = xwingmetadata.TORPEDO, xwingmetadata.TORPEDO
+    MISSILE = xwingmetadata.MISSILE, xwingmetadata.MISSILE
 
 class ShipType(DeclEnum):
     XWING = "X-Wing", "X-Wing"
@@ -87,6 +87,8 @@ class Ship(Base):
     ship_pilot_id = Column(Integer, ForeignKey('{0}.id'.format(ship_pilot_table)))
     list_id = Column(Integer, ForeignKey('{0}.id'.format(list_table)))  #parent
     ship_pilot = relationship(ShipPilot.__name__, uselist=False)
+    upgrades = relationship( "ShipUpgrade", back_populates="ship")
+
 
 class ShipUpgrade(Base):
     __tablename__ = upgrade_table
@@ -94,6 +96,8 @@ class ShipUpgrade(Base):
     ship_id = Column(Integer, ForeignKey('{0}.id'.format(ship_table)))
     upgrade_type = Column(UpgradeType.db_type())
     upgrade = Column(String(128))
+    ship = relationship( Ship.__name__, back_populates="upgrades")
+
 
 class List(Base):
     __tablename__ = list_table

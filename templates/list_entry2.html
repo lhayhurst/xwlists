@@ -158,14 +158,12 @@
 
             });
 
-            console.log( data );
-
             var addSquadUrl = "/add_squad?tourney_id=" + tourney_id + "&tourney_list_id=" + tourney_list_id;
             $.ajax({
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 url: addSquadUrl,
-                data: JSON.stringify({ 'data' : data } ),
+                data: JSON.stringify({ 'data' : data, faction: $('.faction-label').text(), 'points': $('.total').text()   } ),
                 success: function (data) {
                     tourney_id = data.tourney_id;
                     window.location.replace("/enter_list?tourney=" + tourney_id);

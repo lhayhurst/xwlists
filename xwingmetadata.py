@@ -508,25 +508,3 @@ class XWingMetaData:
         return self.upgrades()(TURRET)
 
 
-class XWingList:
-    def get_ship_for_id(self, id, request_form):
-        ship = {}
-        for k in request_form.keys():
-            if k.endswith(id) and request_form(k) is not None and len(request_form(k)) > 0:
-                ship[k] = request_form(k)
-        return ship
-
-    def get_ships_submitted(self, request_form):
-
-        ret = []
-        #8 ships is the most you can have, for now :-)
-        for id in range(0, 7, 1):
-            id = str(id)
-            ship = self.get_ship_for_id(id, request_form)
-            if len(ship.keys()) > 0:
-                ret.append(ship)
-        return ret
-
-    def __init__(self, request_form):
-        self.ships_submitted = self.get_ships_submitted(request_form)
-

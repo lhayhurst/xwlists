@@ -6,7 +6,7 @@ import datetime
 
 from flask import render_template, request, url_for, redirect, jsonify
 import myapp
-from persistence import Tourney, TourneyList, PersistenceManager, List, Faction, Ship
+from persistence import Tourney, TourneyList, PersistenceManager, List, Faction, Ship, ShipUpgrade, UpgradeType
 
 import xwingmetadata
 
@@ -127,39 +127,36 @@ def enter_list():
 
 @app.route("/add_squad",methods=['POST'])
 def add_squad():
-        data = request.json['data']
-        tourney_id = request.args.get('tourney_id')
-        tourney_list_id = request.args.get('tourney_list_id')
-        print ( tourney_id )
-        print ( tourney_list_id )
-        return jsonify(tourney_id=tourney_id)
+         data    = request.json['data']
+         points  = request.json['points']
+         faction = request.json['faction']
 
-#     tourney_list_id = request.form['tourney_list_id']
-#     pm = PersistenceManager(myapp.db_connector)
-#     tourney_list = pm.get_tourney_list(tourney_list_id)
-#
-#     faction = request.form['faction']
-#     points  = request.form['points']
-#
-#     list_data = xwingmetadata.XWingList(request.form )
-#
-#     list = List(faction=Faction.from_string(faction), points=points)
-#     pm.db_connector.get_session().add( list )
-#     pm.db_connector.get_session().commit()
-#
-#     i = 0
-#     for ship_hash in list_data.ships_submitted:
-#         ship_pilot = pm.get_ship_pilot( ship_hash[ 'ship.' + str(i)], ship_hash[ 'pilot.' + str(i) ] )
-#         ship = Ship( ship_pilot_id=ship_pilot.id, list_id=list.id)
-#         list.ships.append( ship )
-#         i = i + 1
-# # new stuff here
-# #        for upgrade in ship.keys():
-# #            print "Ship %d: %s : %s " % (i, upgrade, ship[upgrade ] )
-#
-#     tourney_list.list_id = list.id
-#     pm.db_connector.get_session().commit()
+         tourney_id = request.args.get('tourney_id')
+         tourney_list_id = request.args.get('tourney_list_id')
 
+         pm = PersistenceManager(myapp.db_connector)
+         tourney_list = pm.get_tourney_list(tourney_list_id)
+         list = List(faction=Faction.from_string(faction), points=points)
+         tourney_list.list = list
+         pm.db_connector.get_session().add( list )
+         pm.db_connector.get_session().commit()
+
+         ships = []
+         for squad_member in data:
+             ship_pilot = pm.get_ship_pilot( squad_member['ship'], squad_member['pilot'] )
+             ship       = Ship( ship_pilot_id=ship_pilot.id, list_id=list.id)
+             list.ships.append( ship )
+             for upgrade in squad_member['upgrades']:
+                 ship_upgrade = ShipUpgrade( ship_id=ship.id,
+                                             upgrade_type=UpgradeType.from_string( upgrade['type'] ),
+                                             upgrade=upgrade['name'] )
+                 ship.upgrades.append( ship_upgrade )
+             ships.append( ship )
+
+         pm.db_connector.get_session().add_all( ships )
+         pm.db_connector.get_session().commit()
+
+         return jsonify(tourney_id=tourney_id)
 
 
 @app.route('/')
