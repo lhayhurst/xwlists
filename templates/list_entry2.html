@@ -3,8 +3,10 @@
 
     <script>
         var entryCount = 0;
-        var ships_and_pilots = {{ meta.ships_full()|tojson }}
-        var upgrades         = {{ meta.upgrades()|tojson }}
+        var ships_and_pilots = {{ meta.ships_full()|tojson }};
+        var upgrades         = {{ meta.upgrades()|tojson }};
+        var tourney_id       = {{ tourney_id }};
+        var tourney_list_id  = {{ tourney_list_id }};
     </script>
 
     <style>
@@ -85,10 +87,13 @@
                 </div>
                 <div><a href="#" onclick="removeSquadMember(this)">delete</a></div>
                 <div><a href="#" onclick="copySquadMember(this)">copy</a></div>
+
                 <div class="sub-total"></div>
             </div>
             <div class="total"></div>
             <button class="add-squad-member">Add squad member</button>
+            <button class="submit-squad">Submit squad</button>
+
         </div>
 
     </div>
@@ -105,13 +110,72 @@
             $('.squad').show();
             $('.faction-label').text(faction);
             $('.add-squad-member').click(function() { addSquadMember(faction) });
+            $('.submit-squad').click(function() { submitSquad() });
+
             addSquadMember(faction);
             updateTotals();
         }
 
+
+        function submitSquad()
+        {
+
+            var data = [];
+            $('.squad-member').not('.template').each(function(i, member) {
+                var dmember = {};
+                var memberEl = $(member);
+
+                var ship = memberEl.find('.ship');
+                var shipSelect = ship.find('.row-value .select');
+                var pilot = memberEl.find('.pilot');
+                pilotSelect =  pilot.find('.row-value .select');
+
+                if ( shipSelect != null ) {
+                    var shipName =  shipSelect.select2('data').text;
+                    if ( pilotSelect != null ) {
+                        var pilotName = pilotSelect.select2('data').text;
+                        dmember.ship  = shipName;
+                        dmember.pilot = pilotName;
+                       //get all the upgrades
+                        var upgrades = [];
+                        dmember.upgrades = upgrades;
+
+                        memberEl.find('.upgrade').each( function(k, upgrade) {
+                            var upgradeEl     = $(upgrade);
+                            var upgradeType   = upgradeEl.find( '.row-label').text();
+                            var upgradeSelect = upgradeEl.find('.row-value .select');
+                            if ( upgradeSelect != null ) {
+                                var upgradeSelectEl = $(upgradeSelect).select2('data');
+                                if ( upgradeSelectEl != null ) {
+                                    var upgradeName = upgradeSelectEl.text;
+                                    upgrades.push( { 'name' : upgradeName, 'type': upgradeType });
+                                }
+                            }
+                        } ) ;
+                    }
+                    data.push( dmember );
+                }
+
+            });
+
+            console.log( data );
+
+            var addSquadUrl = "/add_squad?tourney_id=" + tourney_id + "&tourney_list_id=" + tourney_list_id;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: addSquadUrl,
+                data: JSON.stringify({ 'data' : data } ),
+                success: function (data) {
+                    tourney_id = data.tourney_id;
+                    window.location.replace("/enter_list?tourney=" + tourney_id);
+                },
+                dataType: "json"
+            });
+        }
+
         function copySquadMember(obj)
         {
-            console.log("copy squad member clicked");
             var squadMember = $(obj).parent().parent();
             squadMember.clone().insertBefore( squadMember );
             updateTotals();
@@ -121,7 +185,6 @@
 
         function removeSquadMember(obj)
         {
-            console.log("remove squad member clicked");
             var squadMember = $(obj).parent().parent();
             squadMember.remove();
             updateTotals();
@@ -311,7 +374,6 @@
         function addUpgrade(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType)
         {
             var upgradeItems = getUpgradeItems( squadMemberEl, upgradeType, ship, faction, pilotHref );
-            console.log(upgradeItems);
 
             addRow(squadMemberEl, 'upgrade', upgradeType, upgradeItems, function (upgradeValue) {
                 upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue);
@@ -333,7 +395,6 @@
 
 
         function upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue) {
-            console.log( upgradeValue );
             var upgradeHref = getUpgradeHref( upgradeType, upgradeValue );
             if ( 'action' in upgradeHref ) {
                 var action = upgradeHref.action;

@@ -13,6 +13,9 @@
 	    <script src="static/jquery.validate.min.js"></script>
         <script src="static/underscore-min.js"></script>
         <script src="static/select2.min.js"></script>
+        <script type="text/javascript">
+          var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        </script>
 	</head>
 
 	<body>

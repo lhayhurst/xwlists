@@ -172,6 +172,10 @@ class PersistenceManager:
     def get_tourney(self,tourney_name):
         return self.db_connector.get_session().query(Tourney).filter_by(tourney_name=tourney_name).first()
 
+    def get_tourney_by_id(self,tourney_id):
+        return self.db_connector.get_session().query(Tourney).filter_by(id=tourney_id).first()
+
+
     def delete_tourney(self, tourney_name):
         tourney = self.get_tourney( tourney_name)
         for list in tourney.tourney_lists:
