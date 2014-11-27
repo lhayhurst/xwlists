@@ -57,6 +57,7 @@ PER_SQUAD_UNIQUE_CONSTRAINT = {'type': PER_SQUAD, 'value': UNIQUE}
 REBEL_FACTION_CONSTRAINT = {'type': FACTION, 'value': REBEL}
 IMPERIAL_FACTION_CONSTRAINT = {'type': FACTION, 'value': IMPERIAL}
 
+#all the x-wing upgrades.
 upgrades = {
     CREW: (
         {'name': 'Intelligence Agent', 'cost': 1},
