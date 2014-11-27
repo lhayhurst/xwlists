@@ -337,7 +337,7 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
               'upgrades': (EPT, MOD)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Obsidian Squadron Pilot', 'cost': 13,
               'upgrades': (MOD,'')},
-             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Academy Pilot', 'cost': 13, 'upgrades': (MOD,) }
+             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Academy Pilot', 'cost': 12, 'upgrades': (MOD,) }
          ),
 
          TIE_ADVANCED: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Darth Vader', 'cost': 29,
@@ -506,5 +506,21 @@ class XWingMetaData:
 
     def turrets(self):
         return self.upgrades()(TURRET)
+
+    def get_ship_pilot_cost(self, ship, pilot):
+        pilots = ships[ship]
+        for p in pilots:
+            if p['name'] == pilot:
+                return p['cost']
+        return 0
+
+    def get_upgrade_cost(self, upgrade):
+        upgrades = self.upgrades()[upgrade.upgrade_type.description]
+        if upgrades:
+            for u in upgrades:
+                if u['name'] == upgrade.upgrade:
+                    return u['cost']
+        else:
+            return 0
 
 

@@ -1,7 +1,16 @@
 {% extends "layout.html" %}
 {% block content %}
 
+    <script>
+        var entryCount = 0;
+        var ships_and_pilots = {{ meta.ships_full()|tojson }};
+        var upgrades         = {{ meta.upgrades()|tojson }};
+        var tourney_id       = {{ tourney_id }};
+        var tourney_list_id  = {{ tourney_list_id }};
+    </script>
+
     <style>
+
         .main-section {
             width: 100%;
             height: 500px;
@@ -18,158 +27,491 @@
             height: 100%;
             overflow-y: scroll;
         }
-        .entries {
+         .entries {
             margin-left: 66%;
             padding: 20px;
         }
-        .template {
+        .squad {
             display: none;
         }
-        .entry {
-            background-color: #eeeeee;
-            margin: 5px;
-            padding: 0 5px;
+
+        .squad-member {
+            width: 350px;
+            background-color: #ddd;
+            margin: 10px;
+            padding: 20px;
         }
+
+        .row {
+            margin: 5px 0;
+        }
+
+        .row-label {
+            display: inline-block;
+            width: 100px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .row-value {
+            display: inline-block;
+            width: 150px;
+        }
+
+        .row-value .select {
+            width: 150px;
+        }
+
+        .row-cost {
+            display: inline-block;
+            width: 31px;
+            text-align: right;
+        }
+
+        .sub-total {
+            text-align: right;
+            margin-left: 271px;
+            width: 20px;
+            border-top: 1px solid #000;
+        }
+
+        .total {
+            text-align: right;
+            margin-left: 300px;
+            width: 20px;
+            border-top: 1px solid #000;
+            font-weight: bold;
+        }
+
+        .template {
+            display: none !important;
+        }
+
     </style>
-    <script>
-        var entryCount = 0;
-        var ships_and_pilots = {{ meta.ships_full()|tojson|safe }}
-        var upgrades         = {{ meta.upgrades()|tojson|safe }}
-
-        function addEntry() {
-            var entry = $('.entry.shipspilots').clone().removeClass('shipspilots').appendTo('.entry-group');
-            entry.find('.indexed').each(function(i, el) {
-                el.name = el.name + '.' + entryCount;
-                console.log(el);
-            });
-            entry.find("#entry-number").val(entryCount);
-
-            var pilot = entry.find('.pilot');
-            pilot.empty();
-
-            entry.find('.ship').on("select2-close", function(e) {
-                pilot.empty();
-                var results = [];
-                var pilots = ships_and_pilots[ e.target.value ]
-                pilot.append('<option></option>');
-                jQuery.each( ships_and_pilots[e.target.value], function(i,val) {
-                    var pname = val[ 'name'];
-                    pilot.append( '<option value="' + pname + '">'+pname+'</option>');
-                });
-
-                pilot.select2();
-                pilot.on("select2-close", function(e) {
-                    var parentDiv = $(e.target).parent("div");
-                    var shipName = parentDiv.find("select.ship")[0].value;
-                    var pilotName = e.target.value;
-                    var listOfPilots = ships_and_pilots[shipName];
-
-                    var filteredPilots = _.select(listOfPilots, function (p) {
-                        return p.name == pilotName
-                    });
-                    var pilotOptions = _.first(filteredPilots);
-
-                    _.each(pilotOptions.upgrades, function(upgradeTitle){
-                        var entryNumber = parentDiv.find("#entry-number").val();
-
-                        var upgradeTitleEntryNumber = "#" + upgradeTitle + "." + entryNumber;
-                        //console.log(upgradeTitleEntryNumber);
-                        upgrade_options = upgrades[upgradeTitle];
-
-                        var upgrade_entries = $('.entry.upgrades.' + upgradeTitle).clone().removeClass('upgrades ' + upgradeTitle).appendTo('.entry-group');
-                        //console.log(upgrade_entries);
-                        upgrade_entries.find('.indexed').each(function(i, el) {
-                            el.name = el.name + '.' + entryCount;
-                            console.log(el);
-                            $(el).select2();
-                        });
-                        //var upgrade_entry = $('.entry.upgrades').clone().removeClass('upgrade').appendTo('.entry-group');
-                        //    upgrade_entry.find('.indexed').each(function(i, el) {
-                        //    el.name = el.name + '.' + entryCount;
-                        //    console.log(el);
-                        // });
-                    });
-                } );
-            } );
-            entry.find('select').css({width:300}).select2();
-
-            entryCount++;
-            $('.count').val(entryCount);
-        }
-    </script>
 
     <div class="main-section">
+
         <div class="image">
             {{  tourney_list.player_name_stripped()  }}
             <img src={{ image_src }}>
         </div>
+
+
         <div class="entries">
 
+            <div>
+                <b>Player name</b>  <textarea rows="1" cols="30" name="player" required >{{ tourney_list.player_name_stripped() }}</textarea>
+            </div>
 
-            <form action="/add_squad" id="listForm" method=post class="add-entry">
-                <input type="hidden" name="count" class="count" value="0">
-                <div>
-                    <b>Player name</b><textarea rows="1" cols="30" name="player" required >{{ tourney_list.player_name_stripped() }}</textarea>
-                    <b>Faction</b><input type="radio" name="faction" id="Rebel" value="Rebel" required >Rebel</input><input type="radio" name="faction" id="Imperial" value="Imperial"required>Imperial</input>
-                    <b>points spent</b><textarea rows="1" cols="5" name="points" required ></textarea>
-                </div>
+            <div class="choose-faction">
                 <br>
-                <div class="entry-group">
-                    <div class="entry template">
-                        <div class="entry shipspilots">
-                            <input type="hidden" id="entry-number">
-                            <b>Ship</b>
-                            <select name="ship" class="ship indexed" placeholder="Select a ship" >
-                                <option></option>
-                                {% for ship in meta.ships() %}
-                                <option value="{{ ship }}">{{ ship }}</option>
-                                {% endfor %}
-                            </select>
-                            <br>
-                            <b>Pilot</b>
-                            <select name="pilot" class="pilot indexed" placeholder="Select a pilot" >
-                                <option></option>
-                            </select>
-                        </div>
-                        <div class="entry upgrades">
-                            <div class="entry upgrades Title">
-                                <b>Title</b><br>
-                                <select name="Title" class="Title indexed" placeholder="Select a title">
-                                    <option></option>
-                                    {% for title in meta.titles() %}
-                                        <option value="{{ title['name'] }}">{{ title['name'] }}</option>
-                                    {% endfor %}
-                                </select>
-                                <br>
-                            </div>
-                            <div class="entry upgrades Modification">
-                                <b>Modification</b><br>
-                                <select name="Modification" class="Modification indexed" placeholder="Select a Modification">
-                                    <option></option>
-                                    {% for mod in meta.mods() %}
-                                        <option value="{{ mod['name'] }}">{{ mod['name'] }}</option>
-                                    {% endfor %}
-                                </select>
-                                <br>
-                            </div>
-                        </div>
+                Faction?
+                <button class="faction-choice">Imperial</button>
+                <button class="faction-choice">Rebel</button>
+            </div>
+            <span>
+              <h2 class="faction-label"></h2>
+                <br>
+                <button class="submit-squad" hidden="true" disabled="true">Submit squad</button>
+              <div class="total"></div>
+            </span>
+            <div class="squad">
+                <div class="squad-member template">
+                    <div class="row template">
+                        <span class="row-label"></span>
+                        <span class="row-value"><div class="select"></div></span>
+                        <span class="row-cost"></span>
                     </div>
+                    <div><a href="#" onclick="removeSquadMember(this)">delete/</a> <a href="#" onclick="copySquadMember(this)">copy/</a> <a href="#" onclick="createNewSquadMember(this)">new</a></div>
+
+                    <div class="sub-total"></div>
                 </div>
 
-                <button onclick="addEntry(); return false">Add another</button>
-                <script>addEntry()</script>
-
-                <input type=submit value="Submit squad!">
-                <input name="tourney_list_id" value="{{ tourney_list.id }}" type="hidden">
-
-            </form>
-
-            <script>
-               $("#listForm").validate();
-            </script>
-
+            </div>
         </div>
+
     </div>
 
+    <script>
 
+        function init() {
+            $('.faction-choice').click(factionChosen);
+        }
+
+        function factionChosen() {
+            var faction = $(this).text();
+            $('.choose-faction').hide();
+            $('.faction-label').text(faction);
+            $('.faction-label').hide();
+            $('.squad').show();
+            console.log($('.faction-label').text() );
+            if ( $('.faction-label').text() == "Imperial" ) {
+                console.log($('.submit-squad'));
+                $('.submit-squad').text("Submit to the Emperor!");
+            }
+            else
+            {
+                $('.submit-squad').text("Join the Rebellion!");
+            }
+            $('.submit-squad').show();
+            $('.submit-squad').click(function() { submitSquad() });
+
+            addSquadMember(faction);
+            updateTotals();
+        }
+
+
+        function submitSquad()
+        {
+
+            var data = [];
+            $('.squad-member').not('.template').each(function(i, member) {
+                var dmember = {};
+                var memberEl = $(member);
+
+                var ship = memberEl.find('.ship');
+                var shipSelect = ship.find('.row-value .select');
+                var pilot = memberEl.find('.pilot');
+                pilotSelect =  pilot.find('.row-value .select');
+
+                if ( shipSelect != null ) {
+                    var shipName =  shipSelect.select2('data').text;
+                    if ( pilotSelect != null ) {
+                        var pilotName = pilotSelect.select2('data').text;
+                        dmember.ship  = shipName;
+                        dmember.pilot = pilotName;
+                       //get all the upgrades
+                        var upgrades = [];
+                        dmember.upgrades = upgrades;
+
+                        memberEl.find('.upgrade').each( function(k, upgrade) {
+                            var upgradeEl     = $(upgrade);
+                            var upgradeType   = upgradeEl.find( '.row-label').text();
+                            var upgradeSelect = upgradeEl.find('.row-value .select');
+                            if ( upgradeSelect != null ) {
+                                var upgradeSelectEl = $(upgradeSelect).select2('data');
+                                if ( upgradeSelectEl != null ) {
+                                    var upgradeName = upgradeSelectEl.text;
+                                    upgrades.push( { 'name' : upgradeName, 'type': upgradeType });
+                                }
+                            }
+                        } ) ;
+                    }
+                    data.push( dmember );
+                }
+
+            });
+
+            var addSquadUrl = "/add_squad?tourney_id=" + tourney_id + "&tourney_list_id=" + tourney_list_id;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: addSquadUrl,
+                data: JSON.stringify({ 'data' : data, faction: $('.faction-label').text(), 'points': $('.total').text()   } ),
+                success: function (data) {
+                    tourney_id       = data.tourney_id;
+                    tourney_list_id  = data.tourney_list_id;
+                    window.location.replace("/display_list?tourney_list_id=" + tourney_list_id);
+                },
+                dataType: "json"
+            });
+        }
+
+        function copySquadMember(obj)
+        {
+            var squadMember = $(obj).parent().parent();
+            squadMember.clone(true).insertBefore( squadMember );
+            updateTotals();
+
+
+        }
+
+        function removeSquadMember(obj)
+        {
+            var squadMember = $(obj).parent().parent();
+            squadMember.remove();
+            updateTotals();
+        }
+
+        function createNewSquadMember(obj)
+        {
+            var squadMember = $(obj).parent().parent();
+            var faction = $('.faction-label').text();
+            addSquadMember(faction, squadMember);
+        }
+
+        function addSquadMember(faction, squadMember) {
+            var squadMemberEl = $('.squad-member.template').clone().removeClass('template').insertBefore( squadMember != null? squadMember : '.squad');
+            var ships = _.keys(ships_and_pilots).filter(function(ship) { return ships_and_pilots[ship][0].faction == faction });
+            var items = ships.map(function (ship) {
+                return { text: ship, id: ship }
+            });
+            addRow(squadMemberEl, 'ship', 'Ship', items, function(ship) { shipChosen(faction, squadMemberEl, ship) });
+            updateTotals();
+        }
+
+
+        function removeUpgrades( squadMemberEl ) {
+            squadMemberEl.find('.upgrade').each(function(i, upgrade) {  $(upgrade).remove(); });
+
+        }
+        function removePilot( squadMemberEl ) {
+            squadMemberEl.find('.pilot').each(function(i, pilot) {  $(pilot).remove(); });
+
+        }
+
+
+        function getShipForSquadMember( squadMemberEl )
+        {
+            var shipName = squadMemberEl.find( '.ship .row-value .select').select2('data').text;
+            return shipName;
+        }
+
+        function getPilotHref( shipName, pilotName )
+        {
+            return _.select(ships_and_pilots[shipName], function(p) { return p.name == pilotName })[0]
+        }
+
+        function getUniqueSelectedPilots( squadMemberEl )
+        {
+            var ret = {};
+            //get all the pilots, and cherry pick out hte ones that arent for this squad member
+            var pilots = $('.pilot').filter(function(i, pilot) {
+               if ( pilot != null ) {
+                   pilotEl = $(pilot);
+                   var parentSquadMember = pilotEl.parent();
+                   if ( ! parentSquadMember.is( squadMemberEl ) ) {
+                       var pilotSelect =  pilotEl.find('.row-value .select');
+                       if ( pilotSelect != null ) {
+                           var pilotName = pilotSelect.select2('data').text;
+                           //get the ship for the pilot
+                           var shipName = getShipForSquadMember( parentSquadMember );
+                           var pilotHref =  getPilotHref(shipName, pilotName );
+                           if ( pilotHref != null && 'constraints' in pilotHref ) {
+                               var constraints = pilotHref.constraints;
+                               _.each(constraints, function (u) {
+                                   if (u.type == 'PER_SQUAD' && u.value == 'UNIQUE')
+                                   {
+                                       ret[pilotHref.name] = pilotHref.name;
+                                   }
+                               });
+                           }
+                       }
+                   }
+               }
+            });
+            return ret;
+
+        }
+
+        function getUpgradeHref( upgradeType, upgradeName )
+        {
+            return _.select(upgrades[upgradeType], function(u) { return u.name == upgradeName })[0]
+        }
+
+        function getUniqueSelectedUpgrades( squadMemberEl )
+        {
+            var ret = {};
+            //get all the pilots, and then extract out all of their unique upgrades.
+            var pilots = $('.pilot').filter(function(i, pilot) {
+               if ( pilot != null ) {
+                   pilotEl = $(pilot);
+                   var parentSquadMember = pilotEl.parent();
+                   if ( ! parentSquadMember.is( squadMemberEl ) ) {
+                        parentSquadMember.find('.upgrade').each( function(k, upgrade) {
+                            var upgradeEl     = $(upgrade);
+                            var upgradeSelect = upgradeEl.find('.row-value .select');
+                            if ( upgradeSelect != null ) {
+                                var upgradeSelectEl = $(upgradeSelect).select2('data');
+                                if ( upgradeSelectEl != null ) {
+                                    var upgradeName = upgradeSelectEl.text;
+                                    //go fetch the upgrade information for this guy
+                                    var upgradeHref = getUpgradeHref(upgradeSelectEl.type, upgradeName );
+                                    if ( 'constraints' in upgradeHref)
+                                    _.each(upgradeHref.constraints, function (u) {
+                                        if (u.type == 'PER_SQUAD' && u.value == 'UNIQUE')
+                                        {
+                                            ret[upgradeName] = upgradeName;
+                                        }
+                                   });
+                                }
+                            }
+                        } );
+                   }
+               }
+            });
+            return ret;
+
+        }
+
+
+        function shipChosen(faction, squadMemberEl, ship) {
+            removePilot(squadMemberEl);
+            removeUpgrades(squadMemberEl);
+
+            var pilotItems = ships_and_pilots[ship].map(function(pilot) { return { text:pilot.name, id:pilot.name, cost:pilot.cost }});
+
+            //remove any pilots that are unique and have already been selected
+            var uniqueSelectedPilots = getUniqueSelectedPilots(squadMemberEl);
+            //remove the unique selected pilots from the pilotItems
+            pilotItems = _.filter( pilotItems, function (pi) { return ! ( pi.text in uniqueSelectedPilots ) } );
+
+            addRow(squadMemberEl, 'pilot', 'Pilot', pilotItems, function(pilot) { pilotChosen(faction, squadMemberEl, ship, pilot) });
+            updateTotals();
+        }
+
+
+        function convertToArray( someObject ) {
+            if( Object.prototype.toString.call( someObject ) != '[object Array]' ) {
+               return [ someObject ];
+            }
+            return someObject;
+        }
+
+        function manageConstraints( ship, constraints, faction, pilotHref, upgrade, upgradeType )
+        {
+            ret = {text: upgrade.name, id: upgrade.name, cost: upgrade.cost, type: upgradeType, disabled: false };
+            constraints = convertToArray(constraints);
+            for ( var i = 0; i < constraints.length; i++ ) {
+                var u = constraints[i];
+
+                if (u.type == 'FACTION') {
+                    if (u.value != faction) {
+                        ret = {disabled: true };
+                        break;
+                    }
+                }
+                if (u.type == 'SHIP_SIZE') {
+                    if (u.value != pilotHref.ship_size) {
+                        ret = { disabled: true };
+                        break;
+                    }
+                }
+                if (u.type == 'SHIP_TYPE') {
+                    if (u.value != ship) {
+                        ret = {disabled: true };
+                        break;
+                    }
+                }
+            }
+            return ret;
+        }
+
+        function getUpgradeItems(squadMemberEl, upgradeType, ship, faction, pilotHref )
+        {
+            var upgradeItems = upgrades[upgradeType].map(function (u) {
+
+                if ('constraints' in u) {
+                    return manageConstraints(ship, u.constraints, faction, pilotHref, u, upgradeType);
+                }
+                else {
+                    return {text: u.name, id: u.name, cost: u.cost, type: upgradeType, disabled: false};
+                }
+            });
+
+            //filter down the upgrade items to ones that aren't disabled, and unique ones that haven't already been selected.
+            upgradeItems = _.filter(upgradeItems, function (ui) {
+                return 'disabled' in ui && ui.disabled == false
+            });
+            var uniqueSelectedUpgrades = getUniqueSelectedUpgrades(squadMemberEl);
+            upgradeItems = _.filter(upgradeItems, function (ui) {
+                return !( ui.text in uniqueSelectedUpgrades )
+            });
+            return upgradeItems;
+        }
+
+        function addUpgrade(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType)
+        {
+            var upgradeItems = getUpgradeItems( squadMemberEl, upgradeType, ship, faction, pilotHref );
+
+            addRow(squadMemberEl, 'upgrade', upgradeType, upgradeItems, function (upgradeValue) {
+                upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue);
+            });
+        }
+
+        function pilotChosen(faction, squadMemberEl, ship, pilot)
+        {
+            removeUpgrades(squadMemberEl);
+            var pilotHref = getPilotHref( ship, pilot );
+            var upgrades_for_pilot = pilotHref.upgrades;
+            upgrades_for_pilot = convertToArray(upgrades_for_pilot);
+            upgrades_for_pilot.forEach(function(upgradeType) {
+                addUpgrade( faction, squadMemberEl, ship, pilot, pilotHref, upgradeType );
+            } );
+
+            updateTotals();
+        }
+
+
+        function upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue) {
+            var upgradeHref = getUpgradeHref( upgradeType, upgradeValue );
+            if ( 'action' in upgradeHref ) {
+                var action = upgradeHref.action;
+                if ( action.type == 'ADD_UPGRADE' ) {
+                    var upgrade = action.value;
+                    upgradeItems = getUpgradeItems( squadMemberEl, upgrade, ship, faction, pilotHref );
+                    addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function (upgradeValue) {
+                            upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgrade, upgradeValue);
+                    } );
+                }
+            }
+            updateTotals();
+        }
+
+        function addRow(parentEl, className, label, items, changeHandler)
+        {
+            var rowEl = parentEl.find('.row.template').clone().removeClass('template').appendTo(parentEl);
+            rowEl.addClass(className);
+            rowEl.find('.row-label').text(label);
+            rowEl.find('.row-value .select')
+                    .select2({data:items, placeholder:'select a ' + label})
+                    .on('select2-close', function(e) {
+                        changeHandler(e.target.value);
+                    });
+        }
+
+
+        function updateTotals()
+        {
+
+            var squadTotal = 0;
+            $('.squad-member').not('.template').each(function(i, member) {
+                var memberCost = 0;
+                var memberEl = $(member);
+
+                var pilot = memberEl.find('.pilot');
+                pilotSelect =  pilot.find('.row-value .select');
+                if ( pilotSelect != null ) {
+                    memberCost     = pilotSelect.select2('data').cost || 0;
+                    pilot.find( '.row-cost').text( memberCost );
+
+                    //get all the upgrades
+                    var upgradeCosts = 0;
+                    memberEl.find('.upgrade').each( function(k, upgrade) {
+                        var upgradeEl     = $(upgrade);
+                        var upgradeSelect = upgradeEl.find('.row-value .select');
+                        if ( upgradeSelect != null ) {
+                            var upgradeSelectEl = $(upgradeSelect).select2('data');
+                            if ( upgradeSelectEl != null ) {
+                                upgradeCosts += upgradeSelectEl.cost;
+                                upgradeEl.find('.row-cost').text(upgradeSelectEl.cost);
+                            }
+                        }
+                    } ) ;
+                }
+
+                memberCost += upgradeCosts;
+                memberEl.find('.sub-total').text( memberCost );
+                squadTotal += memberCost;
+
+            });
+            if ( squadTotal > 0 ) {
+                $('.submit-squad').removeAttr("disabled");
+                $('.submit-squad').show();
+            }
+            $('.total').text(squadTotal);
+        }
+
+        init();
+    </script>
 {% endblock %}

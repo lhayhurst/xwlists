@@ -17,23 +17,32 @@
     <th class="tg-3i0c">Faction</th>
     <th class="tg-3i0c">Points</th>
     <th class="tg-3i0c">List</th>
+    {% if admin %}
+        <th class="tg-3i0c">Admin</th>
+    {% endif %}
   </tr>
       {% for tourney_list in tourney_lists %}
-      <tr>
-         <td class="tg-031e">{{ tourney.tourney_name }}</td>
-         <td class="tg-031e">{{  tourney_list.player_name }}</td>
-         <td class="tg-031e">{{  tourney_list.tourney_standing }}</td>
-         {% if tourney_list.list %}
-             <td class="tg-031e">{{  tourney_list.list.faction }}</td>
-             <td class="tg-031e">{{  tourney_list.list.points }}</td>
-             <td class="tg-031e">list details here ... </td>
-         {%  else %}
-             <td class="tg-031e">Faction unknown </td>
-             <td class="tg-031e">Points unknown </td>
-             <td class="tg-031e"><a href="{{ url_for( 'enter_list', tourney_list_id=tourney_list.id) }}">Enter it now!</a> </td>
+          <tr>
+             <td class="tg-031e">{{ tourney.tourney_name }}</td>
+             <td class="tg-031e">{{  tourney_list.player_name }}</td>
+             <td class="tg-031e">{{  tourney_list.tourney_standing }}</td>
+             {% if tourney_list.list %}
+                 <td class="tg-031e">{{  tourney_list.list.faction.description }}</td>
+                 <td class="tg-031e">{{  tourney_list.list.points }}</td>
+                 <td class="tg-031e"><a href="{{  url_for( 'display_list', tourney_list_id=tourney_list.id) }}">Show list</a></td>
+                {% if admin %}
+                    <th class="tg-031e">
+                        <a href="{{ url_for( 'delete_list', admin=admin, tourney=tourney.tourney_name, tourney_list_id=tourney_list.id ) }}">Delete list</a>
+                    </th>
+                {% endif %}
+             {%  else %}
+                 <td class="tg-031e">Faction unknown </td>
+                 <td class="tg-031e">Points unknown </td>
+                 <td class="tg-031e"><a href="{{ url_for( 'enter_list', tourney_list_id=tourney_list.id) }}">Enter it now!</a> </td>
+                 <td class="tg-031e">Nothing to do </td>
+             {%  endif %}
 
-         {%  endif %}
-      </tr>
+          </tr>
       {% endfor %}
 </table>
 

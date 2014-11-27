@@ -97,10 +97,22 @@ def add_tourney():
 @app.route("/browse_list")
 def browse_list():
     tourney_name = request.args.get('tourney')
+    admin        = request.args.get('admin')
     pm = PersistenceManager(myapp.db_connector)
     tourney = pm.get_tourney(tourney_name)
     tourney_lists = tourney.tourney_lists
-    return render_template( 'tourney_lists.html', tourney=tourney, tourney_lists=tourney_lists)
+    return render_template( 'tourney_lists.html', tourney=tourney, tourney_lists=tourney_lists, admin=admin)
+
+@app.route("/delete_list")
+def delete_list():
+    tourney_list_id = request.args.get('tourney_list_id')
+    tourney_name    = request.args.get('tourney')
+    admin           = request.args.get('admin')
+
+    pm = PersistenceManager(myapp.db_connector)
+    tourney_list = pm.get_tourney_list(tourney_list_id)
+    pm.delete_tourney_list( tourney_list )
+    return redirect( url_for('browse_list', tourney=tourney_name, admin=admin ) )
 
 @app.route("/enter_list")
 def enter_list():
@@ -119,7 +131,7 @@ def enter_list():
         tourney      = tourney_list.tourney
 
     m = xwingmetadata.XWingMetaData()
-    return render_template('list_entry2.html',
+    return render_template('list_entry.html',
                            meta=m,
                            image_src=urllib.quote(tourney_list.image),
                            tourney_list=tourney_list,
@@ -157,8 +169,22 @@ def add_squad():
          pm.db_connector.get_session().add_all( ships )
          pm.db_connector.get_session().commit()
 
-         return jsonify(tourney_id=tourney_id)
+         return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list.id)
 
+@app.route('/display_list')
+def display_list():
+    tourney_list_id = request.args.get('tourney_list_id')
+    admin           = request.args.get('admin')
+    pm = PersistenceManager(myapp.db_connector)
+    tourney_list = pm.get_tourney_list(tourney_list_id)
+    m = xwingmetadata.XWingMetaData()
+    return render_template('list_display.html',
+                           meta=m,
+                           admin=admin,
+                           image_src=urllib.quote(tourney_list.image),
+                           tourney_list=tourney_list,
+                           tourney_list_id=tourney_list.id,
+                           tourney=tourney_list.tourney )
 
 @app.route('/')
 def index():
