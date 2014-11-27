@@ -65,10 +65,8 @@
             display: none !important;
         }
 
-        .add-squad-member {
-
-        }
     </style>
+
     <div class="main-section">
 
         <div class="choose-faction">
@@ -85,6 +83,8 @@
                     <span class="row-value"><div class="select"></div></span>
                     <span class="row-cost"></span>
                 </div>
+                <div><a href="#" onclick="removeSquadMember(this)">delete</a></div>
+                <div><a href="#" onclick="copySquadMember(this)">copy</a></div>
                 <div class="sub-total"></div>
             </div>
             <div class="total"></div>
@@ -109,8 +109,27 @@
             updateTotals();
         }
 
+        function copySquadMember(obj)
+        {
+            console.log("copy squad member clicked");
+            var squadMember = $(obj).parent().parent();
+            squadMember.clone().insertBefore( squadMember );
+            updateTotals();
+
+
+        }
+
+        function removeSquadMember(obj)
+        {
+            console.log("remove squad member clicked");
+            var squadMember = $(obj).parent().parent();
+            squadMember.remove();
+            updateTotals();
+
+
+        }
         function addSquadMember(faction) {
-            var squadMemberEl = $('.squad-member.template').clone().removeClass('template').appendTo('.squad');
+            var squadMemberEl = $('.squad-member.template').clone().removeClass('template').insertBefore('.squad');
             var ships = _.keys(ships_and_pilots).filter(function(ship) { return ships_and_pilots[ship][0].faction == faction });
             var items = ships.map(function (ship) {
                 return { text: ship, id: ship }
