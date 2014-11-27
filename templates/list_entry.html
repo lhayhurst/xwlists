@@ -3,8 +3,8 @@
 
     <script>
         var entryCount = 0;
-        var ships_and_pilots = {{ meta.ships_full()|tojson }};
-        var upgrades         = {{ meta.upgrades()|tojson }};
+        var ships_and_pilots = {{ meta.ships_full() | tojson | safe }};
+        var upgrades         = {{ meta.upgrades()|tojson | safe }};
         var tourney_id       = {{ tourney_id }};
         var tourney_list_id  = {{ tourney_list_id }};
     </script>
