@@ -122,6 +122,7 @@ def enter_list():
     return render_template('list_entry2.html',
                            meta=m,
                            image_src=urllib.quote(tourney_list.image),
+                           tourney_list=tourney_list,
                            tourney_list_id=tourney_list.id,
                            tourney_id=tourney.id )
 

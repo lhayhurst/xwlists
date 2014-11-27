@@ -11,6 +11,26 @@
 
     <style>
 
+        .main-section {
+            width: 100%;
+            height: 500px;
+        }
+        .image {
+            width: 66%;
+            float: left;
+        }
+        .image img {
+            width: 100%;
+            height: auto;
+        }
+        .entries, .image {
+            height: 100%;
+            overflow-y: scroll;
+        }
+         .entries {
+            margin-left: 66%;
+            padding: 20px;
+        }
         .squad {
             display: none;
         }
@@ -71,29 +91,43 @@
 
     <div class="main-section">
 
-        <div class="choose-faction">
-            Faction?
-            <button class="faction-choice">Imperial</button>
-            <button class="faction-choice">Rebel</button>
+        <div class="image">
+            {{  tourney_list.player_name_stripped()  }}
+            <img src={{ image_src }}>
         </div>
 
-        <div class="squad">
-            <h2 class="faction-label"></h2>
-            <div class="squad-member template">
-                <div class="row template">
-                    <span class="row-label"></span>
-                    <span class="row-value"><div class="select"></div></span>
-                    <span class="row-cost"></span>
-                </div>
-                <div><a href="#" onclick="removeSquadMember(this)">delete</a></div>
-                <div><a href="#" onclick="copySquadMember(this)">copy</a></div>
 
-                <div class="sub-total"></div>
+        <div class="entries">
+
+            <div>
+                <b>Player name</b><textarea rows="1" cols="30" name="player" required >{{ tourney_list.player_name_stripped() }}</textarea>
             </div>
-            <div class="total"></div>
-            <button class="add-squad-member">Add squad member</button>
-            <button class="submit-squad">Submit squad</button>
 
+            <div class="choose-faction">
+                <br>
+                Faction?
+                <button class="faction-choice">Imperial</button>
+                <button class="faction-choice">Rebel</button>
+            </div>
+            <span>
+              <h2 class="faction-label"></h2>
+                <br>
+                <button class="submit-squad" hidden="true" disabled="true">Submit squad</button>
+              <div class="total"></div>
+            </span>
+            <div class="squad">
+                <div class="squad-member template">
+                    <div class="row template">
+                        <span class="row-label"></span>
+                        <span class="row-value"><div class="select"></div></span>
+                        <span class="row-cost"></span>
+                    </div>
+                    <div><a href="#" onclick="removeSquadMember(this)">delete/</a> <a href="#" onclick="copySquadMember(this)">copy/</a> <a href="#" onclick="createNewSquadMember(this)">new</a></div>
+
+                    <div class="sub-total"></div>
+                </div>
+
+            </div>
         </div>
 
     </div>
@@ -107,9 +141,19 @@
         function factionChosen() {
             var faction = $(this).text();
             $('.choose-faction').hide();
-            $('.squad').show();
             $('.faction-label').text(faction);
-            $('.add-squad-member').click(function() { addSquadMember(faction) });
+            $('.faction-label').hide();
+            $('.squad').show();
+            console.log($('.faction-label').text() );
+            if ( $('.faction-label').text() == "Imperial" ) {
+                console.log($('.submit-squad'));
+                $('.submit-squad').text("Submit to the Emperor!");
+            }
+            else
+            {
+                $('.submit-squad').text("Join the Rebellion!");
+            }
+            $('.submit-squad').show();
             $('.submit-squad').click(function() { submitSquad() });
 
             addSquadMember(faction);
@@ -175,7 +219,7 @@
         function copySquadMember(obj)
         {
             var squadMember = $(obj).parent().parent();
-            squadMember.clone().insertBefore( squadMember );
+            squadMember.clone(true).insertBefore( squadMember );
             updateTotals();
 
 
@@ -186,11 +230,17 @@
             var squadMember = $(obj).parent().parent();
             squadMember.remove();
             updateTotals();
-
-
         }
-        function addSquadMember(faction) {
-            var squadMemberEl = $('.squad-member.template').clone().removeClass('template').insertBefore('.squad');
+
+        function createNewSquadMember(obj)
+        {
+            var squadMember = $(obj).parent().parent();
+            var faction = $('.faction-label').text();
+            addSquadMember(faction, squadMember);
+        }
+
+        function addSquadMember(faction, squadMember) {
+            var squadMemberEl = $('.squad-member.template').clone().removeClass('template').insertBefore( squadMember != null? squadMember : '.squad');
             var ships = _.keys(ships_and_pilots).filter(function(ship) { return ships_and_pilots[ship][0].faction == faction });
             var items = ships.map(function (ship) {
                 return { text: ship, id: ship }
@@ -454,6 +504,10 @@
                 squadTotal += memberCost;
 
             });
+            if ( squadTotal > 0 ) {
+                $('.submit-squad').removeAttr("disabled");
+                $('.submit-squad').show();
+            }
             $('.total').text(squadTotal);
         }
 
