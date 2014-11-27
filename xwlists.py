@@ -4,7 +4,7 @@ import re
 import urllib
 import datetime
 
-from flask import render_template, request, url_for, redirect, jsonify
+from flask import render_template, request, url_for, redirect, jsonify, Response
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager, List, Faction, Ship, ShipUpgrade, UpgradeType
 
@@ -45,6 +45,53 @@ def tourneys():
 @app.route("/new")
 def new():
     return render_template('new.html')
+
+def generate( rows ):
+    for r in rows:
+        yield ",".join(r) + "\n"
+
+def get_tourney_lists_as_text(tourney ):
+
+    rows   = []
+    header =  xwingmetadata.header()
+    rows.append( header )
+
+    tourney_date = "%d/%d/%d" % ( tourney.tourney_date.month, tourney.tourney_date.day, tourney.tourney_date.year )
+    row_defaults = [ tourney.tourney_name, tourney.tourney_type, tourney_date ]
+
+    for tourney_list in tourney.tourney_lists:
+        if tourney_list.list is None or tourney_list.list.ships is None or len(tourney_list.list.ships) == 0:
+            new_row = []
+            new_row.extend ( row_defaults )
+            for i in range (len(new_row), len(header)):
+                new_row.append('')
+            rows.append(new_row)
+        else:
+            for ship in tourney_list.list.ships:
+                new_row = []
+                new_row.extend( row_defaults )
+                new_row.extend( [ tourney_list.player_name,  tourney_list.list.faction.description, str(tourney_list.list.points), \
+                        str(tourney_list.tourney_standing), str(tourney_list.id), ship.ship_pilot.ship_type.description, ship.ship_pilot.pilot.name] )
+
+                for i in range(len(new_row), len(header)):
+                    new_row.append( ship.get_upgrade( header[i]  ) )
+
+                rows.append(new_row)
+    return rows
+
+
+@app.route("/export_tourney_lists")
+def export_tourney_lists():
+    tourney_id = request.args.get('tourney_id')
+    pm         = PersistenceManager(myapp.db_connector)
+    tourney    = pm.get_tourney_by_id(tourney_id)
+
+    ret = get_tourney_lists_as_text(tourney)
+    disposition = "attachment; filename=tourney_list_download.csv"
+    return Response(generate(ret), mimetype='text/csv', headers={'Content-Disposition': disposition} )
+
+
+
 
 @app.route("/delete_tourney")
 def delete_tourney():

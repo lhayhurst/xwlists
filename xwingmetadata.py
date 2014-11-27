@@ -19,17 +19,28 @@ A_WING = 'A-Wing'
 Y_WING = 'Y-Wing'
 X_WING = 'X-Wing'
 
-DROID = 'Astromech Droid'
-TORPEDO = 'Torpedo'
-MOD = "Modification"
 EPT = "Elite Pilot Talent"
 TITLE = "Title"
+CREW = "Crew"
+
+SYSTEM = "System"
+MOD = "Modification"
+DROID = 'Astromech Droid'
+
+CANNON = "Cannon"
 TURRET = "Turret Weapon"
 MISSILE = "Missile"
-CREW = "Crew"
-SYSTEM = "System"
-CANNON = "Cannon"
+TORPEDO = 'Torpedo'
 BOMB = "Bomb"
+
+def header():
+    return [ 'Tourney', 'tourneyType', 'tourneyDate', 'player', FACTION, 'points', 'standing', \
+             'listId', 'Ship', 'Pilot', EPT + ".1", EPT + ".2", TITLE, \
+             CREW + ".1", CREW + ".2", CREW + ".3", \
+             SYSTEM, MOD + ".1", MOD + ".2", \
+             CANNON, MISSILE + ".1", MISSILE + ".2",
+             TORPEDO + ".1", TORPEDO + ".2", BOMB ]
+
 
 SHIP_SIZE = 'SHIP_SIZE'
 SHIP_TYPE = 'SHIP_TYPE'

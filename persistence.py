@@ -81,6 +81,8 @@ class ShipPilot(Base):
     pilot_id = Column(Integer, ForeignKey('{0}.id'.format(pilot_table)))
     pilot = relationship(Pilot.__name__, uselist=False)
 
+
+
 class Ship(Base):
     __tablename__ = ship_table
     id = Column(Integer, primary_key=True)
@@ -88,6 +90,28 @@ class Ship(Base):
     list_id = Column(Integer, ForeignKey('{0}.id'.format(list_table)))  #parent
     ship_pilot = relationship(ShipPilot.__name__, uselist=False)
     upgrades = relationship( "ShipUpgrade", back_populates="ship")
+
+    def get_upgrade(self, upgrade_name ):
+
+        ret = []
+
+        num_upgrades = 1
+
+        if "." in upgrade_name:
+            a = upgrade_name.split('.')
+            upgrade_name = a[0]
+            num_upgrades = int(a[1])
+
+        for upgrade in self.upgrades:
+            if upgrade.upgrade_type.description == upgrade_name:
+                ret.append( upgrade.upgrade)
+
+        if num_upgrades > len(ret):
+            return ""
+        elif len(ret) == 0:
+            return ""
+        print ret
+        return ret[ num_upgrades - 1  ]
 
 
 class ShipUpgrade(Base):

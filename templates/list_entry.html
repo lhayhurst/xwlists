@@ -505,7 +505,7 @@
                 squadTotal += memberCost;
 
             });
-            if ( squadTotal > 0 ) {
+            if ( squadTotal > 0 && squadTotal <= 100 ) {
                 $('.submit-squad').removeAttr("disabled");
                 $('.submit-squad').show();
             }
