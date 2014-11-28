@@ -32,8 +32,8 @@
          <td class="tg-031e">{{ value['tourney'].tourney_type }}</td>
          <td class="tg-031e">{{ value['tourney'].tourney_date }}</td>
          <td class="tg-031e">{{  value['num_entered'] + value['num_not_entered']  }}</td>
-         <td class="tg-031e">{{ value['num_entered'] }} (<a href="{{ url_for( 'browse_list', tourney=key) }}">browse submitted lists!</a>) </td>
-         <td class="tg-031e">{{ value['num_not_entered'] }} ( <a href="{{ url_for( 'enter_list', tourney=value['tourney'].id) }}">enter a list!</a>)</td>
+         <td class="tg-031e">{{ value['num_entered'] }} (<a href="{{ url_for( 'browse_list', tourney=key) }}">browse submitted lists</a>) </td>
+         <td class="tg-031e">{{ value['num_not_entered'] }} ( <a href="{{ url_for( 'enter_list', tourney=value['tourney'].id) }}">enter a list</a>)</td>
          <td class="tg-031e"><a type="text/csv" href="{{ url_for( 'export_tourney_lists', tourney_id=value['tourney'].id) }}">Export to csv</a></td>
 
          {% if admin %}
