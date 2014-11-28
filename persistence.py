@@ -199,6 +199,59 @@ class PersistenceManager:
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)
 
+# qry = select([
+#         this.id,
+#         select([func.count().label('xx')], this.id == that.this_id).as_scalar().label('thatcount'),
+#         ])
+
+
+    def get_faction_breakout(self):
+
+        session  =  self.db_connector.get_session()
+        subq =  session.query( func.count(List.faction ).label('total_factions') ).\
+            filter(TourneyList.tourney_id == Tourney.id).\
+            filter(List.id == TourneyList.list_id).subquery()
+
+        ret = session.query(
+            List.faction, func.count(List.faction).label("sub_total") / subq.c.total_factions ).\
+            filter(TourneyList.tourney_id == Tourney.id).\
+            filter(List.id == TourneyList.list_id).\
+            group_by(List.faction)
+
+        return ret
+
+
+    def get_ship_breakout(self):
+
+        session = self.db_connector.get_session()
+        subq    = session.query( func.count(Ship.ship_pilot_id ).label('total_ships') ).\
+            filter(TourneyList.tourney_id == Tourney.id).\
+            filter(List.id == TourneyList.list_id).\
+            filter( Ship.list_id == List.id ).\
+            filter( Ship.ship_pilot_id == ShipPilot.id).subquery()
+
+        ret = session.query(
+            List.faction, ShipPilot.ship_type, func.count(List.faction).label("sub_total") / subq.c.total_ships ).\
+             filter(TourneyList.tourney_id == Tourney.id).\
+             filter(List.id == TourneyList.list_id).\
+             filter(Ship.list_id == List.id).\
+             filter(Ship.ship_pilot_id == ShipPilot.id ).\
+             group_by(List.faction, ShipPilot.ship_type)
+
+        return ret
+
+    def get_ship_pilot_breakout(self):
+         ret = self.db_connector.get_session().query(
+            List.faction, ShipPilot.ship_type, Pilot.name,
+            func.count(List.faction),).\
+            filter(TourneyList.tourney_id == Tourney.id).\
+            filter(List.id == TourneyList.list_id).\
+            filter(Ship.list_id == List.id).\
+            filter(Ship.ship_pilot_id == ShipPilot.id ).\
+            filter( ShipPilot.pilot_id == Pilot.id).\
+             group_by(List.faction, ShipPilot.ship_type, Pilot.name)
+         return ret
+
     def get_tourney(self,tourney_name):
         return self.db_connector.get_session().query(Tourney).filter_by(tourney_name=tourney_name).first()
 

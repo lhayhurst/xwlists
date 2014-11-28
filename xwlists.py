@@ -284,14 +284,38 @@ def display_list():
 def index():
     return redirect(url_for('tourneys') )
 
+def to_float(dec):
+    return float("{0:.2f}".format( float(dec) * float(100)))
+
+
 @app.route("/charts")
 def charts():
     pm = PersistenceManager(myapp.db_connector)
-    tourneys = pm.get_tourneys()
-    names = []
-    for t in tourneys:
-        names.append( t.tourney_name )
-    return render_template('charts.html', tourneys=tourneys, tourney_names=names)
+    faction_breakout    = pm.get_faction_breakout()
+    ship_breakout       = pm.get_ship_breakout()
+
+    data = []
+    drilldowns = {}
+
+    for fba in faction_breakout.all():
+        drilldown =  {
+              'name': fba[0].description,
+              'categories': [],
+              'data' : [],
+              'color' : None
+        }
+        drilldowns[ fba[0].description] = drilldown
+        data.append( { 'y' : to_float(fba[1]),
+            'color' : None,
+            'drilldown' : drilldown
+        })
+
+    for sba in ship_breakout.all():
+        drilldown = drilldowns[ sba[0].description]
+        drilldown[ 'categories'].append( sba[1].description)
+        drilldown[ 'data'].append(to_float(sba[2]) )
+
+    return render_template('charts.html', data=data)
 
 if __name__ == '__main__':
     app.debug = True
