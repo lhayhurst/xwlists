@@ -130,7 +130,7 @@ def add_tourney():
     folder = request.form['folder']
     type   = request.form['tourney_type']
     mmddyyyy = request.form['date'].split('/')
-    date   = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[1]), int(mmddyyyy[0]))
+    date   = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1]))
 
     #load all the files in the folder
     folder_path = os.path.join(static_dir, folder)

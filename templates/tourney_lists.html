@@ -13,7 +13,8 @@
   <tr>
     <th class="tg-3i0c">Tourney</th>
     <th class="tg-3i0c">Player</th>
-    <th class="tg-3i0c">Standing</th>
+    <th class="tg-3i0c">Swiss Standing</th>
+    <th class="tg-3i0c">Elimination Standing</th>
     <th class="tg-3i0c">Faction</th>
     <th class="tg-3i0c">Points</th>
     <th class="tg-3i0c">List</th>
@@ -26,6 +27,7 @@
              <td class="tg-031e">{{ tourney.tourney_name }}</td>
              <td class="tg-031e">{{  tourney_list.player_name }}</td>
              <td class="tg-031e">{{  tourney_list.tourney_standing }}</td>
+             <td class="tg-031e">{{  tourney_list.tourney_elim_standing }}</td>
              {% if tourney_list.list %}
                  <td class="tg-031e">{{  tourney_list.list.faction.description }}</td>
                  <td class="tg-031e">{{  tourney_list.list.points }}</td>

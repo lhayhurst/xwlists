@@ -146,6 +146,7 @@ class TourneyList(Base):
     list_id          = Column(Integer, ForeignKey('{0}.id'.format(list_table)))
     player_name      = Column(String(128))
     tourney_standing = Column(Integer)
+    tourney_elim_standing  = Column(Integer)
     image            = Column(String(128))
     list             = relationship( List.__name__, uselist=False)
     tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
