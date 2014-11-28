@@ -197,6 +197,8 @@ def delete_list():
     pm.delete_tourney_list_details( tourney_list )
     return redirect( url_for('browse_list', tourney=tourney_name, admin=admin ) )
 
+
+
 @app.route( "/success")
 def success():
     tourney_name = request.args.get("tourney_name")
@@ -281,6 +283,10 @@ def display_list():
 @app.route('/')
 def index():
     return redirect(url_for('tourneys') )
+
+@app.route("/charts")
+def charts():
+    return render_template('charts.html')
 
 if __name__ == '__main__':
     app.debug = True
