@@ -110,7 +110,6 @@ class Ship(Base):
             return ""
         elif len(ret) == 0:
             return ""
-        print ret
         return ret[ num_upgrades - 1  ]
 
 
@@ -197,6 +196,9 @@ class PersistenceManager:
         session.add_all( ship_pilots )
         session.commit()
 
+    def get_tourneys(self):
+        return self.db_connector.get_session().query(Tourney)
+
     def get_tourney(self,tourney_name):
         return self.db_connector.get_session().query(Tourney).filter_by(tourney_name=tourney_name).first()
 
@@ -222,6 +224,7 @@ class PersistenceManager:
 
     def get_tourney_list(self,tourney_list_id):
         return self.db_connector.get_session().query(TourneyList).filter_by(id=tourney_list_id).first()
+
 
     def get_ship_pilot(self, ship_type, pilot):
         return \

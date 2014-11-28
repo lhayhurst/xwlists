@@ -50,11 +50,13 @@ def generate( rows ):
     for r in rows:
         yield ",".join(r) + "\n"
 
-def get_tourney_lists_as_text(tourney ):
+def get_tourney_lists_as_text(tourney, make_header=True ):
 
     rows   = []
     header =  xwingmetadata.header()
-    rows.append( header )
+
+    if make_header:
+        rows.append( header )
 
     tourney_date = "%d/%d/%d" % ( tourney.tourney_date.month, tourney.tourney_date.day, tourney.tourney_date.year )
     row_defaults = [ tourney.tourney_name, tourney.tourney_type, tourney_date ]
@@ -85,6 +87,23 @@ def get_tourney_lists_as_text(tourney ):
                 rows.append(new_row)
     return rows
 
+def csv_response(rows, name):
+    disposition = "attachment; filename=" + name
+    return Response(generate(rows), mimetype='text/csv', headers={'Content-Disposition': disposition} )
+
+
+@app.route("/export_all_lists")
+def export_all_lists():
+    pm          = PersistenceManager(myapp.db_connector)
+    tourneys    = pm.get_tourneys();
+    make_header = True
+    rows        = []
+    for tourney in tourneys:
+        ret = get_tourney_lists_as_text(tourney, make_header)
+        make_header = False
+        rows.extend( ret )
+    return csv_response( rows, "all_lists_download.csv")
+
 
 @app.route("/export_tourney_lists")
 def export_tourney_lists():
@@ -93,8 +112,7 @@ def export_tourney_lists():
     tourney    = pm.get_tourney_by_id(tourney_id)
 
     ret = get_tourney_lists_as_text(tourney)
-    disposition = "attachment; filename=tourney_list_download.csv"
-    return Response(generate(ret), mimetype='text/csv', headers={'Content-Disposition': disposition} )
+    return csv_response( ret, "tourney_list_download.csv")
 
 
 
@@ -179,6 +197,12 @@ def delete_list():
     pm.delete_tourney_list_details( tourney_list )
     return redirect( url_for('browse_list', tourney=tourney_name, admin=admin ) )
 
+@app.route( "/success")
+def success():
+    tourney_name = request.args.get("tourney_name")
+    return render_template( "success_kid.html", tourney_name=tourney_name)
+
+
 @app.route("/enter_list")
 def enter_list():
     tourney_id    = request.args.get('tourney')
@@ -191,6 +215,8 @@ def enter_list():
     if tourney_list_id is None:
         tourney = pm.get_tourney_by_id(tourney_id)
         tourney_list = pm.get_random_tourney_list(tourney)
+        if tourney_list is None:
+            return redirect(url_for( "success", tourney_name=tourney.name ) )
     else:
         tourney_list = pm.get_tourney_list(tourney_list_id)
         tourney      = tourney_list.tourney
