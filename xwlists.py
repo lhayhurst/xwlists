@@ -70,8 +70,14 @@ def get_tourney_lists_as_text(tourney ):
             for ship in tourney_list.list.ships:
                 new_row = []
                 new_row.extend( row_defaults )
-                new_row.extend( [ tourney_list.player_name,  tourney_list.list.faction.description, str(tourney_list.list.points), \
-                        str(tourney_list.tourney_standing), str(tourney_list.id), ship.ship_pilot.ship_type.description, ship.ship_pilot.pilot.name] )
+                new_row.extend( [ tourney_list.player_name,
+                                  tourney_list.list.faction.description,
+                                  str(tourney_list.list.points),
+                                  str(tourney_list.tourney_standing),
+                                  str(tourney_list.id),
+                                  ship.ship_pilot.ship_type.description,
+                                  ship.ship_pilot.pilot.name
+                ] )
 
                 for i in range(len(new_row), len(header)):
                     new_row.append( ship.get_upgrade( header[i]  ) )

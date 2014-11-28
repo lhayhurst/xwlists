@@ -37,9 +37,9 @@ def header():
     return [ 'Tourney', 'tourneyType', 'tourneyDate', 'player', FACTION, 'points', 'standing', \
              'listId', 'Ship', 'Pilot', EPT + ".1", EPT + ".2", TITLE, \
              CREW + ".1", CREW + ".2", CREW + ".3", \
-             SYSTEM, MOD + ".1", MOD + ".2", \
+             DROID, SYSTEM, MOD + ".1", MOD + ".2", \
              CANNON, MISSILE + ".1", MISSILE + ".2",
-             TORPEDO + ".1", TORPEDO + ".2", BOMB ]
+             TORPEDO + ".1", TORPEDO + ".2", BOMB, TURRET ]
 
 
 SHIP_SIZE = 'SHIP_SIZE'
