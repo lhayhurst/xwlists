@@ -463,11 +463,19 @@
             var rowEl = parentEl.find('.row.template').clone().removeClass('template').appendTo(parentEl);
             rowEl.addClass(className);
             rowEl.find('.row-label').text(label);
+            var allowClearValue = true;
+            if ( className != "upgrade") {
+                allowClearValue = false;
+            }
             rowEl.find('.row-value .select')
-                    .select2({data:items, placeholder:'select a ' + label})
+                    .select2({data:items, placeholder:'select a ' + label, allowClear: allowClearValue })
                     .on('select2-close', function(e) {
                         changeHandler(e.target.value);
-                    });
+                    }).on('select2-removed', function(e) {
+                        rowUpgradeEl = $(e.currentTarget).parent().parent();
+                        rowUpgradeEl.find( '.row-cost').text('');
+                        updateTotals();
+                    } );
         }
 
 
