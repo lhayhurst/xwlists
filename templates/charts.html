@@ -1,8 +1,23 @@
 {% extends "layout.html" %}
 {% block content %}
-<div>
 
-</div>
+<style>
+    .table {
+    max-width: 100%;
+    background-color: transparent;
+    border-collapse: collapse;
+    border-spacing: 0;
+    }
+
+    .table-bordered {
+        border: 1px solid #ddd;
+        border-collapse: separate;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+    }
+</style>
+
+
 <div id="container" style="width: 600px; height: 400px; margin: 0 auto"></div>
 <script>
     $(function () {
@@ -29,8 +44,8 @@
             }
         }
          ],
-        browserData = [],
-        versionsData = [],
+        factionData = [],
+        shipData = [],
         i,
         j,
         dataLen = data.length,
@@ -42,7 +57,7 @@
     for (i = 0; i < dataLen; i += 1) {
 
         // add browser data
-        browserData.push({
+        factionData.push({
             name: categories[i],
             y: data[i].y,
             color: data[i].color
@@ -52,7 +67,7 @@
         drillDataLen = data[i].drilldown.data.length;
         for (j = 0; j < drillDataLen; j += 1) {
             brightness = 0.2 - (j / drillDataLen) / 5;
-            versionsData.push({
+            shipData.push({
                 name: data[i].drilldown.categories[j],
                 y: data[i].drilldown.data[j],
                 color: Highcharts.Color(data[i].color).brighten(brightness).get()
@@ -84,7 +99,7 @@
         },
         series: [{
             name: 'Factions',
-            data: browserData,
+            data: factionData,
             size: '60%',
             dataLabels: {
                 formatter: function () {
@@ -95,7 +110,7 @@
             }
         }, {
             name: 'Ships',
-            data: versionsData,
+            data: shipData,
             size: '80%',
             innerSize: '60%',
             dataLabels: {

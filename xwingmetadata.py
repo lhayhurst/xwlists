@@ -164,7 +164,7 @@ upgrades = {
          'constraints': ( {'type': SHIP_TYPE, 'value': TIE_PHANTOM} )},
         {'name': 'Advanced Cloaking Device', 'cost': 3, 'constraints': ( {'type': SHIP_TYPE, 'value': TIE_PHANTOM})},
         {'name': 'Experimental Interface', 'cost': 3},
-        {'name': 'B-Wing/E2', 'cost': 3, 'constraints': ( {'type': SHIP_TYPE, 'value': B_WING} )},
+        {'name': 'B-Wing/E2', 'cost': 3, 'action': {'type': 'ADD_UPGRADE', 'value': CREW}, 'constraints': ( {'type': SHIP_TYPE, 'value': B_WING} )},
         {'name': 'Stealth Device', 'cost': 3},
         {'name': 'Hull Upgrade', 'cost': 3},
         {'name': 'Shield Upgrade', 'cost': 4},

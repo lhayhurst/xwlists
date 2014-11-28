@@ -286,7 +286,12 @@ def index():
 
 @app.route("/charts")
 def charts():
-    return render_template('charts.html')
+    pm = PersistenceManager(myapp.db_connector)
+    tourneys = pm.get_tourneys()
+    names = []
+    for t in tourneys:
+        names.append( t.tourney_name )
+    return render_template('charts.html', tourneys=tourneys, tourney_names=names)
 
 if __name__ == '__main__':
     app.debug = True
