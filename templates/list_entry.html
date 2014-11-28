@@ -241,7 +241,7 @@
         }
 
         function addSquadMember(faction, squadMember) {
-            var squadMemberEl = $('.squad-member.template').clone().removeClass('template').insertBefore( squadMember != null? squadMember : '.squad');
+            var squadMemberEl = $('.squad-member.template').clone(true).removeClass('template').insertBefore( squadMember != null? squadMember : '.squad');
             var ships = _.keys(ships_and_pilots).filter(function(ship) { return ships_and_pilots[ship][0].faction == faction });
             var items = ships.map(function (ship) {
                 return { text: ship, id: ship }
