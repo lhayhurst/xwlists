@@ -218,7 +218,7 @@ def enter_list():
         tourney = pm.get_tourney_by_id(tourney_id)
         tourney_list = pm.get_random_tourney_list(tourney)
         if tourney_list is None:
-            return redirect(url_for( "success", tourney_name=tourney.name ) )
+            return redirect(url_for( "success", tourney_name=tourney.tourney_name ) )
     else:
         tourney_list = pm.get_tourney_list(tourney_list_id)
         tourney      = tourney_list.tourney
