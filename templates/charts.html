@@ -20,14 +20,16 @@
 <script>
 
     var factions = {{  faction_data | tojson | safe }}
-    var pilots   = {{  pilot_data | tojson | safe }}
+
     var colors = Highcharts.getOptions().colors
 
     factions[ 0 ].color = colors[0]
     factions[ 0 ].drilldown.color = colors[0]
     factions[ 1 ].color = colors[1]
     factions[ 1 ].drilldown.color = colors[1]
+    var faction_categories = [ factions[ 0 ].drilldown.name, factions[ 1 ].drilldown.name ];
 
+    var pilots   = {{  pilot_data | tojson | safe }}
     var ship_categories = []
     _.each( pilots, function(shipRep) {
         if  ( shipRep.drilldown.faction == 'Rebel' )
@@ -41,10 +43,29 @@
         ship_categories.push( shipRep.drilldown.name );
     });
 
-    var faction_categories = [ factions[ 0 ].drilldown.name, factions[ 1 ].drilldown.name ];
+    var upgrades = {{  upgrade_data | tojson | safe }}
+    var upgrade_categories = []
+    var i = 1;
 
-    //console.log(pilots);
-    //console.log(ship_categories);
+    Highcharts.getOptions().plotOptions.pie.colors = (function () {
+        var colors = [],
+            base = Highcharts.getOptions().colors[0],
+            i;
+
+        for (i = 0; i < 10; i += 1) {
+            // Start out with a darkened base color (negative brighten), and end
+            // up with a much brighter color
+            colors.push(Highcharts.Color(base).brighten((i - 25) / 50).get());
+        }
+        return colors;
+    }());
+    var pieColors = Highcharts.getOptions().plotOptions.pie.colors;
+
+    _.each( upgrades, function(upgrade) {
+        upgrade_categories.push( upgrade.drilldown.name );
+        upgrade.color = pieColors[i];
+        i++;
+    });
 
 </script>
 
@@ -147,6 +168,12 @@ $(function () {
     makeDonutGraph( pilots, ship_categories, "Ship-Pilot Breakout", "Ships", "Pilots",  "#container2" );
 });
 </script>
-
+<br><br>
+<div id="container3" style="width: 800px; height: 600px; margin: 0 auto"></div>
+<script>
+$(function () {
+    makeDonutGraph( upgrades, upgrade_categories, "Upgrade Type-Upgrade Breakout", "Upgrade Type", "Upgrade",  "#container3" );
+});
+</script>
 
 {% endblock %}

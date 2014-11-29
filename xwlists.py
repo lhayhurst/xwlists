@@ -295,8 +295,8 @@ def charts():
     ship_breakout       = pm.get_ship_breakout()
     ship_pilot_breakout = pm.get_ship_pilot_breakout()
 
-    data = []
-    drilldowns = {}
+    faction_data = []
+    faction_drilldowns = {}
 
     for fba in faction_breakout.all():
         drilldown =  {
@@ -305,14 +305,14 @@ def charts():
               'data' : [],
               'color' : None
         }
-        drilldowns[ fba[0].description] = drilldown
-        data.append( { 'y' : to_float(fba[1]),
+        faction_drilldowns[ fba[0].description] = drilldown
+        faction_data.append( { 'y' : to_float(fba[1]),
             'color' : None,
             'drilldown' : drilldown
         })
 
     for sba in ship_breakout.all():
-        drilldown = drilldowns[ sba[0].description]
+        drilldown = faction_drilldowns[ sba[0].description]
         drilldown[ 'categories'].append( sba[1].description)
         drilldown[ 'data'].append(to_float(sba[2]) )
 
@@ -336,7 +336,31 @@ def charts():
         drilldown[ 'categories'].append( spb[2])
         drilldown[ 'data' ].append( to_float( spb[3]))
 
-    return render_template('charts.html', faction_data=data, pilot_data=ship_pilot_data)
+    ut_drilldowns    = {}
+    ut_data          = []
+
+    for utb in pm.get_upgrade_type_breakout().all():
+        drilldown = {
+            'name': utb[0].description,
+            'categories': [],
+            'data': [],
+            'color': None,
+        }
+        ut_drilldowns[utb[0].description] = drilldown
+        ut_data.append({'y': to_float(utb[1]),
+                        'color': None,
+                        'drilldown': drilldown})
+
+    for ub in pm.get_upgrade_breakout().all():
+        drilldown = ut_drilldowns[ub[0].description]
+        drilldown['categories'].append(ub[1])
+        drilldown['data'].append(to_float(ub[2]))
+
+
+
+    return render_template('charts.html', faction_data=faction_data,
+                                          pilot_data=ship_pilot_data,
+                                          upgrade_data=ut_data)
 
 if __name__ == '__main__':
     app.debug = True

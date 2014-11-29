@@ -261,6 +261,26 @@ class PersistenceManager:
             group_by(List.faction, ShipPilot.ship_type, Pilot.name)
         return ret
 
+    def get_upgrade_type_breakout(self):
+        session = self.db_connector.get_session()
+        subq    = session.query( func.count(ShipUpgrade.id ).label('total_upgrades') ).subquery()
+
+        ret = session.query(
+            ShipUpgrade.upgrade_type, func.count(ShipUpgrade.id).label("sub_total") / subq.c.total_upgrades ).\
+            group_by(ShipUpgrade.upgrade_type)
+
+        return ret
+
+    def get_upgrade_breakout(self):
+        session = self.db_connector.get_session()
+        subq    = session.query( func.count(ShipUpgrade.id ).label('total_upgrades') ).subquery()
+
+        ret = session.query(
+            ShipUpgrade.upgrade_type, ShipUpgrade.upgrade, func.count(ShipUpgrade.id).label("sub_total") / subq.c.total_upgrades ).\
+            group_by(ShipUpgrade.upgrade_type)
+
+        return ret
+
     def get_tourney(self,tourney_name):
         return self.db_connector.get_session().query(Tourney).filter_by(tourney_name=tourney_name).first()
 
