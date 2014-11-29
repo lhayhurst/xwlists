@@ -277,7 +277,7 @@ class PersistenceManager:
 
         ret = session.query(
             ShipUpgrade.upgrade_type, ShipUpgrade.upgrade, func.count(ShipUpgrade.id).label("sub_total") / subq.c.total_upgrades ).\
-            group_by(ShipUpgrade.upgrade_type)
+            group_by(ShipUpgrade.upgrade_type, ShipUpgrade.upgrade)
 
         return ret
 

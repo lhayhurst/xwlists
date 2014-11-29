@@ -339,7 +339,10 @@ def charts():
     ut_drilldowns    = {}
     ut_data          = []
 
-    for utb in pm.get_upgrade_type_breakout().all():
+    upgrade_type_breakout = pm.get_upgrade_type_breakout()
+    upgrade_breakout = pm.get_upgrade_breakout()
+
+    for utb in upgrade_type_breakout.all():
         drilldown = {
             'name': utb[0].description,
             'categories': [],
@@ -351,7 +354,8 @@ def charts():
                         'color': None,
                         'drilldown': drilldown})
 
-    for ub in pm.get_upgrade_breakout().all():
+
+    for ub in upgrade_breakout.all():
         drilldown = ut_drilldowns[ub[0].description]
         drilldown['categories'].append(ub[1])
         drilldown['data'].append(to_float(ub[2]))
