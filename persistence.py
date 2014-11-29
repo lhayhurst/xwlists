@@ -60,7 +60,7 @@ class ShipType(DeclEnum):
     Z95 = "Z-95 Headhunter", "Z-95 Headhunter"
     TIEFIGHTER = "TIE Fighter", "TIE Fighter"
     TIEADVANCED = "TIE Advanced", "TIE Advanced"
-    TIEINTERCEPTOR = "TIE Interceptor", "Tie Interceptor"
+    TIEINTERCEPTOR = "TIE Interceptor", "TIE Interceptor"
     FIRESPRAY = "Firespray-31", "Firespray-31"
     LAMDA = "Lambda Shuttle", "Lambda Shuttle"
     TIEBOMBER = "TIE Bomber", "TIE Bomber"
