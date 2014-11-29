@@ -294,7 +294,7 @@ class PersistenceManager:
                         filter(TourneyList.list_id == None )
         rowcount = int(query.count())
         randomRow = query.offset( int( rowcount * random.random() ) ).first()
-        if randomRow == None:
+        if randomRow is None:
             return None
         return randomRow[1]
 
