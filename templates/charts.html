@@ -19,26 +19,40 @@
 
 <script>
 
-    var data = {{  data | tojson | safe }}
+    var factions = {{  faction_data | tojson | safe }}
+    var pilots   = {{  pilot_data | tojson | safe }}
     var colors = Highcharts.getOptions().colors
 
-    data[ 0 ].color = colors[0]
-    data[ 0 ].drilldown.color = colors[0]
-    data[ 1 ].color = colors[1]
-    data[ 1 ].drilldown.color = colors[1]
+    factions[ 0 ].color = colors[0]
+    factions[ 0 ].drilldown.color = colors[0]
+    factions[ 1 ].color = colors[1]
+    factions[ 1 ].drilldown.color = colors[1]
 
-    var categories = [ data[ 0 ].drilldown.name, data[ 1 ].drilldown.name ];
+    var ship_categories = []
+    _.each( pilots, function(shipRep) {
+        if  ( shipRep.drilldown.faction == 'Rebel' )
+        {
+            shipRep.color = colors[0]
+        }
+        else if ( shipRep.drilldown.faction == "Imperial")
+        {
+            shipRep.color = colors[1]
+        }
+        ship_categories.push( shipRep.drilldown.name );
+    });
+
+    var faction_categories = [ factions[ 0 ].drilldown.name, factions[ 1 ].drilldown.name ];
+
+    //console.log(pilots);
+    //console.log(ship_categories);
 
 </script>
 
-<div id="container" style="width: 600px; height: 400px; margin: 0 auto"></div>
 <script>
-    $(function () {
 
-
-
-    var factionData = [],
-        shipData = [],
+function makeDonutGraph( data, data_categories, title, level1Name, level2Name,  containerName ) {
+    var level1Data = [],
+        level2Data = [],
         i,
         j,
         dataLen = data.length,
@@ -46,40 +60,38 @@
         brightness;
 
 
-    // Build the data arrays
+    // Build the factions arrays
     for (i = 0; i < dataLen; i += 1) {
 
-        // add browser data
-        factionData.push({
-            name: categories[i],
+        // add browser factions
+        level1Data.push({
+            name: data_categories[i],
             y: data[i].y,
             color: data[i].color
         });
 
 
 
-        // add version data
+        // add version factions
         drillDataLen = data[i].drilldown.data.length;
         for (j = 0; j < drillDataLen; j += 1) {
             brightness = 0.2 - (j / drillDataLen) / 5;
-            shipData.push({
+            level2Data.push({
                 name: data[i].drilldown.categories[j],
                 y: data[i].drilldown.data[j],
                 color: Highcharts.Color(data[i].color).brighten(brightness).get()
             });
         }
-
-
     }
 
 
     // Create the chart
-    $('#container').highcharts({
+    $(containerName).highcharts({
         chart: {
             type: 'pie'
         },
         title: {
-            text: 'Faction breakout'
+            text: title
         },
         yAxis: {
             title: {
@@ -96,8 +108,8 @@
             valueSuffix: '%'
         },
         series: [{
-            name: 'Factions',
-            data: factionData,
+            name: level1Name,
+            data: level1Data,
             size: '60%',
             dataLabels: {
                 formatter: function () {
@@ -107,8 +119,8 @@
                 distance: -30
             }
         }, {
-            name: 'Ships',
-            data: shipData,
+            name: level2Name,
+            data: level2Data,
             size: '80%',
             innerSize: '60%',
             dataLabels: {
@@ -119,6 +131,22 @@
             }
         }]
     });
+}
+</script>
+
+<div id="container1" style="width: 600px; height: 400px; margin: 0 auto"></div>
+<script>
+$(function () {
+    makeDonutGraph( factions, faction_categories, "Faction-Ship Breakout", "Factions", "Ships", "#container1" );
 });
 </script>
+<br><br>
+<div id="container2" style="width: 600px; height: 400px; margin: 0 auto"></div>
+<script>
+$(function () {
+    makeDonutGraph( pilots, ship_categories, "Ship-Pilot Breakout", "Ships", "Pilots",  "#container2" );
+});
+</script>
+
+
 {% endblock %}

@@ -293,6 +293,7 @@ def charts():
     pm = PersistenceManager(myapp.db_connector)
     faction_breakout    = pm.get_faction_breakout()
     ship_breakout       = pm.get_ship_breakout()
+    ship_pilot_breakout = pm.get_ship_pilot_breakout()
 
     data = []
     drilldowns = {}
@@ -315,7 +316,27 @@ def charts():
         drilldown[ 'categories'].append( sba[1].description)
         drilldown[ 'data'].append(to_float(sba[2]) )
 
-    return render_template('charts.html', data=data)
+    spd_drilldowns = {}
+    ship_pilot_data = []
+    for sba in ship_breakout.all():
+        drilldown = {
+            'name' : sba[1].description,
+            'categories': [],
+            'data' : [],
+            'color' : None,
+            'faction' : sba[0].description
+        }
+        spd_drilldowns[ sba[1].description ] = drilldown
+        ship_pilot_data.append( { 'y' : to_float( sba[2]),
+                       'color': None,
+                       'drilldown' : drilldown } )
+
+    for spb in ship_pilot_breakout.all():
+        drilldown = spd_drilldowns[ spb[1].description ]
+        drilldown[ 'categories'].append( spb[2])
+        drilldown[ 'data' ].append( to_float( spb[3]))
+
+    return render_template('charts.html', faction_data=data, pilot_data=ship_pilot_data)
 
 if __name__ == '__main__':
     app.debug = True
