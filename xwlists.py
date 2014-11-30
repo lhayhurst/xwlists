@@ -15,7 +15,7 @@ UPLOAD_FOLDER = "static/tourneys"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif'])
 
-is_maintenance_mode = True
+is_maintenance_mode = False
 
 here = os.path.dirname(__file__)
 static_dir = os.path.join( here, app.config['UPLOAD_FOLDER'] )
