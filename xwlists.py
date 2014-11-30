@@ -6,7 +6,7 @@ import datetime
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
 import myapp
-from persistence import Tourney, TourneyList, PersistenceManager, List, Faction, Ship, ShipUpgrade, UpgradeType
+from persistence import Tourney, TourneyList, PersistenceManager, List, Faction, Ship, ShipUpgrade, UpgradeType, Upgrade
 
 import xwingmetadata
 
@@ -254,8 +254,8 @@ def add_squad():
              list.ships.append( ship )
              for upgrade in squad_member['upgrades']:
                  ship_upgrade = ShipUpgrade( ship_id=ship.id,
-                                             upgrade_type=UpgradeType.from_string( upgrade['type'] ),
-                                             upgrade=upgrade['name'] )
+                                             upgrade=Upgrade( upgrade_type= UpgradeType.from_string( upgrade['type'] ),
+                                                                     name = upgrade['name'] ) )
                  ship.upgrades.append( ship_upgrade )
              ships.append( ship )
 

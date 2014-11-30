@@ -22,11 +22,9 @@ X_WING = 'X-Wing'
 EPT = "Elite Pilot Talent"
 TITLE = "Title"
 CREW = "Crew"
-
 SYSTEM = "System"
 MOD = "Modification"
 DROID = 'Astromech Droid'
-
 CANNON = "Cannon"
 TURRET = "Turret Weapon"
 MISSILE = "Missile"
@@ -531,7 +529,7 @@ class XWingMetaData:
         upgrades = self.upgrades()[upgrade.upgrade_type.description]
         if upgrades:
             for u in upgrades:
-                if u['name'] == upgrade.upgrade:
+                if u['name'] == upgrade.name:
                     return u['cost']
         else:
             return 0

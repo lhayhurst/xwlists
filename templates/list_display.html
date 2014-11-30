@@ -65,8 +65,8 @@
             {% for ship in tourney_list.list.ships %}
                 <b>{{ ship.ship_pilot.ship_type.description }} -- {{  ship.ship_pilot.pilot.name }}</b><p class="alignright">{{  meta.get_ship_pilot_cost( ship.ship_pilot.ship_type.description,  ship.ship_pilot.pilot.name ) }}</p>
                 <br>
-                {% for upgrade in ship.upgrades %}
-                    <i class="tab">{{ upgrade.upgrade }}</i>  <p class="alignright">{{ meta.get_upgrade_cost( upgrade ) }}</p><br>
+                {% for ship_upgrade in ship.upgrades %}
+                    <i class="tab">{{ ship_upgrade.upgrade.name }}</i>  <p class="alignright">{{ meta.get_upgrade_cost( ship_upgrade.upgrade ) }}</p><br>
                 {% endfor %}
             {%  endfor %}
         <br>

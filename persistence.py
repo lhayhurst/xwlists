@@ -12,7 +12,7 @@ __author__ = 'lhayhurst'
 
 import time
 from decl_enum import DeclEnum
-from sqlalchemy import Column, Integer, String, DateTime, Table, desc, Float, asc, func, Date
+from sqlalchemy import Column, Integer, String, DateTime, Table, desc, Float, asc, func, Date, MetaData
 from sqlalchemy import ForeignKey
 
 
@@ -24,7 +24,8 @@ ship_table = "ship"
 pilot_table = "pilot"
 ship_pilot_table = "ship_pilot"
 ship_type_table = "ship_type"
-upgrade_table = "ship_upgrade"
+upgrade_table   = "upgrade"
+ship_upgrade_table = "ship_upgrade"
 ship_pilot_upgrade_table = "ship_pilot_upgrade_table"
 tourney_list_table = "tourney_list"
 
@@ -49,24 +50,24 @@ class UpgradeType(DeclEnum):
     MISSILE = xwingmetadata.MISSILE, xwingmetadata.MISSILE
 
 class ShipType(DeclEnum):
-    XWING = "X-Wing", "X-Wing"
-    YWING = "Y-Wing", "Y-Wing"
-    AWING = "A-Wing", "A-Wing"
-    BWING = "B-Wing", "B-Wing"
-    EWING = "E-Wing", "E-Wing"
-    YT1300 = "YT-1300", "YT-1300"
-    YT2400 = "YT-2400", "YT-2400"
-    HWK290 = "HWK-290", "HWK-290"
-    Z95 = "Z-95 Headhunter", "Z-95 Headhunter"
-    TIEFIGHTER = "TIE Fighter", "TIE Fighter"
-    TIEADVANCED = "TIE Advanced", "TIE Advanced"
-    TIEINTERCEPTOR = "TIE Interceptor", "TIE Interceptor" #argh
-    FIRESPRAY = "Firespray-31", "Firespray-31"
-    LAMDA = "Lambda Shuttle", "Lambda Shuttle"
-    TIEBOMBER = "TIE Bomber", "TIE Bomber"
-    TIEDEFENDER = "TIE Defender", "TIE Defender"
-    TIEPHANTOM = "TIE Phantom", "TIE Phantom"
-    DECIMATOR = "VT-49 Decimator", "VT-49 Decimator"
+    XWING =  xwingmetadata.X_WING, xwingmetadata.X_WING
+    YWING =  xwingmetadata.Y_WING,  xwingmetadata.Y_WING
+    AWING =  xwingmetadata.A_WING, xwingmetadata.A_WING
+    BWING = xwingmetadata.B_WING, xwingmetadata.A_WING
+    EWING  = xwingmetadata.E_WING, xwingmetadata.E_WING
+    YT1300 = xwingmetadata.YT_1300, xwingmetadata.YT_1300
+    YT2400 = xwingmetadata.YT_2400, xwingmetadata.YT_2400
+    HWK290 = xwingmetadata.HWK_290, xwingmetadata.HWK_290
+    Z95    = xwingmetadata.Z95_HEADHUNTER, xwingmetadata.Z95_HEADHUNTER
+    TIEFIGHTER = xwingmetadata.TIE_FIGHTER, xwingmetadata.TIE_FIGHTER
+    TIEADVANCED = xwingmetadata.TIE_ADVANCED, xwingmetadata.TIE_ADVANCED
+    TIEINTERCEPTOR = xwingmetadata.TIE_INTERCEPTOR, xwingmetadata.TIE_INTERCEPTOR
+    FIRESPRAY = xwingmetadata.FIRESPRAY_31, xwingmetadata.FIRESPRAY_31
+    LAMDA = xwingmetadata.LAMBDA_SHUTTLE, xwingmetadata.LAMBDA_SHUTTLE
+    TIEBOMBER = xwingmetadata.TIE_BOMBER, xwingmetadata.TIE_BOMBER
+    TIEDEFENDER = xwingmetadata.TIE_DEFENDER, xwingmetadata.TIE_DEFENDER
+    TIEPHANTOM = xwingmetadata.TIE_PHANTOM, xwingmetadata.TIE_PHANTOM
+    DECIMATOR = xwingmetadata.VT_DECIMATOR, xwingmetadata.VT_DECIMATOR
 
 class Pilot(Base):
     __tablename__ = pilot_table
@@ -81,6 +82,12 @@ class ShipPilot(Base):
     pilot_id = Column(Integer, ForeignKey('{0}.id'.format(pilot_table)))
     pilot = relationship(Pilot.__name__, uselist=False)
 
+class Upgrade(Base):
+    __tablename__ = upgrade_table
+    id = Column(Integer, primary_key=True)
+    upgrade_type = Column(UpgradeType.db_type())
+    name = Column(String( 128 ))
+    cost = Column(Integer)
 
 
 class Ship(Base):
@@ -113,13 +120,14 @@ class Ship(Base):
         return ret[ num_upgrades - 1  ]
 
 
+
 class ShipUpgrade(Base):
-    __tablename__ = upgrade_table
+    __tablename__ = ship_upgrade_table
     id = Column(Integer, primary_key=True)
     ship_id = Column(Integer, ForeignKey('{0}.id'.format(ship_table)))
-    upgrade_type = Column(UpgradeType.db_type())
-    upgrade = Column(String(128))
-    ship = relationship( Ship.__name__, back_populates="upgrades")
+    upgrade_id = Column(Integer, ForeignKey('{0}.id'.format(upgrade_table) ) )
+    ship    = relationship( Ship.__name__, back_populates="upgrades")
+    upgrade = relationship( Upgrade.__name__, uselist=False)
 
 
 class List(Base):
@@ -167,7 +175,20 @@ class PersistenceManager:
         self.db_connector = db_connector
 
     def create_schema(self):
+        print("creating schema")
         self.db_connector.get_base().metadata.create_all(self.db_connector.get_engine())
+
+    #this guy is a hack just to fix my schema issues.  I really need to use alembic.
+    def create_upgrade_table(self):
+        meta = MetaData()
+
+        upgrade = Table(upgrade_table, meta,
+                        Column('id', Integer, primary_key=True),
+                        Column('upgrade_type', UpgradeType.db_type() ),
+                        Column('name', String(128)),
+                        Column('cost', Integer) )
+
+        upgrade.create( self.db_connector.get_engine() )
 
     def drop_schema(self):
         self.db_connector.get_base().metadata.drop_all(self.db_connector.get_engine())
@@ -200,10 +221,11 @@ class PersistenceManager:
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)
 
-# qry = select([
-#         this.id,
-#         select([func.count().label('xx')], this.id == that.this_id).as_scalar().label('thatcount'),
-#         ])
+    def get_upgrades(self):
+        return self.db_connector.get_session().query(Upgrade).all()
+
+    def get_ship_upgrades(self):
+        return self.db_connector.get_session().query(ShipUpgrade).all()
 
 
     def get_faction_breakout(self):
@@ -266,8 +288,9 @@ class PersistenceManager:
         subq    = session.query( func.count(ShipUpgrade.id ).label('total_upgrades') ).subquery()
 
         ret = session.query(
-            ShipUpgrade.upgrade_type, func.count(ShipUpgrade.id).label("sub_total") / subq.c.total_upgrades ).\
-            group_by(ShipUpgrade.upgrade_type)
+            Upgrade.upgrade_type, func.count(ShipUpgrade.id).label("sub_total") / subq.c.total_upgrades ).\
+            filter( ShipUpgrade.upgrade_id == Upgrade.id ).\
+            group_by(Upgrade.upgrade_type)
 
         return ret
 
@@ -276,8 +299,9 @@ class PersistenceManager:
         subq    = session.query( func.count(ShipUpgrade.id ).label('total_upgrades') ).subquery()
 
         ret = session.query(
-            ShipUpgrade.upgrade_type, ShipUpgrade.upgrade, func.count(ShipUpgrade.id).label("sub_total") / subq.c.total_upgrades ).\
-            group_by(ShipUpgrade.upgrade_type, ShipUpgrade.upgrade)
+            Upgrade.upgrade_type, Upgrade.name, func.count(ShipUpgrade.id).label("sub_total") / subq.c.total_upgrades ).\
+            filter(ShipUpgrade.upgrade_id == Upgrade.id).\
+            group_by(Upgrade.upgrade_type, Upgrade.name)
 
         return ret
 
@@ -309,10 +333,13 @@ class PersistenceManager:
 
 
     def get_ship_pilot(self, ship_type, pilot):
-        return \
-        self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_string(ship_type)). \
-            filter(ShipPilot.pilot_id == Pilot.id). \
-            filter(pilot == Pilot.name).first()[0]
+        if ship_type == None and pilot == None:
+            return self.db_connector.get_session().query(ShipPilot, Pilot).all()
+        else:
+            return \
+            self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_string(ship_type)). \
+                filter(ShipPilot.pilot_id == Pilot.id). \
+                filter(pilot == Pilot.name).first()[0]
 
 
     def get_random_tourney_list(self, tourney):
