@@ -15,6 +15,7 @@ UPLOAD_FOLDER = "static/tourneys"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif'])
 
+is_maintenance_mode = True
 
 here = os.path.dirname(__file__)
 static_dir = os.path.join( here, app.config['UPLOAD_FOLDER'] )
@@ -22,6 +23,11 @@ static_dir = os.path.join( here, app.config['UPLOAD_FOLDER'] )
 ADMINS = ['sozinsky@gmail.com']
 
 session = myapp.db_connector.get_session()
+
+@app.before_request
+def check_for_maintenance():
+    if is_maintenance_mode and request.path != url_for('down'):
+        return redirect(url_for('down'))
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -279,6 +285,10 @@ def display_list():
                            tourney_list_id=tourney_list.id,
                            tourney=tourney_list.tourney,
                            tourney_id=tourney_list.tourney.id )
+
+@app.route('/down')
+def down():
+    return render_template( 'down.html')
 
 @app.route('/')
 def index():
