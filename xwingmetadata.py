@@ -518,20 +518,5 @@ class XWingMetaData:
     def turrets(self):
         return self.upgrades()(TURRET)
 
-    def get_ship_pilot_cost(self, ship, pilot):
-        pilots = ships[ship]
-        for p in pilots:
-            if p['name'] == pilot:
-                return p['cost']
-        return 0
-
-    def get_upgrade_cost(self, upgrade):
-        upgrades = self.upgrades()[upgrade.upgrade_type.description]
-        if upgrades:
-            for u in upgrades:
-                if u['name'] == upgrade.name:
-                    return u['cost']
-        else:
-            return 0
 
 
