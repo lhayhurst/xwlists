@@ -248,7 +248,7 @@ class PersistenceManager:
     def get_ship_breakout(self):
 
         session = self.db_connector.get_session()
-        subq    = session.query( func.count(Ship.ship_pilot_id ).label('total_ships') ).\
+        subq    = session.query( func.sum(Pilot.cost ).label('total_ships') ).\
             filter(TourneyList.tourney_id == Tourney.id).\
             filter(List.id == TourneyList.list_id).\
             filter( Ship.list_id == List.id ).\
@@ -323,6 +323,8 @@ class PersistenceManager:
     def delete_tourney_list_details(self, tourney_list):
 
         for ship in tourney_list.list.ships:
+            for su in ship.upgrades:
+                self.db_connector.get_session().delete(su)
             self.db_connector.get_session().delete(ship)
         self.db_connector.get_session().delete(tourney_list.list)
         tourney_list.list = None
