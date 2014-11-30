@@ -109,9 +109,10 @@ class Ship(Base):
             upgrade_name = a[0]
             num_upgrades = int(a[1])
 
-        for upgrade in self.upgrades:
+        for ship_upgrade in self.upgrades:
+            upgrade = ship_upgrade.upgrade
             if upgrade.upgrade_type.description == upgrade_name:
-                ret.append( upgrade.upgrade)
+                ret.append( upgrade.name)
 
         if num_upgrades > len(ret):
             return ""
