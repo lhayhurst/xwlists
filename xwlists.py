@@ -301,6 +301,26 @@ def to_float(dec):
 @app.route("/charts")
 def charts():
     pm = PersistenceManager(myapp.db_connector)
+
+    doughnut_data = pm.get_faction_ship_doughnut_data()
+
+    merged_doughnut_data = {}
+
+    faction_total = {}
+
+    for d in doughnut_data:
+        faction      = d[0].description
+        ship         = d[1].description
+        pilot        = d[2]
+        pilot_cost   = d[3]
+        upgrade_cost = d[4]
+        num_ships    = d[5]
+
+        if not faction_total.has_key( faction ):
+            faction_total[ faction ] = 0
+        faction_total[ faction ] = faction_total[ faction ] +   pilot_cost + num_ships
+
+
     faction_breakout    = pm.get_faction_breakout()
     ship_breakout       = pm.get_ship_breakout()
     ship_pilot_breakout = pm.get_ship_pilot_breakout()

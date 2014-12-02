@@ -28,7 +28,7 @@ upgrade_table   = "upgrade"
 ship_upgrade_table = "ship_upgrade"
 ship_pilot_upgrade_table = "ship_pilot_upgrade_table"
 tourney_list_table = "tourney_list"
-
+tlist_table = 'tlist'
 
 Base = db_connector.get_base()
 
@@ -94,9 +94,10 @@ class Ship(Base):
     __tablename__ = ship_table
     id = Column(Integer, primary_key=True)
     ship_pilot_id = Column(Integer, ForeignKey('{0}.id'.format(ship_pilot_table)))
-    list_id = Column(Integer, ForeignKey('{0}.id'.format(list_table)))  #parent
+    tlist_id = Column(Integer, ForeignKey('{0}.id'.format(tourney_list_table)))  #parent
     ship_pilot = relationship(ShipPilot.__name__, uselist=False)
     upgrades = relationship( "ShipUpgrade", back_populates="ship")
+    tlist    = relationship("TourneyList", uselist=False)
 
     def get_upgrade(self, upgrade_name ):
 
@@ -122,22 +123,16 @@ class Ship(Base):
 
 
 
+
 class ShipUpgrade(Base):
     __tablename__ = ship_upgrade_table
     id = Column(Integer, primary_key=True)
-    ship_id = Column(Integer, ForeignKey('{0}.id'.format(ship_table)))
+    ship2_id = Column(Integer, ForeignKey('{0}.id'.format(ship_table)))
     upgrade_id = Column(Integer, ForeignKey('{0}.id'.format(upgrade_table) ) )
-    ship    = relationship( Ship.__name__, back_populates="upgrades")
     upgrade = relationship( Upgrade.__name__, uselist=False)
+    ship    = relationship( Ship.__name__, back_populates="upgrades")
 
 
-class List(Base):
-    __tablename__ = list_table
-    id = Column(Integer, primary_key=True)
-    name   = Column(String(128))
-    faction     = Column(Faction.db_type())
-    ships       = relationship(Ship.__name__)
-    points      = Column(Integer)
 
 
 class Tourney(Base):
@@ -148,24 +143,22 @@ class Tourney(Base):
     tourney_type  = Column(String(128))
     tourney_lists = relationship( "TourneyList", back_populates="tourney", order_by="asc(TourneyList.tourney_standing)")
 
+
+
 class TourneyList(Base):
-    __tablename__ = tourney_list_table
+    __tablename__    = tourney_list_table
     id               = Column( Integer, primary_key=True)
     tourney_id       = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
-    list_id          = Column(Integer, ForeignKey('{0}.id'.format(list_table)))
     player_name      = Column(String(128))
     tourney_standing = Column(Integer)
     tourney_elim_standing  = Column(Integer)
     image            = Column(String(128))
-    list             = relationship( List.__name__, uselist=False)
+    name   = Column(String(128))
+    faction     = Column(Faction.db_type())
+    points      = Column(Integer)
+
     tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
-
-    def player_name_stripped(self):
-        regex = re.compile('[^a-zA-Z ]')
-        return regex.sub('', self.player_name)
-
-
-
+    ships       = relationship(Ship.__name__)
 
 
 class PersistenceManager:
@@ -222,6 +215,8 @@ class PersistenceManager:
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)
 
+
+
     def get_upgrades(self):
         return self.db_connector.get_session().query(Upgrade).all()
 
@@ -230,59 +225,61 @@ class PersistenceManager:
 
 
     def get_faction_breakout(self):
-
-        session  =  self.db_connector.get_session()
-        subq =  session.query( func.count(List.faction ).label('total_factions') ).\
-            filter(TourneyList.tourney_id == Tourney.id).\
-            filter(List.id == TourneyList.list_id).subquery()
-
-        ret = session.query(
-            List.faction, func.count(List.faction).label("sub_total") / subq.c.total_factions ).\
-            filter(TourneyList.tourney_id == Tourney.id).\
-            filter(List.id == TourneyList.list_id).\
-            group_by(List.faction)
+        return None
+        # session  =  self.db_connector.get_session()
+        # subq =  session.query( func.count(List.faction ).label('total_factions') ).\
+        #     filter(TourneyList.tourney_id == Tourney.id).\
+        #     filter(List.id == TourneyList.list_id).subquery()
+        #
+        # ret = session.query(
+        #     List.faction, func.count(List.faction).label("sub_total") / subq.c.total_factions ).\
+        #     filter(TourneyList.tourney_id == Tourney.id).\
+        #     filter(List.id == TourneyList.list_id).\
+        #     group_by(List.faction)
 
         return ret
 
 
     def get_ship_breakout(self):
+        return None
 
-        session = self.db_connector.get_session()
-        subq    = session.query( func.sum(Pilot.cost ).label('total_ships') ).\
-            filter(TourneyList.tourney_id == Tourney.id).\
-            filter(List.id == TourneyList.list_id).\
-            filter( Ship.list_id == List.id ).\
-            filter( Ship.ship_pilot_id == ShipPilot.id).subquery()
-
-        ret = session.query(
-            List.faction, ShipPilot.ship_type, func.count(List.faction).label("sub_total") / subq.c.total_ships ).\
-             filter(TourneyList.tourney_id == Tourney.id).\
-             filter(List.id == TourneyList.list_id).\
-             filter(Ship.list_id == List.id).\
-             filter(Ship.ship_pilot_id == ShipPilot.id ).\
-             group_by(List.faction, ShipPilot.ship_type)
+        # session = self.db_connector.get_session()
+        # subq    = session.query( func.sum(Pilot.cost ).label('total_ships') ).\
+        #     filter(TourneyList.tourney_id == Tourney.id).\
+        #     filter(List.id == TourneyList.list_id).\
+        #     filter( Ship.list_id == List.id ).\
+        #     filter( Ship.ship_pilot_id == ShipPilot.id).subquery()
+        #
+        # ret = session.query(
+        #     List.faction, ShipPilot.ship_type, func.count(List.faction).label("sub_total") / subq.c.total_ships ).\
+        #      filter(TourneyList.tourney_id == Tourney.id).\
+        #      filter(List.id == TourneyList.list_id).\
+        #      filter(Ship.list_id == List.id).\
+        #      filter(Ship.ship_pilot_id == ShipPilot.id ).\
+        #      group_by(List.faction, ShipPilot.ship_type)
 
         return ret
 
     def get_ship_pilot_breakout(self):
-
-        session = self.db_connector.get_session()
-        subq    = session.query( func.count(Ship.ship_pilot_id ).label('total_ships') ).\
-            filter(TourneyList.tourney_id == Tourney.id).\
-            filter(List.id == TourneyList.list_id).\
-            filter( Ship.list_id == List.id ).\
-            filter( Ship.ship_pilot_id == ShipPilot.id).subquery()
-
-        ret = self.db_connector.get_session().query(
-            List.faction, ShipPilot.ship_type, Pilot.name,
-            func.count(List.faction) / subq.c.total_ships).\
-            filter(TourneyList.tourney_id == Tourney.id).\
-            filter(List.id == TourneyList.list_id).\
-            filter(Ship.list_id == List.id).\
-            filter(Ship.ship_pilot_id == ShipPilot.id ).\
-            filter( ShipPilot.pilot_id == Pilot.id).\
-            group_by(List.faction, ShipPilot.ship_type, Pilot.name)
-        return ret
+        return None
+        #
+        # session = self.db_connector.get_session()
+        # subq    = session.query( func.count(Ship.ship_pilot_id ).label('total_ships') ).\
+        #     filter(TourneyList.tourney_id == Tourney.id).\
+        #     filter(List.id == TourneyList.list_id).\
+        #     filter( Ship.list_id == List.id ).\
+        #     filter( Ship.ship_pilot_id == ShipPilot.id).subquery()
+        #
+        # ret = self.db_connector.get_session().query(
+        #     List.faction, ShipPilot.ship_type, Pilot.name,
+        #     func.count(List.faction) / subq.c.total_ships).\
+        #     filter(TourneyList.tourney_id == Tourney.id).\
+        #     filter(List.id == TourneyList.list_id).\
+        #     filter(Ship.list_id == List.id).\
+        #     filter(Ship.ship_pilot_id == ShipPilot.id ).\
+        #     filter( ShipPilot.pilot_id == Pilot.id).\
+        #     group_by(List.faction, ShipPilot.ship_type, Pilot.name)
+        # return ret
 
     def get_upgrade_type_breakout(self):
         session = self.db_connector.get_session()
