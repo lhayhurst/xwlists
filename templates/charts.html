@@ -42,7 +42,7 @@
 <div class="checkboxes" name="checkboxes">
     Roll up by:<br>
     <input type="checkbox" name="checkboxGroup" class="points-checkbox" id="r1" value="Total points">Total points<br>
-    <input type="checkbox" name="checkboxGroup"  class="points-checkbox2" id="r2" value="Total ships">Total ships
+    <input type="checkbox" name="checkboxGroup"  class="points-checkbox" id="r2" value="Total ships">Total ships
 </div>
 
 <div class="templates">
@@ -254,7 +254,7 @@ $(document).ready(function () {
     $( document ).ready(init );
 
     function init() {
-        var vt = $('.points-checkbox');
+        var vt = $('#r1');
         console.log("checking the box");
         vt.prop( "checked", true).change();
         console.log("checked it");
