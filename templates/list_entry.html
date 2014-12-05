@@ -92,7 +92,7 @@
     <div class="main-section">
 
         <div class="image">
-            {{  tourney_list.player_name_stripped()  }}
+            {{  tourney_list.player_name  }}
             <img src={{ image_src }}>
         </div>
 
@@ -100,7 +100,7 @@
         <div class="entries">
 
             <div>
-                <b>Player name</b>  <textarea rows="1" cols="30" name="player" required >{{ tourney_list.player_name_stripped() }}</textarea>
+                <b>Player name</b>  <textarea rows="1" cols="30" name="player" required >{{ tourney_list.player_name }}</textarea>
             </div>
 
             <div class="choose-faction">
@@ -220,7 +220,7 @@
         function copySquadMember(obj)
         {
             var squadMember = $(obj).parent().parent();
-            squadMember.clone(true).insertBefore( squadMember );
+            squadMember.clone([true, true]).insertBefore( squadMember );
             updateTotals();
 
 

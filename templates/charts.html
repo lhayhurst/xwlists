@@ -15,165 +15,247 @@
         -moz-border-radius: 4px;
         border-radius: 4px;
     }
-</style>
+    .doughnut-graph {
+       border-style: solid;
+       border-width: 5px;
+    }
 
-<script>
-
-    var factions = {{  faction_data | tojson | safe }}
-
-    var colors = Highcharts.getOptions().colors
-
-    factions[ 0 ].color = colors[0]
-    factions[ 0 ].drilldown.color = colors[0]
-    factions[ 1 ].color = colors[1]
-    factions[ 1 ].drilldown.color = colors[1]
-    var faction_categories = [ factions[ 0 ].drilldown.name, factions[ 1 ].drilldown.name ];
-
-    var pilots   = {{  pilot_data | tojson | safe }}
-    var ship_categories = []
-    _.each( pilots, function(shipRep) {
-        if  ( shipRep.drilldown.faction == 'Rebel' )
-        {
-            shipRep.color = colors[0]
-        }
-        else if ( shipRep.drilldown.faction == "Imperial")
-        {
-            shipRep.color = colors[1]
-        }
-        ship_categories.push( shipRep.drilldown.name );
-    });
-
-    var upgrades = {{  upgrade_data | tojson | safe }}
-    var upgrade_categories = []
-    var i = 1;
-
-    Highcharts.getOptions().plotOptions.pie.colors = (function () {
-        var colors = [],
-            base = Highcharts.getOptions().colors[0],
-            i;
-
-        for (i = 0; i < 50; i += 1) {
-            // Start out with a darkened base color (negative brighten), and end
-            // up with a much brighter color
-            colors.push(Highcharts.Color(base).brighten((i - 20) /30).get());
-        }
-        return colors;
-    }());
-    var pieColors = Highcharts.getOptions().plotOptions.pie.colors;
-
-    _.each( upgrades, function(upgrade) {
-        upgrade_categories.push( upgrade.drilldown.name );
-        upgrade.color = pieColors[i];
-        i++;
-    });
-
-</script>
-
-<script>
-
-function makeDonutGraph( data, data_categories, title, level1Name, level2Name,  containerName ) {
-    var level1Data = [],
-        level2Data = [],
-        i,
-        j,
-        dataLen = data.length,
-        drillDataLen,
-        brightness;
-
-
-    // Build the factions arrays
-    for (i = 0; i < dataLen; i += 1) {
-
-        // add browser factions
-        level1Data.push({
-            name: data_categories[i],
-            y: data[i].y,
-            color: data[i].color
-        });
-
-
-
-        // add version factions
-        drillDataLen = data[i].drilldown.data.length;
-        for (j = 0; j < drillDataLen; j += 1) {
-            brightness = 0.2 - (j / drillDataLen) / 5;
-            level2Data.push({
-                name: data[i].drilldown.categories[j],
-                y: data[i].drilldown.data[j],
-                color: Highcharts.Color(data[i].color).brighten(brightness).get()
-            });
-        }
+    .templates {
+       display: none !important;
     }
 
 
-    // Create the chart
-    $(containerName).highcharts({
-        chart: {
-            type: 'pie'
-        },
-        title: {
-            text: title
-        },
-        yAxis: {
-            title: {
-                text: 'Total percent usage'
-            }
-        },
-        plotOptions: {
-            pie: {
-                shadow: false,
-                center: ['50%', '50%']
-            }
-        },
-        tooltip: {
-            valueSuffix: '%'
-        },
-        series: [{
-            name: level1Name,
-            data: level1Data,
-            size: '60%',
-            dataLabels: {
-                formatter: function () {
-                    return this.y >= 5 ? this.point.name : null;
-                },
-                color: 'white',
-                distance: -30
-            }
-        }, {
-            name: level2Name,
-            data: level2Data,
-            size: '80%',
-            innerSize: '60%',
-            dataLabels: {
-                formatter: function () {
-                    // display only if larger than 1
-                    return this.y > 1 ? '<b>' + this.point.name + ':</b> ' + this.y + '%'  : null;
-                }
-            }
-        }]
-    });
-}
+    .checkboxes {
+        float: left;
+
+    }
+
+</style>
+
+<div class="checkboxes" name="checkboxes">
+    Roll up by:<br>
+    <input type="checkbox" name="checkboxGroup" class="points-checkbox" id="r1" value="Total points">Total points<br>
+    <input type="checkbox" name="checkboxGroup"  class="points-checkbox2" id="r2" value="Total ships">Total ships
+</div>
+
+<div class="templates">
+    <div class="doughnut-graph" style="width: 600px; height: 400px; margin: 0 auto"></div>
+</div>
+
+<div id="doughnuts">
+    <div id="faction-ship"></div>
+</div>
+
+
+<script>
+$('.points-checkbox').change(function() {
+    console.log("fired");
+    var $this = $(this);
+    // $this will contain a reference to the checkbox
+    var doughtnutFactionDiv = $('#doughnuts #faction-ship')
+
+    if ($this.is(':checked')) {
+        console.log("checked")
+        var newDiv = $('.templates .doughnut-graph').clone();
+        doughtnutFactionDiv.append( newDiv );
+            var url = "/get_chart_data";
+
+            $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: url,
+                    data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name }  } ),
+                    success: function (data) {
+                        var factions = data['data']
+                        var colors = Highcharts.getOptions().colors;
+                        console.log(factions[0])
+
+                        factions[ 0 ].color = colors[0];
+                        factions[ 0 ].drilldown.color = colors[0];
+                        factions[ 1 ].color = colors[1];
+                        factions[ 1 ].drilldown.color = colors[1];
+                        var faction_categories = [ factions[ 0 ].drilldown.name, factions[ 1 ].drilldown.name ];
+
+
+
+                        _.each( factions, function(faction) {
+                            if  ( faction.drilldown.faction == 'Rebel' )
+                            {
+                                faction.color = colors[0];
+                            }
+                            else if ( faction.drilldown.faction == "Imperial")
+                            {
+                                faction.color = colors[1];
+                            }
+                        });
+
+                        makeDonutGraph( factions, faction_categories, "Faction-Ship Breakout", "Factions", "Ships", newDiv );
+
+                    },
+                    dataType: "json"
+            });
+
+
+    } else {
+        doughtnutFactionDiv.empty();
+        console.log("not checked")
+    }
+});
 </script>
 
-<div id="container1" style="width: 800px; height: 600px; margin: 0 auto"></div>
-<script>
-$(function () {
-    makeDonutGraph( factions, faction_categories, "Faction-Ship Breakout", "Factions", "Ships", "#container1" );
+{#
+$(document).ready(function () {
+    $("input[name=radioGroup]:radio").change(function () {
+        if ($("#r1").attr("checked")) {
+            var url = "/get_chart_data";
+
+            $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: url,
+                    data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name }  } ),
+                    success: function (data) {
+                        var factions = data['data']
+                        var colors = Highcharts.getOptions().colors;
+                        console.log(factions[0])
+
+                        factions[ 0 ].color = colors[0];
+                        factions[ 0 ].drilldown.color = colors[0];
+                        factions[ 1 ].color = colors[1];
+                        factions[ 1 ].drilldown.color = colors[1];
+                        var faction_categories = [ factions[ 0 ].drilldown.name, factions[ 1 ].drilldown.name ];
+
+
+
+                        _.each( factions, function(faction) {
+                            if  ( faction.drilldown.faction == 'Rebel' )
+                            {
+                                faction.color = colors[0];
+                            }
+                            else if ( faction.drilldown.faction == "Imperial")
+                            {
+                                faction.color = colors[1];
+                            }
+                        });
+
+                        var doughnutDiv = $('.doughnut-graph.template').clone().removeClass('template').append('.doughnuts')
+                        $(doughnutDiv).attr("id", "container1");
+                        console.log(doughnutDiv);
+                        makeDonutGraph( factions, faction_categories, "Faction-Ship Breakout", "Factions", "Ships", "#container1" );
+
+                    },
+                    dataType: "json"
+            });
+        }
+        else {
+            $('#container1').remove()
+        }
+        $('#log').val($('#log').val()+ $(this).val() + '|');
+    })
 });
-</script>
-<br><br>
-<div id="container2" style="width: 800px; height: 600px; margin: 0 auto"></div>
+#}
+
+
 <script>
-$(function () {
-    makeDonutGraph( pilots, ship_categories, "Ship-Pilot Breakout", "Ships", "Pilots",  "#container2" );
-});
+
+
+
+    function makeDonutGraph( data, data_categories, title, level1Name, level2Name,  containerName ) {
+        var level1Data = [],
+            level2Data = [],
+            i,
+            j,
+            dataLen = data.length,
+            drillDataLen,
+            brightness;
+
+
+        // Build the factions arrays
+        for (i = 0; i < dataLen; i += 1) {
+
+            // add browser factions
+            level1Data.push({
+                name: data_categories[i],
+                y: data[i].y,
+                color: data[i].color
+            });
+
+
+
+            // add version factions
+            drillDataLen = data[i].drilldown.data.length;
+            for (j = 0; j < drillDataLen; j += 1) {
+                brightness = 0.2 - (j / drillDataLen) / 5;
+                level2Data.push({
+                    name: data[i].drilldown.categories[j],
+                    y: data[i].drilldown.data[j],
+                    color: Highcharts.Color(data[i].color).brighten(brightness).get()
+                });
+            }
+        }
+
+
+        // Create the chart
+        containerName.highcharts({
+            chart: {
+                type: 'pie'
+            },
+            title: {
+                text: title
+            },
+            yAxis: {
+                title: {
+                    text: 'Total percent usage'
+                }
+            },
+            plotOptions: {
+                pie: {
+                    shadow: false,
+                    center: ['50%', '50%']
+                }
+            },
+            tooltip: {
+                valueSuffix: '%'
+            },
+            series: [{
+                name: level1Name,
+                data: level1Data,
+                size: '60%',
+                dataLabels: {
+                    formatter: function () {
+                        return this.y >= 5 ? this.point.name : null;
+                    },
+                    color: 'white',
+                    distance: -30
+                }
+            }, {
+                name: level2Name,
+                data: level2Data,
+                size: '80%',
+                innerSize: '60%',
+                dataLabels: {
+                    formatter: function () {
+                        // display only if larger than 1
+                        return this.y > 1 ? '<b>' + this.point.name + ':</b> ' + this.y + '%'  : null;
+                    }
+                }
+            }]
+        });
+    }
+
+
+    $( document ).ready(init );
+
+    function init() {
+        var vt = $('.points-checkbox');
+        console.log("checking the box");
+        vt.prop( "checked", true).change();
+        console.log("checked it");
+    }
+
 </script>
-<br><br>
-<div id="container3" style="width: 800px; height: 600px; margin: 0 auto"></div>
-<script>
-$(function () {
-    makeDonutGraph( upgrades, upgrade_categories, "Upgrade Type-Upgrade Breakout", "Upgrade Type", "Upgrade",  "#container3" );
-});
-</script>
+
+
+
 
 {% endblock %}

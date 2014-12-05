@@ -6,7 +6,8 @@ import datetime
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
 import myapp
-from persistence import Tourney, TourneyList, PersistenceManager, List, Faction, Ship, ShipUpgrade, UpgradeType, Upgrade
+from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade
+from rollup import Rollup
 
 import xwingmetadata
 
@@ -294,6 +295,19 @@ def down():
 def index():
     return redirect(url_for('tourneys') )
 
+@app.route("/get_chart_data", methods=['POST'])
+def get_chart_data():
+    data    = request.json['data']
+    use_points = False
+
+    if data.has_key( 'name') and data['name'] == True:
+        use_points = True
+
+    rollup       = Rollup( PersistenceManager(myapp.db_connector) )
+    faction_data = rollup.rollup_by_ship_faction(use_points)
+    return jsonify(data=faction_data)
+
+
 def to_float(dec):
     return float("{0:.2f}".format( float(dec) * float(100)))
 
@@ -302,99 +316,13 @@ def to_float(dec):
 def charts():
     pm = PersistenceManager(myapp.db_connector)
 
-    doughnut_data = pm.get_faction_ship_doughnut_data()
-
-    merged_doughnut_data = {}
-
-    faction_total = {}
-
-    for d in doughnut_data:
-        faction      = d[0].description
-        ship         = d[1].description
-        pilot        = d[2]
-        pilot_cost   = d[3]
-        upgrade_cost = d[4]
-        num_ships    = d[5]
-
-        if not faction_total.has_key( faction ):
-            faction_total[ faction ] = 0
-        faction_total[ faction ] = faction_total[ faction ] +   pilot_cost + num_ships
-
-
-    faction_breakout    = pm.get_faction_breakout()
-    ship_breakout       = pm.get_ship_breakout()
-    ship_pilot_breakout = pm.get_ship_pilot_breakout()
-
-    faction_data = []
-    faction_drilldowns = {}
-
-    for fba in faction_breakout.all():
-        drilldown =  {
-              'name': fba[0].description,
-              'categories': [],
-              'data' : [],
-              'color' : None
-        }
-        faction_drilldowns[ fba[0].description] = drilldown
-        faction_data.append( { 'y' : to_float(fba[1]),
-            'color' : None,
-            'drilldown' : drilldown
-        })
-
-    for sba in ship_breakout.all():
-        drilldown = faction_drilldowns[ sba[0].description]
-        drilldown[ 'categories'].append( sba[1].description)
-        drilldown[ 'data'].append(to_float(sba[2]) )
-
-    spd_drilldowns = {}
-    ship_pilot_data = []
-    for sba in ship_breakout.all():
-        drilldown = {
-            'name' : sba[1].description,
-            'categories': [],
-            'data' : [],
-            'color' : None,
-            'faction' : sba[0].description
-        }
-        spd_drilldowns[ sba[1].description ] = drilldown
-        ship_pilot_data.append( { 'y' : to_float( sba[2]),
-                       'color': None,
-                       'drilldown' : drilldown } )
-
-    for spb in ship_pilot_breakout.all():
-        drilldown = spd_drilldowns[ spb[1].description ]
-        drilldown[ 'categories'].append( spb[2])
-        drilldown[ 'data' ].append( to_float( spb[3]))
-
-    ut_drilldowns    = {}
-    ut_data          = []
-
-    upgrade_type_breakout = pm.get_upgrade_type_breakout()
-    upgrade_breakout = pm.get_upgrade_breakout()
-
-    for utb in upgrade_type_breakout.all():
-        drilldown = {
-            'name': utb[0].description,
-            'categories': [],
-            'data': [],
-            'color': None,
-        }
-        ut_drilldowns[utb[0].description] = drilldown
-        ut_data.append({'y': to_float(utb[1]),
-                        'color': None,
-                        'drilldown': drilldown})
-
-
-    for ub in upgrade_breakout.all():
-        drilldown = ut_drilldowns[ub[0].description]
-        drilldown['categories'].append(ub[1])
-        drilldown['data'].append(to_float(ub[2]))
-
+    rollup       = Rollup( pm )
+    faction_data = rollup.rollup_by_ship_faction(False)
 
 
     return render_template('charts.html', faction_data=faction_data,
-                                          pilot_data=ship_pilot_data,
-                                          upgrade_data=ut_data)
+                                          pilot_data=None,
+                                          upgrade_data=None)
 
 if __name__ == '__main__':
     app.debug = True

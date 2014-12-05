@@ -1,19 +1,34 @@
+from sqlalchemy.dialects import mysql
+
+__author__ = 'lhayhurst'
+
 import random
-import re
-import datetime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, backref
+
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql import ColumnElement
+from sqlalchemy.sql.elements import _clause_element_as_expr
+
 from myapp import db_connector
 from xwingmetadata import XWingMetaData
 import xwingmetadata
 
 
-__author__ = 'lhayhurst'
 
-import time
+
 from decl_enum import DeclEnum
-from sqlalchemy import Column, Integer, String, DateTime, Table, desc, Float, asc, func, Date, MetaData
+from sqlalchemy import Column, Integer, String, func, Date
 from sqlalchemy import ForeignKey
+
+#rollup help
+#see https://groups.google.com/forum/#!msg/sqlalchemy/Pj5T8hO_ibQ/LrmBcIBxnNwJ
+class rollup(ColumnElement):
+    def __init__(self, *elements):
+        self.elements = [_clause_element_as_expr(e) for e in elements]
+
+@compiles(rollup, "mysql")
+def _mysql_rollup(element, compiler, **kw):
+    return "%s WITH ROLLUP" % (', '.join([compiler.process(e, **kw) for e in element.elements]))
 
 
 #TABLES
@@ -127,7 +142,7 @@ class Ship(Base):
 class ShipUpgrade(Base):
     __tablename__ = ship_upgrade_table
     id = Column(Integer, primary_key=True)
-    ship2_id = Column(Integer, ForeignKey('{0}.id'.format(ship_table)))
+    ship_id = Column(Integer, ForeignKey('{0}.id'.format(ship_table))) #todo: change to ship id
     upgrade_id = Column(Integer, ForeignKey('{0}.id'.format(upgrade_table) ) )
     upgrade = relationship( Upgrade.__name__, uselist=False)
     ship    = relationship( Ship.__name__, back_populates="upgrades")
@@ -169,20 +184,8 @@ class PersistenceManager:
         self.db_connector = db_connector
 
     def create_schema(self):
-        print("creating schema")
         self.db_connector.get_base().metadata.create_all(self.db_connector.get_engine())
 
-    #this guy is a hack just to fix my schema issues.  I really need to use alembic.
-    def create_upgrade_table(self):
-        meta = MetaData()
-
-        upgrade = Table(upgrade_table, meta,
-                        Column('id', Integer, primary_key=True),
-                        Column('upgrade_type', UpgradeType.db_type() ),
-                        Column('name', String(128)),
-                        Column('cost', Integer) )
-
-        upgrade.create( self.db_connector.get_engine() )
 
     def drop_schema(self):
         self.db_connector.get_base().metadata.drop_all(self.db_connector.get_engine())
@@ -216,7 +219,6 @@ class PersistenceManager:
         return self.db_connector.get_session().query(Tourney)
 
 
-
     def get_upgrades(self):
         return self.db_connector.get_session().query(Upgrade).all()
 
@@ -224,82 +226,16 @@ class PersistenceManager:
         return self.db_connector.get_session().query(ShipUpgrade).all()
 
 
-    def get_faction_breakout(self):
-        return None
-        # session  =  self.db_connector.get_session()
-        # subq =  session.query( func.count(List.faction ).label('total_factions') ).\
-        #     filter(TourneyList.tourney_id == Tourney.id).\
-        #     filter(List.id == TourneyList.list_id).subquery()
-        #
-        # ret = session.query(
-        #     List.faction, func.count(List.faction).label("sub_total") / subq.c.total_factions ).\
-        #     filter(TourneyList.tourney_id == Tourney.id).\
-        #     filter(List.id == TourneyList.list_id).\
-        #     group_by(List.faction)
-
-        return ret
-
-
-    def get_ship_breakout(self):
-        return None
-
-        # session = self.db_connector.get_session()
-        # subq    = session.query( func.sum(Pilot.cost ).label('total_ships') ).\
-        #     filter(TourneyList.tourney_id == Tourney.id).\
-        #     filter(List.id == TourneyList.list_id).\
-        #     filter( Ship.list_id == List.id ).\
-        #     filter( Ship.ship_pilot_id == ShipPilot.id).subquery()
-        #
-        # ret = session.query(
-        #     List.faction, ShipPilot.ship_type, func.count(List.faction).label("sub_total") / subq.c.total_ships ).\
-        #      filter(TourneyList.tourney_id == Tourney.id).\
-        #      filter(List.id == TourneyList.list_id).\
-        #      filter(Ship.list_id == List.id).\
-        #      filter(Ship.ship_pilot_id == ShipPilot.id ).\
-        #      group_by(List.faction, ShipPilot.ship_type)
-
-        return ret
-
-    def get_ship_pilot_breakout(self):
-        return None
-        #
-        # session = self.db_connector.get_session()
-        # subq    = session.query( func.count(Ship.ship_pilot_id ).label('total_ships') ).\
-        #     filter(TourneyList.tourney_id == Tourney.id).\
-        #     filter(List.id == TourneyList.list_id).\
-        #     filter( Ship.list_id == List.id ).\
-        #     filter( Ship.ship_pilot_id == ShipPilot.id).subquery()
-        #
-        # ret = self.db_connector.get_session().query(
-        #     List.faction, ShipPilot.ship_type, Pilot.name,
-        #     func.count(List.faction) / subq.c.total_ships).\
-        #     filter(TourneyList.tourney_id == Tourney.id).\
-        #     filter(List.id == TourneyList.list_id).\
-        #     filter(Ship.list_id == List.id).\
-        #     filter(Ship.ship_pilot_id == ShipPilot.id ).\
-        #     filter( ShipPilot.pilot_id == Pilot.id).\
-        #     group_by(List.faction, ShipPilot.ship_type, Pilot.name)
-        # return ret
-
-    def get_upgrade_type_breakout(self):
-        session = self.db_connector.get_session()
-        subq    = session.query( func.count(ShipUpgrade.id ).label('total_upgrades') ).subquery()
+    def get_faction_rollup(self):
+        session  =  self.db_connector.get_session()
+        subq =  session.query( func.count(TourneyList.faction ).label('total_factions') ).\
+             filter(TourneyList.tourney_id == Tourney.id).subquery()
 
         ret = session.query(
-            Upgrade.upgrade_type, func.count(ShipUpgrade.id).label("sub_total") / subq.c.total_upgrades ).\
-            filter( ShipUpgrade.upgrade_id == Upgrade.id ).\
-            group_by(Upgrade.upgrade_type)
-
-        return ret
-
-    def get_upgrade_breakout(self):
-        session = self.db_connector.get_session()
-        subq    = session.query( func.count(ShipUpgrade.id ).label('total_upgrades') ).subquery()
-
-        ret = session.query(
-            Upgrade.upgrade_type, Upgrade.name, func.count(ShipUpgrade.id).label("sub_total") / subq.c.total_upgrades ).\
-            filter(ShipUpgrade.upgrade_id == Upgrade.id).\
-            group_by(Upgrade.upgrade_type, Upgrade.name)
+             TourneyList.faction, func.count(TourneyList.faction).label("num_of"), subq.c.total_factions.label("total_of"),
+                                  func.count(TourneyList.faction).label("percentage_of") / subq.c.total_factions ).\
+             filter(TourneyList.tourney_id == Tourney.id).\
+             group_by(TourneyList.faction).order_by( TourneyList.faction.desc())
 
         return ret
 
@@ -313,18 +249,23 @@ class PersistenceManager:
     def delete_tourney(self, tourney_name):
         tourney = self.get_tourney( tourney_name)
         for list in tourney.tourney_lists:
+            for ship in list.ships:
+                for su in ship.upgrades:
+                    self.db_connector.get_session().delete(su)
+                self.db_connector.get_session().delete(ship)
             self.db_connector.get_session().delete(list)
         self.db_connector.get_session().delete(tourney)
         self.db_connector.get_session().commit()
 
     def delete_tourney_list_details(self, tourney_list):
 
-        for ship in tourney_list.list.ships:
+        for ship in tourney_list.ships:
             for su in ship.upgrades:
                 self.db_connector.get_session().delete(su)
             self.db_connector.get_session().delete(ship)
-        self.db_connector.get_session().delete(tourney_list.list)
-        tourney_list.list = None
+        tourney_list.faction = None
+        tourney_list.points  = None
+        tourney_list.shiops  = None
         self.db_connector.get_session().commit()
 
 
@@ -346,7 +287,8 @@ class PersistenceManager:
         session = self.db_connector.get_session()
         query = session.query(Tourney, TourneyList).\
                         filter(TourneyList.tourney_id == Tourney.id).\
-                        filter(TourneyList.list_id == None )
+                        filter( Tourney.id == tourney.id).\
+                        filter(TourneyList.faction == None )
         rowcount = int(query.count())
         randomRow = query.offset( int( rowcount * random.random() ) ).first()
         if randomRow is None:
@@ -363,10 +305,51 @@ class PersistenceManager:
             tourney_name = tl.tourney.tourney_name
             if not ret.has_key(tourney_name):
                 ret[tourney_name] = { 'num_entered' : 0, 'num_not_entered' : 0, 'tourney': tl.tourney}
-            if tl.list_id is None:
+            if len(tl.ships) == 0:
                 ret[tourney_name]['num_not_entered'] += 1
             else:
                 ret[tourney_name]['num_entered'] += 1
         return ret
 
+# SELECT tourney_list.faction, ship_pilot.ship_type, pilot.name, count(tourney_list.faction), sum(Pilot.cost)
+# FROM tourney, tourney_list, ship, ship_pilot, pilot
+# where
+# tourney_list.tourney_id = tourney.id and
+# ship.tlist_id = tourney_list.id and
+# ship.ship_pilot_id = ship_pilot.id
+# and ship_pilot.pilot_id = pilot.id
+# GROUP BY tourney_list.faction,  ship_pilot.ship_type , pilot.name WITH ROLLUP
 
+    def get_ship_faction_rollups(self):
+        session = self.db_connector.get_session()
+
+        faction_ship_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
+                             func.count( Pilot.id).label("num_pilots"),
+                             func.sum( Pilot.cost).label("cost_pilots")).\
+            filter( TourneyList.tourney_id == Tourney.id ).\
+            filter( Ship.tlist_id == TourneyList.id ).\
+            filter( Ship.ship_pilot_id == ShipPilot.id ).\
+            filter( ShipPilot.pilot_id == Pilot.id ).\
+            group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).statement.compile(dialect=mysql.dialect())
+
+        connection = self.db_connector.get_engine().connect()
+        faction_ship_rollup = connection.execute(faction_ship_rollup_sql)
+
+
+        upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
+                                        func.count( Upgrade.id).label("num_upgrades"),
+                                        func.sum( Upgrade.cost).label("cost_upgrades") ).\
+            filter( TourneyList.tourney_id == Tourney.id ).\
+            filter( Ship.tlist_id == TourneyList.id ).\
+            filter( Ship.ship_pilot_id == ShipPilot.id ).\
+            filter( ShipPilot.pilot_id == Pilot.id ).\
+            filter( ShipUpgrade.ship_id == Ship.id).\
+            filter( Upgrade.id == ShipUpgrade.upgrade_id ).\
+            group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).\
+            statement.compile(dialect=mysql.dialect())
+
+        upgrade_rollup = connection.execute( upgrade_rollup_sql )
+        connection.close()
+
+
+        return {  'pilots' : faction_ship_rollup, 'upgrades': upgrade_rollup }
