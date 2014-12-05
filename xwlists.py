@@ -69,19 +69,19 @@ def get_tourney_lists_as_text(tourney, make_header=True ):
     row_defaults = [ tourney.tourney_name, tourney.tourney_type, tourney_date ]
 
     for tourney_list in tourney.tourney_lists:
-        if tourney_list.list is None or tourney_list.list.ships is None or len(tourney_list.list.ships) == 0:
+        if tourney_list.ships is None or len(tourney_list.ships) == 0:
             new_row = []
             new_row.extend ( row_defaults )
             for i in range (len(new_row), len(header)):
                 new_row.append('')
             rows.append(new_row)
         else:
-            for ship in tourney_list.list.ships:
+            for ship in tourney_list.ships:
                 new_row = []
                 new_row.extend( row_defaults )
                 new_row.extend( [ tourney_list.player_name,
-                                  tourney_list.list.faction.description,
-                                  str(tourney_list.list.points),
+                                  tourney_list.faction.description,
+                                  str(tourney_list.points),
                                   str(tourney_list.tourney_standing),
                                   str(tourney_list.id),
                                   ship.ship_pilot.ship_type.description,
@@ -249,16 +249,14 @@ def add_squad():
 
          pm = PersistenceManager(myapp.db_connector)
          tourney_list = pm.get_tourney_list(tourney_list_id)
-         list = List(faction=Faction.from_string(faction), points=points)
-         tourney_list.list = list
-         pm.db_connector.get_session().add( list )
-         pm.db_connector.get_session().commit()
+         tourney_list.faction = Faction.from_string( faction )
+         tourney_list.points  = points
 
          ships = []
          for squad_member in data:
              ship_pilot = pm.get_ship_pilot( squad_member['ship'], squad_member['pilot'] )
-             ship       = Ship( ship_pilot_id=ship_pilot.id, list_id=list.id)
-             list.ships.append( ship )
+             ship       = Ship( ship_pilot_id=ship_pilot.id, tlist_id=tourney_list.id)
+             tourney_list.ships.append( ship )
              for upgrade in squad_member['upgrades']:
                  ship_upgrade = ShipUpgrade( ship_id=ship.id,
                                              upgrade=Upgrade( upgrade_type= UpgradeType.from_string( upgrade['type'] ),

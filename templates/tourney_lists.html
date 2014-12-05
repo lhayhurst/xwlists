@@ -28,9 +28,9 @@
              <td class="tg-031e">{{  tourney_list.player_name }}</td>
              <td class="tg-031e">{{  tourney_list.tourney_standing }}</td>
              <td class="tg-031e">{{  tourney_list.tourney_elim_standing }}</td>
-             {% if tourney_list.list %}
-                 <td class="tg-031e">{{  tourney_list.list.faction.description }}</td>
-                 <td class="tg-031e">{{  tourney_list.list.points }}</td>
+             {% if tourney_list.ships %}
+                 <td class="tg-031e">{{  tourney_list.faction.description }}</td>
+                 <td class="tg-031e">{{  tourney_list.points }}</td>
                  <td class="tg-031e"><a href="{{  url_for( 'display_list', tourney_list_id=tourney_list.id) }}">Show list</a></td>
                 {% if admin %}
                     <th class="tg-031e">

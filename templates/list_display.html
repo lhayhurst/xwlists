@@ -51,18 +51,18 @@
 
     <div class="main-section">
         <div class="image">
-            {{  tourney_list.player_name_stripped()  }}
+            {{  tourney_list.player_name  }}
             <img src={{ image_src }}>
         </div>
         <div class="entries">
             <div>
                 <b>Tourney:</b>  {{ tourney.tourney_name }}<br>
-                <b>Player name:</b>  {{ tourney_list.player_name_stripped() }}<br>
-                <b>Player faction:</b> {{  tourney_list.list.faction.description }}<br>
-                <b>List total:</b> <p class="alignright sub-total">{{ tourney_list.list.points }}</p>
+                <b>Player name:</b>  {{ tourney_list.player_name }}<br>
+                <b>Player faction:</b> {{  tourney_list.faction.description }}<br>
+                <b>List total:</b> <p class="alignright sub-total">{{ tourney_list.points }}</p>
             </div>
             <br>
-            {% for ship in tourney_list.list.ships %}
+            {% for ship in tourney_list.ships %}
                 <b>{{ ship.ship_pilot.ship_type.description }} -- {{  ship.ship_pilot.pilot.name }}</b><p class="alignright">{{ ship.ship_pilot.pilot.cost }}</p>
                 <br>
                 {% for ship_upgrade in ship.upgrades %}
