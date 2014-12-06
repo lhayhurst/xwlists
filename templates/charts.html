@@ -2,19 +2,30 @@
 {% block content %}
 
 <style>
-    .table {
-    max-width: 100%;
-    background-color: transparent;
-    border-collapse: collapse;
-    border-spacing: 0;
+
+    .main-section {
+        width: 100%;
+        height: 500px;
     }
 
-    .table-bordered {
-        border: 1px solid #ddd;
-        border-collapse: separate;
-        -moz-border-radius: 4px;
-        border-radius: 4px;
+    .charts {
+        width: 91%;
+        float: left;
     }
+    .charts img {
+        width: 100%;
+        height: auto;
+    }
+    .checkboxes, .charts {
+        height: 100%;
+        overflow-y: scroll;
+    }
+     .checkboxes {
+        margin-left: 91%;
+        padding: 20px;
+    }
+
+
     .doughnut-graph {
        border-style: solid;
        border-width: 2px;
@@ -26,40 +37,49 @@
        display: none !important;
     }
 
-
-    .checkboxes {
-        float: left;
-        background-color: #ddd;
-        padding: 5px;
+    .inline-display {
+        display: inline-flex;
     }
 
-    .fixed-height-overflow {
-        height: 411px;
-        overflow-y: scroll;
-        float: left;
-        margin-left: 10px;
-
-    }
 
 </style>
 
-<div class="checkboxes" name="checkboxes">
-    roll up by:<br>
-    <input type="checkbox" name="checkboxGroup" class="faction-ship-count-checkbox"
-                                                id="faction-ship-count-checkbox"
-                                                value="faction-ship-count">total ships<br>
-    <input type="checkbox" name="checkboxGroup"  class="faction-ship-points-checkbox"
-                                                 id="faction-ship-points-checkbox"
-                                                 value="faction-ship-points">total points
+<div class="main-section">
+    <div class="templates">
+        <div class="doughnut-graph" style="width: 600px; height: 400px; margin: 8 auto"></div>
+    </div>
+
+    <div id="doughnuts" class="charts">
+        <div id="faction-ship" class="inline-display"></div>
+        <div id="ship-pilot"></div>
+    </div>
+
+
+    <div class="checkboxes" name="faction-ship-checkboxes">
+        factions-ships:<br>
+        <input type="checkbox" name="checkboxGroup" class="faction-ship-count-checkbox"
+                                                    id="faction-ship-count-checkbox"
+                                                    value="faction-ship-count">ships<br>
+        <input type="checkbox" name="checkboxGroup"  class="faction-ship-points-checkbox"
+                                                     id="faction-ship-points-checkbox"
+                                                     value="faction-ship-points">points
+        <br>
+        <br>
+        ships-pilots:<br>
+        <input type="checkbox" name="checkboxGroup" class="ship-pilot-count-checkbox"
+                                                    id="ship-pilot-count-checkbox"
+                                                    value="ship-pilot-count">ships<br>
+        <input type="checkbox" name="checkboxGroup"  class="ship-pilot-points-checkbox"
+                                                     id="ship-pilot-points-checkbox"
+                                                     value="ship-pilot-points">points
+    </div>
 </div>
 
-<div class="templates">
-    <div class="doughnut-graph" style="width: 600px; height: 400px; margin: 8 auto"></div>
-</div>
 
-<div id="doughnuts" class="fixed-height-overflow">
-    <div id="faction-ship"></div>
-</div>
+
+
+
+
 
 <script>
 
