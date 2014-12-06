@@ -9,10 +9,17 @@ class Rollup:
     def __init__(self,pm):
         self.pm = pm
 
+    def title(self):
+        if not self.use_points:
+            return ": %d samples" % ( self.grand_count)
+        else:
+            return ": %s points spent" % ( "{:,}".format(self.grand_sum ) )
+
     def to_float(self, dec):
         return float("{0:.2f}".format( float(dec) * float(100)))
 
-    def rollup_by_ship_faction(self, use_counts):
+    def rollup_by_ship_faction(self, use_points):
+        self.use_points = use_points
         rollups = self.pm.get_ship_faction_rollups()
         self.grand_count   = 0
         self.grand_sum     = 0
@@ -48,7 +55,7 @@ class Rollup:
             faction_drilldowns[ faction ] = drilldown
 
             ratio = 0.0
-            if use_counts:
+            if not use_points:
                 ratio = self.to_float( self.to_float( self.factions[faction]['cnt'] ) / self.to_float(self.grand_count) )
             else:
                 ratio = self.to_float( self.to_float( self.factions[faction]['cost'] ) / self.to_float(self.grand_sum) )
@@ -63,7 +70,7 @@ class Rollup:
             drilldown = faction_drilldowns[faction]
             drilldown[ 'categories'].append( ship )
             ratio = 0.0
-            if use_counts:
+            if not use_points:
                 ratio = self.to_float( self.to_float( val['cnt'] ) / self.to_float( self.grand_count ) )
             else:
                 ratio = self.to_float( self.to_float( val['cost'] ) / self.to_float( self.grand_sum ) )

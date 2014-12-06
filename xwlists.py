@@ -298,12 +298,12 @@ def get_chart_data():
     data    = request.json['data']
     use_points = False
 
-    if data.has_key( 'name') and data['name'] == True:
+    if data.has_key( 'name') and data['value'] == 'faction-ship-points':
         use_points = True
 
     rollup       = Rollup( PersistenceManager(myapp.db_connector) )
     faction_data = rollup.rollup_by_ship_faction(use_points)
-    return jsonify(data=faction_data)
+    return jsonify(data=faction_data, title=data['value'] + rollup.title())
 
 
 def to_float(dec):

@@ -17,7 +17,9 @@
     }
     .doughnut-graph {
        border-style: solid;
-       border-width: 5px;
+       border-width: 2px;
+       display: inline-block;
+       margin: 2px;
     }
 
     .templates {
@@ -34,33 +36,47 @@
     .fixed-height-overflow {
         height: 411px;
         overflow-y: scroll;
+        float: left;
+        margin-left: 10px;
 
     }
 
 </style>
 
 <div class="checkboxes" name="checkboxes">
-    Roll up by:<br>
-    <input type="checkbox" name="checkboxGroup" class="points-checkbox" id="r1" value="Total points">Total points<br>
-    <input type="checkbox" name="checkboxGroup"  class="points-checkbox" id="r2" value="Total ships">Total ships
+    roll up by:<br>
+    <input type="checkbox" name="checkboxGroup" class="faction-ship-count-checkbox"
+                                                id="faction-ship-count-checkbox"
+                                                value="faction-ship-count">total ships<br>
+    <input type="checkbox" name="checkboxGroup"  class="faction-ship-points-checkbox"
+                                                 id="faction-ship-points-checkbox"
+                                                 value="faction-ship-points">total points
 </div>
 
 <div class="templates">
-    <div class="doughnut-graph" style="width: 600px; height: 400px; margin: 0 auto"></div>
+    <div class="doughnut-graph" style="width: 600px; height: 400px; margin: 8 auto"></div>
 </div>
 
 <div id="doughnuts" class="fixed-height-overflow">
     <div id="faction-ship"></div>
 </div>
 
-
 <script>
-$('.points-checkbox').change(function() {
-    console.log("fired");
+
+$( document ).ready(init );
+
+function init() {
+    $('#faction-ship-count-checkbox').prop("checked", true).change();
+    $('#faction-ship-points-checkbox').prop("checked", true).change();
+
+}
+
+
+
+$('.faction-ship-count-checkbox, .faction-ship-points-checkbox').change(function() {
     var $this = $(this);
     // $this will contain a reference to the checkbox
     var doughtnutFactionDiv = $('#doughnuts #faction-ship')
-
     if ($this.is(':checked')) {
         console.log("checked")
         var newDiv = $('.templates .doughnut-graph').clone();
@@ -75,15 +91,12 @@ $('.points-checkbox').change(function() {
                     success: function (data) {
                         var factions = data['data']
                         var colors = Highcharts.getOptions().colors;
-                        console.log(factions[0])
 
                         factions[ 0 ].color = colors[0];
                         factions[ 0 ].drilldown.color = colors[0];
                         factions[ 1 ].color = colors[1];
                         factions[ 1 ].drilldown.color = colors[1];
                         var faction_categories = [ factions[ 0 ].drilldown.name, factions[ 1 ].drilldown.name ];
-
-
 
                         _.each( factions, function(faction) {
                             if  ( faction.drilldown.faction == 'Rebel' )
@@ -96,71 +109,22 @@ $('.points-checkbox').change(function() {
                             }
                         });
 
-                        makeDonutGraph( factions, faction_categories, "Faction-Ship Breakout", "Factions", "Ships", newDiv );
+                        //console.log(data);
+                        makeDonutGraph( factions, faction_categories, data.title, "factions", "ships", newDiv );
 
                     },
                     dataType: "json"
             });
 
 
-    } else {
+    }
+    else
+    {
+        //console.log(doughtnutFactionDiv.find());
         doughtnutFactionDiv.empty();
-        console.log("not checked")
     }
 });
 </script>
-
-{#
-$(document).ready(function () {
-    $("input[name=radioGroup]:radio").change(function () {
-        if ($("#r1").attr("checked")) {
-            var url = "/get_chart_data";
-
-            $.ajax({
-                    type: "POST",
-                    contentType: "application/json; charset=utf-8",
-                    url: url,
-                    data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name }  } ),
-                    success: function (data) {
-                        var factions = data['data']
-                        var colors = Highcharts.getOptions().colors;
-                        console.log(factions[0])
-
-                        factions[ 0 ].color = colors[0];
-                        factions[ 0 ].drilldown.color = colors[0];
-                        factions[ 1 ].color = colors[1];
-                        factions[ 1 ].drilldown.color = colors[1];
-                        var faction_categories = [ factions[ 0 ].drilldown.name, factions[ 1 ].drilldown.name ];
-
-
-
-                        _.each( factions, function(faction) {
-                            if  ( faction.drilldown.faction == 'Rebel' )
-                            {
-                                faction.color = colors[0];
-                            }
-                            else if ( faction.drilldown.faction == "Imperial")
-                            {
-                                faction.color = colors[1];
-                            }
-                        });
-
-                        var doughnutDiv = $('.doughnut-graph.template').clone().removeClass('template').append('.doughnuts')
-                        $(doughnutDiv).attr("id", "container1");
-                        console.log(doughnutDiv);
-                        makeDonutGraph( factions, faction_categories, "Faction-Ship Breakout", "Factions", "Ships", "#container1" );
-
-                    },
-                    dataType: "json"
-            });
-        }
-        else {
-            $('#container1').remove()
-        }
-        $('#log').val($('#log').val()+ $(this).val() + '|');
-    })
-});
-#}
 
 
 <script>
@@ -251,14 +215,6 @@ $(document).ready(function () {
     }
 
 
-    $( document ).ready(init );
-
-    function init() {
-        var vt = $('#r1');
-        console.log("checking the box");
-        vt.prop( "checked", true).change();
-        console.log("checked it");
-    }
 
 </script>
 
