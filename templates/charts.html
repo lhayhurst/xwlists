@@ -51,7 +51,7 @@
 
     <div id="doughnuts" class="charts">
         <div id="faction-ship" class="inline-display"></div>
-        <div id="ship-pilot"></div>
+        <div id="ship-pilot" class="inline-display"></div>
     </div>
 
 
@@ -59,7 +59,7 @@
         factions-ships:<br>
         <input type="checkbox" name="checkboxGroup" class="faction-ship-count-checkbox"
                                                     id="faction-ship-count-checkbox"
-                                                    value="faction-ship-count">ships<br>
+                                                    value="faction-ship-count">count<br>
         <input type="checkbox" name="checkboxGroup"  class="faction-ship-points-checkbox"
                                                      id="faction-ship-points-checkbox"
                                                      value="faction-ship-points">points
@@ -68,7 +68,7 @@
         ships-pilots:<br>
         <input type="checkbox" name="checkboxGroup" class="ship-pilot-count-checkbox"
                                                     id="ship-pilot-count-checkbox"
-                                                    value="ship-pilot-count">ships<br>
+                                                    value="ship-pilot-count">count<br>
         <input type="checkbox" name="checkboxGroup"  class="ship-pilot-points-checkbox"
                                                      id="ship-pilot-points-checkbox"
                                                      value="ship-pilot-points">points
@@ -88,19 +88,32 @@ $( document ).ready(init );
 function init() {
     $('#faction-ship-count-checkbox').prop("checked", true).change();
     $('#faction-ship-points-checkbox').prop("checked", true).change();
+    $('#ship-pilot-count-checkbox').prop("checked", true).change();
+    $('#ship-pilot-points-checkbox').prop("checked", true).change();
 
 }
 
 
 
-$('.faction-ship-count-checkbox, .faction-ship-points-checkbox').change(function() {
+$('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-count-checkbox, .ship-pilot-points-checkbox').change(function() {
     var $this = $(this);
     // $this will contain a reference to the checkbox
-    var doughtnutFactionDiv = $('#doughnuts #faction-ship')
+    var doughnutFactionDiv;
+    var myclass = $(this).attr('class');
+    if (myclass.indexOf("faction-ship") > -1) {
+        doughnutFactionDiv = $('#doughnuts #faction-ship')
+    }
+    else if ( myclass.indexOf("ship-pilot") > -1) {
+        doughnutFactionDiv = $('#doughnuts #ship-pilot')
+    }
+    else {
+        console.log("no div found");
+    }
+    console.log(doughnutFactionDiv);
     if ($this.is(':checked')) {
         console.log("checked")
         var newDiv = $('.templates .doughnut-graph').clone();
-        doughtnutFactionDiv.append( newDiv );
+        doughnutFactionDiv.append( newDiv );
             var url = "/get_chart_data";
 
             $.ajax({
