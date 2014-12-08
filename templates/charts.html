@@ -53,6 +53,8 @@
     <div id="doughnuts" class="charts">
         <div id="faction-ship" class="inline-display"></div>
         <div id="ship-pilot" class="inline-display"></div>
+        <div id="upgrade_type-upgrade" class="inline-display"></div>
+
     </div>
 
 
@@ -73,14 +75,18 @@
         <input type="checkbox" name="checkboxGroup"  class="ship-pilot-points-checkbox"
                                                      id="ship-pilot-points-checkbox"
                                                      value="ship-pilot-points">points
+        <br>
+        upgrades_types-upgrades:<br>
+        <input type="checkbox" name="checkboxGroup"  class="upgrade_type-upgrade-count-checkbox"
+                                                     id="upgrade_type-upgrade-count-checkbox"
+                                                     value="upgrade_type-upgrade-count">count
+
+        <input type="checkbox" name="checkboxGroup" class="upgrade_type-upgrade-points-checkbox"
+                                                    id="upgrade_type-upgrade-points-checkbox"
+                                                    value="upgrade_type-upgrade-points">points<br>
+
     </div>
 </div>
-
-
-
-
-
-
 
 <script>
 
@@ -91,12 +97,14 @@ function init() {
     $('#faction-ship-points-checkbox').prop("checked", true).change();
     $('#ship-pilot-count-checkbox').prop("checked", true).change();
     $('#ship-pilot-points-checkbox').prop("checked", true).change();
+    $('#upgrade_type-upgrade-count-checkbox').prop("checked", true).change();
+    $('#upgrade_type-upgrade-points-checkbox').prop("checked", true).change();
 
 }
 
 
 
-$('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-count-checkbox, .ship-pilot-points-checkbox').change(function() {
+$('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-count-checkbox, .ship-pilot-points-checkbox, .upgrade_type-upgrade-count-checkbox, .upgrade_type-upgrade-points-checkbox').change(function() {
     var $this = $(this);
     // $this will contain a reference to the checkbox
     var doughnutFactionDiv;
@@ -107,12 +115,13 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
     else if ( myclass.indexOf("ship-pilot") > -1) {
         doughnutFactionDiv = $('#doughnuts #ship-pilot')
     }
+    else if ( myclass.indexOf("upgrade_type-upgrade") > -1) {
+        doughnutFactionDiv = $('#doughnuts #upgrade_type-upgrade')
+    }
     else {
         console.log("no div found");
     }
-    console.log(doughnutFactionDiv);
     if ($this.is(':checked')) {
-        console.log("checked")
         var newDiv = $('.templates .doughnut-graph').clone();
         doughnutFactionDiv.append( newDiv );
             var url = "/get_chart_data";
@@ -124,12 +133,7 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
                     data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name }  } ),
                     success: function (data) {
                         var donutData = data['data']
-
-//                        console.log(donutData);
                         makeDonutGraph( donutData, data.title, data.firstCategory, data.secondCategory, newDiv );
-
-
-
                     },
                     dataType: "json"
             });
@@ -138,7 +142,6 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
     }
     else
     {
-        //console.log(doughtnutFactionDiv.find());
         doughtnutFactionDiv.empty();
     }
 });
@@ -160,7 +163,6 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
 
 
         for (i = 0; i < dataLen; i += 1) {
-            console.log( data[i].drilldown.name);
             // add level 1  data
             level1Data.push({
                 name: data[i].drilldown.name,
@@ -179,12 +181,6 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
                 });
             }
         }
-
-        console.log(level1Name);
-        console.log(level1Data);
-        console.log(level2Name);
-        console.log(level2Data);
-
         // Create the chart
         containerName.highcharts({
             chart: {

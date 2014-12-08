@@ -357,6 +357,26 @@ class PersistenceManager:
         return ret
 
 
+    def get_upgrade_rollups(self):
+
+        session = self.db_connector.get_session()
+
+        upgrade_rollup_sql = session.query( Upgrade.upgrade_type, Upgrade.name,
+                                        func.count( Upgrade.id).label("num_upgrades"),
+                                        func.sum( Upgrade.cost).label("cost_upgrades") ).\
+            filter( TourneyList.tourney_id == Tourney.id ).\
+            filter( Ship.tlist_id == TourneyList.id ).\
+            filter( Ship.ship_pilot_id == ShipPilot.id ).\
+            filter( ShipPilot.pilot_id == Pilot.id ).\
+            filter( ShipUpgrade.ship_id == Ship.id).\
+            filter( Upgrade.id == ShipUpgrade.upgrade_id ).\
+            group_by( rollup( Upgrade.upgrade_type, Upgrade.name) ).\
+            statement.compile(dialect=mysql.dialect())
+
+        connection = self.db_connector.get_engine().connect()
+        ret = connection.execute(upgrade_rollup_sql)
+        return ret
+
     def get_ship_faction_rollups(self):
         session = self.db_connector.get_session()
 

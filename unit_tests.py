@@ -16,7 +16,7 @@ class DatabaseTestCase(unittest.TestCase):
 
         user     = os.environ['USER']
         password = os.environ['PASSWORD']
-        sqlfile  = "./dbs/post_migration.sql"
+        sqlfile  = "./dbs/lists.sql"
         cmd = "/usr/local/mysql/bin/mysql -u %s -p%s 'sozin$lists' < %s" % ( user, password, sqlfile )
 
         print os.system(cmd)
@@ -162,7 +162,12 @@ class TestIntegrity(DatabaseTestCase):
         sum = 0
         for rd in data:
             sum += rd['y']
-        self.assertEqual( 100.0, sum )
+        self.assertAlmostEqual( 100.0, sum, 1 )
+
+        r = Rollup( self.pm, 'upgrade_type-upgrade-points')
+        data = r.rollup()
+        self.assertTrue( data is not None)
+        self.assertEqual( len(data), 11 )
 
 
 

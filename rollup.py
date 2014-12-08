@@ -10,10 +10,6 @@ class Rollup:
 
     def __init__(self,pm, request_type):
         self.pm = pm
-    # ship-pilot-count
-    # ship-pilot-points
-    # action-ship-count
-    # faction-ship-points
 
         self.chart_request_type = request_type
 
@@ -43,15 +39,18 @@ class Rollup:
         return float("{0:.2f}".format( float(dec) * float(100)))
 
     def rollup(self):
-        ret = None
+        sorted_ret = None
         if self.chart_request_type == 'faction-ship-points' or self.chart_request_type == 'faction-ship-count':
             ret = self._rollup( self.pm.get_ship_faction_rollups(), has_pilot=False)
+            sorted_ret = sorted( ret, key=lambda record: record['faction'])
 
         elif self.chart_request_type.startswith( 'ship-pilot'):
             ret = self._rollup( self.pm.get_ship_pilot_rollup(), has_pilot=True)
+            sorted_ret = sorted( ret, key=lambda record: record['faction'])
 
-        sorted_ret = sorted( ret, key=lambda record: record['faction'])
-
+        elif self.chart_request_type.startswith('upgrade_type-upgrade'):
+            ret = self._rollup_upgrades( self.pm.get_upgrade_rollups())
+            sorted_ret = ret
 
         return sorted_ret
 
@@ -213,4 +212,67 @@ class Rollup:
         else:
             return self.create_faction_ship_doughnut_data()
 
+    def _rollup_upgrades(self, rollups):
+
+        self.grand_count   = 0
+        self.grand_sum     = 0
+        self.factions      = {}
+        self.upgrade_types = {}
+        self.upgrades      = {}
+
+        for row in rollups:
+            upgrade_type = row[0]
+            upgrade      = row[1]
+            cnt          = row[2]
+            cost         = row[3]
+
+            if upgrade_type is None and upgrade is None: #grand total
+                #grand total
+                self.grand_count += cnt
+                self.grand_sum   += cost
+            elif upgrade_type is not None and upgrade is None:
+                #upgrade_type total
+                self.upgrade_types[upgrade_type.description] = { 'cnt' : cnt, 'cost': cost }
+            else: #regulary record.
+                self.upgrades[ upgrade ] = { 'upgrade_type': upgrade_type, 'upgrade' : upgrade,
+                                                     'cnt' : cnt, 'cost': cost, }
+
+
+        ret = []
+        upgrade_type_drilldowns = {}
+        for upgrade_type in self.upgrade_types.keys():
+            drilldown = {
+              'name': upgrade_type,
+              'categories': [],
+              'data' : [],
+              'color' : Rollup.colors[1]
+            }
+
+            ut_key = upgrade_type
+            upgrade_type_drilldowns[ ut_key ] = drilldown
+
+            ratio = 0.0
+            if not self.use_points:
+                ratio = self.to_float( self.to_float( self.upgrade_types[ut_key]['cnt'] ) / self.to_float(self.grand_count) )
+            else:
+                ratio = self.to_float( self.to_float( self.upgrade_types[ut_key]['cost'] ) / self.to_float(self.grand_sum) )
+
+            ret.append( { 'y' : ratio,
+                          'name':ut_key,
+                         'color' : Rollup.colors[1],
+                         'drilldown' : drilldown
+                        })
+        for upgrade in self.upgrades.keys():
+            val       = self.upgrades[upgrade]
+            upgrade_type   = val['upgrade_type']
+            drilldown = upgrade_type_drilldowns[upgrade_type.description]
+            drilldown[ 'categories'].append( upgrade )
+            ratio = 0.0
+            if not self.use_points:
+                ratio = self.to_float( self.to_float( val['cnt'] ) / self.to_float( self.grand_count ) )
+            else:
+                ratio = self.to_float( self.to_float( val['cost'] ) / self.to_float( self.grand_sum ) )
+            drilldown[ 'data' ].append( ratio )
+
+        return ret
 
