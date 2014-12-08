@@ -83,6 +83,7 @@ def get_tourney_lists_as_text(tourney, make_header=True ):
                                   tourney_list.faction.description,
                                   str(tourney_list.points),
                                   str(tourney_list.tourney_standing),
+                                  str(tourney_list.tourney_elim_standing),
                                   str(tourney_list.id),
                                   ship.ship_pilot.ship_type.description,
                                   ship.ship_pilot.pilot.name

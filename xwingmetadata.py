@@ -32,7 +32,7 @@ TORPEDO = 'Torpedo'
 BOMB = "Bomb"
 
 def header():
-    return [ 'Tourney', 'tourneyType', 'tourneyDate', 'player', FACTION, 'points', 'standing', \
+    return [ 'Tourney', 'tourneyType', 'tourneyDate', 'player', FACTION, 'points', 'swiss_standing', 'elim_standing', \
              'listId', 'Ship', 'Pilot', EPT + ".1", EPT + ".2", TITLE, \
              CREW + ".1", CREW + ".2", CREW + ".3", \
              DROID, SYSTEM, MOD + ".1", MOD + ".2", \
@@ -149,7 +149,7 @@ upgrades = {
     ),
     MISSILE: (
         {'name': 'Chardaan Refit', 'cost': -2, 'constraints': ({'type': SHIP_TYPE, 'value': A_WING})},
-        {'name': 'Ion Pulse Missle', 'cost': 3},
+        {'name': 'Ion Pulse Missile', 'cost': 3},
         {'name': 'Proton Rockets', 'cost': 3},
         {'name': 'Concussion Missiles', 'cost': 4},
         {'name': 'Cluster Missiles', 'cost': 4},
@@ -222,7 +222,7 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                   {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Biggs Darklighter', 'cost': 25,
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                    'upgrades': (DROID, TORPEDO, MOD)},
-                  {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Hobbie" Klivian', 'cost': 25,
+                  {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Hobbie Klivian', 'cost': 25,
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                    'upgrades': (DROID, TORPEDO, MOD)},
                   {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Tarn Mison', 'cost': 23,
@@ -425,7 +425,7 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Captain Jonus', 'cost': 22,
               'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
               'upgrades': (TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD, EPT)},
-             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Gamma Squadron. Pilot', 'cost': 18,
+             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Gamma Squadron Pilot', 'cost': 18,
               'upgrades': (TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Scimitar Squadron Pilot', 'cost': 16,
               'upgrades': (TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD)} ),
