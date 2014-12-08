@@ -9,7 +9,7 @@
     }
 
     .charts {
-        width: 91%;
+        width: 100%;
         float: left;
     }
     .charts img {
@@ -21,8 +21,9 @@
         overflow-y: scroll;
     }
      .checkboxes {
-        margin-left: 91%;
-        padding: 20px;
+        margin-left: 100%;
+        padding: 0px;
+        display: none;
     }
 
 
@@ -46,7 +47,7 @@
 
 <div class="main-section">
     <div class="templates">
-        <div class="doughnut-graph" style="width: 600px; height: 400px; margin: 8 auto"></div>
+        <div class="doughnut-graph" style="width: 665px; height: 400px; margin: 8 auto"></div>
     </div>
 
     <div id="doughnuts" class="charts">
@@ -122,28 +123,12 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
                     url: url,
                     data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name }  } ),
                     success: function (data) {
-                        var factions = data['data']
-                        var colors = Highcharts.getOptions().colors;
+                        var donutData = data['data']
 
-                        factions[ 0 ].color = colors[0];
-                        factions[ 0 ].drilldown.color = colors[0];
-                        factions[ 1 ].color = colors[1];
-                        factions[ 1 ].drilldown.color = colors[1];
-                        var faction_categories = [ factions[ 0 ].drilldown.name, factions[ 1 ].drilldown.name ];
+//                        console.log(donutData);
+                        makeDonutGraph( donutData, data.title, data.firstCategory, data.secondCategory, newDiv );
 
-                        _.each( factions, function(faction) {
-                            if  ( faction.drilldown.faction == 'Rebel' )
-                            {
-                                faction.color = colors[0];
-                            }
-                            else if ( faction.drilldown.faction == "Imperial")
-                            {
-                                faction.color = colors[1];
-                            }
-                        });
 
-                        //console.log(data);
-                        makeDonutGraph( factions, faction_categories, data.title, "factions", "ships", newDiv );
 
                     },
                     dataType: "json"
@@ -164,7 +149,7 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
 
 
 
-    function makeDonutGraph( data, data_categories, title, level1Name, level2Name,  containerName ) {
+    function makeDonutGraph( data, title, level1Name, level2Name,  containerName ) {
         var level1Data = [],
             level2Data = [],
             i,
@@ -174,19 +159,16 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
             brightness;
 
 
-        // Build the factions arrays
         for (i = 0; i < dataLen; i += 1) {
-
-            // add browser factions
+            console.log( data[i].drilldown.name);
+            // add level 1  data
             level1Data.push({
-                name: data_categories[i],
+                name: data[i].drilldown.name,
                 y: data[i].y,
                 color: data[i].color
             });
 
-
-
-            // add version factions
+            //add level 2 data
             drillDataLen = data[i].drilldown.data.length;
             for (j = 0; j < drillDataLen; j += 1) {
                 brightness = 0.2 - (j / drillDataLen) / 5;
@@ -198,6 +180,10 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
             }
         }
 
+        console.log(level1Name);
+        console.log(level1Data);
+        console.log(level2Name);
+        console.log(level2Data);
 
         // Create the chart
         containerName.highcharts({

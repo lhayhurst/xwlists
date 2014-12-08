@@ -147,13 +147,22 @@ class TestIntegrity(DatabaseTestCase):
 
     def testRollup(self):
 
-        r = Rollup( self.pm )
-        data = r.rollup_by_ship_faction(use_counts=False)
+        r = Rollup( self.pm, 'faction-ship-points' )
+        data = r.rollup()
         self.assertTrue( data is not None )
         self.assertEqual( len(data), 2 )
 
         rebs = data[0]
-        self.assertEqual( rebs['drilldown']['name'], 'Rebel')
+        self.assertEqual( rebs['drilldown']['name'], 'Imperial')
+
+        r = Rollup( self.pm, 'ship-pilot-points')
+        data = r.rollup()
+        self.assertTrue( data is not None )
+        self.assertEqual( len(data), 16 )
+        sum = 0
+        for rd in data:
+            sum += rd['y']
+        self.assertEqual( 100.0, sum )
 
 
 

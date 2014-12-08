@@ -68,7 +68,7 @@ class ShipType(DeclEnum):
     XWING =  xwingmetadata.X_WING, xwingmetadata.X_WING
     YWING =  xwingmetadata.Y_WING,  xwingmetadata.Y_WING
     AWING =  xwingmetadata.A_WING, xwingmetadata.A_WING
-    BWING = xwingmetadata.B_WING, xwingmetadata.A_WING
+    BWING = xwingmetadata.B_WING, xwingmetadata.B_WING
     EWING  = xwingmetadata.E_WING, xwingmetadata.E_WING
     YT1300 = xwingmetadata.YT_1300, xwingmetadata.YT_1300
     YT2400 = xwingmetadata.YT_2400, xwingmetadata.YT_2400
@@ -320,6 +320,43 @@ class PersistenceManager:
 # and ship_pilot.pilot_id = pilot.id
 # GROUP BY tourney_list.faction,  ship_pilot.ship_type , pilot.name WITH ROLLUP
 
+    def get_ship_pilot_rollup(self):
+        session = self.db_connector.get_session()
+
+        ship_pilot_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
+                             func.count( Pilot.id).label("num_pilots"),
+                             func.sum( Pilot.cost).label("cost_pilots")).\
+            filter( TourneyList.tourney_id == Tourney.id ).\
+            filter( Ship.tlist_id == TourneyList.id ).\
+            filter( Ship.ship_pilot_id == ShipPilot.id ).\
+            filter( ShipPilot.pilot_id == Pilot.id ).\
+            group_by( rollup( TourneyList.faction, ShipPilot.ship_type, Pilot.name) ).\
+            statement.compile(dialect=mysql.dialect())
+
+        connection = self.db_connector.get_engine().connect()
+        ship_pilot_rollup = connection.execute(ship_pilot_rollup_sql)
+
+
+        upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
+                                        func.count( Upgrade.id).label("num_upgrades"),
+                                        func.sum( Upgrade.cost).label("cost_upgrades") ).\
+            filter( TourneyList.tourney_id == Tourney.id ).\
+            filter( Ship.tlist_id == TourneyList.id ).\
+            filter( Ship.ship_pilot_id == ShipPilot.id ).\
+            filter( ShipPilot.pilot_id == Pilot.id ).\
+            filter( ShipUpgrade.ship_id == Ship.id).\
+            filter( Upgrade.id == ShipUpgrade.upgrade_id ).\
+            group_by( rollup( TourneyList.faction, ShipPilot.ship_type, Pilot.name) ).\
+            statement.compile(dialect=mysql.dialect())
+
+        upgrade_rollup = connection.execute( upgrade_rollup_sql )
+
+
+        ret = ship_pilot_rollup.fetchall() + upgrade_rollup.fetchall()
+        connection.close()
+        return ret
+
+
     def get_ship_faction_rollups(self):
         session = self.db_connector.get_session()
 
@@ -351,5 +388,5 @@ class PersistenceManager:
         upgrade_rollup = connection.execute( upgrade_rollup_sql )
         connection.close()
 
-
-        return {  'pilots' : faction_ship_rollup, 'upgrades': upgrade_rollup }
+        ret = faction_ship_rollup.fetchall() + upgrade_rollup.fetchall()
+        return ret

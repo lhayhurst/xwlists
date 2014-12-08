@@ -293,17 +293,16 @@ def down():
 def index():
     return redirect(url_for('tourneys') )
 
+
 @app.route("/get_chart_data", methods=['POST'])
 def get_chart_data():
-    data    = request.json['data']
-    use_points = False
-
-    if data.has_key( 'name') and data['value'] == 'faction-ship-points':
-        use_points = True
-
-    rollup       = Rollup( PersistenceManager(myapp.db_connector) )
-    faction_data = rollup.rollup_by_ship_faction(use_points)
-    return jsonify(data=faction_data, title=data['value'] + rollup.title())
+    data         = request.json['data']
+    rollup       = Rollup( PersistenceManager(myapp.db_connector), data['value'] )
+    chart_data   = rollup.rollup()
+    return jsonify(data=chart_data,
+                   title=data['value'] + rollup.title(),
+                   firstCategory=rollup.first_category(),
+                   secondCategory=rollup.second_category())
 
 
 def to_float(dec):
@@ -312,15 +311,7 @@ def to_float(dec):
 
 @app.route("/charts")
 def charts():
-    pm = PersistenceManager(myapp.db_connector)
-
-    rollup       = Rollup( pm )
-    faction_data = rollup.rollup_by_ship_faction(False)
-
-
-    return render_template('charts.html', faction_data=faction_data,
-                                          pilot_data=None,
-                                          upgrade_data=None)
+    return render_template('charts.html')
 
 if __name__ == '__main__':
     app.debug = True
