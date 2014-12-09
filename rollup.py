@@ -180,7 +180,8 @@ class Rollup:
 
             if self.is_grand_total( faction, ship, has_pilot, pilot):
                 #grand total
-                self.grand_count += cnt
+                if self.grand_count == 0:
+                    self.grand_count = cnt
                 self.grand_sum   += cost
             elif self.is_faction_total( faction, ship, has_pilot, pilot ):
                 #faction total
@@ -188,7 +189,6 @@ class Rollup:
                     self.factions[faction.description] = { 'cnt' : cnt, 'cost': cost }
                 else:
                     href = self.factions[faction.description]
-                    href['cnt']  += cnt
                     href['cost'] += cost
             elif self.is_ship_total( faction, ship, has_pilot, pilot):
                 #ship total
@@ -196,7 +196,6 @@ class Rollup:
                     self.ships[ ship.description ] = { 'faction': faction.description, 'cnt': cnt, 'cost': cost}
                 else:
                     href = self.ships[ship.description]
-                    href['cnt']  += cnt
                     href['cost'] += cost
             else: #full pilot row
                 if not self.pilots.has_key( pilot ):
@@ -205,7 +204,6 @@ class Rollup:
 
                 else:
                     href = self.pilots[pilot]
-                    href['cnt']  += cnt
                     href['cost'] += cost
 
         if has_pilot:

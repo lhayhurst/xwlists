@@ -312,15 +312,6 @@ class PersistenceManager:
                 ret[tourney_name]['num_entered'] += 1
         return ret
 
-# SELECT tourney_list.faction, ship_pilot.ship_type, pilot.name, count(tourney_list.faction), sum(Pilot.cost)
-# FROM tourney, tourney_list, ship, ship_pilot, pilot
-# where
-# tourney_list.tourney_id = tourney.id and
-# ship.tlist_id = tourney_list.id and
-# ship.ship_pilot_id = ship_pilot.id
-# and ship_pilot.pilot_id = pilot.id
-# GROUP BY tourney_list.faction,  ship_pilot.ship_type , pilot.name WITH ROLLUP
-
     def get_ship_pilot_rollup(self, elimination_only):
         session = self.db_connector.get_session()
 
