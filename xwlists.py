@@ -298,7 +298,7 @@ def index():
 @app.route("/get_chart_data", methods=['POST'])
 def get_chart_data():
     data         = request.json['data']
-    rollup       = Rollup( PersistenceManager(myapp.db_connector), data['value'] )
+    rollup       = Rollup( PersistenceManager(myapp.db_connector), data['value'], data['top32'] )
     chart_data   = rollup.rollup()
     return jsonify(data=chart_data,
                    title=data['value'] + rollup.title(),

@@ -8,6 +8,7 @@
         height: 500px;
     }
 
+
     .charts {
         width: 100%;
         float: left;
@@ -49,7 +50,7 @@
     <div class="templates">
         <div class="doughnut-graph" style="width: 665px; height: 400px; margin: 8 auto"></div>
     </div>
-
+    <input type="checkbox" class="top-32-filter" id="top-32-filter" value="top-32-filter">show top 32 only
     <div id="doughnuts" class="charts">
         <div id="faction-ship" class="inline-display"></div>
         <div id="ship-pilot" class="inline-display"></div>
@@ -93,6 +94,7 @@
 $( document ).ready(init );
 
 function init() {
+    console.log("init");
     $('#faction-ship-count-checkbox').prop("checked", true).change();
     $('#faction-ship-points-checkbox').prop("checked", true).change();
     $('#ship-pilot-count-checkbox').prop("checked", true).change();
@@ -102,7 +104,22 @@ function init() {
 
 }
 
+var top32Only = false;
 
+$('.top-32-filter').change(function() {
+    var $this = $(this);
+    if ($this.is(':checked')) {
+        top32Only=true;
+    }
+    else {
+        top32Only=false;
+    }
+    $('#doughnuts #faction-ship').empty();
+    $('#doughnuts #ship-pilot').empty();
+    $('#doughnuts #upgrade_type-upgrade').empty();
+
+    init();
+});
 
 $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-count-checkbox, .ship-pilot-points-checkbox, .upgrade_type-upgrade-count-checkbox, .upgrade_type-upgrade-points-checkbox').change(function() {
     var $this = $(this);
@@ -122,17 +139,21 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
         console.log("no div found");
     }
     if ($this.is(':checked')) {
+        console.log("checked");
         var newDiv = $('.templates .doughnut-graph').clone();
         doughnutFactionDiv.append( newDiv );
             var url = "/get_chart_data";
-
+            console.log("getting data");
             $.ajax({
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
                     url: url,
-                    data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name }  } ),
+                    data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name, 'top32' : top32Only }  } ),
                     success: function (data) {
-                        var donutData = data['data']
+                        var donutData = data['data'];
+                        console.log("got response");
+                        console.log(donutData);
+                        console.log(doughnutFactionDiv);
                         makeDonutGraph( donutData, data.title, data.firstCategory, data.secondCategory, newDiv );
                     },
                     dataType: "json"

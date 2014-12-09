@@ -1,4 +1,5 @@
 from sqlalchemy.dialects import mysql
+from sqlalchemy.sql.operators import ColumnOperators
 
 __author__ = 'lhayhurst'
 
@@ -17,7 +18,7 @@ import xwingmetadata
 
 
 from decl_enum import DeclEnum
-from sqlalchemy import Column, Integer, String, func, Date
+from sqlalchemy import Column, Integer, String, func, Date, and_
 from sqlalchemy import ForeignKey
 
 #rollup help
@@ -320,32 +321,45 @@ class PersistenceManager:
 # and ship_pilot.pilot_id = pilot.id
 # GROUP BY tourney_list.faction,  ship_pilot.ship_type , pilot.name WITH ROLLUP
 
-    def get_ship_pilot_rollup(self):
+    def get_ship_pilot_rollup(self, elimination_only):
         session = self.db_connector.get_session()
+
+        filters = [
+            TourneyList.tourney_id == Tourney.id ,
+            Ship.tlist_id == TourneyList.id ,
+            Ship.ship_pilot_id == ShipPilot.id ,
+            ShipPilot.pilot_id == Pilot.id
+        ]
+
+        if elimination_only:
+            filters.append(TourneyList.tourney_elim_standing != None)
 
         ship_pilot_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
                              func.count( Pilot.id).label("num_pilots"),
                              func.sum( Pilot.cost).label("cost_pilots")).\
-            filter( TourneyList.tourney_id == Tourney.id ).\
-            filter( Ship.tlist_id == TourneyList.id ).\
-            filter( Ship.ship_pilot_id == ShipPilot.id ).\
-            filter( ShipPilot.pilot_id == Pilot.id ).\
+                             filter( and_(*filters)).\
             group_by( rollup( TourneyList.faction, ShipPilot.ship_type, Pilot.name) ).\
             statement.compile(dialect=mysql.dialect())
 
         connection = self.db_connector.get_engine().connect()
         ship_pilot_rollup = connection.execute(ship_pilot_rollup_sql)
 
+        filters = [
+            TourneyList.tourney_id == Tourney.id ,
+            Ship.tlist_id == TourneyList.id ,
+            Ship.ship_pilot_id == ShipPilot.id ,
+            ShipPilot.pilot_id == Pilot.id ,
+            ShipUpgrade.ship_id == Ship.id ,
+            Upgrade.id == ShipUpgrade.upgrade_id,
+        ]
+
+        if elimination_only:
+            filters.append(TourneyList.tourney_elim_standing != None)
 
         upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
                                         func.sum( Upgrade.cost).label("cost_upgrades") ).\
-            filter( TourneyList.tourney_id == Tourney.id ).\
-            filter( Ship.tlist_id == TourneyList.id ).\
-            filter( Ship.ship_pilot_id == ShipPilot.id ).\
-            filter( ShipPilot.pilot_id == Pilot.id ).\
-            filter( ShipUpgrade.ship_id == Ship.id).\
-            filter( Upgrade.id == ShipUpgrade.upgrade_id ).\
+                            filter( and_(*filters)).\
             group_by( rollup( TourneyList.faction, ShipPilot.ship_type, Pilot.name) ).\
             statement.compile(dialect=mysql.dialect())
 
@@ -356,20 +370,26 @@ class PersistenceManager:
         connection.close()
         return ret
 
-
-    def get_upgrade_rollups(self):
+    def get_upgrade_rollups(self, elimination_only):
 
         session = self.db_connector.get_session()
+
+        filters = [
+            TourneyList.tourney_id == Tourney.id,
+            Ship.tlist_id == TourneyList.id ,
+            Ship.ship_pilot_id == ShipPilot.id ,
+            ShipPilot.pilot_id == Pilot.id ,
+            ShipUpgrade.ship_id == Ship.id,
+            Upgrade.id == ShipUpgrade.upgrade_id ,
+        ]
+
+        if elimination_only:
+            filters.append(TourneyList.tourney_elim_standing != None)
 
         upgrade_rollup_sql = session.query( Upgrade.upgrade_type, Upgrade.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
                                         func.sum( Upgrade.cost).label("cost_upgrades") ).\
-            filter( TourneyList.tourney_id == Tourney.id ).\
-            filter( Ship.tlist_id == TourneyList.id ).\
-            filter( Ship.ship_pilot_id == ShipPilot.id ).\
-            filter( ShipPilot.pilot_id == Pilot.id ).\
-            filter( ShipUpgrade.ship_id == Ship.id).\
-            filter( Upgrade.id == ShipUpgrade.upgrade_id ).\
+            filter( and_(*filters)).\
             group_by( rollup( Upgrade.upgrade_type, Upgrade.name) ).\
             statement.compile(dialect=mysql.dialect())
 
@@ -377,31 +397,42 @@ class PersistenceManager:
         ret = connection.execute(upgrade_rollup_sql)
         return ret
 
-    def get_ship_faction_rollups(self):
+    def get_ship_faction_rollups(self, elimination_only):
         session = self.db_connector.get_session()
+
+        filters = [TourneyList.tourney_id == Tourney.id ,
+                        Ship.tlist_id == TourneyList.id,
+                        Ship.ship_pilot_id == ShipPilot.id,
+                        ShipPilot.pilot_id == Pilot.id ]
+
+        if elimination_only:
+            filters.append(TourneyList.tourney_elim_standing != None)
+
 
         faction_ship_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
                              func.count( Pilot.id).label("num_pilots"),
                              func.sum( Pilot.cost).label("cost_pilots")).\
-            filter( TourneyList.tourney_id == Tourney.id ).\
-            filter( Ship.tlist_id == TourneyList.id ).\
-            filter( Ship.ship_pilot_id == ShipPilot.id ).\
-            filter( ShipPilot.pilot_id == Pilot.id ).\
-            group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).statement.compile(dialect=mysql.dialect())
+                             filter( and_(*filters)).\
+                             group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).statement.compile(dialect=mysql.dialect())
 
         connection = self.db_connector.get_engine().connect()
         faction_ship_rollup = connection.execute(faction_ship_rollup_sql)
 
 
+        filters = [ TourneyList.tourney_id == Tourney.id,
+             Ship.tlist_id == TourneyList.id,
+             Ship.ship_pilot_id == ShipPilot.id,
+            ShipPilot.pilot_id == Pilot.id ,
+             ShipUpgrade.ship_id == Ship.id,
+            Upgrade.id == ShipUpgrade.upgrade_id ]
+
+        if elimination_only:
+            filters.append(TourneyList.tourney_elim_standing != None)
+
         upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
                                         func.count( Upgrade.id).label("num_upgrades"),
                                         func.sum( Upgrade.cost).label("cost_upgrades") ).\
-            filter( TourneyList.tourney_id == Tourney.id ).\
-            filter( Ship.tlist_id == TourneyList.id ).\
-            filter( Ship.ship_pilot_id == ShipPilot.id ).\
-            filter( ShipPilot.pilot_id == Pilot.id ).\
-            filter( ShipUpgrade.ship_id == Ship.id).\
-            filter( Upgrade.id == ShipUpgrade.upgrade_id ).\
+            filter( and_(*filters)).\
             group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).\
             statement.compile(dialect=mysql.dialect())
 
