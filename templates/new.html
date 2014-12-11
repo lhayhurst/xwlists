@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <h2>Create a tourney</h2>
- <form action="{{ url_for('add_tourney') }}" method=post class="add-entry"><br>
+ <form action="{{ url_for('add_tourney') }}" method=POST class="add-entry" enctype="multipart/form-data"><br>
     What is the name of the tourney?<br>
     <textarea rows="1" cols="50" name="name" required></textarea><br><br>
     On what date was it played? (format: MM/DD/YYYY)<br>
@@ -15,9 +15,9 @@
         <option value="Vassal play">Vassal play</option>
         <option value="Other">Other</option>
     </select><br><br>
-    What folder on sozin's webserver does it live in?<br>
-    <textarea rows="1" cols="50" name="folder" required></textarea><br><br>
-    <input type=submit value="Create tourney!">
+    Cryodex tournament report export file (optional)?<br>
+    <input type="file" name="tourney_report"><br><br><hr>
+    <input type="submit" value="Create tourney!">
  </form>
  <script>
   $(function() {

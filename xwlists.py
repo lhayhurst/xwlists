@@ -3,8 +3,10 @@ import os
 import re
 import urllib
 import datetime
+from bs4 import BeautifulSoup
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
+from werkzeug.utils import secure_filename
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade
 from rollup import Rollup
@@ -14,7 +16,7 @@ import xwingmetadata
 app =  myapp.create_app()
 UPLOAD_FOLDER = "static/tourneys"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif', 'html'])
 
 is_maintenance_mode = False
 
@@ -33,6 +35,12 @@ def check_for_maintenance():
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     session.remove()
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
 
 @app.route("/about")
 def about():
@@ -134,41 +142,51 @@ def delete_tourney():
 
 @app.route("/add_tourney",methods=['POST'])
 def add_tourney():
+
     name   = request.form['name']
-    folder = request.form['folder']
     type   = request.form['tourney_type']
     mmddyyyy = request.form['date'].split('/')
     date   = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1]))
 
+    tourney_report  = request.files['tourney_report']
+    filename        = tourney_report.filename
+    if tourney_report and allowed_file(filename):
+        html = tourney_report.read()
+        sfilename = secure_filename(filename)
+        tourney_report.save(os.path.join(app.config['UPLOAD_FOLDER'], sfilename))
+        #now parse the thing
+
+
+
     #load all the files in the folder
-    folder_path = os.path.join(static_dir, folder)
-    tourney_files = {}
-    for f in os.listdir(folder_path):
-        if isfile(os.path.join(folder_path,f)):
-            player_name = os.path.splitext(f)[0]
-            tourney_files[player_name] = UPLOAD_FOLDER +  "/" + folder + "/" + f
+    # folder_path = os.path.join(static_dir, folder)
+    # tourney_files = {}
+    # for f in os.listdir(folder_path):
+    #     if isfile(os.path.join(folder_path,f)):
+    #         player_name = os.path.splitext(f)[0]
+    #         tourney_files[player_name] = UPLOAD_FOLDER +  "/" + folder + "/" + f
 
     tourney = Tourney(tourney_name=name, tourney_date=date, tourney_type=type)
     myapp.db_connector.get_session().add(tourney)
     myapp.db_connector.get_session().commit()
 
-    lists   = []
-    for player_name in tourney_files.keys():
-        f = tourney_files[player_name]
+    # lists   = []
+    # for player_name in tourney_files.keys():
+    #     f = tourney_files[player_name]
+    #
+    #     try:
+    #
+    #         match = re.match(r'^(.*?)\s+(\d+)',player_name)
+    #
+    #         tourney_list = TourneyList( tourney_id=tourney.id,
+    #                                     image=f,
+    #                                     player_name=match.group(1),
+    #                                     tourney_standing=match.group(2))
+    #         lists.append( tourney_list )
+    #     except:
+    #         print ("unable to load file name %s" % ( player_name ))
 
-        try:
-
-            match = re.match(r'^(.*?)\s+(\d+)',player_name)
-
-            tourney_list = TourneyList( tourney_id=tourney.id,
-                                        image=f,
-                                        player_name=match.group(1),
-                                        tourney_standing=match.group(2))
-            lists.append( tourney_list )
-        except:
-            print ("unable to load file name %s" % ( player_name ))
-
-    myapp.db_connector.get_session().add_all( lists )
+    #myapp.db_connector.get_session().add_all( lists )
     myapp.db_connector.get_session().commit()
 
     return redirect(url_for('tourneys') )

@@ -1,5 +1,6 @@
 import os
 from sqlalchemy import func
+from cryodex import Cryodex
 from myapp import db_connector
 from persistence import PersistenceManager, Ship, Tourney, TourneyList
 from rollup import Rollup
@@ -38,6 +39,73 @@ class TestIntegrity(DatabaseTestCase):
         self.pm.db_connector.get_base().metadata.create_all(self.pm.db_connector.get_engine(), checkfirst=True )
 
         self.pm.db_connector.get_session().commit()
+
+    def testCryodexImport(self):
+        file = "static/tourneys/TournmentReport.html"
+        with open (file, "r") as myfile:
+            data=myfile.read()
+            c = Cryodex(data)
+            rounds = c.rounds
+            self.assertTrue( rounds is not None )
+            self.assertEqual( 2, len(rounds.keys()))
+            self.assertTrue( rounds.has_key("Round"))
+            self.assertTrue( rounds.has_key("Top"))
+
+            pre_elim_rounds = rounds["Round"]
+            self.assertEqual( 3, len(pre_elim_rounds) )
+
+            round0 = pre_elim_rounds[0]
+            self.assertEqual( round0.type, "Round")
+            self.assertEqual( round0.number, "1")
+            results = round0.results
+            self.assertEqual( 3, len(results))
+            round_result = results[0]
+            self.assertEqual( "bob", round_result.player1)
+            self.assertEqual( "janine", round_result.player2)
+            self.assertEqual( "bob", round_result.winner)
+            self.assertEqual( "100", round_result.player1_score)
+            self.assertEqual( "0", round_result.player2_score)
+
+            round1 = pre_elim_rounds[1]
+            self.assertEqual( round1.type, "Round")
+            self.assertEqual( round1.number, "2")
+
+            round2 = pre_elim_rounds[2]
+            self.assertEqual( round2.type, "Round")
+            self.assertEqual( round2.number, "3")
+
+            elim_rounds = rounds["Top"]
+            self.assertEqual( 2, len(elim_rounds) )
+
+            last_round = elim_rounds[1]
+            self.assertEqual( last_round.type, "Top")
+            self.assertEqual( last_round.number, "2")
+            round_result = last_round.results[0]
+            self.assertEqual( "jenny", round_result.player1)
+            self.assertEqual( "lyle", round_result.player2)
+            self.assertEqual( "jenny", round_result.winner)
+            self.assertEqual( "100", round_result.player1_score)
+            self.assertEqual( "88", round_result.player2_score)
+
+            ranking = c.ranking
+            self.assertTrue( ranking is not None )
+            rankings = ranking.rankings
+            self.assertEqual( 6, len(rankings))
+
+            winner = rankings[0]
+            self.assertEqual( "jenny", winner.player_name)
+            self.assertEqual( "1", winner.rank)
+            self.assertEqual( "13", winner.score)
+            self.assertEqual( "416", winner.mov)
+            self.assertEqual( "20", winner.sos)
+
+            loser = rankings[len(rankings)-1]
+            self.assertEqual( "janine", loser.player_name)
+            self.assertEqual( "6", loser.rank)
+            self.assertEqual( "0", loser.score)
+            self.assertEqual( "56", loser.mov)
+            self.assertEqual( "25", loser.sos)
+
 
 
     @unittest.skip("because")
@@ -144,7 +212,7 @@ class TestIntegrity(DatabaseTestCase):
             self.assertTrue( total_points <= num_tlists * 100 )
             print ("total points %d") % ( total_points )
 
-
+    @unittest.skip("because")
     def testRollup(self):
 
         r = Rollup( self.pm, 'faction-ship-points' )
