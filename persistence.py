@@ -45,8 +45,14 @@ ship_upgrade_table = "ship_upgrade"
 ship_pilot_upgrade_table = "ship_pilot_upgrade_table"
 tourney_list_table = "tourney_list"
 tlist_table = 'tlist'
+tourney_round = "tourney_round"
+tourney_result = "tourney_result"
 
 Base = db_connector.get_base()
+
+class RoundType(DeclEnum):
+    ELIMINATION     = "Elimination", "Elimination"
+    PRE_ELIMINATION = 'Pre-Elimination', 'Pre-Elimination'
 
 class Faction(DeclEnum):
     IMPERIAL = "Imperial", "Imperial"
@@ -158,8 +164,14 @@ class Tourney(Base):
     tourney_date  = Column(Date)
     tourney_type  = Column(String(128))
     tourney_lists = relationship( "TourneyList", back_populates="tourney", order_by="asc(TourneyList.tourney_standing)")
+    rounds        = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)")
 
+    def get_pre_elimination_rounds(self):
+        return [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]
 
+    def get_elim_rounds(self):
+        ret =  [r for r in self.rounds if r.round_type == RoundType.ELIMINATION]
+        return ret
 
 class TourneyList(Base):
     __tablename__    = tourney_list_table
@@ -169,12 +181,42 @@ class TourneyList(Base):
     tourney_standing = Column(Integer)
     tourney_elim_standing  = Column(Integer)
     image            = Column(String(128))
-    name   = Column(String(128))
-    faction     = Column(Faction.db_type())
-    points      = Column(Integer)
+    name             = Column(String(128))
+    faction          = Column(Faction.db_type())
+    points           = Column(Integer)
 
     tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
-    ships       = relationship(Ship.__name__)
+    ships            = relationship(Ship.__name__)
+
+tourney_round_table = "tourney_round"
+class TourneyRound(Base):
+    __tablename__ = tourney_round_table
+    id            = Column(Integer, primary_key=True)
+    tourney_id    = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
+    round_num     = Column(Integer)
+    round_type    = Column(RoundType.db_type())
+    results       = relationship( "RoundResult", back_populates="round")
+    tourney       = relationship( Tourney.__name__, back_populates="rounds")
+
+
+round_result_table = "round_result"
+class RoundResult(Base):
+    __tablename__ = round_result_table
+    id            = Column(Integer, primary_key=True)
+    round_id      = Column(ForeignKey('{0}.id'.format(tourney_round_table)))
+    list1_id      = Column(ForeignKey('{0}.id'.format(tourney_list_table)))
+    list2_id      = Column(ForeignKey('{0}.id'.format(tourney_list_table)))
+    winner_id     = Column(ForeignKey('{0}.id'.format(tourney_list_table)))
+    loser_id      = Column(ForeignKey('{0}.id'.format(tourney_list_table)))
+    list1_score   = Column(Integer)
+    list2_score   = Column(Integer)
+    round         = relationship( TourneyRound.__name__, back_populates="results")
+    list1         = relationship( TourneyList.__name__, foreign_keys='RoundResult.list1_id',  uselist=False)
+    list2         = relationship( TourneyList.__name__, foreign_keys='RoundResult.list2_id',  uselist=False)
+    winner        = relationship( TourneyList.__name__, foreign_keys='RoundResult.winner_id', uselist=False)
+    loser         = relationship( TourneyList.__name__, foreign_keys='RoundResult.loser_id',  uselist=False)
+
+
 
 
 class PersistenceManager:

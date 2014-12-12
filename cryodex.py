@@ -1,6 +1,7 @@
 import re
 from bs4 import BeautifulSoup
 import collections
+from persistence import RoundType
 
 RANKINGS = 'Rankings'
 
@@ -24,6 +25,14 @@ class CryodexRound:
     def add_result( self, player1, player2, winner, player1_score, player2_score):
         result = CryodexResult( player1, player2, winner, player1_score, player2_score)
         self.results.append( result )
+
+    def get_round_type(self):
+        if self.type == 'Round':
+            return RoundType.PRE_ELIMINATION
+        elif self.type == 'Top':
+            return RoundType.ELIMINATION
+        else:
+            return None
 
 class CryodexRank:
     def __init__(self, rank, player_name, score, mov, sos):

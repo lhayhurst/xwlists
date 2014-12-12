@@ -42,7 +42,7 @@ if __name__ == "__main__":
     elif sys.argv[1] == 'create':
         pm = PersistenceManager(db_connector)
         pm.create_schema()
-        pm.populate_reference_tables()
+        #pm.populate_reference_tables()
         db_connector.get_session().commit()
         db_connector.get_session().close_all()
     elif sys.argv[1] == 'destroy':

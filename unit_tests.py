@@ -2,7 +2,7 @@ import os
 from sqlalchemy import func
 from cryodex import Cryodex
 from myapp import db_connector
-from persistence import PersistenceManager, Ship, Tourney, TourneyList
+from persistence import PersistenceManager, Ship, Tourney, TourneyList, TourneyRound, RoundResult
 from rollup import Rollup
 
 __author__ = 'lhayhurst'
@@ -40,7 +40,107 @@ class TestIntegrity(DatabaseTestCase):
 
         self.pm.db_connector.get_session().commit()
 
+
     def testCryodexImport(self):
+        file = "static/tourneys/TournmentReport.html"
+        tourney_name = "test"
+        with open (file, "r") as myfile:
+            data=myfile.read()
+            c = Cryodex(data)
+            t = Tourney( tourney_name=tourney_name, tourney_date="12/01/14", tourney_type="whatev")
+            self.pm.db_connector.get_session().add(t)
+
+            #add the players
+            players = {}
+            for player in c.players.keys():
+                tlist = TourneyList( tourney=t, player_name=player)
+                self.pm.db_connector.get_session().add(tlist)
+                players[player] = tlist
+
+            for round_type in c.rounds.keys():
+                rounds = c.rounds[round_type]
+                for round in rounds:
+                    tr = TourneyRound( round_num=int(round.number), round_type=round.get_round_type(), tourney=t )
+                    self.pm.db_connector.get_session().add(tr)
+                    for round_result in round.results:
+                        p1_tourney_list = players[round_result.player1]
+                        self.assertTrue(p1_tourney_list is not None)
+                        p2_tourney_list = players[round_result.player2]
+                        self.assertTrue(p2_tourney_list)
+                        winner = None
+                        loser  = None
+                        if round_result.player1 == round_result.winner:
+                            winner = p1_tourney_list
+                            loser  = p2_tourney_list
+                        else:
+                            winner = p2_tourney_list
+                            loser  = p1_tourney_list
+                        rr = RoundResult( round=tr,list1=p1_tourney_list, list2=p2_tourney_list, winner=winner, loser=loser,
+                                          list1_score=int(round_result.player1_score), list2_score=int(round_result.player2_score)  )
+                        self.pm.db_connector.get_session().commit()
+            self.pm.db_connector.get_session().commit()
+
+        #pull them out and verify they loaded ok
+        tourney = self.pm.get_tourney(tourney_name)
+        self.assertTrue( tourney is not None)
+        self.assertTrue( tourney.rounds is not None)
+        self.assertEqual( len(tourney.rounds),5)
+
+        pre_elim_rounds = tourney.get_pre_elimination_rounds()
+        self.assertTrue( pre_elim_rounds is not None)
+        self.assertEqual( len(pre_elim_rounds), 3 )
+        i = 1
+        for round in pre_elim_rounds:
+            self.assertEqual( i, round.round_num)
+            i = i + 1
+
+        elim_rounds = tourney.get_elim_rounds()
+        self.assertTrue( elim_rounds is not None)
+        self.assertEqual( len(elim_rounds), 2 )
+
+        i = 4
+        for round in elim_rounds:
+            self.assertEqual( i, round.round_num)
+            i = i - 2
+
+
+        #now check the round results
+        round1 = pre_elim_rounds[0]
+        round1_results = round1.results
+        self.assertEqual( 3, len(round1_results) )
+        result1 = round1_results[0]
+        winner  = result1.winner
+        loser    = result1.loser
+        self.assertTrue( winner is not None)
+        self.assertTrue( loser is not None)
+        self.assertEqual( "bob", winner.player_name)
+        self.assertEqual( "janine", loser.player_name)
+        self.assertEqual( 100, result1.list1_score)
+        self.assertEqual( 0, result1.list2_score )
+        self.assertEqual( winner, result1.list1)
+        self.assertEqual( loser, result1.list2)
+
+
+        for round in pre_elim_rounds:
+            self.assertEqual( 3, len(round.results))
+
+        final_round = elim_rounds[1]
+        results = final_round.results
+        result = results[0]
+        winner  = result.winner
+        loser    = result.loser
+        self.assertTrue( winner is not None)
+        self.assertTrue( loser is not None)
+        self.assertEqual( "jenny", winner.player_name)
+        self.assertEqual( "lyle", loser.player_name)
+        self.assertEqual( 100, result.list1_score)
+        self.assertEqual( 88, result.list2_score )
+        self.assertEqual( winner, result.list1)
+        self.assertEqual( loser, result.list2)
+
+
+    @unittest.skip("because")
+    def testCryodexParse(self):
         file = "static/tourneys/TournmentReport.html"
         with open (file, "r") as myfile:
             data=myfile.read()
@@ -215,7 +315,7 @@ class TestIntegrity(DatabaseTestCase):
     @unittest.skip("because")
     def testRollup(self):
 
-        r = Rollup( self.pm, 'faction-ship-points' )
+        r = Rollup( self.pm, 'faction-ship-points', True )
         data = r.rollup()
         self.assertTrue( data is not None )
         self.assertEqual( len(data), 2 )
@@ -223,23 +323,23 @@ class TestIntegrity(DatabaseTestCase):
         rebs = data[0]
         self.assertEqual( rebs['drilldown']['name'], 'Imperial')
 
-        r = Rollup( self.pm, 'ship-pilot-points')
+        r = Rollup( self.pm, 'ship-pilot-points', True)
         data = r.rollup()
         self.assertTrue( data is not None )
-        self.assertEqual( len(data), 16 )
+        self.assertEqual( len(data), 11 )
         sum = 0
         for rd in data:
             sum += rd['y']
         self.assertAlmostEqual( 100.0, sum, 1 )
 
-        r = Rollup( self.pm, 'upgrade_type-upgrade-points')
+        r = Rollup( self.pm, 'upgrade_type-upgrade-points', True)
         data = r.rollup()
         self.assertTrue( data is not None)
-        self.assertEqual( len(data), 11 )
+        self.assertEqual( len(data), 8 )
 
 
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testTourneyList(self):
         tourneys = self.pm.get_tourneys()
 
@@ -253,10 +353,9 @@ class TestIntegrity(DatabaseTestCase):
             for tl in tourney.tourney_lists:
                 num_list_points   = 0
 
-                list = tl.list
-                self.assertTrue( list.faction is not None )
-                self.assertTrue(len(list.ships) > 0)
-                for ship in list.ships:
+                self.assertTrue( tl.faction is not None )
+                self.assertTrue(len(tl.ships) > 0)
+                for ship in tl.ships:
                     sp = ship.ship_pilot
                     self.assertTrue( sp is not None )
                     pilot = sp.pilot
