@@ -165,13 +165,24 @@ class Tourney(Base):
     tourney_type  = Column(String(128))
     tourney_lists = relationship( "TourneyList", back_populates="tourney", order_by="asc(TourneyList.tourney_standing)")
     rounds        = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)")
+    rankings      = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)")
 
     def get_pre_elimination_rounds(self):
-        return [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]
+        ret = [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]
+        return ret
 
     def get_elim_rounds(self):
         ret =  [r for r in self.rounds if r.round_type == RoundType.ELIMINATION]
         return ret
+
+
+    def get_descending_elim_rounds(self):
+        ret =  [r for r in self.rounds if r.round_type == RoundType.ELIMINATION]
+        ret.reverse()
+        return ret
+
+    def headline(self):
+        return "{0}".format(self.id)
 
 class TourneyList(Base):
     __tablename__    = tourney_list_table
@@ -198,6 +209,22 @@ class TourneyRound(Base):
     results       = relationship( "RoundResult", back_populates="round")
     tourney       = relationship( Tourney.__name__, back_populates="rounds")
 
+tourney_ranking_table = "tourney_ranking"
+class TourneyRanking(Base):
+    __tablename__      = tourney_ranking_table
+    id                 = Column(Integer, primary_key=True)
+    tourney_id    = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
+    tourney_list_id    = Column(Integer, ForeignKey('{0}.id'.format(tourney_list_table)))
+    score              = Column(Integer)
+    mov                = Column(Integer)
+    sos                = Column(Integer)
+    rank               = Column(Integer)
+    tourney_list       = relationship( TourneyList.__name__, uselist=False)
+    tourney            = relationship( Tourney.__name__, back_populates="rankings")
+
+
+
+
 
 round_result_table = "round_result"
 class RoundResult(Base):
@@ -216,7 +243,15 @@ class RoundResult(Base):
     winner        = relationship( TourneyList.__name__, foreign_keys='RoundResult.winner_id', uselist=False)
     loser         = relationship( TourneyList.__name__, foreign_keys='RoundResult.loser_id',  uselist=False)
 
+    def winning_score(self):
+        if self.winner.id == self.list1.id:
+            return self.list1_score
+        return self.list2_score
 
+    def losing_score(self):
+        if self.loser.id == self.list1.id:
+            return self.list1_score
+        return self.list2_score
 
 
 class PersistenceManager:
@@ -291,12 +326,23 @@ class PersistenceManager:
 
     def delete_tourney(self, tourney_name):
         tourney = self.get_tourney( tourney_name)
-        for list in tourney.tourney_lists:
-            for ship in list.ships:
-                for su in ship.upgrades:
-                    self.db_connector.get_session().delete(su)
-                self.db_connector.get_session().delete(ship)
-            self.db_connector.get_session().delete(list)
+        if tourney is None:
+            return
+        if tourney.rounds is not None:
+            for round in tourney.rounds:
+                self.db_connector.get_session().delete(round)
+                for result in round.results():
+                    self.db_connector.get_session().delete(result)
+        if tourney.rankings is not None:
+            for rank in tourney.rankings:
+                self.db_connector.get_session().delete(rank)
+        if tourney.tourney_lists is not None:
+            for list in tourney.tourney_lists:
+                for ship in list.ships:
+                    for su in ship.upgrades:
+                        self.db_connector.get_session().delete(su)
+                    self.db_connector.get_session().delete(ship)
+                self.db_connector.get_session().delete(list)
         self.db_connector.get_session().delete(tourney)
         self.db_connector.get_session().commit()
 

@@ -2,7 +2,7 @@ import os
 from sqlalchemy import func
 from cryodex import Cryodex
 from myapp import db_connector
-from persistence import PersistenceManager, Ship, Tourney, TourneyList, TourneyRound, RoundResult
+from persistence import PersistenceManager, Ship, Tourney, TourneyList, TourneyRound, RoundResult, TourneyRanking
 from rollup import Rollup
 
 __author__ = 'lhayhurst'
@@ -34,15 +34,16 @@ class DatabaseTestCase(unittest.TestCase):
 
 class TestIntegrity(DatabaseTestCase):
 
-    @unittest.skip("because")
-    def testTListCreation(self):
-        self.pm.db_connector.get_base().metadata.create_all(self.pm.db_connector.get_engine(), checkfirst=True )
-
+    #@unittest.skip("because")
+    def testDeleteTourneys(self):
+        tourneys = self.pm.get_tourneys()
+        for tourney in tourneys:
+            self.pm.delete_tourney(tourney.tourney_name)
         self.pm.db_connector.get_session().commit()
 
-
+    #@unittest.skip("because")
     def testCryodexImport(self):
-        file = "static/tourneys/TournmentReport.html"
+        file = "static/tourneys/treport.html"
         tourney_name = "test"
         with open (file, "r") as myfile:
             data=myfile.read()
@@ -56,6 +57,7 @@ class TestIntegrity(DatabaseTestCase):
                 tlist = TourneyList( tourney=t, player_name=player)
                 self.pm.db_connector.get_session().add(tlist)
                 players[player] = tlist
+            self.pm.db_connector.get_session().commit()
 
             for round_type in c.rounds.keys():
                 rounds = c.rounds[round_type]
@@ -77,7 +79,18 @@ class TestIntegrity(DatabaseTestCase):
                             loser  = p1_tourney_list
                         rr = RoundResult( round=tr,list1=p1_tourney_list, list2=p2_tourney_list, winner=winner, loser=loser,
                                           list1_score=int(round_result.player1_score), list2_score=int(round_result.player2_score)  )
-                        self.pm.db_connector.get_session().commit()
+                        self.pm.db_connector.get_session().add(rr)
+#                        self.pm.db_connector.get_session().commit()
+
+            #finally load the rankings
+            for rank in c.ranking.rankings:
+                r = TourneyRanking( tourney=t,
+                                          tourney_list=players[rank.player_name],
+                                          rank=rank.rank,
+                                          mov=rank.mov,
+                                          sos=rank.sos,
+                                          score=rank.score)
+                self.pm.db_connector.get_session().add(r)
             self.pm.db_connector.get_session().commit()
 
         #pull them out and verify they loaded ok
@@ -98,10 +111,10 @@ class TestIntegrity(DatabaseTestCase):
         self.assertTrue( elim_rounds is not None)
         self.assertEqual( len(elim_rounds), 2 )
 
-        i = 4
+        i = 2
         for round in elim_rounds:
             self.assertEqual( i, round.round_num)
-            i = i - 2
+            i = i + 2
 
 
         #now check the round results
@@ -124,7 +137,7 @@ class TestIntegrity(DatabaseTestCase):
         for round in pre_elim_rounds:
             self.assertEqual( 3, len(round.results))
 
-        final_round = elim_rounds[1]
+        final_round = elim_rounds[0]
         results = final_round.results
         result = results[0]
         winner  = result.winner
@@ -137,6 +150,30 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( 88, result.list2_score )
         self.assertEqual( winner, result.list1)
         self.assertEqual( loser, result.list2)
+        self.assertEqual( 100, result.winning_score())
+        self.assertEqual( 88, result.losing_score())
+
+
+        #check the rankings
+        rankings = t.rankings
+        self.assertTrue(rankings is not None)
+        self.assertEqual( 6, len(rankings))
+        winner = rankings[0]
+        self.assertTrue( winner is not None)
+        self.assertEqual( "jenny", winner.tourney_list.player_name)
+        self.assertEqual( 1, winner.rank )
+        self.assertEqual( 13, winner.score)
+        self.assertEqual( 416, winner.mov)
+        self.assertEqual( 20, winner.sos )
+
+        loser = rankings[len(rankings)-1]
+        self.assertTrue( loser is not None)
+        self.assertEqual( "janine", loser.tourney_list.player_name)
+        self.assertEqual( 6, loser.rank )
+        self.assertEqual( 0, loser.score)
+        self.assertEqual( 56, loser.mov)
+        self.assertEqual( 25, loser.sos )
+
 
 
     @unittest.skip("because")

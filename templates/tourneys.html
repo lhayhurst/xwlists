@@ -15,6 +15,7 @@
 <table class="tg">
   <tr>
     <th class="tg-3i0c">Name</th>
+    <th class="tg-310c">Results</th>
     <th class="tg-3i0c">Type</th>
     <th class="tg-3i0c">Date Played</th>
     <th class="tg-3i0c">Total Lists</th>
@@ -29,6 +30,7 @@
       {% for key, value in tourneys.iteritems() %}
       <tr>
          <td class="tg-031e">{{ key }}</td>
+         <td class="tg-031e"><a href="{{ url_for( 'tourney_results', tourney_id=value['tourney'].id ) }}">{{ value['tourney'].headline() }}</a></td>
          <td class="tg-031e">{{ value['tourney'].tourney_type }}</td>
          <td class="tg-031e">{{ value['tourney'].tourney_date }}</td>
          <td class="tg-031e">{{  value['num_entered'] + value['num_not_entered']  }}</td>

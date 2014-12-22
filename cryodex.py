@@ -36,11 +36,11 @@ class CryodexRound:
 
 class CryodexRank:
     def __init__(self, rank, player_name, score, mov, sos):
-        self.rank        = rank
+        self.rank        = int(rank)
         self.player_name = player_name
-        self.score       = score
-        self.mov         = mov
-        self.sos         = sos
+        self.score       = int(score)
+        self.mov         = int(mov)
+        self.sos         = int(sos)
 
 
 class CryodexRankings:

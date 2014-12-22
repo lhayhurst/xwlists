@@ -44,6 +44,45 @@ INSERT INTO `pilot` VALUES (1,'Carnor Jax',26),(2,'Green Sq. Pilot',19),(3,'Jan 
 UNLOCK TABLES;
 
 --
+-- Table structure for table `round_result`
+--
+
+DROP TABLE IF EXISTS `round_result`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `round_result` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `round_id` int(11) DEFAULT NULL,
+  `list1_id` int(11) DEFAULT NULL,
+  `list2_id` int(11) DEFAULT NULL,
+  `winner_id` int(11) DEFAULT NULL,
+  `loser_id` int(11) DEFAULT NULL,
+  `list1_score` int(11) DEFAULT NULL,
+  `list2_score` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `round_id` (`round_id`),
+  KEY `list1_id` (`list1_id`),
+  KEY `list2_id` (`list2_id`),
+  KEY `winner_id` (`winner_id`),
+  KEY `loser_id` (`loser_id`),
+  CONSTRAINT `round_result_ibfk_1` FOREIGN KEY (`round_id`) REFERENCES `tourney_round` (`id`),
+  CONSTRAINT `round_result_ibfk_2` FOREIGN KEY (`list1_id`) REFERENCES `tourney_list` (`id`),
+  CONSTRAINT `round_result_ibfk_3` FOREIGN KEY (`list2_id`) REFERENCES `tourney_list` (`id`),
+  CONSTRAINT `round_result_ibfk_4` FOREIGN KEY (`winner_id`) REFERENCES `tourney_list` (`id`),
+  CONSTRAINT `round_result_ibfk_5` FOREIGN KEY (`loser_id`) REFERENCES `tourney_list` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `round_result`
+--
+
+LOCK TABLES `round_result` WRITE;
+/*!40000 ALTER TABLE `round_result` DISABLE KEYS */;
+/*!40000 ALTER TABLE `round_result` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ship`
 --
 
@@ -187,6 +226,65 @@ INSERT INTO `tourney_list` VALUES (1,1,'Ira Mayer',1,4,'static/tourneys/worlds/F
 UNLOCK TABLES;
 
 --
+-- Table structure for table `tourney_ranking`
+--
+
+DROP TABLE IF EXISTS `tourney_ranking`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tourney_ranking` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tourney_id` int(11) DEFAULT NULL,
+  `tourney_list_id` int(11) DEFAULT NULL,
+  `score` int(11) DEFAULT NULL,
+  `mov` int(11) DEFAULT NULL,
+  `sos` int(11) DEFAULT NULL,
+  `rank` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tourney_id` (`tourney_id`),
+  KEY `tourney_list_id` (`tourney_list_id`),
+  CONSTRAINT `tourney_ranking_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
+  CONSTRAINT `tourney_ranking_ibfk_2` FOREIGN KEY (`tourney_list_id`) REFERENCES `tourney_list` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tourney_ranking`
+--
+
+LOCK TABLES `tourney_ranking` WRITE;
+/*!40000 ALTER TABLE `tourney_ranking` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tourney_ranking` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tourney_round`
+--
+
+DROP TABLE IF EXISTS `tourney_round`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tourney_round` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tourney_id` int(11) DEFAULT NULL,
+  `round_num` int(11) DEFAULT NULL,
+  `round_type` enum('Elimination','Pre-Elimination') DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tourney_id` (`tourney_id`),
+  CONSTRAINT `tourney_round_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tourney_round`
+--
+
+LOCK TABLES `tourney_round` WRITE;
+/*!40000 ALTER TABLE `tourney_round` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tourney_round` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `upgrade`
 --
 
@@ -221,4 +319,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-12-11  7:29:03
+-- Dump completed on 2014-12-16  8:51:27

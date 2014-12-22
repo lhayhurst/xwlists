@@ -6,9 +6,12 @@ import datetime
 from bs4 import BeautifulSoup
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
+from mock import self
 from werkzeug.utils import secure_filename
+from cryodex import Cryodex
 import myapp
-from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade
+from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
+    TourneyRound, RoundResult
 from rollup import Rollup
 
 import xwingmetadata
@@ -140,9 +143,49 @@ def delete_tourney():
     pm.delete_tourney(tourney_name)
     return redirect(url_for('tourneys') )
 
+def create_tourney(cryodex, tourney_name, tourney_date, tourney_type):
+
+    pm = PersistenceManager(myapp.db_connector)
+    t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date, tourney_type=tourney_type)
+
+    pm.db_connector.get_session().add(t)
+    #add the players
+    players = {}
+
+    for player in cryodex.players.keys():
+        tlist = TourneyList(tourney=t, player_name=player)
+        pm.db_connector.get_session().add(tlist)
+        players[player] = tlist
+    pm.db_connector.get_session().commit()
+
+    for round_type in cryodex.rounds.keys():
+        rounds = cryodex.rounds[round_type]
+        for round in rounds:
+            tr = TourneyRound(round_num=int(round.number), round_type=round.get_round_type(), tourney=t)
+            pm.db_connector.get_session().add(tr)
+            for round_result in round.results:
+                p1_tourney_list = players[round_result.player1]
+                p2_tourney_list = players[round_result.player2]
+                winner = None
+                loser = None
+                if round_result.player1 == round_result.winner:
+                    winner = p1_tourney_list
+                    loser = p2_tourney_list
+                else:
+                    winner = p2_tourney_list
+                    loser = p1_tourney_list
+
+                rr = RoundResult(round=tr, list1=p1_tourney_list, list2=p2_tourney_list, winner=winner, loser=loser,
+                                 list1_score=int(round_result.player1_score),
+                                 list2_score=int(round_result.player2_score))
+                pm.db_connector.get_session().commit()
+    pm.db_connector.get_session().commit()
+    return t
+
 @app.route("/add_tourney",methods=['POST'])
 def add_tourney():
 
+    #TODO: better edge testing against user input
     name   = request.form['name']
     type   = request.form['tourney_type']
     mmddyyyy = request.form['date'].split('/')
@@ -154,10 +197,13 @@ def add_tourney():
         html = tourney_report.read()
         sfilename = secure_filename(filename)
         tourney_report.save(os.path.join(app.config['UPLOAD_FOLDER'], sfilename))
-        #now parse the thing
+
+        cryodex = Cryodex(html)
+        t = create_tourney(cryodex, name, date, type )
 
 
 
+    #TODO: this is code for handling the scanned player list scenario.   I'll refactor it to something useful if the situation comes up again.
     #load all the files in the folder
     # folder_path = os.path.join(static_dir, folder)
     # tourney_files = {}
@@ -165,11 +211,6 @@ def add_tourney():
     #     if isfile(os.path.join(folder_path,f)):
     #         player_name = os.path.splitext(f)[0]
     #         tourney_files[player_name] = UPLOAD_FOLDER +  "/" + folder + "/" + f
-
-    tourney = Tourney(tourney_name=name, tourney_date=date, tourney_type=type)
-    myapp.db_connector.get_session().add(tourney)
-    myapp.db_connector.get_session().commit()
-
     # lists   = []
     # for player_name in tourney_files.keys():
     #     f = tourney_files[player_name]
@@ -187,7 +228,7 @@ def add_tourney():
     #         print ("unable to load file name %s" % ( player_name ))
 
     #myapp.db_connector.get_session().add_all( lists )
-    myapp.db_connector.get_session().commit()
+    #myapp.db_connector.get_session().commit()
 
     return redirect(url_for('tourneys') )
 
@@ -287,6 +328,13 @@ def add_squad():
          pm.db_connector.get_session().commit()
 
          return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list.id)
+
+@app.route('/tourney_results')
+def tourney_results():
+    tourney_id = request.args.get('tourney_id')
+    pm = PersistenceManager(myapp.db_connector)
+    tourney = pm.get_tourney_by_id(tourney_id)
+    return render_template('tourney_results.html', tourney=tourney)
 
 @app.route('/display_list')
 def display_list():
