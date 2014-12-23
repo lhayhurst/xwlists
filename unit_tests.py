@@ -2,7 +2,8 @@ import os
 from sqlalchemy import func
 from cryodex import Cryodex
 from myapp import db_connector
-from persistence import PersistenceManager, Ship, Tourney, TourneyList, TourneyRound, RoundResult, TourneyRanking
+from persistence import PersistenceManager, Ship, Tourney, TourneyList, TourneyRound, RoundResult, TourneyRanking, \
+    TourneyPlayer
 from rollup import Rollup
 
 __author__ = 'lhayhurst'
@@ -34,6 +35,17 @@ class DatabaseTestCase(unittest.TestCase):
 
 class TestIntegrity(DatabaseTestCase):
 
+
+    @unittest.skip("because")
+    def testPortPlayerTable(self):
+        tourneys = self.pm.get_tourneys()
+        for tourney in tourneys:
+            for tlist in tourney.tourney_lists:
+                player = TourneyPlayer( player_name=tlist.player_name, tourney=tourney)
+                tlist.player = player
+                self.pm.db_connector.get_session().add(player)
+        self.pm.db_connector.get_session().commit()
+
     #@unittest.skip("because")
     def testDeleteTourneys(self):
         tourneys = self.pm.get_tourneys()
@@ -54,7 +66,8 @@ class TestIntegrity(DatabaseTestCase):
             #add the players
             players = {}
             for player in c.players.keys():
-                tlist = TourneyList( tourney=t, player_name=player)
+                tp    = TourneyPlayer( tourney=t, player_name=player)
+                tlist = TourneyList( tourney=t, player=tp)
                 self.pm.db_connector.get_session().add(tlist)
                 players[player] = tlist
             self.pm.db_connector.get_session().commit()
@@ -126,8 +139,8 @@ class TestIntegrity(DatabaseTestCase):
         loser    = result1.loser
         self.assertTrue( winner is not None)
         self.assertTrue( loser is not None)
-        self.assertEqual( "bob", winner.player_name)
-        self.assertEqual( "janine", loser.player_name)
+        self.assertEqual( "bob", winner.player.player_name)
+        self.assertEqual( "janine", loser.player.player_name)
         self.assertEqual( 100, result1.list1_score)
         self.assertEqual( 0, result1.list2_score )
         self.assertEqual( winner, result1.list1)
@@ -140,16 +153,16 @@ class TestIntegrity(DatabaseTestCase):
         final_round = elim_rounds[0]
         results = final_round.results
         result = results[0]
-        winner  = result.winner
-        loser    = result.loser
+        winner  = result.winner.player
+        loser    = result.loser.player
         self.assertTrue( winner is not None)
         self.assertTrue( loser is not None)
         self.assertEqual( "jenny", winner.player_name)
         self.assertEqual( "lyle", loser.player_name)
         self.assertEqual( 100, result.list1_score)
         self.assertEqual( 88, result.list2_score )
-        self.assertEqual( winner, result.list1)
-        self.assertEqual( loser, result.list2)
+        self.assertEqual( winner, result.list1.player)
+        self.assertEqual( loser, result.list2.player)
         self.assertEqual( 100, result.winning_score())
         self.assertEqual( 88, result.losing_score())
 
@@ -160,7 +173,7 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( 6, len(rankings))
         winner = rankings[0]
         self.assertTrue( winner is not None)
-        self.assertEqual( "jenny", winner.tourney_list.player_name)
+        self.assertEqual( "jenny", winner.tourney_list.player.player_name)
         self.assertEqual( 1, winner.rank )
         self.assertEqual( 13, winner.score)
         self.assertEqual( 416, winner.mov)
@@ -168,7 +181,7 @@ class TestIntegrity(DatabaseTestCase):
 
         loser = rankings[len(rankings)-1]
         self.assertTrue( loser is not None)
-        self.assertEqual( "janine", loser.tourney_list.player_name)
+        self.assertEqual( "janine", loser.tourney_list.player.player_name)
         self.assertEqual( 6, loser.rank )
         self.assertEqual( 0, loser.score)
         self.assertEqual( 56, loser.mov)
@@ -176,9 +189,9 @@ class TestIntegrity(DatabaseTestCase):
 
 
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testCryodexParse(self):
-        file = "static/tourneys/TournmentReport.html"
+        file = "static/tourneys/treport.html"
         with open (file, "r") as myfile:
             data=myfile.read()
             c = Cryodex(data)
@@ -231,21 +244,21 @@ class TestIntegrity(DatabaseTestCase):
 
             winner = rankings[0]
             self.assertEqual( "jenny", winner.player_name)
-            self.assertEqual( "1", winner.rank)
-            self.assertEqual( "13", winner.score)
-            self.assertEqual( "416", winner.mov)
-            self.assertEqual( "20", winner.sos)
+            self.assertEqual( 1, winner.rank)
+            self.assertEqual( 13, winner.score)
+            self.assertEqual( 416, winner.mov)
+            self.assertEqual( 20, winner.sos)
 
             loser = rankings[len(rankings)-1]
             self.assertEqual( "janine", loser.player_name)
-            self.assertEqual( "6", loser.rank)
-            self.assertEqual( "0", loser.score)
-            self.assertEqual( "56", loser.mov)
-            self.assertEqual( "25", loser.sos)
+            self.assertEqual( 6, loser.rank)
+            self.assertEqual( 0, loser.score)
+            self.assertEqual( 56, loser.mov)
+            self.assertEqual( 25, loser.sos)
 
 
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testDeleteTourney(self):
         tourneys = self.pm.get_tourneys().all()
         self.assertEqual( 2, len(tourneys))
@@ -261,7 +274,7 @@ class TestIntegrity(DatabaseTestCase):
         filter(Tourney.id == tourney.id ).first()[0]
 
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testDeleteTourneyList(self):
         tname = 'Worlds 2014 Flight One'
         tourney = self.pm.get_tourney( tname )
@@ -286,7 +299,7 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( num_ships_in_tourney - num_ships_in_list, num_ships_after_delete )
 
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testGetRandomTourneyList(self):
         tname = 'Worlds 2014 Flight One'
         tourney = self.pm.get_tourney( tname )
@@ -307,7 +320,7 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( random_tourney_list.id, first_tourney_list_id )
 
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testNewTourneyList(self):
         tourneys = self.pm.get_tourneys()
 
@@ -322,10 +335,11 @@ class TestIntegrity(DatabaseTestCase):
             for tl in tourney.tourney_lists:
                 num_list_points   = 0
                 self.assertTrue( tl.faction is not None )
+                self.assertTrue( tl.player is not None)
                 self.assertTrue(len(tl.ships) > 0)
                 self.assertTrue( tl.image is not None )
-                self.assertTrue( tl.tourney_elim_standing is None )
-                self.assertTrue( tl.tourney_standing > 0 )
+#                self.assertTrue( tl.tourney_elim_standing is None )
+#                self.assertTrue( tl.tourney_standing > 0 )
                 self.assertTrue( tl.points > 0 )
                 for ship in tl.ships:
                     sp = ship.ship_pilot
@@ -349,7 +363,7 @@ class TestIntegrity(DatabaseTestCase):
             self.assertTrue( total_points <= num_tlists * 100 )
             print ("total points %d") % ( total_points )
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testRollup(self):
 
         r = Rollup( self.pm, 'faction-ship-points', True )
@@ -376,7 +390,7 @@ class TestIntegrity(DatabaseTestCase):
 
 
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testTourneyList(self):
         tourneys = self.pm.get_tourneys()
 

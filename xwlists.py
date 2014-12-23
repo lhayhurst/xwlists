@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 from cryodex import Cryodex
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
-    TourneyRound, RoundResult
+    TourneyRound, RoundResult, TourneyPlayer
 from rollup import Rollup
 
 import xwingmetadata
@@ -90,7 +90,7 @@ def get_tourney_lists_as_text(tourney, make_header=True ):
             for ship in tourney_list.ships:
                 new_row = []
                 new_row.extend( row_defaults )
-                new_row.extend( [ tourney_list.player_name,
+                new_row.extend( [ tourney_list.player.player_name,
                                   tourney_list.faction.description,
                                   str(tourney_list.points),
                                   str(tourney_list.tourney_standing),
@@ -153,7 +153,8 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type):
     players = {}
 
     for player in cryodex.players.keys():
-        tlist = TourneyList(tourney=t, player_name=player)
+        player = TourneyPlayer( tourney=t, player_name=player)
+        tlist = TourneyList(tourney=t, player=player)
         pm.db_connector.get_session().add(tlist)
         players[player] = tlist
     pm.db_connector.get_session().commit()

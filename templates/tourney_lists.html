@@ -25,7 +25,7 @@
       {% for tourney_list in tourney_lists %}
           <tr>
              <td class="tg-031e">{{ tourney.tourney_name }}</td>
-             <td class="tg-031e">{{  tourney_list.player_name }}</td>
+             <td class="tg-031e">{{  tourney_list.player.player_name }}</td>
              <td class="tg-031e">{{  tourney_list.tourney_standing }}</td>
              <td class="tg-031e">{{  tourney_list.tourney_elim_standing }}</td>
              {% if tourney_list.ships %}

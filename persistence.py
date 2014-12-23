@@ -160,12 +160,13 @@ class ShipUpgrade(Base):
 class Tourney(Base):
     __tablename__ = tourney_table
     id = Column(Integer, primary_key=True)
-    tourney_name  = Column(String(128))
-    tourney_date  = Column(Date)
-    tourney_type  = Column(String(128))
-    tourney_lists = relationship( "TourneyList", back_populates="tourney", order_by="asc(TourneyList.tourney_standing)")
-    rounds        = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)")
-    rankings      = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)")
+    tourney_name    = Column(String(128))
+    tourney_date    = Column(Date)
+    tourney_type    = Column(String(128))
+    tourney_lists   = relationship( "TourneyList", back_populates="tourney", order_by="asc(TourneyList.tourney_standing)")
+    rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)")
+    rankings        = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)")
+    tourney_players = relationship( "TourneyPlayer", back_populates="tourney")
 
     def get_pre_elimination_rounds(self):
         ret = [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]
@@ -184,18 +185,27 @@ class Tourney(Base):
     def headline(self):
         return "{0}".format(self.id)
 
+tourney_player_table = "tourney_player"
+class TourneyPlayer(Base):
+    __tablename__    = tourney_player_table
+    id               = Column( Integer, primary_key=True)
+    tourney_id       = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
+    player_name      = Column(String(128))
+    tourney          = relationship( Tourney.__name__, back_populates="tourney_players")
+
+
 class TourneyList(Base):
     __tablename__    = tourney_list_table
     id               = Column( Integer, primary_key=True)
     tourney_id       = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
-    player_name      = Column(String(128))
+    player_id        = Column(Integer, ForeignKey('{0}.id'.format(tourney_player_table)))
     tourney_standing = Column(Integer)
     tourney_elim_standing  = Column(Integer)
     image            = Column(String(128))
     name             = Column(String(128))
     faction          = Column(Faction.db_type())
     points           = Column(Integer)
-
+    player           = relationship( TourneyPlayer.__name__, uselist=False)
     tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
     ships            = relationship(Ship.__name__)
 

@@ -51,13 +51,13 @@
 
     <div class="main-section">
         <div class="charts">
-            {{  tourney_list.player_name  }}
+            {{  tourney_list.player.player_name  }}
             <img src={{ image_src }}>
         </div>
         <div class="entries">
             <div>
                 <b>Tourney:</b>  {{ tourney.tourney_name }}<br>
-                <b>Player name:</b>  {{ tourney_list.player_name }}<br>
+                <b>Player name:</b>  {{ tourney_list.player.player_name }}<br>
                 <b>Player faction:</b> {{  tourney_list.faction.description }}<br>
                 <b>List total:</b> <p class="alignright sub-total">{{ tourney_list.points }}</p>
             </div>
