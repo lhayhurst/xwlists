@@ -60,6 +60,7 @@ def test_mail():
     msg.html = '<b>HTML</b> body'
     with app.app_context():
         mail.send(msg)
+        return render_template('about.html')
 
 
 @app.route("/about")
