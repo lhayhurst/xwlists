@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 from cryodex import Cryodex
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
-    TourneyRound, RoundResult, TourneyPlayer
+    TourneyRound, RoundResult, TourneyPlayer, TourneyRanking
 from rollup import Rollup
 
 import xwingmetadata
@@ -151,12 +151,15 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type):
     pm.db_connector.get_session().add(t)
     #add the players
     players = {}
+    lists  = {}
 
     for player in cryodex.players.keys():
-        player = TourneyPlayer( tourney=t, player_name=player)
-        tlist = TourneyList(tourney=t, player=player)
+        tp = TourneyPlayer( tourney=t, player_name=player)
+        tlist = TourneyList(tourney=t, player=tp)
         pm.db_connector.get_session().add(tlist)
-        players[player] = tlist
+        players[player] = tp
+        lists[player]   = tlist
+
     pm.db_connector.get_session().commit()
 
     for round_type in cryodex.rounds.keys():
@@ -165,8 +168,8 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type):
             tr = TourneyRound(round_num=int(round.number), round_type=round.get_round_type(), tourney=t)
             pm.db_connector.get_session().add(tr)
             for round_result in round.results:
-                p1_tourney_list = players[round_result.player1]
-                p2_tourney_list = players[round_result.player2]
+                p1_tourney_list = lists[round_result.player1]
+                p2_tourney_list = lists[round_result.player2]
                 winner = None
                 loser = None
                 if round_result.player1 == round_result.winner:
@@ -179,7 +182,19 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type):
                 rr = RoundResult(round=tr, list1=p1_tourney_list, list2=p2_tourney_list, winner=winner, loser=loser,
                                  list1_score=int(round_result.player1_score),
                                  list2_score=int(round_result.player2_score))
-                pm.db_connector.get_session().commit()
+                pm.db_connector.get_session().add(rr)
+    pm.db_connector.get_session().commit()
+
+    #finally load the rankings
+    for rank in cryodex.ranking.rankings:
+        r = TourneyRanking( tourney   = t,
+                            player    = players[rank.player_name],
+                            rank      = rank.rank,
+                            elim_rank = None,
+                            mov       = rank.mov,
+                            sos       = rank.sos,
+                            score     = rank.score)
+        pm.db_connector.get_session().add(r)
     pm.db_connector.get_session().commit()
     return t
 
@@ -197,11 +212,14 @@ def add_tourney():
     if tourney_report and allowed_file(filename):
         html = tourney_report.read()
         sfilename = secure_filename(filename)
-        tourney_report.save(os.path.join(app.config['UPLOAD_FOLDER'], sfilename))
+        #tourney_report.save(os.path.join(app.config['UPLOAD_FOLDER'], sfilename))
 
-        cryodex = Cryodex(html)
-        t = create_tourney(cryodex, name, date, type )
-
+        try:
+            cryodex = Cryodex(html)
+            create_tourney(cryodex, name, date, type )
+            return redirect(url_for('tourneys') )
+        except Exception as err:
+            return render_template( 'tourney_entry_error.html', errortext=str(err))
 
 
     #TODO: this is code for handling the scanned player list scenario.   I'll refactor it to something useful if the situation comes up again.
@@ -230,10 +248,6 @@ def add_tourney():
 
     #myapp.db_connector.get_session().add_all( lists )
     #myapp.db_connector.get_session().commit()
-
-    return redirect(url_for('tourneys') )
-
-
 
 @app.route("/browse_list")
 def browse_list():

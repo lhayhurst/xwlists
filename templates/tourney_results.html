@@ -7,10 +7,30 @@
 .tg .tg-3i0c{font-weight:bold;background-color:#ffce93}
 </style>
 
+    <br>
+    <b>Final Standings</b>
+    <hr>
+    <table class="tg">
+        <tr>
+            <th class="tg-3i0c">Rank</th>
+            <th class="tg-3i0c">Player</th>
+            <th class="tg-3i0c">Score</th>
+            <th class="tg-3i0c">Margin of Victory</th>
+            <th class="tg-3i0c">Strength of Schedule</th>
+        </tr>
+    {%  for rank in tourney.rankings %}
+            <tr>
+                <td class="tg-031e">{{ rank.rank }}</td>
+                <td class="tg-031e">{{ rank.player.player_name }}</td>
+                <td class="tg-031e">{{ rank.score }}</td>
+                <td class="tg-031e">{{ rank.mov }}</td>
+                <td class="tg-031e">{{ rank.sos }}</td>
 
-    <p>
+            </tr>
+    {% endfor %}
+    </table>
+    <br>
     <b>Elimination Rounds</b>
-    </p>
     <hr>
         {% for round in tourney.get_descending_elim_rounds() %}
             <br>
@@ -24,9 +44,9 @@
                 </tr>
             {%  for result in round.results %}
                 <tr>
-                    <td class="tg-031e">{{ result.winner.player_name }}</td>
+                    <td class="tg-031e">{{ result.winner.player.player_name }}</td>
                     <td class="tg-031e">{{ result.winning_score() }}</td>
-                    <td class="tg-031e">{{ result.loser.player_name }}</td>
+                    <td class="tg-031e">{{ result.loser.player.player_name }}</td>
                     <td class="tg-031e">{{ result.losing_score() }}</td>
                 </tr>
             {% endfor %}
@@ -34,20 +54,7 @@
 
         {% endfor %}
     <br>
-    <b>Final Standings</b>
-        <table class="tg">
-            <tr>
-                <th class="tg-3i0c">Rank</th>
-                <th class="tg-3i0c">Player</th>
-                <th class="tg-3i0c">Score</th>
-                <th class="tg-3i0c">Margin of Victory</th>
-                <th class="tg-3i0c">Strength of Schedule</th>
-            </tr>
-
-    <br>
-    <p>
-        <b>Pre-elimination Rounds</b>
-    </p>
+    <b>Pre-elimination Rounds</b>
     <hr>
         {% for round in tourney.get_pre_elimination_rounds() %}
             <br>
@@ -61,9 +68,9 @@
                 </tr>
             {%  for result in round.results %}
                 <tr>
-                    <td class="tg-031e">{{ result.winner.player_name }}</td>
+                    <td class="tg-031e">{{ result.winner.player.player_name }}</td>
                     <td class="tg-031e">{{ result.winning_score() }}</td>
-                    <td class="tg-031e">{{ result.loser.player_name }}</td>
+                    <td class="tg-031e">{{ result.loser.player.player_name }}</td>
                     <td class="tg-031e">{{ result.losing_score() }}</td>
                 </tr>
             {% endfor %}
