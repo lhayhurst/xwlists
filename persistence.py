@@ -427,7 +427,10 @@ class PersistenceManager:
         ]
 
         if elimination_only:
-            filters.append(TourneyList.tourney_elim_standing != None)
+            filters.append( TourneyRanking.tourney_id == Tourney.id)
+            filters.append( TourneyList.player_id == TourneyRanking.player_id)
+            filters.append(TourneyRanking.elim_rank != None)
+
 
         ship_pilot_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
                              func.count( Pilot.id).label("num_pilots"),
@@ -449,7 +452,10 @@ class PersistenceManager:
         ]
 
         if elimination_only:
-            filters.append(TourneyList.tourney_elim_standing != None)
+            filters.append( TourneyRanking.tourney_id == Tourney.id)
+            filters.append( TourneyList.player_id == TourneyRanking.player_id)
+            filters.append(TourneyRanking.elim_rank != None)
+
 
         upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
@@ -479,7 +485,9 @@ class PersistenceManager:
         ]
 
         if elimination_only:
-            filters.append(TourneyList.tourney_elim_standing != None)
+            filters.append( TourneyRanking.tourney_id == Tourney.id)
+            filters.append( TourneyList.player_id == TourneyRanking.player_id)
+            filters.append(TourneyRanking.elim_rank != None)
 
         upgrade_rollup_sql = session.query( Upgrade.upgrade_type, Upgrade.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
@@ -501,7 +509,10 @@ class PersistenceManager:
                         ShipPilot.pilot_id == Pilot.id ]
 
         if elimination_only:
-            filters.append(TourneyList.tourney_elim_standing != None)
+            filters.append( TourneyRanking.tourney_id == Tourney.id)
+            filters.append( TourneyList.player_id == TourneyRanking.player_id)
+            filters.append(TourneyRanking.elim_rank != None)
+
 
 
         faction_ship_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
@@ -522,7 +533,10 @@ class PersistenceManager:
             Upgrade.id == ShipUpgrade.upgrade_id ]
 
         if elimination_only:
-            filters.append(TourneyList.tourney_elim_standing != None)
+            filters.append( TourneyRanking.tourney_id == Tourney.id)
+            filters.append( TourneyList.player_id == TourneyRanking.player_id)
+            filters.append(TourneyRanking.elim_rank != None)
+
 
         upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
                                         func.count( Upgrade.id).label("num_upgrades"),

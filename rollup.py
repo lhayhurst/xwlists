@@ -8,9 +8,9 @@ class Rollup:
 
 
 
-    def __init__(self,pm, request_type, top32only):
+    def __init__(self,pm, request_type, eliminationOnly):
         self.pm = pm
-        self.top32only = top32only
+        self.top32only = eliminationOnly
 
         self.chart_request_type = request_type
 

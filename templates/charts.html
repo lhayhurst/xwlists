@@ -50,7 +50,7 @@
     <div class="templates">
         <div class="doughnut-graph" style="width: 665px; height: 400px; margin: 8 auto"></div>
     </div>
-    <input type="checkbox" class="top-32-filter" id="top-32-filter" value="top-32-filter">show top 32 only
+    <input type="checkbox" class="elimination-filter" id="elimination-filter" value="elimination-filter">elimination round lists only
     <div id="doughnuts" class="charts">
         <div id="faction-ship" class="inline-display"></div>
         <div id="ship-pilot" class="inline-display"></div>
@@ -104,15 +104,15 @@ function init() {
 
 }
 
-var top32Only = false;
+var eliminationOnly = false;
 
-$('.top-32-filter').change(function() {
+$('.elimination-filter').change(function() {
     var $this = $(this);
     if ($this.is(':checked')) {
-        top32Only=true;
+        eliminationOnly=true;
     }
     else {
-        top32Only=false;
+        eliminationOnly=false;
     }
     $('#doughnuts #faction-ship').empty();
     $('#doughnuts #ship-pilot').empty();
@@ -148,7 +148,7 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
                     url: url,
-                    data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name, 'top32' : top32Only }  } ),
+                    data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name, 'eliminationOnly' : eliminationOnly }  } ),
                     success: function (data) {
                         var donutData = data['data'];
                         console.log("got response");
