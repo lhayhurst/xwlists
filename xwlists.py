@@ -1,20 +1,18 @@
-from genericpath import isfile
 import os
-import re
 import urllib
 import datetime
-from bs4 import BeautifulSoup
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
-from mock import self
+from flask.ext.mail import Mail, Message
 from werkzeug.utils import secure_filename
+
 from cryodex import Cryodex
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking
 from rollup import Rollup
-
 import xwingmetadata
+
 
 app =  myapp.create_app()
 UPLOAD_FOLDER = "static/tourneys"
@@ -26,9 +24,20 @@ is_maintenance_mode = False
 here = os.path.dirname(__file__)
 static_dir = os.path.join( here, app.config['UPLOAD_FOLDER'] )
 
+
+MAIL_SERVER = 'smtp.googlemail.com'
+MAIL_PORT = 465
+MAIL_USE_TLS = False
+MAIL_USE_SSL = True
+MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+
+# administrator list
 ADMINS = ['sozinsky@gmail.com']
 
 session = myapp.db_connector.get_session()
+
+mail = Mail(app)
 
 @app.before_request
 def check_for_maintenance():
@@ -43,6 +52,14 @@ def shutdown_session(exception=None):
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+@app.route("/test_mail")
+def test_mail():
+    msg = Message('test subject', sender=ADMINS[0], recipients=ADMINS)
+    msg.body = 'text body'
+    msg.html = '<b>HTML</b> body'
+    with app.app_context():
+        mail.send(msg)
 
 
 @app.route("/about")
@@ -210,13 +227,14 @@ def add_tourney():
     tourney_report  = request.files['tourney_report']
     filename        = tourney_report.filename
     if tourney_report and allowed_file(filename):
-        html = tourney_report.read()
-        sfilename = secure_filename(filename)
-        #tourney_report.save(os.path.join(app.config['UPLOAD_FOLDER'], sfilename))
 
         try:
+            html = tourney_report.read()
             cryodex = Cryodex(html)
-            create_tourney(cryodex, name, date, type )
+            t = create_tourney(cryodex, name, date, type )
+            sfilename = secure_filename(filename)
+            upload_folder = os.path.join( app.config['UPLOAD_FOLDER'], 'cryodex_uploads')
+            tourney_report.save(os.path.join(upload_folder, sfilename + "." + str(t.id)) )
             return redirect(url_for('tourneys') )
         except Exception as err:
             return render_template( 'tourney_entry_error.html', errortext=str(err))
