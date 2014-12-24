@@ -36,16 +36,6 @@ class DatabaseTestCase(unittest.TestCase):
 class TestIntegrity(DatabaseTestCase):
 
 
-    @unittest.skip("because")
-    def testPortPlayerTable(self):
-        tourneys = self.pm.get_tourneys()
-        for tourney in tourneys:
-            for tlist in tourney.tourney_lists:
-                player = TourneyPlayer( player_name=tlist.player_name, tourney=tourney)
-                tlist.player = player
-                self.pm.db_connector.get_session().add(player)
-        self.pm.db_connector.get_session().commit()
-
     #@unittest.skip("because")
     def testDeleteTourneys(self):
         tourneys = self.pm.get_tourneys()
@@ -65,11 +55,13 @@ class TestIntegrity(DatabaseTestCase):
 
             #add the players
             players = {}
+            lists   = {}
             for player in c.players.keys():
                 tp    = TourneyPlayer( tourney=t, player_name=player)
                 tlist = TourneyList( tourney=t, player=tp)
                 self.pm.db_connector.get_session().add(tlist)
-                players[player] = tlist
+                players[player] = tp
+                lists[player]   = tlist
             self.pm.db_connector.get_session().commit()
 
             for round_type in c.rounds.keys():
@@ -78,9 +70,9 @@ class TestIntegrity(DatabaseTestCase):
                     tr = TourneyRound( round_num=int(round.number), round_type=round.get_round_type(), tourney=t )
                     self.pm.db_connector.get_session().add(tr)
                     for round_result in round.results:
-                        p1_tourney_list = players[round_result.player1]
+                        p1_tourney_list = lists[round_result.player1]
                         self.assertTrue(p1_tourney_list is not None)
-                        p2_tourney_list = players[round_result.player2]
+                        p2_tourney_list = lists[round_result.player2]
                         self.assertTrue(p2_tourney_list)
                         winner = None
                         loser  = None
@@ -97,12 +89,13 @@ class TestIntegrity(DatabaseTestCase):
 
             #finally load the rankings
             for rank in c.ranking.rankings:
-                r = TourneyRanking( tourney=t,
-                                          tourney_list=players[rank.player_name],
-                                          rank=rank.rank,
-                                          mov=rank.mov,
-                                          sos=rank.sos,
-                                          score=rank.score)
+                r = TourneyRanking(       tourney   =t,
+                                          player    =players[rank.player_name],
+                                          rank      =rank.rank,
+                                          elim_rank =None,
+                                          mov       =rank.mov,
+                                          sos       =rank.sos,
+                                          score     =rank.score)
                 self.pm.db_connector.get_session().add(r)
             self.pm.db_connector.get_session().commit()
 
@@ -173,7 +166,7 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( 6, len(rankings))
         winner = rankings[0]
         self.assertTrue( winner is not None)
-        self.assertEqual( "jenny", winner.tourney_list.player.player_name)
+        self.assertEqual( "jenny", winner.player.player_name)
         self.assertEqual( 1, winner.rank )
         self.assertEqual( 13, winner.score)
         self.assertEqual( 416, winner.mov)
@@ -181,7 +174,7 @@ class TestIntegrity(DatabaseTestCase):
 
         loser = rankings[len(rankings)-1]
         self.assertTrue( loser is not None)
-        self.assertEqual( "janine", loser.tourney_list.player.player_name)
+        self.assertEqual( "janine", loser.player.player_name)
         self.assertEqual( 6, loser.rank )
         self.assertEqual( 0, loser.score)
         self.assertEqual( 56, loser.mov)

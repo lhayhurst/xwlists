@@ -163,7 +163,7 @@ class Tourney(Base):
     tourney_name    = Column(String(128))
     tourney_date    = Column(Date)
     tourney_type    = Column(String(128))
-    tourney_lists   = relationship( "TourneyList", back_populates="tourney", order_by="asc(TourneyList.tourney_standing)")
+    tourney_lists   = relationship( "TourneyList", back_populates="tourney", )
     rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)")
     rankings        = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)")
     tourney_players = relationship( "TourneyPlayer", back_populates="tourney")
@@ -192,6 +192,13 @@ class TourneyPlayer(Base):
     tourney_id       = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
     player_name      = Column(String(128))
     tourney          = relationship( Tourney.__name__, back_populates="tourney_players")
+    tourney_lists    = relationship( "TourneyList", back_populates='player')
+    result           = relationship("TourneyRanking", back_populates='player', uselist=False )
+
+    def get_first_tourney_list(self):
+        if self.tourney_lists:
+            return self.tourney_lists[0]
+        return None
 
 
 class TourneyList(Base):
@@ -199,8 +206,6 @@ class TourneyList(Base):
     id               = Column( Integer, primary_key=True)
     tourney_id       = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
     player_id        = Column(Integer, ForeignKey('{0}.id'.format(tourney_player_table)))
-    tourney_standing = Column(Integer)
-    tourney_elim_standing  = Column(Integer)
     image            = Column(String(128))
     name             = Column(String(128))
     faction          = Column(Faction.db_type())
@@ -223,14 +228,15 @@ tourney_ranking_table = "tourney_ranking"
 class TourneyRanking(Base):
     __tablename__      = tourney_ranking_table
     id                 = Column(Integer, primary_key=True)
-    tourney_id    = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
-    tourney_list_id    = Column(Integer, ForeignKey('{0}.id'.format(tourney_list_table)))
+    tourney_id         = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
+    player_id          = Column(Integer, ForeignKey('{0}.id'.format(tourney_player_table)))
     score              = Column(Integer)
     mov                = Column(Integer)
     sos                = Column(Integer)
     rank               = Column(Integer)
-    tourney_list       = relationship( TourneyList.__name__, uselist=False)
+    elim_rank          = Column(Integer)
     tourney            = relationship( Tourney.__name__, back_populates="rankings")
+    player             = relationship( TourneyPlayer.__name__, uselist=False)
 
 
 

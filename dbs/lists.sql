@@ -264,16 +264,17 @@ DROP TABLE IF EXISTS `tourney_ranking`;
 CREATE TABLE `tourney_ranking` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tourney_id` int(11) DEFAULT NULL,
-  `tourney_list_id` int(11) DEFAULT NULL,
+  `player_id` int(11) DEFAULT NULL,
   `score` int(11) DEFAULT NULL,
   `mov` int(11) DEFAULT NULL,
   `sos` int(11) DEFAULT NULL,
   `rank` int(11) DEFAULT NULL,
+  `elim_rank` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `tourney_id` (`tourney_id`),
-  KEY `tourney_list_id` (`tourney_list_id`),
+  KEY `player_id` (`player_id`),
   CONSTRAINT `tourney_ranking_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
-  CONSTRAINT `tourney_ranking_ibfk_2` FOREIGN KEY (`tourney_list_id`) REFERENCES `tourney_list` (`id`)
+  CONSTRAINT `tourney_ranking_ibfk_2` FOREIGN KEY (`player_id`) REFERENCES `tourney_player` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -348,4 +349,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-12-22 18:24:44
+-- Dump completed on 2014-12-23 16:51:46
