@@ -344,14 +344,17 @@ class PersistenceManager:
         tourney = self.get_tourney( tourney_name)
         if tourney is None:
             return
+
+        if tourney.tourney_players is not None:
+            for player in tourney.tourney_players:
+                self.db_connector.get_session().delete(player)
+
         if tourney.rounds is not None:
             for round in tourney.rounds:
-                self.db_connector.get_session().delete(round)
-                for result in round.results():
+                for result in round.results:
                     self.db_connector.get_session().delete(result)
-        if tourney.rankings is not None:
-            for rank in tourney.rankings:
-                self.db_connector.get_session().delete(rank)
+                self.db_connector.get_session().delete(round)
+
         if tourney.tourney_lists is not None:
             for list in tourney.tourney_lists:
                 for ship in list.ships:
@@ -359,6 +362,11 @@ class PersistenceManager:
                         self.db_connector.get_session().delete(su)
                     self.db_connector.get_session().delete(ship)
                 self.db_connector.get_session().delete(list)
+
+        if tourney.rankings is not None:
+            for rank in tourney.rankings:
+                self.db_connector.get_session().delete(rank)
+
         self.db_connector.get_session().delete(tourney)
         self.db_connector.get_session().commit()
 
