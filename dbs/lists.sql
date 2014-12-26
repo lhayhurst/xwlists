@@ -228,7 +228,7 @@ INSERT INTO `tourney_list` VALUES (1,1,1,4,'static/tourneys/worlds/Flight1/Ira M
 UNLOCK TABLES;
 
 --
--- Table structure for table `tourney_player`
+-- Table structure for table `tourney_player`.
 --
 
 DROP TABLE IF EXISTS `tourney_player`;
