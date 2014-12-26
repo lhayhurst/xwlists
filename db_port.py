@@ -25,7 +25,7 @@ class DatabaseTestCase(unittest.TestCase):
 
 class DbPort(DatabaseTestCase):
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testPortPlayerTable(self):
         tourneys = self.pm.get_tourneys()
         for tourney in tourneys:
@@ -34,7 +34,7 @@ class DbPort(DatabaseTestCase):
                 self.pm.db_connector.get_session().add(ranking)
         self.pm.db_connector.get_session().commit()
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testPortPlayerList(self):
         tourneys = self.pm.get_tourneys()
         for tourney in tourneys:
