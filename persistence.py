@@ -163,10 +163,10 @@ class Tourney(Base):
     tourney_name    = Column(String(128))
     tourney_date    = Column(Date)
     tourney_type    = Column(String(128))
-    tourney_lists   = relationship( "TourneyList", back_populates="tourney", )
-    rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)")
-    rankings        = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)")
-    tourney_players = relationship( "TourneyPlayer", back_populates="tourney")
+    tourney_lists   = relationship( "TourneyList", back_populates="tourney", cascade="all,delete,delete-orphan" )
+    rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)", cascade="all,delete,delete-orphan")
+    rankings        = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)", cascade="all,delete,delete-orphan")
+    tourney_players = relationship( "TourneyPlayer", back_populates="tourney", cascade="all,delete,delete-orphan")
 
     def get_pre_elimination_rounds(self):
         ret = [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]
@@ -212,7 +212,7 @@ class TourneyList(Base):
     points           = Column(Integer)
     player           = relationship( TourneyPlayer.__name__, uselist=False)
     tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
-    ships            = relationship(Ship.__name__)
+    ships            = relationship(Ship.__name__, cascade="all,delete,delete-orphan")
 
 tourney_round_table = "tourney_round"
 class TourneyRound(Base):
@@ -344,28 +344,6 @@ class PersistenceManager:
         tourney = self.get_tourney( tourney_name)
         if tourney is None:
             return
-
-        if tourney.tourney_players is not None:
-            for player in tourney.tourney_players:
-                self.db_connector.get_session().delete(player)
-
-        if tourney.rounds is not None:
-            for round in tourney.rounds:
-                for result in round.results:
-                    self.db_connector.get_session().delete(result)
-                self.db_connector.get_session().delete(round)
-
-        if tourney.tourney_lists is not None:
-            for list in tourney.tourney_lists:
-                for ship in list.ships:
-                    for su in ship.upgrades:
-                        self.db_connector.get_session().delete(su)
-                    self.db_connector.get_session().delete(ship)
-                self.db_connector.get_session().delete(list)
-
-        if tourney.rankings is not None:
-            for rank in tourney.rankings:
-                self.db_connector.get_session().delete(rank)
 
         self.db_connector.get_session().delete(tourney)
         self.db_connector.get_session().commit()

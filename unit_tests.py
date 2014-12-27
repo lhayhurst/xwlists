@@ -36,14 +36,14 @@ class DatabaseTestCase(unittest.TestCase):
 class TestIntegrity(DatabaseTestCase):
 
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testDeleteTourneys(self):
         tourneys = self.pm.get_tourneys()
         for tourney in tourneys:
             self.pm.delete_tourney(tourney.tourney_name)
         self.pm.db_connector.get_session().commit()
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testCryodexImport(self):
         file = "static/tourneys/treport.html"
         tourney_name = "test"
@@ -180,9 +180,7 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( 56, loser.mov)
         self.assertEqual( 25, loser.sos )
 
-
-
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testCryodexParse(self):
         file = "static/tourneys/treport.html"
         with open (file, "r") as myfile:
@@ -249,8 +247,6 @@ class TestIntegrity(DatabaseTestCase):
             self.assertEqual( 56, loser.mov)
             self.assertEqual( 25, loser.sos)
 
-
-
     #@unittest.skip("because")
     def testDeleteTourney(self):
         tourneys = self.pm.get_tourneys().all()
@@ -267,7 +263,7 @@ class TestIntegrity(DatabaseTestCase):
         filter(Tourney.id == tourney.id ).first()[0]
 
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testDeleteTourneyList(self):
         tname = 'Worlds 2014 Flight One'
         tourney = self.pm.get_tourney( tname )
@@ -292,7 +288,7 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( num_ships_in_tourney - num_ships_in_list, num_ships_after_delete )
 
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testGetRandomTourneyList(self):
         tname = 'Worlds 2014 Flight One'
         tourney = self.pm.get_tourney( tname )
@@ -313,12 +309,12 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( random_tourney_list.id, first_tourney_list_id )
 
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testNewTourneyList(self):
         tourneys = self.pm.get_tourneys()
 
         self.assertTrue(tourneys)
-        self.assertTrue(len(tourneys.all()) == 2)
+        self.assertEqual(len(tourneys.all()) , 2)
 
 
         for tourney in tourneys:
@@ -356,7 +352,7 @@ class TestIntegrity(DatabaseTestCase):
             self.assertTrue( total_points <= num_tlists * 100 )
             print ("total points %d") % ( total_points )
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testRollup(self):
 
         r = Rollup( self.pm, 'faction-ship-points', True )
@@ -380,8 +376,6 @@ class TestIntegrity(DatabaseTestCase):
         data = r.rollup()
         self.assertTrue( data is not None)
         self.assertEqual( len(data), 8 )
-
-
 
     @unittest.skip("because")
     def testTourneyList(self):
