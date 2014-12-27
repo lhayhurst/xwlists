@@ -36,12 +36,12 @@ class DatabaseTestCase(unittest.TestCase):
 class TestIntegrity(DatabaseTestCase):
 
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testDeleteTourneys(self):
         tourneys = self.pm.get_tourneys()
-        for tourney in tourneys:
-            self.pm.delete_tourney(tourney.tourney_name)
-        self.pm.db_connector.get_session().commit()
+    #    for tourney in tourneys:
+    #        self.pm.delete_tourney(tourney.tourney_name)
+    #    self.pm.db_connector.get_session().commit()
 
     @unittest.skip("because")
     def testCryodexImport(self):
@@ -247,7 +247,7 @@ class TestIntegrity(DatabaseTestCase):
             self.assertEqual( 56, loser.mov)
             self.assertEqual( 25, loser.sos)
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testDeleteTourney(self):
         tourneys = self.pm.get_tourneys().all()
         self.assertEqual( 2, len(tourneys))

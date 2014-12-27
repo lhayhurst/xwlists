@@ -221,7 +221,7 @@ class TourneyRound(Base):
     tourney_id    = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
     round_num     = Column(Integer)
     round_type    = Column(RoundType.db_type())
-    results       = relationship( "RoundResult", back_populates="round")
+    results       = relationship( "RoundResult", back_populates="round", cascade="all,delete,delete-orphan")
     tourney       = relationship( Tourney.__name__, back_populates="rounds")
 
 tourney_ranking_table = "tourney_ranking"

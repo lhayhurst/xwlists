@@ -227,7 +227,7 @@ def save_cryodex_file( failed, filename, html ):
     if failed:
         dir = os.path.join( static_dir, "cryodex/fail")
     else:
-        dir = os.path.join( static_dir, "croydex/success")
+        dir = os.path.join( static_dir, "cryodex/success")
     file = os.path.join( dir, filename )
     fd = open( file, 'w' )
     fd.write( html.encode('ascii', 'ignore') )
@@ -251,7 +251,7 @@ def add_tourney():
             html = tourney_report.read()
             cryodex = Cryodex(html)
             t = create_tourney(cryodex, name, date, type )
-            sfilename = secure_filename(filename) + "." + t.id
+            sfilename = secure_filename(filename) + "." + str(t.id)
             save_cryodex_file( failed=False, filename=sfilename, html=html)
             return redirect(url_for('tourneys') )
         except Exception as err:
@@ -260,6 +260,8 @@ def add_tourney():
             mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
             return render_template( 'tourney_entry_error.html', errortext=str(err))
 
+    #/Users/lhayhurst/PycharmProjects/xwlists/static/tourneys/croydex/success
+    #/Users/lhayhurst/PycharmProjects/xwlists/static/tourneys/cryodex/success
 
     #TODO: this is code for handling the scanned player list scenario.   I'll refactor it to something useful if the situation comes up again.
     #load all the files in the folder
