@@ -60,14 +60,12 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-@app.route("/test_mail")
-def test_mail():
+def mail_error(errortext):
     msg = Message('test subject', sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
-    msg.html = '<b>HTML</b> body'
+    msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
         mail.send(msg)
-        return render_template('about.html')
 
 
 @app.route("/about")
@@ -245,6 +243,7 @@ def add_tourney():
             tourney_report.save(os.path.join(upload_folder, sfilename + "." + str(t.id)) )
             return redirect(url_for('tourneys') )
         except Exception as err:
+            mail_error(errortext=str(err))
             return render_template( 'tourney_entry_error.html', errortext=str(err))
 
 
