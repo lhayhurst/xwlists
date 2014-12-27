@@ -25,19 +25,26 @@ here = os.path.dirname(__file__)
 static_dir = os.path.join( here, app.config['UPLOAD_FOLDER'] )
 
 
-MAIL_SERVER = 'smtp.googlemail.com'
-MAIL_PORT = 465
-MAIL_USE_TLS = False
-MAIL_USE_SSL = True
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+
+app.config.update(dict(
+    DEBUG = True,
+    MAIL_SERVER = 'smtp.gmail.com',
+    MAIL_PORT = 587,
+    MAIL_USE_TLS = True,
+    MAIL_USE_SSL = False,
+    MAIL_USERNAME = MAIL_USERNAME,
+    MAIL_PASSWORD = MAIL_PASSWORD
+))
 
 # administrator list
 ADMINS = ['sozinsky@gmail.com']
 
+mail = Mail(app)
+
 session = myapp.db_connector.get_session()
 
-mail = Mail(app)
 
 @app.before_request
 def check_for_maintenance():
