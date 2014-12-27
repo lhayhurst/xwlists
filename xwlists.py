@@ -1,6 +1,7 @@
 import os
 import urllib
 import datetime
+import uuid
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
@@ -221,6 +222,17 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type):
     pm.db_connector.get_session().commit()
     return t
 
+def save_cryodex_file( failed, filename, html ):
+    dir = None
+    if failed:
+        dir = os.path.join( static_dir, "cryodex/fail")
+    else:
+        dir = os.path.join( static_dir, "croydex/success")
+    file = os.path.join( dir, filename )
+    fd = open( file, 'w' )
+    fd.write( html.encode('ascii', 'ignore') )
+    fd.close()
+
 @app.route("/add_tourney",methods=['POST'])
 def add_tourney():
 
@@ -232,6 +244,7 @@ def add_tourney():
 
     tourney_report  = request.files['tourney_report']
     filename        = tourney_report.filename
+    html            = None
     if tourney_report and allowed_file(filename):
 
         try:
@@ -239,11 +252,12 @@ def add_tourney():
             cryodex = Cryodex(html)
             t = create_tourney(cryodex, name, date, type )
             sfilename = secure_filename(filename)
-            upload_folder = os.path.join( app.config['UPLOAD_FOLDER'], 'cryodex_uploads')
-            tourney_report.save(os.path.join(upload_folder, sfilename + "." + str(t.id)) )
+            save_cryodex_file( failed=False, filename=sfilename, html=html)
             return redirect(url_for('tourneys') )
         except Exception as err:
-            mail_error(errortext=str(err))
+            filename=str(uuid.uuid4()) + ".html"
+            save_cryodex_file( failed=True, filename=filename, html=html)
+            mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
             return render_template( 'tourney_entry_error.html', errortext=str(err))
 
 
