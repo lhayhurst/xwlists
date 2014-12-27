@@ -251,7 +251,7 @@ def add_tourney():
             html = tourney_report.read()
             cryodex = Cryodex(html)
             t = create_tourney(cryodex, name, date, type )
-            sfilename = secure_filename(filename)
+            sfilename = secure_filename(filename) + "." + t.id
             save_cryodex_file( failed=False, filename=sfilename, html=html)
             return redirect(url_for('tourneys') )
         except Exception as err:
