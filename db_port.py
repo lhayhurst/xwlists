@@ -3,8 +3,9 @@ from sqlalchemy import func
 from cryodex import Cryodex
 from myapp import db_connector
 from persistence import PersistenceManager, Ship, Tourney, TourneyList, TourneyRound, RoundResult, TourneyRanking, \
-    TourneyPlayer
+    TourneyPlayer, Set, TourneySet
 from rollup import Rollup
+import xwingmetadata
 
 __author__ = 'lhayhurst'
 import sys
@@ -26,6 +27,26 @@ class DatabaseTestCase(unittest.TestCase):
 class DbPort(DatabaseTestCase):
 
     @unittest.skip("because")
+    def testApplySetToTourney(self):
+        sets = self.pm.db_connector.get_session().query(Set)
+        tourneys = self.pm.get_tourneys()
+        for tourney in tourneys:
+            for set in sets:
+                if set.set_name != 'Wave 5':
+                    ts = TourneySet( tourney_id=tourney.id, set_id=set.id)
+                    self.pm.db_connector.get_session().add(ts)
+        self.pm.db_connector.get_session().commit()
+
+    @unittest.skip("because")
+    def testCreateSetTable(self):
+        for set in xwingmetadata.sets_and_expansions.keys():
+            expansions = xwingmetadata.sets_and_expansions[set]
+            for expansion in expansions:
+                s = Set( set_name=set, expansion_name=expansion )
+                self.pm.db_connector.get_session().add(s)
+        self.pm.db_connector.get_session().commit()
+
+    #@unittest.skip("because")
     def testPortPlayerTable(self):
         tourneys = self.pm.get_tourneys()
         for tourney in tourneys:
@@ -40,14 +61,6 @@ class DbPort(DatabaseTestCase):
         for tourney in tourneys:
             for player in tourney.tourney_players:
                 print "foo"
-
-    #@unittest.skip("because")
-    def testPortPlayerList(self):
-        tourneys = self.pm.get_tourneys()
-        for tourney in tourneys:
-            for player in tourney.tourney_players:
-                print "foo"
-
 
 
 if __name__ == "__main__":

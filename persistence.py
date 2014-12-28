@@ -168,6 +168,7 @@ class Tourney(Base):
     rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)", cascade="all,delete,delete-orphan")
     rankings        = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)", cascade="all,delete,delete-orphan")
     tourney_players = relationship( "TourneyPlayer", back_populates="tourney", cascade="all,delete,delete-orphan")
+    sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
 
     def get_pre_elimination_rounds(self):
         ret = [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]
@@ -239,10 +240,6 @@ class TourneyRanking(Base):
     tourney            = relationship( Tourney.__name__, back_populates="rankings")
     player             = relationship( TourneyPlayer.__name__, uselist=False)
 
-
-
-
-
 round_result_table = "round_result"
 class RoundResult(Base):
     __tablename__ = round_result_table
@@ -269,6 +266,22 @@ class RoundResult(Base):
         if self.loser.id == self.list1.id:
             return self.list1_score
         return self.list2_score
+
+set_table_name = "xwing_set"
+class Set(Base):
+    __tablename__   = set_table_name
+    id              = Column(Integer, primary_key=True)
+    set_name        = Column(String(128))
+    expansion_name  = Column(String(128))
+
+tourney_set_table_name = "tourney_set"
+class TourneySet(Base):
+    __tablename__      = tourney_set_table_name
+    id                 = Column(Integer, primary_key=True)
+    tourney_id         = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
+    set_id             = Column(Integer, ForeignKey('{0}.id'.format(set_table_name)))
+    tourney            = relationship( Tourney.__name__, back_populates="sets")
+    set                = relationship( Set.__name__,  uselist=False)
 
 
 class PersistenceManager:

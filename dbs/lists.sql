@@ -68,7 +68,7 @@ CREATE TABLE `round_result` (
   CONSTRAINT `round_result_ibfk_3` FOREIGN KEY (`list2_id`) REFERENCES `tourney_list` (`id`),
   CONSTRAINT `round_result_ibfk_4` FOREIGN KEY (`winner_id`) REFERENCES `tourney_list` (`id`),
   CONSTRAINT `round_result_ibfk_5` FOREIGN KEY (`loser_id`) REFERENCES `tourney_list` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -178,7 +178,7 @@ CREATE TABLE `tourney` (
   `tourney_type` varchar(128) DEFAULT NULL,
   `round_length` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +211,7 @@ CREATE TABLE `tourney_list` (
   KEY `tourney_list_ibfk_2_idx` (`player_id`),
   CONSTRAINT `tourney_list_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
   CONSTRAINT `tourney_list_ibfk_2` FOREIGN KEY (`player_id`) REFERENCES `tourney_player` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=330 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=342 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -238,7 +238,7 @@ CREATE TABLE `tourney_player` (
   PRIMARY KEY (`id`),
   KEY `tourney_id` (`tourney_id`),
   CONSTRAINT `tourney_player_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=573 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=585 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,7 +272,7 @@ CREATE TABLE `tourney_ranking` (
   KEY `player_id` (`player_id`),
   CONSTRAINT `tourney_ranking_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
   CONSTRAINT `tourney_ranking_ibfk_2` FOREIGN KEY (`player_id`) REFERENCES `tourney_player` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=269 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=281 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -300,7 +300,7 @@ CREATE TABLE `tourney_round` (
   PRIMARY KEY (`id`),
   KEY `tourney_id` (`tourney_id`),
   CONSTRAINT `tourney_round_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -310,6 +310,35 @@ CREATE TABLE `tourney_round` (
 LOCK TABLES `tourney_round` WRITE;
 /*!40000 ALTER TABLE `tourney_round` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tourney_round` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tourney_set`
+--
+
+DROP TABLE IF EXISTS `tourney_set`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tourney_set` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tourney_id` int(11) DEFAULT NULL,
+  `set_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tourney_id` (`tourney_id`),
+  KEY `set_id` (`set_id`),
+  CONSTRAINT `tourney_set_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
+  CONSTRAINT `tourney_set_ibfk_2` FOREIGN KEY (`set_id`) REFERENCES `xwing_set` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tourney_set`
+--
+
+LOCK TABLES `tourney_set` WRITE;
+/*!40000 ALTER TABLE `tourney_set` DISABLE KEYS */;
+INSERT INTO `tourney_set` VALUES (73,1,1),(74,1,2),(75,1,3),(76,1,4),(77,1,5),(78,1,6),(79,1,7),(80,1,8),(81,1,9),(82,1,10),(83,1,11),(84,1,12),(85,1,13),(86,1,14),(87,1,15),(88,1,16),(89,2,1),(90,2,2),(91,2,3),(92,2,4),(93,2,5),(94,2,6),(95,2,7),(96,2,8),(97,2,9),(98,2,10),(99,2,11),(100,2,12),(101,2,13),(102,2,14),(103,2,15),(104,2,16);
+/*!40000 ALTER TABLE `tourney_set` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -337,6 +366,31 @@ LOCK TABLES `upgrade` WRITE;
 INSERT INTO `upgrade` VALUES (1,'Astromech Droid','R2 Astromech',1),(2,'Astromech Droid','R5 Astromech',1),(3,'Astromech Droid','R4-D6',1),(4,'Astromech Droid','R5-K6',2),(5,'Astromech Droid','R3-A2',2),(6,'Astromech Droid','R7 Astromech',2),(7,'Astromech Droid','R2-F2',3),(8,'Astromech Droid','R5-D8',3),(9,'Astromech Droid','R5-P9',3),(10,'Astromech Droid','R7-T1',3),(11,'Astromech Droid','R2-D6',1),(12,'Astromech Droid','R2-D2',4),(13,'Turret Weapon','Blaster Turret',4),(14,'Turret Weapon','Ion Cannon Turret',5),(15,'System','Enhanced Scopes',1),(16,'System','Fire-Control System',2),(17,'System','Advanced Sensors',3),(18,'System','Sensor Jammer',4),(19,'Crew','Intelligence Agent',1),(20,'Crew','Mercenary Copilot',2),(21,'Crew','Saboteur',2),(22,'Crew','Tactician',2),(23,'Crew','Weapons Engineer',3),(24,'Crew','Recon Specialist',3),(25,'Crew','Navigator',3),(26,'Crew','Flight Instructor',4),(27,'Crew','Gunner',5),(28,'Crew','Nien Nunb',1),(29,'Crew','Han Solo',2),(30,'Crew','Jan Ors',2),(31,'Crew','Dash Rendar',2),(32,'Crew','Leebo',2),(33,'Crew','C-3PO',3),(34,'Crew','Kyle Katarn',3),(35,'Crew','Lando Calrissian',3),(36,'Crew','Chewbacca',4),(37,'Crew','Leia Organa',4),(38,'Crew','R2-D2',4),(39,'Crew','Luke Skywalker',7),(40,'Crew','Moff Jerjerrod',2),(41,'Crew','Darth Vader',3),(42,'Crew','Rebel Captive',3),(43,'Crew','Fleet Officer',3),(44,'Crew','Mara Jade',3),(45,'Crew','Ysanne Isard',4),(46,'Modification','Munitions Failsafe',1),(47,'Modification','Tactical Jammer',1),(48,'Modification','Targeting Computer',2),(49,'Modification','Anti-Pursuit Lasers',2),(50,'Modification','Stygium Particle Accelerator',2),(51,'Modification','Advanced Cloaking Device',4),(52,'Modification','Experimental Interface',3),(53,'Modification','B-Wing/E2',1),(54,'Modification','Stealth Device',3),(55,'Modification','Hull Upgrade',3),(56,'Modification','Shield Upgrade',4),(57,'Modification','Counter-Measures',3),(58,'Modification','Engine Upgrade',4),(59,'Elite Pilot Talent','Adrenaline Rush',1),(60,'Elite Pilot Talent','Deadeye',1),(61,'Elite Pilot Talent','Determination',1),(62,'Elite Pilot Talent','Draw Their Fire',1),(63,'Elite Pilot Talent','Veteran Instincts',1),(64,'Elite Pilot Talent','Swarm Tactics',2),(65,'Elite Pilot Talent','Squad Leader',2),(66,'Elite Pilot Talent','Expert Handling',2),(67,'Elite Pilot Talent','Elusiveness',2),(68,'Elite Pilot Talent','Wingman',2),(69,'Elite Pilot Talent','Decoy',2),(70,'Elite Pilot Talent','Lone Wolf',2),(71,'Elite Pilot Talent','Stay on Target',2),(72,'Elite Pilot Talent','Intimidation',2),(73,'Elite Pilot Talent','Push the Limit',3),(74,'Elite Pilot Talent','Marksmanship',3),(75,'Elite Pilot Talent','Daredevil',3),(76,'Elite Pilot Talent','Outmaneuver',3),(77,'Elite Pilot Talent','Predator',3),(78,'Elite Pilot Talent','Ruthlessness',3),(79,'Elite Pilot Talent','Expose',4),(80,'Elite Pilot Talent','Opportunist',4),(81,'Torpedo','Flechette Torpedoes',2),(82,'Torpedo','Proton Torpedos',4),(83,'Torpedo','Ion Torpedoes',5),(84,'Torpedo','Advanced Proton Torpedoes',6),(85,'Bomb','Seismic Charges',2),(86,'Bomb','Proximity Mines',3),(87,'Bomb','Proton Bombs',5),(88,'Cannon','Ion Cannon',3),(89,'Cannon','AutoBlaster',5),(90,'Cannon','Heavy Laser Cannon',7),(91,'Title','Slave 1',0),(92,'Title','Royal Guard TIE',0),(93,'Title','A-Wing Test Pilot',0),(94,'Title','Millennium Falcon',1),(95,'Title','Dauntless',2),(96,'Title','Moldy Crow',3),(97,'Title','ST-321',3),(98,'Title','Outrider',5),(99,'Missile','Chardaan Refit',-2),(100,'Missile','Ion Pulse Missile',3),(101,'Missile','Proton Rockets',3),(102,'Missile','Concussion Missiles',4),(103,'Missile','Cluster Missiles',4),(104,'Missile','Assault Missiles',5),(105,'Missile','Homing Missiles',5),(106,'Elite Pilot Talent','Predator',3),(107,'Title','Millennium Falcon',1),(108,'Modification','Engine Upgrade',4),(109,'Crew','C-3PO',3),(110,'Crew','Gunner',5),(111,'Elite Pilot Talent','Push the Limit',3),(112,'Modification','Hull Upgrade',2),(113,'Elite Pilot Talent','Veteran Instincts',1),(114,'Crew','Intelligence Agent',1),(115,'System','Fire-Control System',2),(116,'Modification','Advanced Cloaking Device',4),(117,'Elite Pilot Talent','Veteran Instincts',1),(118,'Astromech Droid','R2-D2',4),(119,'Elite Pilot Talent','Opportunist',4),(120,'Elite Pilot Talent','Predator',3),(121,'Astromech Droid','R3-A2',2),(122,'Elite Pilot Talent','Veteran Instincts',1);
 /*!40000 ALTER TABLE `upgrade` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `xwing_set`
+--
+
+DROP TABLE IF EXISTS `xwing_set`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `xwing_set` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `set_name` varchar(128) DEFAULT NULL,
+  `expansion_name` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `xwing_set`
+--
+
+LOCK TABLES `xwing_set` WRITE;
+/*!40000 ALTER TABLE `xwing_set` DISABLE KEYS */;
+INSERT INTO `xwing_set` VALUES (1,'Wave 4','E-Wing Expansion'),(2,'Wave 4','Z-95 Headhunter Expansion'),(3,'Wave 4','TIE Defender Expansion'),(4,'Wave 4','TIE Phantom Expansion'),(5,'Wave 1','X-Wing Expansion'),(6,'Wave 1','Y-Wing Expansion'),(7,'Wave 1','TIE Fighter Expansion'),(8,'Wave 1','TIE Advanced x1 Expansion'),(9,'Wave 3','B-Wing Expansion'),(10,'Wave 3','HWK-290 Expansion'),(11,'Wave 3','Lambda Shuttle Expansion'),(12,'Wave 3','TIE Bomber Expansion'),(13,'Wave 2','A-Wing Expansion'),(14,'Wave 2','YT-1300 Expansion'),(15,'Wave 2','TIE Interceptor Expansion'),(16,'Wave 2','Firespray-31 Expansion'),(17,'Wave 5','YT-2400 Expansion'),(18,'Wave 5','VT-49 Decimator Expansion');
+/*!40000 ALTER TABLE `xwing_set` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -347,4 +401,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-12-27 21:08:43
+-- Dump completed on 2014-12-27 22:56:26

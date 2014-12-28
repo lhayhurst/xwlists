@@ -51,6 +51,19 @@ IMPERIAL = "Imperial"
 FACTION = "FACTION"
 ADD_EPT = "ADD_EPT"
 
+sets_and_expansions = {  'Core Set' : [],
+                         'Wave 1'   : ['X-Wing Expansion', 'Y-Wing Expansion', 'TIE Fighter Expansion', 'TIE Advanced x1 Expansion'],
+                         'Wave 2'   : ['A-Wing Expansion', 'YT-1300 Expansion', 'TIE Interceptor Expansion', 'Firespray-31 Expansion' ],
+                         'Wave 3'   : ['B-Wing Expansion', 'HWK-290 Expansion', 'Lambda Shuttle Expansion', 'TIE Bomber Expansion', ],
+                         'Imperial Aces Expansion' : [],
+                         'GR-75 Expansion' : [],
+                         'CR90 Expansion'  : [],
+                         'Wave 4': ['E-Wing Expansion', 'Z-95 Headhunter Expansion', 'TIE Defender Expansion' , 'TIE Phantom Expansion'],
+                         'Rebel Aces Expansion' : [],
+                         'Wave 5': ['YT-2400 Expansion', 'VT-49 Decimator Expansion']
+}
+
+
 factions = [ REBEL, IMPERIAL ]
 
 PER_SQUAD_UNIQUE_CONSTRAINT = {'type': PER_SQUAD, 'value': UNIQUE}
