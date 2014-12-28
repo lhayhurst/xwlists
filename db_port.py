@@ -25,7 +25,7 @@ class DatabaseTestCase(unittest.TestCase):
 
 class DbPort(DatabaseTestCase):
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testPortPlayerTable(self):
         tourneys = self.pm.get_tourneys()
         for tourney in tourneys:
@@ -40,6 +40,14 @@ class DbPort(DatabaseTestCase):
         for tourney in tourneys:
             for player in tourney.tourney_players:
                 print "foo"
+
+    #@unittest.skip("because")
+    def testPortPlayerList(self):
+        tourneys = self.pm.get_tourneys()
+        for tourney in tourneys:
+            for player in tourney.tourney_players:
+                print "foo"
+
 
 
 if __name__ == "__main__":

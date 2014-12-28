@@ -18,6 +18,7 @@
     <th class="tg-3i0c">Results</th>
     <th class="tg-3i0c">Type</th>
     <th class="tg-3i0c">Date Played</th>
+    <th class="tg-3i0c">Round Length</th>
     <th class="tg-3i0c">Total Lists</th>
     <th class="tg-3i0c">Lists Entered</th>
     <th class="tg-3i0c">Lists Not Entered</th>
@@ -33,6 +34,7 @@
          <td class="tg-031e"><a href="{{ url_for( 'tourney_results', tourney_id=value['tourney'].id ) }}">Browse results</a></td>
          <td class="tg-031e">{{ value['tourney'].tourney_type }}</td>
          <td class="tg-031e">{{ value['tourney'].tourney_date }}</td>
+         <td class="tg-031e">{{ value['tourney'].round_length }}</td>
          <td class="tg-031e">{{  value['num_entered'] + value['num_not_entered']  }}</td>
          <td class="tg-031e">{{ value['num_entered'] }} (<a href="{{ url_for( 'browse_list', tourney=key) }}">browse submitted lists</a>) </td>
          <td class="tg-031e">{{ value['num_not_entered'] }} ( <a href="{{ url_for( 'enter_list', tourney=value['tourney'].id) }}">enter a list</a>)</td>

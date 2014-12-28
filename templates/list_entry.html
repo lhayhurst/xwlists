@@ -1,14 +1,5 @@
 {% extends "layout.html" %}
 {% block content %}
-
-    <script>
-        var entryCount = 0;
-        var ships_and_pilots = {{ meta.ships_full() | tojson | safe }};
-        var upgrades         = {{ meta.upgrades()|tojson | safe }};
-        var tourney_id       = {{ tourney_id }};
-        var tourney_list_id  = {{ tourney_list_id }};
-    </script>
-
     <style>
 
         .main-section {
@@ -88,6 +79,16 @@
         }
 
     </style>
+
+    <script>
+        var entryCount = 0;
+        var ships_and_pilots = {{ meta.ships_full() | tojson | safe }};
+        var upgrades         = {{ meta.upgrades()|tojson | safe }};
+        var tourney_id       = {{ tourney_id }};
+        var tourney_list_id  = {{ tourney_list_id }};
+        var image_src        = {{  image_src }}
+    </script>
+
 
     <div class="main-section">
 

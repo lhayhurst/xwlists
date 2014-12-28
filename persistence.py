@@ -163,6 +163,7 @@ class Tourney(Base):
     tourney_name    = Column(String(128))
     tourney_date    = Column(Date)
     tourney_type    = Column(String(128))
+    round_length    = Column(Integer)
     tourney_lists   = relationship( "TourneyList", back_populates="tourney", cascade="all,delete,delete-orphan" )
     rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)", cascade="all,delete,delete-orphan")
     rankings        = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)", cascade="all,delete,delete-orphan")

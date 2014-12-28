@@ -167,10 +167,10 @@ def delete_tourney():
     pm.delete_tourney(tourney_name)
     return redirect(url_for('tourneys') )
 
-def create_tourney(cryodex, tourney_name, tourney_date, tourney_type):
+def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_length):
 
     pm = PersistenceManager(myapp.db_connector)
-    t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date, tourney_type=tourney_type)
+    t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date, tourney_type=tourney_type, round_length=round_length)
 
     pm.db_connector.get_session().add(t)
     #add the players
@@ -237,10 +237,19 @@ def save_cryodex_file( failed, filename, html ):
 def add_tourney():
 
     #TODO: better edge testing against user input
-    name   = request.form['name']
-    type   = request.form['tourney_type']
-    mmddyyyy = request.form['date'].split('/')
-    date   = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1]))
+    name                  = request.form['name']
+    type                  = request.form['tourney_type']
+    mmddyyyy              = request.form['datepicker'].split('/')
+    date                  = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1])) #YYYY, MM, DD
+    round_length_dropdown = request.form['round_length_dropdown']
+    round_length_userdef  = request.form['round_length_userdef']
+
+    round_length = None
+    if round_length_dropdown is None or len(round_length_dropdown) == 0:
+        round_length = int(round_length_userdef)
+    else:
+        round_length = int(round_length_dropdown)
+
 
     tourney_report  = request.files['tourney_report']
     filename        = tourney_report.filename
@@ -250,7 +259,7 @@ def add_tourney():
         try:
             html = tourney_report.read()
             cryodex = Cryodex(html)
-            t = create_tourney(cryodex, name, date, type )
+            t = create_tourney(cryodex, name, date, type, round_length )
             sfilename = secure_filename(filename) + "." + str(t.id)
             save_cryodex_file( failed=False, filename=sfilename, html=html)
             return redirect(url_for('tourneys') )
@@ -259,9 +268,6 @@ def add_tourney():
             save_cryodex_file( failed=True, filename=filename, html=html)
             mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
             return render_template( 'tourney_entry_error.html', errortext=str(err))
-
-    #/Users/lhayhurst/PycharmProjects/xwlists/static/tourneys/croydex/success
-    #/Users/lhayhurst/PycharmProjects/xwlists/static/tourneys/cryodex/success
 
     #TODO: this is code for handling the scanned player list scenario.   I'll refactor it to something useful if the situation comes up again.
     #load all the files in the folder
@@ -347,9 +353,14 @@ def enter_list():
         tourney      = tourney_list.tourney
 
     m = xwingmetadata.XWingMetaData()
+
+    image_src = None
+    if tourney_list.image is not None:
+        image_src = urllib.quote(tourney_list.image)
+
     return render_template('list_entry.html',
                            meta=m,
-                           image_src=urllib.quote(tourney_list.image),
+                           image_src=image_src,
                            tourney_list=tourney_list,
                            tourney_list_id=tourney_list.id,
                            tourney_id=tourney.id )
