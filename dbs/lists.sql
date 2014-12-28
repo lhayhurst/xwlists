@@ -68,7 +68,7 @@ CREATE TABLE `round_result` (
   CONSTRAINT `round_result_ibfk_3` FOREIGN KEY (`list2_id`) REFERENCES `tourney_list` (`id`),
   CONSTRAINT `round_result_ibfk_4` FOREIGN KEY (`winner_id`) REFERENCES `tourney_list` (`id`),
   CONSTRAINT `round_result_ibfk_5` FOREIGN KEY (`loser_id`) REFERENCES `tourney_list` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -178,7 +178,7 @@ CREATE TABLE `tourney` (
   `tourney_type` varchar(128) DEFAULT NULL,
   `round_length` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +211,7 @@ CREATE TABLE `tourney_list` (
   KEY `tourney_list_ibfk_2_idx` (`player_id`),
   CONSTRAINT `tourney_list_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
   CONSTRAINT `tourney_list_ibfk_2` FOREIGN KEY (`player_id`) REFERENCES `tourney_player` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=342 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=348 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -238,7 +238,7 @@ CREATE TABLE `tourney_player` (
   PRIMARY KEY (`id`),
   KEY `tourney_id` (`tourney_id`),
   CONSTRAINT `tourney_player_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=585 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=591 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -300,7 +300,7 @@ CREATE TABLE `tourney_round` (
   PRIMARY KEY (`id`),
   KEY `tourney_id` (`tourney_id`),
   CONSTRAINT `tourney_round_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -328,7 +328,7 @@ CREATE TABLE `tourney_set` (
   KEY `set_id` (`set_id`),
   CONSTRAINT `tourney_set_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
   CONSTRAINT `tourney_set_ibfk_2` FOREIGN KEY (`set_id`) REFERENCES `xwing_set` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -337,7 +337,7 @@ CREATE TABLE `tourney_set` (
 
 LOCK TABLES `tourney_set` WRITE;
 /*!40000 ALTER TABLE `tourney_set` DISABLE KEYS */;
-INSERT INTO `tourney_set` VALUES (73,1,1),(74,1,2),(75,1,3),(76,1,4),(77,1,5),(78,1,6),(79,1,7),(80,1,8),(81,1,9),(82,1,10),(83,1,11),(84,1,12),(85,1,13),(86,1,14),(87,1,15),(88,1,16),(89,2,1),(90,2,2),(91,2,3),(92,2,4),(93,2,5),(94,2,6),(95,2,7),(96,2,8),(97,2,9),(98,2,10),(99,2,11),(100,2,12),(101,2,13),(102,2,14),(103,2,15),(104,2,16);
+INSERT INTO `tourney_set` VALUES (105,1,19),(106,1,20),(107,1,21),(108,1,22),(109,1,23),(110,1,24),(111,1,25),(112,1,26),(113,1,27),(114,2,19),(115,2,20),(116,2,21),(117,2,22),(118,2,23),(119,2,24),(120,2,25),(121,2,26),(122,2,27);
 /*!40000 ALTER TABLE `tourney_set` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -377,9 +377,8 @@ DROP TABLE IF EXISTS `xwing_set`;
 CREATE TABLE `xwing_set` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `set_name` varchar(128) DEFAULT NULL,
-  `expansion_name` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -388,7 +387,7 @@ CREATE TABLE `xwing_set` (
 
 LOCK TABLES `xwing_set` WRITE;
 /*!40000 ALTER TABLE `xwing_set` DISABLE KEYS */;
-INSERT INTO `xwing_set` VALUES (1,'Wave 4','E-Wing Expansion'),(2,'Wave 4','Z-95 Headhunter Expansion'),(3,'Wave 4','TIE Defender Expansion'),(4,'Wave 4','TIE Phantom Expansion'),(5,'Wave 1','X-Wing Expansion'),(6,'Wave 1','Y-Wing Expansion'),(7,'Wave 1','TIE Fighter Expansion'),(8,'Wave 1','TIE Advanced x1 Expansion'),(9,'Wave 3','B-Wing Expansion'),(10,'Wave 3','HWK-290 Expansion'),(11,'Wave 3','Lambda Shuttle Expansion'),(12,'Wave 3','TIE Bomber Expansion'),(13,'Wave 2','A-Wing Expansion'),(14,'Wave 2','YT-1300 Expansion'),(15,'Wave 2','TIE Interceptor Expansion'),(16,'Wave 2','Firespray-31 Expansion'),(17,'Wave 5','YT-2400 Expansion'),(18,'Wave 5','VT-49 Decimator Expansion');
+INSERT INTO `xwing_set` VALUES (19,'GR-75 Expansion'),(20,'Core Set'),(21,'Wave 4'),(22,'CR90 Expansion'),(23,'Wave 1'),(24,'Imperial Aces Expansion'),(25,'Wave 3'),(26,'Wave 2'),(27,'Rebel Aces Expansion'),(28,'Wave 5');
 /*!40000 ALTER TABLE `xwing_set` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -401,4 +400,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-12-27 22:56:26
+-- Dump completed on 2014-12-28  0:13:56

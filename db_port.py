@@ -40,13 +40,11 @@ class DbPort(DatabaseTestCase):
     @unittest.skip("because")
     def testCreateSetTable(self):
         for set in xwingmetadata.sets_and_expansions.keys():
-            expansions = xwingmetadata.sets_and_expansions[set]
-            for expansion in expansions:
-                s = Set( set_name=set, expansion_name=expansion )
-                self.pm.db_connector.get_session().add(s)
+            s = Set( set_name=set )
+            self.pm.db_connector.get_session().add(s)
         self.pm.db_connector.get_session().commit()
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testPortPlayerTable(self):
         tourneys = self.pm.get_tourneys()
         for tourney in tourneys:
@@ -55,12 +53,7 @@ class DbPort(DatabaseTestCase):
                 self.pm.db_connector.get_session().add(ranking)
         self.pm.db_connector.get_session().commit()
 
-    @unittest.skip("because")
-    def testPortPlayerList(self):
-        tourneys = self.pm.get_tourneys()
-        for tourney in tourneys:
-            for player in tourney.tourney_players:
-                print "foo"
+
 
 
 if __name__ == "__main__":

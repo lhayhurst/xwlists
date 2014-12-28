@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
+
 <h2>Create a tourney</h2>
  <form id="myform" action="{{ url_for('add_tourney') }}" method=POST class="add-entry" enctype="multipart/form-data"><br>
     What is the name of the tourney?<br>
@@ -27,7 +28,21 @@
     <br><br>
 
     Cryodex tournament report export file (optional)?<br>
-    <input type="file" name="tourney_report"><br><br><hr>
+    <input type="file" name="tourney_report"><br><br>
+
+    Sets and expansions (optional)?<br>
+    <select multiple id="sets" name="sets[]" style="width:700px">
+        {% for set in sets %}
+        <option value="{{ set }}">{{ set }}</option>
+        {% endfor %}
+    </select>
+    <script>
+        $('#sets').select2();
+        $('#sets > option').prop("selected", "selected")
+        $("#sets").trigger("change");
+    </script>
+    <hr>
+
     <input type="submit" value="Create tourney!">
  </form>
 

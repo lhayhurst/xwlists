@@ -272,7 +272,6 @@ class Set(Base):
     __tablename__   = set_table_name
     id              = Column(Integer, primary_key=True)
     set_name        = Column(String(128))
-    expansion_name  = Column(String(128))
 
 tourney_set_table_name = "tourney_set"
 class TourneySet(Base):
@@ -346,6 +345,9 @@ class PersistenceManager:
              group_by(TourneyList.faction).order_by( TourneyList.faction.desc())
 
         return ret
+
+    def get_set(self, set_name):
+        return self.db_connector.get_session().query(Set).filter_by(set_name=set_name).first()
 
     def get_tourney(self,tourney_name):
         return self.db_connector.get_session().query(Tourney).filter_by(tourney_name=tourney_name).first()
