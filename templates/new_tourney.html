@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+
+
+    label {
+        display: inline-block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+
+    .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 0;
+        font-size: 14px;
+        font-weight: normal;
+        line-height: 1.428571429;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        background-image: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+    }
+
+    .btn-info {
+        margin-top: 10px;
+        color: #ffffff;
+        background-color: #3882C7;
+        border-color: #46b8da;
+    }
+
+</style>
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('add_tourney') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data"
+      data-parsley-validate >
+    <fieldset>
+        <legend>Tourney details</legend>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>Tourney name</label>
+                <input type="text" name="name" required/>
+            </div>
+        </div>
+        <div data-row-span="4">
+            <div data-field-span="1">
+                <label>Date played</label>
+                <input type="text" id="datepicker" name="datepicker" required/>
+            </div>
+            <div data-field-span="1">
+                <label>Type of tourney</label>
+                <select id="tourney_type" name="tourney_type" placeholder="Select a tourney type" required>
+                    <option></option>
+                    <option value="World championship">World championship</option>
+                    <option value="Regional">Regional</option>
+                    <option value="Store championship">Store championship</option>
+                    <option value="Vassal play">Vassal play</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div data-field-span="1">
+                <label>Round length (minutes)</label>
+                <select name="round_length_dropdown" id="round_length_dropdown" placeholder="Select a round length" data-parsley-notDefaultSelection='' data-parsley-group="round-len1">
+                    <option></option>
+                    <option value="60">60 minutes</option>
+                    <option value="75">75 minutes</option>
+                    <option value="90">90 minutes</option>
+                </select>
+            </div>
+            <div data-field-span="1">
+                <label>Or add your own round length</label>
+                <input type="text" name="round_length_userdef" id="round_length_userdef" data-parsley-type="integer" data-parsley-group="round-len2" data-parsley-notDefaultSelection='' />
+            </div>
+        </div>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>Valid/legal sets used in tourney</label>
+                <select multiple id="sets" name="sets[]" required>
+                    {% for set in sets %}
+                    <option value="{{ set }}">{{ set }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div data-row-span="4">
+            <div data-field-span="1">
+                <label>Country</label>
+                <select id="country" name="country" ></select><br>
+            </div>
+            <div data-field-span="1">
+                <label>State/Provence</label>
+                <select id="state" name="state" ></select><br>
+            </div>
+            <div data-field-span="1">
+                <label>City</label>
+                <input type="text" name="city" />
+            </div>
+            <div data-field-span="1">
+                <label>Venue name</label>
+                <input type="text" name="venue" />
+            </div>
+        </div>
+         <legend>Cryodex results</legend>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>To use this, in Cryodex go to Export->Export Tournament Report, and then choose the file it creates below</label>
+                <input type="file" name="tourney_report">
+            </div>
+        </div>
+    </fieldset>
+
+
+    <div class="invalid-form-error-message"></div>
+    <input type="submit" class="btn btn-info validate" />
+</form>
+
+<script>
+// just for the demos, avoids form submit
+
+
+
+$(document).ready(function(){
+    window.ParsleyValidator.addValidator('notDefaultSelection', function(value, requirement) {
+            return value.length > 0 },32 );
+
+    window.ParsleyValidator.addValidator('validRoundLength', function(value, requirement) {
+            return value === parseInt( data, 10 )},32 );
+    populateCountries("country", "state");
+    $('#country').select2();
+    $( "#datepicker" ).datepicker();
+    $('#form').parsley();
+    $('#tourney_type').select2()
+    $('#round_length_dropdown').select2()
+    $('#sets').select2();
+    $('#sets > option').prop("selected", "selected")
+    $("#sets").trigger("change");
+    $('#form').parsley().subscribe('parsley:form:validate', function (formInstance) {
+        console.log("parsley:form:validate");
+        // if one of these blocks is not failing do not prevent submission
+        // we use here group validation with option force (validate even non required fields)
+        if (formInstance.isValid('round-len1', true) ) {
+            $('.invalid-form-error-message').html('');
+            return;
+        }
+        else if ( formInstance.isValid('round-len2', true)) {
+            $('.invalid-form-error-message').html('');
+            return;
+        }
+        console.log("neither is valid")
+        // else stop form submission
+        formInstance.submitEvent.preventDefault();
+
+        // and display a gentle message
+        $('.invalid-form-error-message')
+          .html("You must correctly fill the fields of at least one of the round length blocks!")
+          .addClass("filled");
+        return;
+  });
+
+});
+</script>
+{% endblock %}

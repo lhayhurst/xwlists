@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from sqlalchemy.dialects import mysql
 from sqlalchemy.sql.operators import ColumnOperators
 
@@ -18,7 +19,7 @@ import xwingmetadata
 
 
 from decl_enum import DeclEnum
-from sqlalchemy import Column, Integer, String, func, Date, and_
+from sqlalchemy import Column, Integer, String, func, Date, and_, desc
 from sqlalchemy import ForeignKey
 
 #rollup help
@@ -156,7 +157,6 @@ class ShipUpgrade(Base):
 
 
 
-
 class Tourney(Base):
     __tablename__ = tourney_table
     id = Column(Integer, primary_key=True)
@@ -169,6 +169,8 @@ class Tourney(Base):
     rankings        = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)", cascade="all,delete,delete-orphan")
     tourney_players = relationship( "TourneyPlayer", back_populates="tourney", cascade="all,delete,delete-orphan")
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
+    venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
+
 
     def get_pre_elimination_rounds(self):
         ret = [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]
@@ -186,6 +188,21 @@ class Tourney(Base):
 
     def headline(self):
         return "{0}".format(self.id)
+
+    def venue_string(self):
+        ret = ""
+        if self.venue is not None:
+            if self.venue.venue is not None:
+                ret = self.venue.venue
+            if self.venue.city is not None:
+                ret = ret + "/" + self.venue.city
+            if self.venue.state is not None:
+                ret = ret + "/" + self.venue.state
+            if self.venue.country is not None:
+                ret = ret + "/" + self.venue.country
+        else:
+            ret = "Unknown"
+        return ret
 
 tourney_player_table = "tourney_player"
 class TourneyPlayer(Base):
@@ -282,6 +299,16 @@ class TourneySet(Base):
     tourney            = relationship( Tourney.__name__, back_populates="sets")
     set                = relationship( Set.__name__,  uselist=False)
 
+tourney_venue_table_name = 'tourney_venue'
+class TourneyVenue(Base):
+    __tablename__      = tourney_venue_table_name
+    id                 = Column(Integer, primary_key=True)
+    tourney_id         = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
+    country            = Column(String(128))
+    state              = Column(String(128))
+    city               = Column(String(128))
+    venue              = Column(String(128))
+    tourney            = relationship( Tourney.__name__, back_populates="venue", uselist=False)
 
 class PersistenceManager:
 
@@ -404,9 +431,9 @@ class PersistenceManager:
 
     def get_tourney_summary(self):
         session = self.db_connector.get_session()
-        tourney_lists = session.query(TourneyList).all()
+        tourney_lists = session.query(TourneyList).join(Tourney).order_by(desc(Tourney.tourney_date)).all()
 
-        ret = {}
+        ret = OrderedDict()
 
         for tl in tourney_lists:
             tourney_name = tl.tourney.tourney_name

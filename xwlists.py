@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from cryodex import Cryodex
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
-    TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet
+    TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue
 from rollup import Rollup
 import xwingmetadata
 
@@ -86,7 +86,7 @@ def tourneys():
 
 @app.route("/new")
 def new():
-    return render_template('new.html', sets=sorted(xwingmetadata.sets_and_expansions.keys()))
+    return render_template('new_tourney.html', sets=sorted(xwingmetadata.sets_and_expansions.keys()))
 
 def generate( rows ):
     for r in rows:
@@ -167,7 +167,7 @@ def delete_tourney():
     pm.delete_tourney(tourney_name)
     return redirect(url_for('tourneys') )
 
-def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_length, sets_used):
+def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_length, sets_used, country, state, city, venue):
 
     pm = PersistenceManager(myapp.db_connector)
     t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date, tourney_type=tourney_type, round_length=round_length)
@@ -218,6 +218,9 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_leng
                 ts  = TourneySet( tourney=t, set=set)
                 pm.db_connector.get_session().add(ts)
 
+    tv = TourneyVenue( tourney=t, country=country, state=state, city=city, venue=venue)
+    pm.db_connector.get_session().add(tv)
+
     #finally load the rankings
     for rank in cryodex.ranking.rankings:
         r = TourneyRanking( tourney   = t,
@@ -255,6 +258,10 @@ def add_tourney():
     round_length_dropdown = request.form['round_length_dropdown']
     round_length_userdef  = request.form['round_length_userdef']
     sets_used             = request.form.getlist('sets[]')
+    country               = request.form['country']
+    state                 = request.form['state']
+    city                  = request.form['city']
+    venue                 = request.form['venue']
 
     round_length = None
     if round_length_dropdown is None or len(round_length_dropdown) == 0:
@@ -271,7 +278,7 @@ def add_tourney():
         try:
             html = tourney_report.read()
             cryodex = Cryodex(html)
-            t = create_tourney(cryodex, name, date, type, round_length, sets_used )
+            t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
             sfilename = secure_filename(filename) + "." + str(t.id)
             save_cryodex_file( failed=False, filename=sfilename, html=html)
             return redirect(url_for('tourneys') )

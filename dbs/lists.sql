@@ -342,6 +342,36 @@ INSERT INTO `tourney_set` VALUES (105,1,19),(106,1,20),(107,1,21),(108,1,22),(10
 UNLOCK TABLES;
 
 --
+-- Table structure for table `tourney_venue`
+--
+
+DROP TABLE IF EXISTS `tourney_venue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tourney_venue` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tourney_id` int(11) DEFAULT NULL,
+  `country` varchar(128) DEFAULT NULL,
+  `state` varchar(128) DEFAULT NULL,
+  `city` varchar(128) DEFAULT NULL,
+  `venue` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tourney_id` (`tourney_id`),
+  CONSTRAINT `tourney_venue_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tourney_venue`
+--
+
+LOCK TABLES `tourney_venue` WRITE;
+/*!40000 ALTER TABLE `tourney_venue` DISABLE KEYS */;
+INSERT INTO `tourney_venue` VALUES (1,1,'United States of America','Minnesota','Roseville','Fantasy Flight Games Center'),(2,2,'United States of America','Minnesota','Roseville','Fantasy Flight Games Center');
+/*!40000 ALTER TABLE `tourney_venue` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `upgrade`
 --
 
@@ -400,4 +430,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-12-28  0:13:56
+-- Dump completed on 2014-12-29  7:29:39
