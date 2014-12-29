@@ -68,7 +68,7 @@ CREATE TABLE `round_result` (
   CONSTRAINT `round_result_ibfk_3` FOREIGN KEY (`list2_id`) REFERENCES `tourney_list` (`id`),
   CONSTRAINT `round_result_ibfk_4` FOREIGN KEY (`winner_id`) REFERENCES `tourney_list` (`id`),
   CONSTRAINT `round_result_ibfk_5` FOREIGN KEY (`loser_id`) REFERENCES `tourney_list` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -178,7 +178,7 @@ CREATE TABLE `tourney` (
   `tourney_type` varchar(128) DEFAULT NULL,
   `round_length` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +211,7 @@ CREATE TABLE `tourney_list` (
   KEY `tourney_list_ibfk_2_idx` (`player_id`),
   CONSTRAINT `tourney_list_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
   CONSTRAINT `tourney_list_ibfk_2` FOREIGN KEY (`player_id`) REFERENCES `tourney_player` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=348 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=354 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -238,7 +238,7 @@ CREATE TABLE `tourney_player` (
   PRIMARY KEY (`id`),
   KEY `tourney_id` (`tourney_id`),
   CONSTRAINT `tourney_player_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=591 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=597 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,7 +272,7 @@ CREATE TABLE `tourney_ranking` (
   KEY `player_id` (`player_id`),
   CONSTRAINT `tourney_ranking_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
   CONSTRAINT `tourney_ranking_ibfk_2` FOREIGN KEY (`player_id`) REFERENCES `tourney_player` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=281 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=287 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -300,7 +300,7 @@ CREATE TABLE `tourney_round` (
   PRIMARY KEY (`id`),
   KEY `tourney_id` (`tourney_id`),
   CONSTRAINT `tourney_round_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -328,7 +328,7 @@ CREATE TABLE `tourney_set` (
   KEY `set_id` (`set_id`),
   CONSTRAINT `tourney_set_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`),
   CONSTRAINT `tourney_set_ibfk_2` FOREIGN KEY (`set_id`) REFERENCES `xwing_set` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -358,7 +358,7 @@ CREATE TABLE `tourney_venue` (
   PRIMARY KEY (`id`),
   KEY `tourney_id` (`tourney_id`),
   CONSTRAINT `tourney_venue_ibfk_1` FOREIGN KEY (`tourney_id`) REFERENCES `tourney` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -430,4 +430,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-12-29  7:29:39
+-- Dump completed on 2014-12-29  7:53:07
