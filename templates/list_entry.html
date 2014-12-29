@@ -19,11 +19,13 @@
             overflow-y: scroll;
         }
          .entries {
-            margin-left: 66%;
+            margin-left: auto;
             padding: 20px;
+
         }
         .squad {
             display: none;
+            background-color:red;
         }
 
         .squad-member {
@@ -86,16 +88,15 @@
         var upgrades         = {{ meta.upgrades()|tojson | safe }};
         var tourney_id       = {{ tourney_id }};
         var tourney_list_id  = {{ tourney_list_id }};
-        var image_src        = {{  image_src }}
     </script>
 
 
     <div class="main-section">
 
-        <div class="image">
-            {{  tourney_list.player.player_name  }}
-            <img src={{ image_src }}>
-        </div>
+{#        <div class="image">#}
+{#            {{  tourney_list.player.player_name  }}#}
+{#            <img src={{ image_src }}>#}
+{#        </div>#}
 
 
         <div class="entries">
@@ -116,7 +117,7 @@
                 <button class="submit-squad" hidden="true" disabled="true">Submit squad</button>
               <div class="total"></div>
             </span>
-            <div class="squad">
+            <div class="squad" >
                 <div class="squad-member template">
                     <div class="row template">
                         <span class="row-label"></span>
@@ -221,6 +222,7 @@
         function copySquadMember(obj)
         {
             var squadMember = $(obj).parent().parent();
+            console.log($(squadMember).parent())
             squadMember.clone([true, true]).insertBefore( squadMember );
             updateTotals();
 

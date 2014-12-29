@@ -429,10 +429,14 @@ def display_list():
     pm = PersistenceManager(myapp.db_connector)
     tourney_list = pm.get_tourney_list(tourney_list_id)
     m = xwingmetadata.XWingMetaData()
+    image_src = None
+    if tourney_list.image is not None:
+        image_src=urllib.quote(tourney_list.image)
+
     return render_template('list_display.html',
                            meta=m,
                            admin=admin,
-                           image_src=urllib.quote(tourney_list.image),
+                           image_src=image_src,
                            tourney_list=tourney_list,
                            tourney_list_id=tourney_list.id,
                            tourney=tourney_list.tourney,
