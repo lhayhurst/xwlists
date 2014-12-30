@@ -16,16 +16,16 @@
         }
         .entries, .image {
             height: 100%;
-            overflow-y: scroll;
         }
          .entries {
             margin-left: auto;
             padding: 20px;
+            display: inline-block;
 
         }
         .squad {
             display: none;
-            background-color:red;
+
         }
 
         .squad-member {
@@ -33,6 +33,7 @@
             background-color: #ddd;
             margin: 10px;
             padding: 20px;
+            display: inherit;
         }
 
         .row {
@@ -99,8 +100,6 @@
 {#        </div>#}
 
 
-        <div class="entries">
-
             <div>
                 <b>Player name</b>  <textarea rows="1" cols="30" name="player" required >{{ tourney_list.player.player_name }}</textarea>
             </div>
@@ -111,6 +110,10 @@
                 <button class="faction-choice">Imperial</button>
                 <button class="faction-choice">Rebel</button>
             </div>
+
+
+        <div class="entries">
+
             <span>
               <h2 class="faction-label"></h2>
                 <br>
