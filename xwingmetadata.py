@@ -352,9 +352,9 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Mauler Mithel', 'cost': 17,
               'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (EPT, MOD)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Dark Curse', 'cost': 16,
-              'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (MOD,'' )},
+              'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (MOD, )},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Backstabber', 'cost': 16,
-              'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (MOD,'' )},
+              'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (MOD, )},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Winged Gundark', 'cost': 15,
               'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (MOD,)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Night Beast', 'cost': 15,
@@ -362,7 +362,7 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Black Squadron Pilot', 'cost': 14,
               'upgrades': (EPT, MOD)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Obsidian Squadron Pilot', 'cost': 13,
-              'upgrades': (MOD,'')},
+              'upgrades': (MOD,)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Academy Pilot', 'cost': 12, 'upgrades': (MOD,) }
          ),
 

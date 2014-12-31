@@ -222,14 +222,13 @@
             });
         }
 
+
         function copySquadMember(obj)
         {
             var squadMember = $(obj).parent().parent();
-            console.log($(squadMember).parent())
-            squadMember.clone([true, true]).insertBefore( squadMember );
+            clone = $(squadMember).clone(true, true);
+            $(clone).insertBefore( squadMember );
             updateTotals();
-
-
         }
 
         function removeSquadMember(obj)
@@ -243,7 +242,7 @@
         {
             var squadMember = $(obj).parent().parent();
             var faction = $('.faction-label').text();
-            addSquadMember(faction, squadMember);
+            return addSquadMember(faction, squadMember);
         }
 
         function addSquadMember(faction, squadMember) {
@@ -254,9 +253,105 @@
             });
             addRow(squadMemberEl, 'ship', 'Ship', items, function(ship) { shipChosen(faction, squadMemberEl, ship) });
             updateTotals();
+            return squadMemberEl;
         }
 
+        function shipChosen(faction, squadMemberEl, ship) {
+            removePilot(squadMemberEl);
+            removeUpgrades(squadMemberEl);
 
+            var pilotItems = ships_and_pilots[ship].map(function(pilot) { return { text:pilot.name, id:pilot.name, cost:pilot.cost }});
+
+            //remove any pilots that are unique and have already been selected
+            var uniqueSelectedPilots = getUniqueSelectedPilots(squadMemberEl);
+            //remove the unique selected pilots from the pilotItems
+            pilotItems = _.filter( pilotItems, function (pi) { return ! ( pi.text in uniqueSelectedPilots ) } );
+
+            ret = addRow(squadMemberEl, 'pilot', 'Pilot', pilotItems, function(pilot) { pilotChosen(faction, squadMemberEl, ship, pilot) });
+            updateTotals();
+            return ret;
+        }
+
+        function pilotChosen(faction, squadMemberEl, ship, pilot)
+        {
+            removeUpgrades(squadMemberEl);
+            var pilotHref = getPilotHref( ship, pilot );
+            var upgrades_for_pilot = pilotHref.upgrades;
+            upgrades_for_pilot = convertToArray(upgrades_for_pilot);
+            upgrades_for_pilot.forEach(function(upgradeType) {
+                addUpgrade( faction, squadMemberEl, ship, pilot, pilotHref, upgradeType );
+            } );
+
+            updateTotals();
+        }
+
+        function upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue) {
+            var upgradeHref = getUpgradeHref( upgradeType, upgradeValue );
+            if ( 'action' in upgradeHref ) {
+                var action = upgradeHref.action;
+                if ( action.type == 'ADD_UPGRADE' ) {
+                    var upgrade = action.value;
+                    upgradeItems = getUpgradeItems( squadMemberEl, upgrade, ship, faction, pilotHref );
+                    addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function (upgradeValue) {
+                            upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgrade, upgradeValue);
+                    } );
+                }
+            }
+            updateTotals();
+        }
+
+        function addRow(parentEl, className, label, items, changeHandler)
+        {
+            var rowEl = parentEl.find('.row.template').clone().removeClass('template').appendTo(parentEl);
+            rowEl.addClass(className);
+            rowEl.find('.row-label').text(label);
+            var allowClearValue = true;
+            if ( className != "upgrade") {
+                allowClearValue = false;
+            }
+            rowEl.find('.row-value .select')
+                    .select2({data:items, placeholder:'select a ' + label, allowClear: allowClearValue })
+                    .on('select2-close', function(e) {
+                        changeHandler(e.target.value);
+                    }).on('select2-removed', function(e) {
+                        rowUpgradeEl = $(e.currentTarget).parent().parent();
+                        rowUpgradeEl.find( '.row-cost').text('');
+                        updateTotals();
+                    } );
+            return rowEl;
+        }
+
+        function getUpgradeItems(squadMemberEl, upgradeType, ship, faction, pilotHref )
+        {
+            var upgradeItems = upgrades[upgradeType].map(function (u) {
+
+                if ('constraints' in u) {
+                    return manageConstraints(ship, u.constraints, faction, pilotHref, u, upgradeType);
+                }
+                else {
+                    return {text: u.name, id: u.name, cost: u.cost, type: upgradeType, disabled: false};
+                }
+            });
+
+            //filter down the upgrade items to ones that aren't disabled, and unique ones that haven't already been selected.
+            upgradeItems = _.filter(upgradeItems, function (ui) {
+                return 'disabled' in ui && ui.disabled == false
+            });
+            var uniqueSelectedUpgrades = getUniqueSelectedUpgrades(squadMemberEl);
+            upgradeItems = _.filter(upgradeItems, function (ui) {
+                return !( ui.text in uniqueSelectedUpgrades )
+            });
+            return upgradeItems;
+        }
+
+        function addUpgrade(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType)
+        {
+            var upgradeItems = getUpgradeItems( squadMemberEl, upgradeType, ship, faction, pilotHref );
+
+            addRow(squadMemberEl, 'upgrade', upgradeType, upgradeItems, function (upgradeValue) {
+                upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue);
+            });
+        }
         function removeUpgrades( squadMemberEl ) {
             squadMemberEl.find('.upgrade').each(function(i, upgrade) {  $(upgrade).remove(); });
 
@@ -351,20 +446,6 @@
         }
 
 
-        function shipChosen(faction, squadMemberEl, ship) {
-            removePilot(squadMemberEl);
-            removeUpgrades(squadMemberEl);
-
-            var pilotItems = ships_and_pilots[ship].map(function(pilot) { return { text:pilot.name, id:pilot.name, cost:pilot.cost }});
-
-            //remove any pilots that are unique and have already been selected
-            var uniqueSelectedPilots = getUniqueSelectedPilots(squadMemberEl);
-            //remove the unique selected pilots from the pilotItems
-            pilotItems = _.filter( pilotItems, function (pi) { return ! ( pi.text in uniqueSelectedPilots ) } );
-
-            addRow(squadMemberEl, 'pilot', 'Pilot', pilotItems, function(pilot) { pilotChosen(faction, squadMemberEl, ship, pilot) });
-            updateTotals();
-        }
 
 
         function convertToArray( someObject ) {
@@ -403,86 +484,11 @@
             return ret;
         }
 
-        function getUpgradeItems(squadMemberEl, upgradeType, ship, faction, pilotHref )
-        {
-            var upgradeItems = upgrades[upgradeType].map(function (u) {
-
-                if ('constraints' in u) {
-                    return manageConstraints(ship, u.constraints, faction, pilotHref, u, upgradeType);
-                }
-                else {
-                    return {text: u.name, id: u.name, cost: u.cost, type: upgradeType, disabled: false};
-                }
-            });
-
-            //filter down the upgrade items to ones that aren't disabled, and unique ones that haven't already been selected.
-            upgradeItems = _.filter(upgradeItems, function (ui) {
-                return 'disabled' in ui && ui.disabled == false
-            });
-            var uniqueSelectedUpgrades = getUniqueSelectedUpgrades(squadMemberEl);
-            upgradeItems = _.filter(upgradeItems, function (ui) {
-                return !( ui.text in uniqueSelectedUpgrades )
-            });
-            return upgradeItems;
-        }
-
-        function addUpgrade(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType)
-        {
-            var upgradeItems = getUpgradeItems( squadMemberEl, upgradeType, ship, faction, pilotHref );
-
-            addRow(squadMemberEl, 'upgrade', upgradeType, upgradeItems, function (upgradeValue) {
-                upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue);
-            });
-        }
-
-        function pilotChosen(faction, squadMemberEl, ship, pilot)
-        {
-            removeUpgrades(squadMemberEl);
-            var pilotHref = getPilotHref( ship, pilot );
-            var upgrades_for_pilot = pilotHref.upgrades;
-            upgrades_for_pilot = convertToArray(upgrades_for_pilot);
-            upgrades_for_pilot.forEach(function(upgradeType) {
-                addUpgrade( faction, squadMemberEl, ship, pilot, pilotHref, upgradeType );
-            } );
-
-            updateTotals();
-        }
 
 
-        function upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue) {
-            var upgradeHref = getUpgradeHref( upgradeType, upgradeValue );
-            if ( 'action' in upgradeHref ) {
-                var action = upgradeHref.action;
-                if ( action.type == 'ADD_UPGRADE' ) {
-                    var upgrade = action.value;
-                    upgradeItems = getUpgradeItems( squadMemberEl, upgrade, ship, faction, pilotHref );
-                    addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function (upgradeValue) {
-                            upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgrade, upgradeValue);
-                    } );
-                }
-            }
-            updateTotals();
-        }
 
-        function addRow(parentEl, className, label, items, changeHandler)
-        {
-            var rowEl = parentEl.find('.row.template').clone().removeClass('template').appendTo(parentEl);
-            rowEl.addClass(className);
-            rowEl.find('.row-label').text(label);
-            var allowClearValue = true;
-            if ( className != "upgrade") {
-                allowClearValue = false;
-            }
-            rowEl.find('.row-value .select')
-                    .select2({data:items, placeholder:'select a ' + label, allowClear: allowClearValue })
-                    .on('select2-close', function(e) {
-                        changeHandler(e.target.value);
-                    }).on('select2-removed', function(e) {
-                        rowUpgradeEl = $(e.currentTarget).parent().parent();
-                        rowUpgradeEl.find( '.row-cost').text('');
-                        updateTotals();
-                    } );
-        }
+
+
 
 
         function updateTotals()
@@ -496,7 +502,13 @@
                 var pilot = memberEl.find('.pilot');
                 pilotSelect =  pilot.find('.row-value .select');
                 if ( pilotSelect != null ) {
-                    memberCost     = pilotSelect.select2('data').cost || 0;
+                    var memberCost = 0;
+                    if ( pilotSelect ) {
+                        var psd =  pilotSelect.select2('data');
+                        if ( psd ) {
+                            memberCost = psd.cost;
+                        }
+                    }
                     pilot.find( '.row-cost').text( memberCost );
 
                     //get all the upgrades
