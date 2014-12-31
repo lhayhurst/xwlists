@@ -151,7 +151,6 @@
             $('.squad').show();
             console.log($('.faction-label').text() );
             if ( $('.faction-label').text() == "Imperial" ) {
-                console.log($('.submit-squad'));
                 $('.submit-squad').text("Submit to the Emperor!");
             }
             else
@@ -231,11 +230,22 @@
             updateTotals();
         }
 
+        function numSquadMembers() {
+            var count = 0;
+            $('.squad-member').not('.template').each(function(i, member) {
+                count++;
+            } );
+            return count;
+        }
+
         function removeSquadMember(obj)
         {
             var squadMember = $(obj).parent().parent();
             squadMember.remove();
             updateTotals();
+            if ( numSquadMembers() == 0 ) {
+                window.location.reload();
+            }
         }
 
         function createNewSquadMember(obj)
@@ -253,7 +263,6 @@
             });
             addRow(squadMemberEl, 'ship', 'Ship', items, function(ship) { shipChosen(faction, squadMemberEl, ship) });
             updateTotals();
-            return squadMemberEl;
         }
 
         function shipChosen(faction, squadMemberEl, ship) {
@@ -484,33 +493,19 @@
             return ret;
         }
 
-
-
-
-
-
-
-
         function updateTotals()
         {
-
+            console.log("update totals");
             var squadTotal = 0;
             $('.squad-member').not('.template').each(function(i, member) {
+                console.log("found a squad member");
                 var memberCost = 0;
                 var memberEl = $(member);
-
                 var pilot = memberEl.find('.pilot');
                 pilotSelect =  pilot.find('.row-value .select');
                 if ( pilotSelect != null ) {
-                    var memberCost = 0;
-                    if ( pilotSelect ) {
-                        var psd =  pilotSelect.select2('data');
-                        if ( psd ) {
-                            memberCost = psd.cost;
-                        }
-                    }
+                    memberCost     = pilotSelect.select2('data').cost || 0;
                     pilot.find( '.row-cost').text( memberCost );
-
                     //get all the upgrades
                     var upgradeCosts = 0;
                     memberEl.find('.upgrade').each( function(k, upgrade) {
@@ -525,11 +520,9 @@
                         }
                     } ) ;
                 }
-
                 memberCost += upgradeCosts;
                 memberEl.find('.sub-total').text( memberCost );
                 squadTotal += memberCost;
-
             });
             if ( squadTotal > 0 && squadTotal <= 100 ) {
                 $('.submit-squad').removeAttr("disabled");
@@ -541,6 +534,7 @@
             }
             $('.total').text(squadTotal);
         }
+
 
         init();
     </script>
