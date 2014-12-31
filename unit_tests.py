@@ -36,12 +36,6 @@ class DatabaseTestCase(unittest.TestCase):
 class TestIntegrity(DatabaseTestCase):
 
 
-    #@unittest.skip("because")
-    def testDeleteTourneys(self):
-        tourneys = self.pm.get_tourneys()
-    #    for tourney in tourneys:
-    #        self.pm.delete_tourney(tourney.tourney_name)
-    #    self.pm.db_connector.get_session().commit()
 
     @unittest.skip("because")
     def testCryodexImport(self):
@@ -180,7 +174,7 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( 56, loser.mov)
         self.assertEqual( 25, loser.sos )
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testCryodexParse(self):
         file = "static/tourneys/treport.html"
         with open (file, "r") as myfile:
@@ -239,6 +233,7 @@ class TestIntegrity(DatabaseTestCase):
             self.assertEqual( 13, winner.score)
             self.assertEqual( 416, winner.mov)
             self.assertEqual( 20, winner.sos)
+            self.assertEqual( 1, winner.elim_rank)
 
             loser = rankings[len(rankings)-1]
             self.assertEqual( "janine", loser.player_name)

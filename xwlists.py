@@ -226,7 +226,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_leng
         r = TourneyRanking( tourney   = t,
                             player    = players[rank.player_name],
                             rank      = rank.rank,
-                            elim_rank = None,
+                            elim_rank = rank.elim_rank,
                             mov       = rank.mov,
                             sos       = rank.sos,
                             score     = rank.score)

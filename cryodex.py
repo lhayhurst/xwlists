@@ -5,8 +5,10 @@ from persistence import RoundType
 
 RANKINGS = 'Rankings'
 
-H3 = 'h3'
-DIV = "div"
+H3    = 'h3'
+DIV   = "div"
+ELIM  = "Top"
+ROUND = "Round"
 
 class CryodexResult:
     def __init__(self, player1, player2, winner, player1_score, player2_score):
@@ -27,9 +29,9 @@ class CryodexRound:
         self.results.append( result )
 
     def get_round_type(self):
-        if self.type == 'Round':
+        if self.type == ROUND:
             return RoundType.PRE_ELIMINATION
-        elif self.type == 'Top':
+        elif self.type == ELIM:
             return RoundType.ELIMINATION
         else:
             return None
@@ -37,6 +39,7 @@ class CryodexRound:
 class CryodexRank:
     def __init__(self, rank, player_name, score, mov, sos):
         self.rank        = int(rank)
+        self.elim_rank   = None
         self.player_name = player_name
         self.score       = int(score)
         self.mov         = int(mov)
@@ -57,6 +60,36 @@ class CryodexRankings:
                 mov   = rec[3]
                 sos   = rec[4]
                 self.rankings.append( CryodexRank( rank, name, score, mov, sos  ))
+
+    def apply_elimination_results(self, rounds):
+        elim_rounds = rounds[ELIM]
+        i = 0
+        for round in elim_rounds:
+            i = i + 1
+            elim_rank = round.number
+            for result in round.results:
+                winner    = result.winner
+                loser     = None
+                if winner == result.player1:
+                    loser = result.player2
+                else:
+                    loser = result.player1
+                #set the ranking of the player
+                for rank in self.rankings:
+                    if rank.player_name == loser:
+                        rank.elim_rank = int(elim_rank)
+                        break
+
+                #set the winner if its the last one
+                if i == len(elim_rounds):
+                    for rank in self.rankings:
+                        if rank.player_name == winner:
+                            rank.elim_rank = 1
+                            break
+
+
+
+        print "foo"
 
 
 class Cryodex:
@@ -131,3 +164,5 @@ class Cryodex:
                     self.players[player2] = player2
 
                     cr.add_result( player1, player2, winner, player1_score, player2_score)
+
+        self.ranking.apply_elimination_results( self.rounds )
