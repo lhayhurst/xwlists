@@ -44,9 +44,9 @@
                 </tr>
             {%  for result in round.results %}
                 <tr>
-                    <td class="tg-031e">{{ result.winner.player.player_name }}</td>
+                    <td class="tg-031e"><a href="{{ result.get_winner_list_url()}}">{{result.winner.player.player_name}}</a></td>
                     <td class="tg-031e">{{ result.winning_score() }}</td>
-                    <td class="tg-031e">{{ result.loser.player.player_name }}</td>
+                    <td class="tg-031e"><a href="{{ result.get_loser_list_url()}}">{{result.loser.player.player_name}}</a></td>
                     <td class="tg-031e">{{ result.losing_score() }}</td>
                 </tr>
             {% endfor %}
@@ -68,9 +68,9 @@
                 </tr>
             {%  for result in round.results %}
                 <tr>
-                    <td class="tg-031e">{{ result.winner.player.player_name }}</td>
+                    <td class="tg-031e"><a href="{{ result.get_winner_list_url()}}">{{result.winner.player.player_name}}</a></td>
                     <td class="tg-031e">{{ result.winning_score() }}</td>
-                    <td class="tg-031e">{{ result.loser.player.player_name }}</td>
+                    <td class="tg-031e"><a href="{{ result.get_loser_list_url()}}">{{result.loser.player.player_name}}</a></td>
                     <td class="tg-031e">{{ result.losing_score() }}</td>
                 </tr>
             {% endfor %}
