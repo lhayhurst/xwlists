@@ -8,7 +8,7 @@ padding:1.5em;
 
 #conteneur {
     background-color:#fafafa;
-    position: absolute;
+    position: inherit;
     top: 40px; /* Header Height */
     bottom: 20px; /* Footer Height */
     width: 98%;
