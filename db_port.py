@@ -1,10 +1,7 @@
-import os
-from sqlalchemy import func
-from cryodex import Cryodex
+
 from myapp import db_connector
-from persistence import PersistenceManager, Ship, Tourney, TourneyList, TourneyRound, RoundResult, TourneyRanking, \
-    TourneyPlayer, Set, TourneySet, TourneyVenue, FactionTable
-from rollup import Rollup
+from persistence import PersistenceManager, TourneyRanking, \
+     Set, TourneySet, TourneyVenue, Pilot
 import xwingmetadata
 
 __author__ = 'lhayhurst'
@@ -26,6 +23,11 @@ class DatabaseTestCase(unittest.TestCase):
 
 class DbPort(DatabaseTestCase):
 
+    def testCanonizePilots(self):
+        pilots = self.pm.db_connector.get_session().query(Pilot)
+        for pilot in pilots:
+            pilot.canon_name = xwingmetadata.canonize(pilot.name)
+        self.pm.db_connector.get_session().commit()
 
     @unittest.skip("because")
     def testApplyVenue(self):

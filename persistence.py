@@ -100,6 +100,7 @@ class Pilot(Base):
     __tablename__ = pilot_table
     id = Column(Integer, primary_key=True)
     name = Column(String(128), unique=True)
+    canon_name = Column(String(128), unique=True)
     cost = Column(Integer)
 
 class ShipPilot(Base):

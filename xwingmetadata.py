@@ -291,7 +291,7 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
          A_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Tycho Celchu', 'cost': 26,
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                    'upgrades': (TITLE, MISSILE, EPT, MOD)},
-                  {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Green Sq. Pilot', 'cost': 19,
+                  {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Green Squadron Pilot', 'cost': 19,
                    'upgrades': (TITLE, MISSILE, EPT, MOD)},
                   {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Arvel Crynyd', 'cost': 23,
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
@@ -513,8 +513,17 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
              {'ship_size': LARGE_SHIP, 'faction': IMPERIAL, 'name': 'Patrol Leader', 'cost': 40,
               'upgrades': (BOMB, CREW, CREW, CREW, TORPEDO, TITLE, MOD)} )}
 
+alpha_num_only_pattern = re.compile('[\W_]+')
 
+def canonize(value):
 
+    #first lower case it
+    lc_value = value.lower()
+
+    #then remove non alphanumeric characters
+    lc_alphanum_value = alpha_num_only_pattern.sub('', lc_value )
+
+    return lc_alphanum_value
 
 class XWingMetaData:
 
@@ -525,17 +534,7 @@ class XWingMetaData:
     #Convert non-ASCII characters to closest ASCII equivalent (to remove umlauts, etc.)
     #Remove non-alphanumeric characters
 
-    alpha_num_only_pattern = re.compile('[\W_]+')
 
-    def canonize(vself,value):
-
-        #first lower case it
-        lc_value = value.lower()
-
-        #then remove non alphanumeric characters
-        lc_alphanum_value = XWingMetaData.alpha_num_only_pattern.sub('', lc_value )
-
-        return lc_alphanum_value
 
     def is_rebel(self):
         self.is_rebel = True
