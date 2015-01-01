@@ -57,21 +57,24 @@ class RoundType(DeclEnum):
     PRE_ELIMINATION = 'Pre-Elimination', 'Pre-Elimination'
 
 class Faction(DeclEnum):
-    IMPERIAL = "empire", "Empire"
-    REBEL    = "rebels", "Rebels"
+    IMPERIAL = "empire", "Galactic Empire"
+    REBEL    = "rebels", "Rebel Alliance"
+    SCUM     = "scum", "Scum and Villainy"
 
 class UpgradeType(DeclEnum):
-    TITLE = xwingmetadata.TITLE, xwingmetadata.TITLE
-    DROID = xwingmetadata.DROID, xwingmetadata.DROID,
-    CREW  = xwingmetadata.CREW, xwingmetadata.CREW
-    EPT   = xwingmetadata.EPT, xwingmetadata.EPT
-    MOD    = xwingmetadata.MOD, xwingmetadata.MOD
-    SYSTEM = xwingmetadata.SYSTEM, xwingmetadata.SYSTEM
-    BOMB_MINES = xwingmetadata.BOMB, xwingmetadata.BOMB
-    CANNON = xwingmetadata.CANNON, xwingmetadata.CANNON
-    TURRET = xwingmetadata.TURRET, xwingmetadata.TURRET
-    TORPEDO = xwingmetadata.TORPEDO, xwingmetadata.TORPEDO
-    MISSILE = xwingmetadata.MISSILE, xwingmetadata.MISSILE
+    TITLE = xwingmetadata.TITLE_CANON, xwingmetadata.TITLE
+    DROID = xwingmetadata.DROID_CANON, xwingmetadata.DROID
+    CREW  = xwingmetadata.CREW_CANON, xwingmetadata.CREW
+    EPT   = xwingmetadata.EPT_CANON, xwingmetadata.EPT
+    MOD    = xwingmetadata.MOD_CANON, xwingmetadata.MOD
+    SYSTEM = xwingmetadata.SYSTEM_CANON, xwingmetadata.SYSTEM
+    BOMB_MINES = xwingmetadata.BOMB_CANON, xwingmetadata.BOMB
+    CANNON = xwingmetadata.CANNON_CANON, xwingmetadata.CANNON
+    TURRET = xwingmetadata.TURRET_CANON, xwingmetadata.TURRET
+    TORPEDO = xwingmetadata.TORPEDO_CANON, xwingmetadata.TORPEDO
+    MISSILE = xwingmetadata.MISSILE_CANON, xwingmetadata.MISSILE
+    SALVAGED_ASTROMECH_DROID = xwingmetadata.SALVAGED_ASTROMECH_DROID_CANON, xwingmetadata.SALVAGED_ASTROMECH_DROID
+    ILLICIT = xwingmetadata.ILLICIT_CANON, xwingmetadata.ILLICIT
 
 class ShipType(DeclEnum):
     XWING =  xwingmetadata.X_WING, xwingmetadata.X_WING

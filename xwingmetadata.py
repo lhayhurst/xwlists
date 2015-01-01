@@ -22,16 +22,31 @@ Y_WING = 'Y-Wing'
 X_WING = 'X-Wing'
 
 EPT = "Elite Pilot Talent"
+EPT_CANON = 'ept'
 TITLE = "Title"
+TITLE_CANON = 'title'
 CREW = "Crew"
-SYSTEM = "System"
+CREW_CANON = 'crew'
+SYSTEM = 'System'
+SYSTEM_CANON = 'system'
 MOD = "Modification"
+MOD_CANON = 'mod'
 DROID = 'Astromech Droid'
+DROID_CANON = 'amd'
 CANNON = "Cannon"
+CANNON_CANON = 'cannon' #heh
 TURRET = "Turret Weapon"
+TURRET_CANON = 'turret'
 MISSILE = "Missile"
+MISSILE_CANON = 'missile'
 TORPEDO = 'Torpedo'
+TORPEDO_CANON = 'torpedo'
 BOMB = "Bomb"
+BOMB_CANON = 'bomb'
+SALVAGED_ASTROMECH_DROID = 'Salvaged Astromech Droid'
+SALVAGED_ASTROMECH_DROID_CANON = 'samd'
+ILLICIT = 'Illicit'
+ILLICIT_CANON = 'illicit'
 
 def header():
     return [ 'Tourney', 'tourneyType', 'tourneyDate', 'player', FACTION, 'points', 'swiss_standing', 'elim_standing', \
@@ -48,8 +63,8 @@ SMALL_SHIP = "SMALL_SHIP"
 LARGE_SHIP = "LARGE_SHIP"
 PER_SQUAD = "PER_SQUAD"
 UNIQUE = "UNIQUE"
-REBEL = "Rebel"
-IMPERIAL = "Imperial"
+REBEL = "rebels"
+IMPERIAL = "empire"
 FACTION = "FACTION"
 ADD_EPT = "ADD_EPT"
 
