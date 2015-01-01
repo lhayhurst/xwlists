@@ -1,3 +1,4 @@
+from persistence import Faction
 import xwingmetadata
 
 COUNT_MEASURE       = 'COUNT_MEASURE'
@@ -57,9 +58,9 @@ class Rollup:
 
     colors = ["#7cb5ec", "#434348", "#90ed7d"]
     def get_faction_color(self, faction):
-        if faction == xwingmetadata.IMPERIAL:
+        if faction == Faction.IMPERIAL.description:
             return Rollup.colors[1]
-        elif faction == xwingmetadata.REBEL:
+        elif faction == Faction.REBEL.description:
             return Rollup.colors[0]
         else:
             return Rollup.colors[2]
