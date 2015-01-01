@@ -3,7 +3,7 @@ from sqlalchemy import func
 from cryodex import Cryodex
 from myapp import db_connector
 from persistence import PersistenceManager, Ship, Tourney, TourneyList, TourneyRound, RoundResult, TourneyRanking, \
-    TourneyPlayer, Set, TourneySet, TourneyVenue
+    TourneyPlayer, Set, TourneySet, TourneyVenue, FactionTable
 from rollup import Rollup
 import xwingmetadata
 
@@ -26,7 +26,8 @@ class DatabaseTestCase(unittest.TestCase):
 
 class DbPort(DatabaseTestCase):
 
-    #@unittest.skip("because")
+
+    @unittest.skip("because")
     def testApplyVenue(self):
         tourneys = self.pm.get_tourneys()
         for tourney in tourneys:

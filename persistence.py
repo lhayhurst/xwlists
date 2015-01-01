@@ -57,8 +57,8 @@ class RoundType(DeclEnum):
     PRE_ELIMINATION = 'Pre-Elimination', 'Pre-Elimination'
 
 class Faction(DeclEnum):
-    IMPERIAL = "Imperial", "Imperial"
-    REBEL    = "Rebel", "Rebel"
+    IMPERIAL = "empire", "Empire"
+    REBEL    = "rebels", "Rebels"
 
 class UpgradeType(DeclEnum):
     TITLE = xwingmetadata.TITLE, xwingmetadata.TITLE

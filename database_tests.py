@@ -35,7 +35,8 @@ class DatabaseTestCase(unittest.TestCase):
 
 class TestIntegrity(DatabaseTestCase):
 
-
+    def testForceSchemaLoad(self):
+        self.assertTrue(True)
 
     @unittest.skip("because")
     def testCryodexImport(self):
@@ -174,7 +175,7 @@ class TestIntegrity(DatabaseTestCase):
         self.assertEqual( 56, loser.mov)
         self.assertEqual( 25, loser.sos )
 
-    #@unittest.skip("because")
+    @unittest.skip("because")
     def testCryodexParse(self):
         file = "static/tourneys/treport.html"
         with open (file, "r") as myfile:

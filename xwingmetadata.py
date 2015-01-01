@@ -1,3 +1,5 @@
+import re
+
 __author__ = 'lhayhurst'
 
 VT_DECIMATOR = 'VT-49 Decimator'
@@ -479,14 +481,34 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
               'upgrades': (BOMB, CREW, CREW, CREW, TORPEDO, TITLE, MOD)} )}
 
 
+
+
 class XWingMetaData:
+
+    #rules
+    #Take the English-language name as printed on the card
+    #Check for special case exceptions to these rules (see below)
+    #Lowercase the name
+    #Convert non-ASCII characters to closest ASCII equivalent (to remove umlauts, etc.)
+    #Remove non-alphanumeric characters
+
+    alpha_num_only_pattern = re.compile('[\W_]+')
+
+    def canonize(vself,value):
+
+        #first lower case it
+        lc_value = value.lower()
+
+        #then remove non alphanumeric characters
+        lc_alphanum_value = XWingMetaData.alpha_num_only_pattern.sub('', lc_value )
+
+        return lc_alphanum_value
+
     def is_rebel(self):
         self.is_rebel = True
-        print ("is rebel")
 
     def is_imperial(self):
         self.is_rebel = False
-        print ("is imp")
 
     def ships(self):
         return ships.keys()
