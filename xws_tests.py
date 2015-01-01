@@ -10,11 +10,8 @@ from xwingmetadata import XWingMetaData
 
 class XWSTests(unittest.TestCase):
 
-    def testCanonize(self):
-        meta = XWingMetaData()
-        meta.canonicalize_ships_and_pilots()
 
-    @unittest.skip("because")
+    #@unittest.skip("because")
     def testGetUrl(self):
 
         response = urllib2.urlopen('http://xwing-builder.co.uk/xws/127470#view=full')
@@ -33,15 +30,29 @@ class XWSTests(unittest.TestCase):
         # schema_file = os.path.join( static_dir, 'xwschema.json')
 
         #schema = json.loads(self.schema())
-        json_data = json.loads(code )
-        print json_data
+        xws = json.loads(code )
+        print xws
+        name = xws['name']
+        faction = xws['faction']
+        version = xws['version']
+        points  = xws['points']
+        pilots  = xws['pilots']
 
-        #verify that everything matches up.  here are the rules:
-        #Take the English-language name as printed on the card
-        #Check for special case exceptions to these rules (see below)
-        #Lowercase the name
-        #Convert non-ASCII characters to closest ASCII equivalent (to remove umlauts, etc.)
-        #Remove non-alphanumeric characters
+        for ship_pilot in xws['pilots']:
+            ship = ship_pilot['ship']
+            pilot = ship_pilot['name']
+            ship_pilot_points = ship_pilot['points']
+            upgrades = ship_pilot['upgrades']
+            for upgrade_type in upgrades.keys():
+                for upgrade in upgrades[upgrade_type]:
+                    print "foo"
+
+
+
+
+
+
+
 
 
 

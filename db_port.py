@@ -1,7 +1,7 @@
 
 from myapp import db_connector
 from persistence import PersistenceManager, TourneyRanking, \
-     Set, TourneySet, TourneyVenue, Pilot
+     Set, TourneySet, TourneyVenue, Pilot, Upgrade
 import xwingmetadata
 
 __author__ = 'lhayhurst'
@@ -23,6 +23,15 @@ class DatabaseTestCase(unittest.TestCase):
 
 class DbPort(DatabaseTestCase):
 
+    #@unittest.skip("because")
+    def testCanonizeUpgrades(self):
+        upgrades = self.pm.db_connector.get_session().query(Upgrade)
+        for upgrade in upgrades:
+            upgrade.canon_name = xwingmetadata.canonize(upgrade.name)
+        self.pm.db_connector.get_session().commit()
+
+
+    @unittest.skip("because")
     def testCanonizePilots(self):
         pilots = self.pm.db_connector.get_session().query(Pilot)
         for pilot in pilots:

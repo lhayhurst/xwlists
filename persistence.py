@@ -115,6 +115,7 @@ class Upgrade(Base):
     id = Column(Integer, primary_key=True)
     upgrade_type = Column(UpgradeType.db_type(), unique=True)
     name = Column(String( 128 ), unique=True)
+    canon_name = Column(String( 128 ), unique=True)
     cost = Column(Integer, unique=True)
 
 

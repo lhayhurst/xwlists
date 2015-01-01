@@ -515,6 +515,13 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
 
 alpha_num_only_pattern = re.compile('[\W_]+')
 
+#rules
+#Take the English-language name as printed on the card
+#Check for special case exceptions to these rules (see below)
+#Lowercase the name
+#Convert non-ASCII characters to closest ASCII equivalent (to remove umlauts, etc.)
+#Remove non-alphanumeric characters
+
 def canonize(value):
 
     #first lower case it
@@ -526,13 +533,6 @@ def canonize(value):
     return lc_alphanum_value
 
 class XWingMetaData:
-
-    #rules
-    #Take the English-language name as printed on the card
-    #Check for special case exceptions to these rules (see below)
-    #Lowercase the name
-    #Convert non-ASCII characters to closest ASCII equivalent (to remove umlauts, etc.)
-    #Remove non-alphanumeric characters
 
 
 
