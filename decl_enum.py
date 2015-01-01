@@ -58,6 +58,14 @@ class DeclEnum(object):
                 )
 
     @classmethod
+    def from_description(cls, description):
+        for key, descr in cls:
+            if descr == description:
+                return cls.from_string( key)
+        raise ValueError(
+                "Invalid description for %r: %r" % (cls.__name__, description) )
+
+    @classmethod
     def values(cls):
         return cls._reg.keys()
 

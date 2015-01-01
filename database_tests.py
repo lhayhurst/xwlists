@@ -3,7 +3,7 @@ from sqlalchemy import func
 from cryodex import Cryodex
 from myapp import db_connector
 from persistence import PersistenceManager, Ship, Tourney, TourneyList, TourneyRound, RoundResult, TourneyRanking, \
-    TourneyPlayer
+    TourneyPlayer, Upgrade, UpgradeType
 from rollup import Rollup
 
 __author__ = 'lhayhurst'
@@ -35,6 +35,8 @@ class DatabaseTestCase(unittest.TestCase):
 
 class TestIntegrity(DatabaseTestCase):
 
+
+    #@unittest.skip("because")
     def testForceSchemaLoad(self):
         self.assertTrue(True)
 

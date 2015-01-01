@@ -89,9 +89,6 @@ class CryodexRankings:
 
 
 
-        print "foo"
-
-
 class Cryodex:
 
     def parse_round_text(self, text):

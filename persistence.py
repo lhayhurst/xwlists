@@ -77,24 +77,24 @@ class UpgradeType(DeclEnum):
     ILLICIT = xwingmetadata.ILLICIT_CANON, xwingmetadata.ILLICIT
 
 class ShipType(DeclEnum):
-    XWING =  xwingmetadata.X_WING, xwingmetadata.X_WING
-    YWING =  xwingmetadata.Y_WING,  xwingmetadata.Y_WING
-    AWING =  xwingmetadata.A_WING, xwingmetadata.A_WING
-    BWING = xwingmetadata.B_WING, xwingmetadata.B_WING
-    EWING  = xwingmetadata.E_WING, xwingmetadata.E_WING
-    YT1300 = xwingmetadata.YT_1300, xwingmetadata.YT_1300
-    YT2400 = xwingmetadata.YT_2400, xwingmetadata.YT_2400
-    HWK290 = xwingmetadata.HWK_290, xwingmetadata.HWK_290
-    Z95    = xwingmetadata.Z95_HEADHUNTER, xwingmetadata.Z95_HEADHUNTER
-    TIEFIGHTER = xwingmetadata.TIE_FIGHTER, xwingmetadata.TIE_FIGHTER
-    TIEADVANCED = xwingmetadata.TIE_ADVANCED, xwingmetadata.TIE_ADVANCED
-    TIEINTERCEPTOR = xwingmetadata.TIE_INTERCEPTOR, xwingmetadata.TIE_INTERCEPTOR
-    FIRESPRAY = xwingmetadata.FIRESPRAY_31, xwingmetadata.FIRESPRAY_31
-    LAMDA = xwingmetadata.LAMBDA_SHUTTLE, xwingmetadata.LAMBDA_SHUTTLE
-    TIEBOMBER = xwingmetadata.TIE_BOMBER, xwingmetadata.TIE_BOMBER
-    TIEDEFENDER = xwingmetadata.TIE_DEFENDER, xwingmetadata.TIE_DEFENDER
-    TIEPHANTOM = xwingmetadata.TIE_PHANTOM, xwingmetadata.TIE_PHANTOM
-    DECIMATOR = xwingmetadata.VT_DECIMATOR, xwingmetadata.VT_DECIMATOR
+    XWING =  xwingmetadata.X_WING_CANON, xwingmetadata.X_WING
+    YWING =  xwingmetadata.Y_WING_CANON,  xwingmetadata.Y_WING
+    AWING =  xwingmetadata.A_WING_CANON, xwingmetadata.A_WING
+    BWING = xwingmetadata.B_WING_CANON, xwingmetadata.B_WING
+    EWING  = xwingmetadata.E_WING_CANON, xwingmetadata.E_WING
+    YT1300 = xwingmetadata.YT_1300_CANON, xwingmetadata.YT_1300
+    YT2400 = xwingmetadata.YT_2400_CANON, xwingmetadata.YT_2400
+    HWK290 = xwingmetadata.HWK_290_CANON, xwingmetadata.HWK_290
+    Z95    = xwingmetadata.Z95_HEADHUNTER_CANON, xwingmetadata.Z95_HEADHUNTER
+    TIEFIGHTER = xwingmetadata.TIE_FIGHTER_CANON, xwingmetadata.TIE_FIGHTER
+    TIEADVANCED = xwingmetadata.TIE_ADVANCED_CANON, xwingmetadata.TIE_ADVANCED
+    TIEINTERCEPTOR = xwingmetadata.TIE_INTERCEPTOR_CANON, xwingmetadata.TIE_INTERCEPTOR
+    FIRESPRAY = xwingmetadata.FIRESPRAY_31_CANON, xwingmetadata.FIRESPRAY_31
+    LAMDA = xwingmetadata.LAMBDA_SHUTTLE_CANON, xwingmetadata.LAMBDA_SHUTTLE
+    TIEBOMBER = xwingmetadata.TIE_BOMBER_CANON, xwingmetadata.TIE_BOMBER
+    TIEDEFENDER = xwingmetadata.TIE_DEFENDER_CANON, xwingmetadata.TIE_DEFENDER
+    TIEPHANTOM = xwingmetadata.TIE_PHANTOM_CANON, xwingmetadata.TIE_PHANTOM
+    DECIMATOR = xwingmetadata.VT_DECIMATOR_CANON, xwingmetadata.VT_DECIMATOR
 
 class Pilot(Base):
     __tablename__ = pilot_table
@@ -112,9 +112,9 @@ class ShipPilot(Base):
 class Upgrade(Base):
     __tablename__ = upgrade_table
     id = Column(Integer, primary_key=True)
-    upgrade_type = Column(UpgradeType.db_type())
-    name = Column(String( 128 ))
-    cost = Column(Integer)
+    upgrade_type = Column(UpgradeType.db_type(), unique=True)
+    name = Column(String( 128 ), unique=True)
+    cost = Column(Integer, unique=True)
 
 
 class Ship(Base):
@@ -416,8 +416,15 @@ class PersistenceManager:
         self.db_connector.get_session().commit()
 
 
+    def get_upgrade(self, upgrade_type, upgrade_name):
+        ret = self.db_connector.get_session().query(Upgrade).filter_by(upgrade_type=UpgradeType.from_description(upgrade_type)).\
+            filter_by(name=upgrade_name)
+        return ret.first()
+
     def get_tourney_list(self,tourney_list_id):
         return self.db_connector.get_session().query(TourneyList).filter_by(id=tourney_list_id).first()
+
+
 
 
     def get_ship_pilot(self, ship_type, pilot):
@@ -425,7 +432,7 @@ class PersistenceManager:
             return self.db_connector.get_session().query(ShipPilot, Pilot).all()
         else:
             return \
-            self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_string(ship_type)). \
+            self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_description(ship_type)). \
                 filter(ShipPilot.pilot_id == Pilot.id). \
                 filter(pilot == Pilot.name).first()[0]
 

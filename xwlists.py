@@ -404,9 +404,9 @@ def add_squad():
              ship       = Ship( ship_pilot_id=ship_pilot.id, tlist_id=tourney_list.id)
              tourney_list.ships.append( ship )
              for upgrade in squad_member['upgrades']:
+                 upgrade = pm.get_upgrade(upgrade['type'], upgrade['name'])
                  ship_upgrade = ShipUpgrade( ship_id=ship.id,
-                                             upgrade=Upgrade( upgrade_type= UpgradeType.from_string( upgrade['type'] ),
-                                                                     name = upgrade['name'] ) )
+                                             upgrade=upgrade )
                  ship.upgrades.append( ship_upgrade )
              ships.append( ship )
 
