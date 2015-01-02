@@ -28,6 +28,10 @@
 
         }
 
+        .error_text {
+            color: red;
+        }
+
         .squad-member {
             width: 350px;
             background-color: #ddd;
@@ -86,8 +90,6 @@
     <script>
         var entryCount = 0;
         var ships_and_pilots = {{ meta.ships_full() | tojson | safe }};
-        console.log("ships and pilots");
-        console.log(ships_and_pilots);
         var upgrades         = {{ meta.upgrades()|tojson | safe }};
         var tourney_id       = {{ tourney_id }};
         var tourney_list_id  = {{ tourney_list_id }};
@@ -111,6 +113,40 @@
                 Faction?
                 <button class="faction-choice">empire</button>
                 <button class="faction-choice">rebels</button>
+                <div name="voidstatediv" id="voidstatediv">
+                    <label for="voidstate">OR load from voidstate!  enter the voidstate list number here: </label><input type="text" id="voidstate" name="voidstate" size="10"/>
+                    <button name="getVoidStateList" id="getVoidStateList" onclick="getVoidStateList()" disabled>get it!</button>
+                    <span class="error_text" id="voidstateErrorMessage"></span>
+                </div>
+
+                <script>
+                    document.getElementById('voidstate').addEventListener('keydown', function(e) {
+                        document.getElementById('getVoidStateList').disabled = false;
+
+                    }, false );
+
+                    function getVoidStateList()
+                    {
+                        listId = document.getElementById('voidstate').value;
+                        var url = "/get_from_voidstate?voidstate_id=" + listId + "&tourney_id=" + tourney_id + "&tourney_list_id=" + tourney_list_id;
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            url: url,
+                            success: function (data) {
+                                tourney_id       = data.tourney_id;
+                                tourney_list_id  = data.tourney_list_id;
+                                window.location.replace("/display_list?tourney_list_id=" + tourney_list_id);
+                            },
+                            error: function (data) {
+                                errorMessageSpan = document.getElementById('voidstateErrorMessage')
+                                errorMessageSpan.innerHTML = "something went wrong, got response '" + data.responseJSON.message + "', likely a bad voidstate id...";
+                            },
+                            dataType: "json"
+                        });
+                    }
+                </script>
+
             </div>
 
 
@@ -146,12 +182,12 @@
         }
 
         function factionChosen() {
+            $('#voidstatediv').hidden = true;
             var faction = $(this).text();
             $('.choose-faction').hide();
             $('.faction-label').text(faction);
             $('.faction-label').hide();
             $('.squad').show();
-            console.log($('.faction-label').text() );
             if ( $('.faction-label').text() == "empire" ) {
                 $('.submit-squad').text("Submit to the Emperor!");
             }
@@ -497,10 +533,8 @@
 
         function updateTotals()
         {
-            console.log("update totals");
             var squadTotal = 0;
             $('.squad-member').not('.template').each(function(i, member) {
-                console.log("found a squad member");
                 var memberCost = 0;
                 var memberEl = $(member);
                 var pilot = memberEl.find('.pilot');

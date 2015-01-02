@@ -13,6 +13,7 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue
 from rollup import Rollup
 import xwingmetadata
+from xws import VoidStateXWSFetcher, XWSToJuggler
 
 
 app =  myapp.create_app()
@@ -384,11 +385,32 @@ def enter_list():
                            tourney_list_id=tourney_list.id,
                            tourney_id=tourney.id )
 
+@app.route("/get_from_voidstate", methods=['POST'])
+def add_from_voidstate():
+     try:
+         voidstate_id = request.args.get('voidstate_id')
+         tourney_id = request.args.get('tourney_id')
+         tourney_list_id = request.args.get('tourney_list_id')
+
+         pm = PersistenceManager(myapp.db_connector)
+         tourney_list = pm.get_tourney_list(tourney_list_id)
+
+         fetcher = VoidStateXWSFetcher()
+         xws = fetcher.fetch(voidstate_id)
+         converter = XWSToJuggler(xws)
+         converter.convert( pm, tourney_list )
+         pm.db_connector.get_session().commit()
+         return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list.id)
+     except Exception, e:
+         response = jsonify(message=str(e))
+         response.status_code = (500)
+         return response
+
 @app.route("/add_squad",methods=['POST'])
 def add_squad():
-         data    = request.json['data']
-         points  = request.json['points']
-         faction = request.json['faction']
+         data         = request.json['data']
+         points       = request.json['points']
+         faction      = request.json['faction']
 
          tourney_id = request.args.get('tourney_id')
          tourney_list_id = request.args.get('tourney_list_id')

@@ -418,6 +418,11 @@ class PersistenceManager:
         self.db_connector.get_session().commit()
 
 
+    def get_upgrade_canonical(self, upgrade_type, upgrade_name):
+        ret = self.db_connector.get_session().query(Upgrade).filter_by(upgrade_type=UpgradeType.from_string(upgrade_type)).\
+            filter_by(canon_name=upgrade_name)
+        return ret.first()
+
     def get_upgrade(self, upgrade_type, upgrade_name):
         ret = self.db_connector.get_session().query(Upgrade).filter_by(upgrade_type=UpgradeType.from_description(upgrade_type)).\
             filter_by(name=upgrade_name)
@@ -427,7 +432,11 @@ class PersistenceManager:
         return self.db_connector.get_session().query(TourneyList).filter_by(id=tourney_list_id).first()
 
 
-
+    def get_canonical_ship_pilot(self, ship_type, pilot):
+            return \
+            self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_string(ship_type)). \
+                filter(ShipPilot.pilot_id == Pilot.id). \
+                filter(pilot == Pilot.canon_name).first()[0]
 
     def get_ship_pilot(self, ship_type, pilot):
         if ship_type == None and pilot == None:
