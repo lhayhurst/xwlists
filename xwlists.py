@@ -383,7 +383,8 @@ def enter_list():
                            image_src=image_src,
                            tourney_list=tourney_list,
                            tourney_list_id=tourney_list.id,
-                           tourney_id=tourney.id )
+                           tourney_id=tourney.id,
+                           tourney=tourney)
 
 @app.route("/get_from_voidstate", methods=['POST'])
 def add_from_voidstate():
@@ -454,6 +455,8 @@ def display_list():
     image_src = None
     if tourney_list.image is not None:
         image_src=urllib.quote(tourney_list.image)
+    else:
+        image_src=url_for( 'static', filename='Skirmish_at_Geonosis_2.png')
 
     return render_template('list_display.html',
                            meta=m,
