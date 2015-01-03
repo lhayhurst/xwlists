@@ -63,8 +63,17 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+
+def mail_message(subject, message):
+    msg = Message(subject, sender=ADMINS[0], recipients=ADMINS)
+    msg.body = 'text body'
+    msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
+    with app.app_context():
+        mail.send(msg)
+
+
 def mail_error(errortext):
-    msg = Message('test subject', sender=ADMINS[0], recipients=ADMINS)
+    msg = Message('XWJuggler Error', sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
     msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
@@ -283,6 +292,7 @@ def add_tourney():
             t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
             sfilename = secure_filename(filename) + "." + str(t.id)
             save_cryodex_file( failed=False, filename=sfilename, html=html)
+            mail_message("New tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
             return redirect(url_for('tourneys') )
         except Exception as err:
             filename=str(uuid.uuid4()) + ".html"
