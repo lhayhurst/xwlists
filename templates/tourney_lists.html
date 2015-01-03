@@ -1,51 +1,58 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-.tg .tg-3i0c{font-weight:bold;background-color:#ffce93}
-</style>
 
 <h3>Tourney {{ tourney.tourney_name }} lists summary</h3>
-<table class="tg">
-  <tr>
-    <th class="tg-3i0c">Tourney</th>
-    <th class="tg-3i0c">Player</th>
-    <th class="tg-3i0c">Swiss Standing</th>
-    <th class="tg-3i0c">Elimination Standing</th>
-    <th class="tg-3i0c">Faction</th>
-    <th class="tg-3i0c">Points</th>
-    <th class="tg-3i0c">List</th>
-    {% if admin %}
-        <th class="tg-3i0c">Admin</th>
-    {% endif %}
-  </tr>
+<table id="tourneyLists" class="display" cellspacing="0" width="100%">
+  <thead>
+      <tr>
+        <th >Tourney</th>
+        <th >Player</th>
+        <th >Swiss Standing</th>
+        <th >Elimination Standing</th>
+        <th >Faction</th>
+        <th >Points</th>
+        <th >List</th>
+        {% if admin %}
+            <th >Admin</th>
+        {% endif %}
+      </tr>
+  </thead>
+  <tbody>
       {% for player in tourney.tourney_players %}
           <tr>
-             <td class="tg-031e">{{ tourney.tourney_name }}</td>
-             <td class="tg-031e">{{  player.player_name }}</td>
-             <td class="tg-031e">{{  player.result.rank }}</td>
-             <td class="tg-031e">{{  player.result.elim_rank}}</td>
+             <td >{{ tourney.tourney_name }}</td>
+             <td >{{  player.player_name }}</td>
+             <td >{{  player.result.rank }}</td>
+             <td >{{  player.result.elim_rank}}</td>
              {%  set tourney_list = player.get_first_tourney_list()  %}
              {% if tourney_list and tourney_list.ships %}
-                 <td class="tg-031e">{{  tourney_list.faction.description }}</td>
-                 <td class="tg-031e">{{  tourney_list.points }}</td>
-                 <td class="tg-031e"><a href="{{  url_for( 'display_list', tourney_list_id=tourney_list.id) }}">Show list</a></td>
+                 <td >{{  tourney_list.faction.description }}</td>
+                 <td >{{  tourney_list.points }}</td>
+                 <td ><a href="{{  url_for( 'display_list', tourney_list_id=tourney_list.id) }}">Show list</a></td>
                 {% if admin %}
-                    <th class="tg-031e">
+                    <th >
                         <a href="{{ url_for( 'delete_list', admin=admin, tourney=tourney.tourney_name, tourney_list_id=tourney_list.id ) }}">Delete list</a>
                     </th>
                 {% endif %}
              {%  else %}
-                 <td class="tg-031e">Faction unknown </td>
-                 <td class="tg-031e">Points unknown </td>
-                 <td class="tg-031e"><a href="{{ url_for( 'enter_list', tourney_list_id=tourney_list.id) }}">Enter it now!</a> </td>
+                 <td >Faction unknown </td>
+                 <td >Points unknown </td>
+                 <td ><a href="{{ url_for( 'enter_list', tourney_list_id=tourney_list.id) }}">Enter it now!</a> </td>
              {%  endif %}
 
           </tr>
       {% endfor %}
+  </tbody>
 </table>
+
+<script>
+    $(document).ready( function () {
+        $('#tourneyLists').dataTable( {
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+            iDisplayLength: -1
+        });
+    } );
+</script>
 
 {% endblock %}
