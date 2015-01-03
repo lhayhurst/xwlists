@@ -457,7 +457,7 @@ def display_list():
     if tourney_list.image is not None:
         image_src=urllib.quote(tourney_list.image)
     else:
-        rand = randint(1,14)
+        rand = randint(1,18)
         image_src=url_for( 'static', filename="imgs/" + str(rand) + ".jpg")
 
     return render_template('list_display.html',
