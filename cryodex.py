@@ -62,6 +62,8 @@ class CryodexRankings:
                 self.rankings.append( CryodexRank( rank, name, score, mov, sos  ))
 
     def apply_elimination_results(self, rounds):
+        if not rounds.has_key( ELIM ):
+            return
         elim_rounds = rounds[ELIM]
         i = 0
         for round in elim_rounds:
