@@ -92,7 +92,6 @@ def tourneys():
     else:
         admin_on = False
     summary = PersistenceManager(myapp.db_connector).get_tourney_summary()
-    decoder = Decoder()
     return render_template('tourneys.html', tourneys=summary, admin=admin_on )
 
 
