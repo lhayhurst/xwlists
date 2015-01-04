@@ -2,5 +2,14 @@
 {% block content %}
 This website was built to help enter lists from live X-Wing tournaments.  It was inspired by Major Juggler's tireless efforts to gather statistics around the various lists that we play.
 
-Please provide feedback to either sozin (the author) <a href="http://community.fantasyflightgames.com/index.php?/user/186628-sozin/>"over on Fantasy Flight</a>.
+Please provide feedback to either sozin (the author) <a href="http://community.fantasyflightgames.com/index.php?/user/186628-sozin/">over on the Fantasy Flight Forums</a>.
+
+If you're interested in contributing, the source code can be found <a href="https://github.com/lhayhurst/xwlists">over on github</a>.  The technical stack used to implement this site is:
+<ul>
+    <li>Python for the server-side, using the excellent <a href="http://flask.pocoo.org/docs/0.10/">Flask</a> framework</li>
+    <li><a href="http://www.mysql.com/">MySQL for the database, with <a href="http://www.sqlalchemy.org/">SQL Alchemy</a> for the object to relational mapping</li>
+    <li>Javascript for the client-side, using a variety of different Javascript libraries.</li>
+    <li><a href="https://www.pythonanywhere.com/">Pythonanywhere</a> for hosting</li>
+    <li>The amazing <a href="https://www.jetbrains.com/pycharm/">Pycharm</a> integrated development environment</li>
+</ul>
 {% endblock %}
