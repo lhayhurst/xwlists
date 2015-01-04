@@ -54,9 +54,30 @@ td
 </table>
 
 <script>
+
+    jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+        "num-html-pre": function ( a ) {
+            var x = String(a).replace( /None/g, "999999" );
+            return parseInt( x );
+        },
+
+        "num-html-asc": function ( a, b ) {
+            return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+        },
+
+        "num-html-desc": function ( a, b ) {
+            return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+        }
+    } );
+
     $(document).ready( function () {
         $('#tourneyLists').dataTable( {
             "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+            columnDefs: [
+                { "type": "string", "targets": [0, 1, 4, 6]},
+                { "type": "numeric", "targets": [2, 5 ]},
+                { "type": "num-html", "targets":[3]}
+            ],
             iDisplayLength: -1
         });
     } );
