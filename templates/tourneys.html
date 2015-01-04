@@ -36,7 +36,7 @@
   </tr>
       {% for key, value in tourneys.iteritems() %}
       <tr>
-         <td >{{ decoder.decode(key) }}</td>
+         <td >{{ key }}</td>
          <td ><a href="{{ url_for( 'tourney_results', tourney_id=value['tourney'].id ) }}">Browse results</a></td>
          <td >{{ value['tourney'].tourney_type }}</td>
          <td >{{ value['tourney'].tourney_date }}</td>
