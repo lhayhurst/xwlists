@@ -97,7 +97,8 @@ def tourneys():
     else:
         admin_on = False
     summary = PersistenceManager(myapp.db_connector).get_tourney_summary()
-    return render_template('tourneys.html', tourneys=summary, admin=admin_on, decoder=Decoder() )
+    decoder = Decoder()
+    return render_template('tourneys.html', tourneys=summary, admin=admin_on, decoder=decode )
 
 
 @app.route("/new")
