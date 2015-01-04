@@ -84,6 +84,7 @@ def mail_error(errortext):
 def about():
     return render_template('about.html')
 
+
 class Decoder:
     def decode(self, value):
         return value.decode("ISO-8859-1")
@@ -98,7 +99,7 @@ def tourneys():
         admin_on = False
     summary = PersistenceManager(myapp.db_connector).get_tourney_summary()
     decoder = Decoder()
-    return render_template('tourneys.html', tourneys=summary, admin=admin_on, decoder=decode )
+    return render_template('tourneys.html', tourneys=summary, admin=admin_on, decoder=decoder )
 
 
 @app.route("/new")
