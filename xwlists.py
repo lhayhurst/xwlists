@@ -3,6 +3,7 @@ from random import randint
 import urllib
 import datetime
 import uuid
+import unicodedata
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
@@ -258,21 +259,26 @@ def save_cryodex_file( failed, filename, html ):
     fd.write( html.encode('ascii', 'ignore') )
     fd.close()
 
+def remove_accents(input_str):
+    nkfd_form = unicodedata.normalize('NFKD', unicode(input_str))
+    return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
+
 @app.route("/add_tourney",methods=['POST'])
 def add_tourney():
 
     #TODO: better edge testing against user input
-    name                  = request.form['name']
+    name                  = remove_accents( request.form['name'] )
     type                  = request.form['tourney_type']
     mmddyyyy              = request.form['datepicker'].split('/')
     date                  = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1])) #YYYY, MM, DD
     round_length_dropdown = request.form['round_length_dropdown']
     round_length_userdef  = request.form['round_length_userdef']
     sets_used             = request.form.getlist('sets[]')
-    country               = request.form['country']
-    state                 = request.form['state']
-    city                  = request.form['city']
-    venue                 = request.form['venue']
+    country               = remove_accents(request.form['country'])
+    state                 = remove_accents(request.form['state'])
+    city                  = remove_accents(request.form['city'])
+    venue                 = remove_accents(request.form['venue'])
+
 
     round_length = None
     if round_length_dropdown is None or len(round_length_dropdown) == 0:
