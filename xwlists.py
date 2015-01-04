@@ -86,7 +86,7 @@ def about():
 
 class Decoder:
     def decode(self, value):
-        return value.decode("utf-8")
+        return value.decode("ISO-8859-1")
 
 
 @app.route("/tourneys")
