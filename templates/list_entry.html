@@ -183,7 +183,7 @@
                         <span class="row-value"><div class="select"></div></span>
                         <span class="row-cost"></span>
                     </div>
-                    <div><a href="#" onclick="removeSquadMember(this)">delete/</a> <a href="#" onclick="copySquadMember(this)" style="display:none" >copy/</a> <a href="#" onclick="createNewSquadMember(this)">new</a></div>
+                     <div><a href="#" onclick="removeSquadMember(this)">delete/</a> <a href="#" onclick="copySquadMember(this)" style="display:none" >copy/</a> <a href="#" onclick="createNewSquadMember(this)">new</a></div>
 
                     <div class="sub-total"></div>
                 </div>
@@ -303,8 +303,17 @@
         function copySquadMember(obj)
         {
             var squadMember = $(obj).parent().parent();
-            clone = $(squadMember).clone(true, true);
-            $(clone).insertBefore( squadMember );
+            //clone = $(squadMember).clone();
+            //$(clone).insertBefore( squadMember );
+            copy = addSquadMember($('.faction-label').text()  );
+
+            copyShipSelect = copy.find('.ship .select');
+            selectedShip = copyShipSelect.select2('data').text;
+            copyShipSelect.select2("val", selectedShip, true);
+
+            selectedPilot = squadMember.find('.row .pilot .select')
+
+            console.debugger;
             updateTotals();
         }
 
@@ -340,7 +349,8 @@
                 return { text: ship, id: ship }
             });
             addRow(squadMemberEl, 'ship', 'Ship', items, function(ship) { shipChosen(faction, squadMemberEl, ship) });
-            updateTotals();
+            //updateTotals();
+            return squadMemberEl;
         }
 
         function shipChosen(faction, squadMemberEl, ship) {
@@ -398,7 +408,7 @@
             }
             rowEl.find('.row-value .select')
                     .select2({data:items, placeholder:'select a ' + label, allowClear: allowClearValue })
-                    .on('select2-close', function(e) {
+                    .on('change', function(e) {
                         changeHandler(e.target.value);
                     }).on('select2-removed', function(e) {
                         rowUpgradeEl = $(e.currentTarget).parent().parent();
