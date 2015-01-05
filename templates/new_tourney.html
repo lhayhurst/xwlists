@@ -141,7 +141,7 @@ $(document).ready(function(){
             return value === parseInt( data, 10 )},32 );
     populateCountries("country", "state");
     $('#country').select2();
-    $("#datepicker").datepicker({ minDate: 0 });
+    $("#datepicker").datepicker({ startDate:'01/01/2012' // first selectable date is 1st Jan 2000 });
     $('#form').parsley();
     $('#tourney_type').select2()
     $('#round_length_dropdown').select2()
