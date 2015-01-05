@@ -509,6 +509,9 @@ def get_chart_data():
 def to_float(dec):
     return float("{0:.2f}".format( float(dec) * float(100)))
 
+@app.route("/tableau")
+def tableau():
+    return render_template('tableau.html')
 
 @app.route("/charts")
 def charts():

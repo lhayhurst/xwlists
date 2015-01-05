@@ -18,7 +18,7 @@ class DatabaseTestCase(unittest.TestCase):
 
         user     = os.environ['USER']
         password = os.environ['PASSWORD']
-        sqlfile  = "./dbs/lists.sql"
+        sqlfile  = "./dbs/prod.sql"
         cmd = "/usr/local/mysql/bin/mysql -u %s -p%s 'sozin$lists' < %s" % ( user, password, sqlfile )
 
         print os.system(cmd)
