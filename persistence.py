@@ -166,7 +166,7 @@ class ShipUpgrade(Base):
 class Tourney(Base):
     __tablename__ = tourney_table
     id = Column(Integer, primary_key=True)
-    tourney_name    = Column(String(128))
+    tourney_name    = Column(String(128), unique=True)
     tourney_date    = Column(Date)
     tourney_type    = Column(String(128))
     round_length    = Column(Integer)

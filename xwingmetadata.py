@@ -329,9 +329,9 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                   {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Nera Dantels', 'cost': 26,
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                    'upgrades': (SYSTEM, CANNON, TORPEDO, TORPEDO, EPT, MOD)},
-                  {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Dagger Sq. Pilot', 'cost': 24,
+                  {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Dagger Squadron Pilot', 'cost': 24,
                    'upgrades': (SYSTEM, CANNON, TORPEDO, TORPEDO, MOD)},
-                  {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Blue Sq. Pilot', 'cost': 22,
+                  {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Pilot', 'cost': 22,
                    'upgrades': (SYSTEM, CANNON, TORPEDO, TORPEDO, MOD)} ),
 
          HWK_290: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Jan Ors', 'cost': 25,
