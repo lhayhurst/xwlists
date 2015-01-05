@@ -141,7 +141,7 @@ $(document).ready(function(){
             return value === parseInt( data, 10 )},32 );
     populateCountries("country", "state");
     $('#country').select2();
-    $( "#datepicker" ).datepicker();
+    $("#datepicker").datepicker({ minDate: 0 });
     $('#form').parsley();
     $('#tourney_type').select2()
     $('#round_length_dropdown').select2()
