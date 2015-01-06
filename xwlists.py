@@ -129,8 +129,8 @@ def get_tourney_lists_as_text(tourney, make_header=True ):
                 new_row.extend( [ tourney_list.player.player_name,
                                   tourney_list.faction.description,
                                   str(tourney_list.points),
-                                  str(tourney_list.tourney_standing),
-                                  str(tourney_list.tourney_elim_standing),
+                                  str(tourney_list.player.result.rank),
+                                  str(tourney_list.player.result.elim_rank),
                                   str(tourney_list.id),
                                   ship.ship_pilot.ship_type.description,
                                   ship.ship_pilot.pilot.name
