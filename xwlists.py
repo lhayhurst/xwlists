@@ -360,7 +360,7 @@ def add_tourney():
                 t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, html=html)
-                mail_message("New tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
+                mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
                 return redirect(url_for('tourneys') )
             except Exception as err:
                 filename=str(uuid.uuid4()) + ".html"
@@ -373,6 +373,8 @@ def add_tourney():
             pm = PersistenceManager(myapp.db_connector)
             t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, round_length=round_length)
             pm.db_connector.get_session().add(t)
+            mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
+
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
             pm.db_connector.get_session().commit()
             return redirect(url_for("get_tourney_results", tourney_id=t.id) )
