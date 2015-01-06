@@ -120,7 +120,9 @@
 
 <script>
 
-var inputs = [ 'player_name',  'score', 'pre_elim', 'elim', 'mov', 'sos']
+var inputs    = [ 'player_name',  'score', 'pre_elim', 'elim', 'mov',  'sos']
+var required =  [ true,            true,    true,       false,  false,  false]
+
 function addRow() {
     rowCount++;
     var dataRowEl       = $('#templates .data-row-span').clone(true).removeClass('template');
@@ -130,6 +132,9 @@ function addRow() {
         dataRowEl.append(dataFieldSpanEL);
         var inputEl         = $('#templates .data-input').clone(true).removeClass('template');
         inputEl.attr("name", inputs[i] + "_" + rowCount.toString() );
+        if ( required[i] == true ) {
+            inputEl.attr("required", ""); //javascript is weird.
+        }
         dataFieldSpanEL.append(inputEl);
         $('#num_players').val( rowCount );
     }
