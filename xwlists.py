@@ -373,10 +373,10 @@ def add_tourney():
             pm = PersistenceManager(myapp.db_connector)
             t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, round_length=round_length)
             pm.db_connector.get_session().add(t)
-            mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
-
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
             pm.db_connector.get_session().commit()
+            mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
+
             return redirect(url_for("get_tourney_results", tourney_id=t.id) )
         except Exception as err:
             mail_error(errortext=str(err))
