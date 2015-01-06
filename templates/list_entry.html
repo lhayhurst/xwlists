@@ -109,8 +109,9 @@
               enctype="multipart/form-data"
               onsubmit="return false;">
 
-            <fieldset>Tourney details</fieldset>
-            <div data-row-span="4">
+            <fieldset>
+                <legend>tourney details</legend>
+                <div data-row-span="4">
 
                 <div data-field-span="1">
                     <label>Player name</label>
@@ -129,35 +130,53 @@
                     <textarea rows="1" name="player" disabled>{{ tourney.tourney_type}} </textarea>
                 </div>
             </div>
+            </fieldset>
         </form>
+
         <form id="list_entry_options-form"
               name="list_entry_options-form"
               class="grid-form"
               enctype="multipart/form-data"
               onsubmit="return false;"
               data-parsley-validate >
-            <div data-row-span="5" class="list_entry_options" id="list_entry_options">
-                <div class="choose-faction" data-field-span="1">
-                    <label>Pick a faction for manual list entry</label>
-                    <button class="faction-choice">empire</button>
-                    or
-                    <button class="faction-choice">rebels</button>
-                </div>
-                <div name="voidstatediv" id="voidstatediv" data-field-span="2">
-                    <label><b>Or</b> type in a voidstate list number to load from voidstate</label>
-                    <input type="text" id="voidstate" name="voidstate"  data-parsley-type="integer" />
-                    <button name="getVoidStateList" id="getVoidStateList" style="width:400px;height:20px"  disabled>get it!</button>
+            <fieldset>
+            <legend>Fetch the list from Yet-Another-Squad-Builder or voidstate</legend>
+                <div data-row-span="3" class="list_entry_options" id="list_entry_options">
+                <div class="yasbdiv" id="yasbdiv" data-field-span="1">
+                    <label>Paste the YASB URL below</label>
+                    <input type="text" id="yasb" name="yasb"  data-parsley-type="url" />
+                    <button name="getYASBList" id="getYASBList" style="width:400px;height:20px"  disabled>get it!</button>
 
                 </div>
-                <div data-field-span="2">
-                    <label>Error message in case voidstate fetch goes badly wrong</label>
-                    <span class="error_text" id="voidstateErrorMessage"></span>
+                <div name="voidstatediv" id="voidstatediv" data-field-span="1">
+                    <label><b>Or</b> type in a voidstate list number to load from voidstate</label>
+                    <input type="text" id="voidstate" name="voidstate"  data-parsley-type="integer" />
+                    <button name="getVoidStateList" id="getVoidstateList" style="width:400px;height:20px"  disabled>get it!</button>
+
+                </div>
+                <div data-field-span="1">
+                    <label>Error message in case list provider fetch goes badly wrong</label>
+                    <span class="error_text" id="listFetchErrorMessage"></span>
                 </div>
             </div>
+            <legend>Or enter the list manually: select a faction to begin</legend>
+            <div data-row-span="1">
+                <div class="choose-faction" data-field-span="1">
+                    <button class="faction-choice">empire</button>
+                    or
+                  <button class="faction-choice">rebels</button>
+                </div>
+            </div>
+            </fieldset>
         </form>
+
 
         <script>
             $('#list_entry_options-form').parsley();
+            document.getElementById('yasb').addEventListener('keydown', function(e) {
+                document.getElementById('getYASBList').disabled = false;
+
+            }, false );
             document.getElementById('voidstate').addEventListener('keydown', function(e) {
                 document.getElementById('getVoidStateList').disabled = false;
 
@@ -198,6 +217,8 @@
         function init() {
             $('.faction-choice').click(factionChosen);
             $('#getVoidStateList').click(getVoidStateList);
+            $('#getYASBList').click(getYASBList);
+
         }
 
         function factionChosen() {
@@ -222,9 +243,40 @@
             updateTotals();
         }
 
+        function getYASBList()
+        {
+            //https://geordanr.github.io/xwing/?f=Galactic%20Empire&d=v3!s!70:98,23,-1:-1:-1:;78:27,36,46:-1:9:;15::-1:-1:
+            errorMessageSpan = document.getElementById('listFetchErrorMessage');
+
+            yasbUrl = document.getElementById('yasb').value;
+            splits  = yasbUrl.split("/?"); //hackish but it works
+            if ( splits.length != 2 )
+            {
+                errorMessageSpan.innerHTML = "invalid yasb url, please provide something like 'https://geordanr.github.io/xwing/?f=Galactic%20Empire&d=v3!s!70:98,23,-1:-1:-1:;78:27,36,46:-1:9:;15::-1:-1:'";
+
+            }
+            yasb    = encodeURIComponent(splits[1]);
+            var url = "/get_from_yasb?yasb=" + yasb + "&tourney_id=" + tourney_id + "&tourney_list_id=" + tourney_list_id;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: url,
+                success: function (data) {
+                    tourney_id       = data.tourney_id;
+                    tourney_list_id  = data.tourney_list_id;
+                    window.location.replace("/display_list?tourney_list_id=" + tourney_list_id);
+                },
+                error: function (data) {
+                    errorMessageSpan.innerHTML = "something went wrong, got response '" + data.responseJSON.message;
+                },
+                dataType: "json"
+            });
+
+
+        }
+
         function getVoidStateList()
         {
-            console.log("getvoidstatelist function called");
             listId = document.getElementById('voidstate').value;
             var url = "/get_from_voidstate?voidstate_id=" + listId + "&tourney_id=" + tourney_id + "&tourney_list_id=" + tourney_list_id;
             $.ajax({
@@ -237,7 +289,7 @@
                     window.location.replace("/display_list?tourney_list_id=" + tourney_list_id);
                 },
                 error: function (data) {
-                    errorMessageSpan = document.getElementById('voidstateErrorMessage');
+                    errorMessageSpan = document.getElementById('listFetchErrorMessage');
                     errorMessageSpan.innerHTML = "something went wrong, got response '" + data.responseJSON.message + "', likely a bad voidstate id...";
                 },
                 dataType: "json"
@@ -313,7 +365,6 @@
 
             selectedPilot = squadMember.find('.row .pilot .select')
 
-            console.debugger;
             updateTotals();
         }
 

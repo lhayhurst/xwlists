@@ -481,7 +481,7 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
          TIE_DEFENDER: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Rexler Brath', 'cost': 37,
                          'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                          'upgrades': (MISSILE, CANNON, MOD, EPT)},
-                        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Col. Vessery', 'cost': 35,
+                        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Colonel Vessery', 'cost': 35,
                          'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                          'upgrades': (MISSILE, CANNON, MOD, EPT)},
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Onyx Squadron Pilot', 'cost': 32,

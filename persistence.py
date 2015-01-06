@@ -433,10 +433,12 @@ class PersistenceManager:
 
 
     def get_canonical_ship_pilot(self, ship_type, pilot):
-            return \
-            self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_string(ship_type)). \
+            query = self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_string(ship_type)). \
                 filter(ShipPilot.pilot_id == Pilot.id). \
-                filter(pilot == Pilot.canon_name).first()[0]
+                filter(pilot == Pilot.canon_name)
+            if query.first() is None:
+                return None
+            return query.first()[0]
 
     def get_ship_pilot(self, ship_type, pilot):
         if ship_type == None and pilot == None:
