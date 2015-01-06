@@ -468,8 +468,6 @@ class PersistenceManager:
 
         for tl in tourney_lists:
             tourney_name = tl.tourney.tourney_name
-            tourney_name = tourney_name.decode("ISO-8859-1")
-            print "fetched " + tourney_name
             if not ret.has_key(tourney_name):
                 ret[tourney_name] = { 'num_entered' : 0, 'num_not_entered' : 0, 'tourney': tl.tourney}
             if len(tl.ships) == 0:

@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+    .template {
+        display: none !important;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    label {
+        display: inline-block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+
+    .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 0;
+        font-size: 14px;
+        font-weight: normal;
+        line-height: 1.428571429;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        background-image: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+    }
+
+    .btn-info {
+        margin-top: 10px;
+        color: #ffffff;
+        background-color: #3882C7;
+        border-color: #46b8da;
+    }
+</style>
+
+<div id="templates" name="templates">
+    <div data-row-span="6" class="data-row-span"></div>
+    <div data-field-span="1" class="data-field-span"></div>
+    <input type="text" class="data-input template"/>
+</div>
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('add_tourney_results') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data"
+      data-parsley-validate >
+    <input name="num_players" id="num_players" type="text" class="hidden"/>
+    <input name="tourney_id" value="{{ tourney_id }}" type="text" class="hidden">
+
+    <fieldset id="fieldset" name="fieldset">
+        <legend>Player results</legend>
+        <div data-row-span="6" >
+            <div data-field-span="1">
+                <label>Player name</label>
+            </div>
+            <div data-field-span="1">
+                <label>Score</label>
+            </div>
+            <div data-field-span="1">
+                <label>Pre-Elimination Rank</label>
+            </div>
+            <div data-field-span="1">
+                <label>Elimination Rank (optional) </label>
+            </div>
+            <div data-field-span="1">
+                <label>Margin of Victory (optional)</label>
+            </div>
+            <div data-field-span="1">
+                <label>Strength of Schedule (optional) </label>
+            </div>
+        </div>
+        <div data-row-span="6" name="data-row-span" id="first-data-row-span">
+            <div data-field-span="1">
+                <input type="text" name="player_name_1" required/>
+            </div>
+            <div data-field-span="1">
+                <input type="text" name="score_1" data-parsley-type="integer" required/>
+            </div>
+            <div data-field-span="1">
+                <input type="text" name="pre_elim_1" data-parsley-type="integer" required/>
+            </div>
+            <div data-field-span="1">
+                <input type="text" name="elim_1" data-parsley-type="integer"/>
+            </div>
+            <div data-field-span="1">
+                <input type="text" name="mov_1" data-parsley-type="integer" />
+            </div>
+            <div data-field-span="1">
+                <input type="text" name="sos_1" data-parsley-type="integer" />
+            </div>
+        </div>
+    </fieldset>
+    <br>
+    <button type="button" class="btn btn-info validate " onclick="addRow()">Add anther row</button>
+    <input type="submit" class="btn btn-info validate" />
+
+</form>
+
+
+<script>
+    $('#form').parsley();
+    var rowCount = 1;
+    var currentFieldSetDiv = $('#first-data-row-span');
+</script>
+
+<script>
+
+var inputs = [ 'player_name',  'score', 'pre_elim', 'elim', 'mov', 'sos']
+function addRow() {
+    rowCount++;
+    var dataRowEl       = $('#templates .data-row-span').clone(true).removeClass('template');
+    currentFieldSetDiv.after(dataRowEl);
+    for ( i = 0; i < 6; i++ ) {
+        var dataFieldSpanEL = $('#templates .data-field-span').clone(true).removeClass('template');
+        dataRowEl.append(dataFieldSpanEL);
+        var inputEl         = $('#templates .data-input').clone(true).removeClass('template');
+        inputEl.attr("name", inputs[i] + "_" + rowCount.toString() );
+        dataFieldSpanEL.append(inputEl);
+        $('#num_players').val( rowCount );
+    }
+    currentFieldSetDiv = dataRowEl;
+
+}
+</script>
+
+
+{% endblock %}

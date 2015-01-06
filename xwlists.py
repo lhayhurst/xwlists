@@ -179,6 +179,67 @@ def delete_tourney():
     pm.delete_tourney(tourney_name)
     return redirect(url_for('tourneys') )
 
+
+def add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue):
+    #load in the sets used
+    if sets_used:
+        for set_name in sets_used:
+            set = pm.get_set(set_name)
+            if set is not None:
+                ts = TourneySet(tourney=t, set=set)
+                pm.db_connector.get_session().add(ts)
+    tv = TourneyVenue(tourney=t, country=country, state=state, city=city, venue=venue)
+    pm.db_connector.get_session().add(tv)
+
+@app.route("/add_tourney_results",methods=['POST'])
+def add_tourney_results():
+    num_players = int(request.form['num_players'])
+    tourney_id  = int(request.form['tourney_id'])
+    pm = PersistenceManager(myapp.db_connector)
+    t = pm.get_tourney_by_id(tourney_id)
+
+    i = 1
+    while i <= num_players:
+        str_i = str(i)
+        i = i + 1
+        player_name = remove_accents(request.form['player_name_' + str_i ])
+        pre_elim    = request.form['pre_elim_' + str_i ]
+        elim        = request.form['elim_' + str_i ]
+        score       = request.form['score_' + str_i ]
+        mov         = request.form['mov_' + str_i ]
+        sos         = request.form['sos_' + str_i ]
+
+        player = TourneyPlayer( tourney=t, player_name=player_name)
+        tlist  = TourneyList( tourney=t, player=player)
+        pm.db_connector.get_session().add(tlist)
+        pm.db_connector.get_session().add(player)
+
+        if len(mov) == 0:
+            mov = None
+        else:
+            mov = int(mov)
+        if len(sos) == 0:
+            sos = None
+        else:
+            sos = int(sos)
+        if len(elim) == 0:
+            elim = None
+        else:
+            elim = int(elim)
+
+        r = TourneyRanking(tourney=t,
+                           player=player,
+                           rank=int(pre_elim),
+                           elim_rank=elim,
+                           mov=mov,
+                           sos=sos,
+                           score=int(score))
+        pm.db_connector.get_session().add(r)
+
+    pm.db_connector.get_session().commit()
+    return redirect(url_for('tourneys') )
+
+
 def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_length, sets_used, country, state, city, venue):
 
     pm = PersistenceManager(myapp.db_connector)
@@ -222,27 +283,20 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_leng
 
     #pm.db_connector.get_session().commit()
 
-    #load in the sets used
-    if sets_used:
-        for set_name in sets_used:
-            set = pm.get_set(set_name)
-            if set is not None:
-                ts  = TourneySet( tourney=t, set=set)
-                pm.db_connector.get_session().add(ts)
 
-    tv = TourneyVenue( tourney=t, country=country, state=state, city=city, venue=venue)
-    pm.db_connector.get_session().add(tv)
+    add_sets_and_venue_to_tourney(city, country, players, pm, sets_used, state, t, venue)
 
     #finally load the rankings
     for rank in cryodex.ranking.rankings:
-        r = TourneyRanking( tourney   = t,
-                            player    = players[rank.player_name],
-                            rank      = rank.rank,
-                            elim_rank = rank.elim_rank,
-                            mov       = rank.mov,
-                            sos       = rank.sos,
-                            score     = rank.score)
+        r = TourneyRanking(tourney=t,
+                           player=players[rank.player_name],
+                           rank=rank.rank,
+                           elim_rank=rank.elim_rank,
+                           mov=rank.mov,
+                           sos=rank.sos,
+                           score=rank.score)
         pm.db_connector.get_session().add(r)
+
 
     #and commit all the work
     pm.db_connector.get_session().commit()
@@ -262,6 +316,13 @@ def save_cryodex_file( failed, filename, html ):
 def remove_accents(input_str):
     nkfd_form = unicodedata.normalize('NFKD', unicode(input_str))
     return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
+
+
+@app.route("/get_tourney_results")
+def get_tourney_results():
+    tourney_id = request.args.get('tourney_id')
+    return render_template("get_tourney_results.html", tourney_id=tourney_id)
+
 
 @app.route("/add_tourney",methods=['POST'])
 def add_tourney():
@@ -288,23 +349,38 @@ def add_tourney():
 
 
     tourney_report  = request.files['tourney_report']
-    filename        = tourney_report.filename
-    html            = None
-    if tourney_report and allowed_file(filename):
 
+    if tourney_report.content_length > 0:
+        filename        = tourney_report.filename
+        html            = None
+        if tourney_report and allowed_file(filename):
+            try:
+                html = tourney_report.read()
+                cryodex = Cryodex(html)
+                t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
+                sfilename = secure_filename(filename) + "." + str(t.id)
+                save_cryodex_file( failed=False, filename=sfilename, html=html)
+                mail_message("New tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
+                return redirect(url_for('tourneys') )
+            except Exception as err:
+                filename=str(uuid.uuid4()) + ".html"
+                save_cryodex_file( failed=True, filename=filename, html=html)
+                mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
+                return render_template( 'tourney_entry_error.html', errortext=str(err))
+
+    else: #user didnt provide a cryodex file ... have to do it manually
         try:
-            html = tourney_report.read()
-            cryodex = Cryodex(html)
-            t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
-            sfilename = secure_filename(filename) + "." + str(t.id)
-            save_cryodex_file( failed=False, filename=sfilename, html=html)
-            mail_message("New tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
-            return redirect(url_for('tourneys') )
+            pm = PersistenceManager(myapp.db_connector)
+            t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, round_length=round_length)
+            pm.db_connector.get_session().add(t)
+            add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
+            pm.db_connector.get_session().commit()
+            return redirect(url_for("get_tourney_results", tourney_id=t.id) )
         except Exception as err:
-            filename=str(uuid.uuid4()) + ".html"
-            save_cryodex_file( failed=True, filename=filename, html=html)
-            mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
+            mail_error(errortext=str(err))
             return render_template( 'tourney_entry_error.html', errortext=str(err))
+
+
 
     #TODO: this is code for handling the scanned player list scenario.   I'll refactor it to something useful if the situation comes up again.
     #load all the files in the folder
