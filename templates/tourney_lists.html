@@ -19,7 +19,8 @@ td
         <th >Elimination Standing</th>
         <th >Faction</th>
         <th >Points</th>
-        <th >List</th>
+        <th> List</th>
+        <th >Url</th>
         {% if admin %}
             <th >Admin</th>
         {% endif %}
@@ -36,6 +37,7 @@ td
              {% if tourney_list and tourney_list.ships %}
                  <td >{{  tourney_list.faction.description }}</td>
                  <td >{{  tourney_list.points }}</td>
+                 <td> {{  tourney_list.pretty_print() }}</td>
                  <td ><a href="{{  url_for( 'display_list', tourney_list_id=tourney_list.id) }}">Show list</a></td>
                 {% if admin %}
                     <th >

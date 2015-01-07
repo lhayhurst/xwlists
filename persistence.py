@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from flask import url_for
+from markupsafe import Markup
 from sqlalchemy.dialects import mysql
 from sqlalchemy.sql.operators import ColumnOperators
 
@@ -239,6 +240,20 @@ class TourneyList(Base):
     player           = relationship( TourneyPlayer.__name__, uselist=False)
     tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
     ships            = relationship(Ship.__name__, cascade="all,delete,delete-orphan")
+
+
+    def pretty_print(self):
+        ret = ""
+        for ship in self.ships:
+            ret = ret + ship.ship_pilot.pilot.name
+            i = 1
+            if ship.upgrades is not None:
+                for ship_upgrade in ship.upgrades:
+                    ret = ret + " + " + ship_upgrade.upgrade.name
+            if i < len(self.ships):
+                ret = ret + '<br>'
+            i = i + 1
+        return Markup( ret )
 
 tourney_round_table = "tourney_round"
 class TourneyRound(Base):
