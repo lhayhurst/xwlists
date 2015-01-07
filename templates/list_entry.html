@@ -32,6 +32,8 @@
             color: red;
         }
 
+
+
         .squad-member {
             width: 350px;
             background-color: #ddd;
@@ -151,11 +153,11 @@
                 <div name="voidstatediv" id="voidstatediv" data-field-span="1">
                     <label><b>Or</b> type in a voidstate list number to load from voidstate</label>
                     <input type="text" id="voidstate" name="voidstate"  data-parsley-type="integer" />
-                    <button name="getVoidStateList" id="getVoidstateList" style="width:400px;height:20px"  disabled>get it!</button>
+                    <button name="getVoidStateList" id="getVoidStateList" style="width:400px;height:20px"  disabled>get it!</button>
 
                 </div>
                 <div data-field-span="1">
-                    <label>Error message in case list provider fetch goes badly wrong</label>
+                    <label>xws endpoint fetch status log</label>
                     <span class="error_text" id="listFetchErrorMessage"></span>
                 </div>
             </div>
@@ -178,7 +180,7 @@
 
             }, false );
             document.getElementById('voidstate').addEventListener('keydown', function(e) {
-                document.getElementById('getVoidstateList').disabled = false;
+                document.getElementById('getVoidStateList').disabled = false;
 
             }, false );
 
@@ -247,6 +249,7 @@
         {
             //https://geordanr.github.io/xwing/?f=Galactic%20Empire&d=v3!s!70:98,23,-1:-1:-1:;78:27,36,46:-1:9:;15::-1:-1:
             errorMessageSpan = document.getElementById('listFetchErrorMessage');
+            errorMessageSpan.innerHTML = "making xws endpoint lookup to yasb..."
 
             yasbUrl = document.getElementById('yasb').value;
             splits  = yasbUrl.split("/?"); //hackish but it works
@@ -279,6 +282,10 @@
         {
             listId = document.getElementById('voidstate').value;
             var url = "/get_from_voidstate?voidstate_id=" + listId + "&tourney_id=" + tourney_id + "&tourney_list_id=" + tourney_list_id;
+            errorMessageSpan = document.getElementById('listFetchErrorMessage');
+            errorMessageSpan.innerHTML = "making xws endpoint lookup to voidstate..."
+
+
             $.ajax({
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
@@ -289,8 +296,7 @@
                     window.location.replace("/display_list?tourney_list_id=" + tourney_list_id);
                 },
                 error: function (data) {
-                    errorMessageSpan = document.getElementById('listFetchErrorMessage');
-                    errorMessageSpan.innerHTML = "something went wrong, got response '" + data.responseJSON.message + "', likely a bad voidstate id...";
+                    errorMessageSpan.innerHTML = "Something went wrong!: " + data.responseJSON.message;
                 },
                 dataType: "json"
             });

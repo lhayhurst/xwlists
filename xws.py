@@ -16,6 +16,7 @@ class VoidStateXWSFetcher:
 
     def fetch(self, list_id):
         url = "http://xwing-builder.co.uk/xws/" + str(list_id) + "#view=full"
+        print "fetching url " + url
         response = urllib2.urlopen(url)
         html = response.read()
         soup = BeautifulSoup( html )
