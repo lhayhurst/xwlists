@@ -92,7 +92,6 @@
     <script>
         var entryCount = 0;
         var ships_and_pilots = {{ meta.ships_full() | tojson | safe }};
-        console.log(ships_and_pilots);
         var upgrades         = {{ meta.upgrades()|tojson | safe }};
         var tourney_id       = {{ tourney_id }};
         var tourney_list_id  = {{ tourney_list_id }};
@@ -437,8 +436,6 @@
             //and the ones of the wrong faction
             pilotItems = _.filter( pilotItems, function (pi) { return pi.faction == faction ; } );
 
-            console.log(pilotItems);
-
             ret = addRow(squadMemberEl, 'pilot', 'Pilot', pilotItems, function(pilot) { pilotChosen(faction, squadMemberEl, ship, pilot) });
             updateTotals();
             return ret;
@@ -465,6 +462,7 @@
                 {
                     if ( action[i].type == 'ADD_UPGRADE' ) {
                         var upgrade = action[i].value;
+                        upgradeItems = getUpgradeItems( squadMemberEl, upgrade, ship, faction, pilotHref );
                         upgradeItems = getUpgradeItems( squadMemberEl, upgrade, ship, faction, pilotHref );
                         addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function (upgradeValue) {
                                 upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgrade, upgradeValue);
