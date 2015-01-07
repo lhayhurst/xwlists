@@ -37,7 +37,7 @@ td
              {% if tourney_list and tourney_list.ships %}
                  <td >{{  tourney_list.faction.description }}</td>
                  <td >{{  tourney_list.points }}</td>
-                 <td> {{  tourney_list.pretty_print() }}</td>
+                 <td> {{  tourney_list.pretty_print()    }}</td>
                  <td ><a href="{{  url_for( 'display_list', tourney_list_id=tourney_list.id) }}">Show list</a></td>
                 {% if admin %}
                     <th >
@@ -76,7 +76,7 @@ td
         $('#tourneyLists').dataTable( {
             "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
             columnDefs: [
-                { "type": "string", "targets": [0, 1, 4, 6]},
+                { "type": "string", "targets": [0, 1, 4, 6, 7]},
                 { "type": "num-html", "targets":[2, 3, 5 ]}
             ],
             iDisplayLength: -1
