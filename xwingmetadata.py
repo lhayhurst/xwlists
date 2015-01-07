@@ -6,6 +6,7 @@ VT_DECIMATOR = 'VT-49 Decimator'
 VT_DECIMATOR_CANON ='vt49decimator'
 TIE_PHANTOM = 'TIE Phantom'
 TIE_PHANTOM_CANON = 'tiephantom'
+TIE_PHANTOM_CANON = 'tiephantom'
 TIE_DEFENDER = 'TIE Defender'
 TIE_DEFENDER_CANON = 'tiedefender'
 TIE_BOMBER = 'TIE Bomber'
@@ -38,6 +39,13 @@ Y_WING = 'Y-Wing'
 Y_WING_CANON = 'ywing'
 X_WING = 'X-Wing'
 X_WING_CANON = 'xwing'
+STAR_VIPER_CANON = 'starviper'
+STAR_VIPER = "Star Viper"
+AGGRESSOR_CANON = 'aggressor'
+AGGRESSOR = 'Aggressor'
+M3_A_INTERCEPTOR_CANON = 'm3ainterceptor'
+M3_A_INTERCEPTOR = 'M3-A Interceptor'
+
 
 EPT = "Elite Pilot Talent"
 EPT_CANON = 'ept'
@@ -66,6 +74,18 @@ SALVAGED_ASTROMECH_DROID_CANON = 'samd'
 ILLICIT = 'Illicit'
 ILLICIT_CANON = 'illicit'
 
+SHIP_SIZE = 'SHIP_SIZE'
+SHIP_TYPE = 'SHIP_TYPE'
+SMALL_SHIP = "SMALL_SHIP"
+LARGE_SHIP = "LARGE_SHIP"
+PER_SQUAD = "PER_SQUAD"
+UNIQUE = "UNIQUE"
+REBEL = "rebels"
+IMPERIAL = "empire"
+SCUM = "scum"
+FACTION = "FACTION"
+ADD_EPT = "ADD_EPT"
+
 def header():
     return [ 'Tourney', 'tourneyType', 'tourneyDate', 'player', FACTION, 'points', 'swiss_standing', 'elim_standing', \
              'listId', 'Ship', 'Pilot', EPT + ".1", EPT + ".2", TITLE, \
@@ -75,16 +95,6 @@ def header():
              TORPEDO + ".1", TORPEDO + ".2", BOMB, TURRET ]
 
 
-SHIP_SIZE = 'SHIP_SIZE'
-SHIP_TYPE = 'SHIP_TYPE'
-SMALL_SHIP = "SMALL_SHIP"
-LARGE_SHIP = "LARGE_SHIP"
-PER_SQUAD = "PER_SQUAD"
-UNIQUE = "UNIQUE"
-REBEL = "rebels"
-IMPERIAL = "empire"
-FACTION = "FACTION"
-ADD_EPT = "ADD_EPT"
 
 sets_and_expansions = {  'Core Set' : [],
                          'Wave 1'   : ['X-Wing Expansion', 'Y-Wing Expansion', 'TIE Fighter Expansion', 'TIE Advanced x1 Expansion'],
@@ -95,15 +105,17 @@ sets_and_expansions = {  'Core Set' : [],
                          'CR90 Expansion'  : [],
                          'Wave 4': ['E-Wing Expansion', 'Z-95 Headhunter Expansion', 'TIE Defender Expansion' , 'TIE Phantom Expansion'],
                          'Rebel Aces Expansion' : [],
-                         'Wave 5': ['YT-2400 Expansion', 'VT-49 Decimator Expansion']
+                         'Wave 5': ['YT-2400 Expansion', 'VT-49 Decimator Expansion'],
+                         'Wave 6': ['Most Wanted Expansion', 'StarViper Expansion', 'IG-2000 Expanson', 'M3-A Interceptor Expansion' ]
 }
 
 
-factions = [ REBEL, IMPERIAL ]
+factions = [ REBEL, IMPERIAL, SCUM ]
 
 PER_SQUAD_UNIQUE_CONSTRAINT = {'type': PER_SQUAD, 'value': UNIQUE}
 REBEL_FACTION_CONSTRAINT = {'type': FACTION, 'value': REBEL}
 IMPERIAL_FACTION_CONSTRAINT = {'type': FACTION, 'value': IMPERIAL}
+SCUM_FACTION_CONSTRAINT = {'type': FACTION, 'value': SCUM}
 
 #all the x-wing upgrades.
 upgrades = {
@@ -152,22 +164,33 @@ upgrades = {
         {'name': 'R5-D8', 'cost': 3, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )},
         {'name': 'R5-P9', 'cost': 3, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )},
         {'name': 'R7-T1', 'cost': 3, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )},
-        {'name': 'R2-D6', 'cost': 1, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),  'action': {'type': 'ADD_UPGRADE', 'value': EPT}},
+        {'name': 'R2-D6', 'cost': 1, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
+         'action':[ {'type': 'ADD_UPGRADE', 'value': EPT} ] },
         {'name': 'R2-D2', 'cost': 4, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )}
     ),
     TITLE: (
         {'name': 'Slave 1', 'cost': 0, 'constraints': ( {'type': SHIP_TYPE, 'value': FIRESPRAY_31})},
         {'name': 'Royal Guard TIE', 'cost': 0,
-         'action': {'type': 'ADD_UPGRADE', 'value': MOD},
+         'action': [{'type': 'ADD_UPGRADE', 'value': MOD}],
          'constraints': ( {'type': SHIP_TYPE, 'value': TIE_INTERCEPTOR})},
         {'name': 'A-Wing Test Pilot', 'cost': 0,
          'constraints': ({'type': SHIP_TYPE, 'value': A_WING}),
-         'action': {'type': 'ADD_UPGRADE', 'value': EPT}},
+         'action':[ {'type': 'ADD_UPGRADE', 'value': EPT}]},
         {'name': 'Millennium Falcon', 'cost': 1, 'constraints': ({'type': SHIP_TYPE, 'value': YT_1300})},
         {'name': 'Dauntless', 'cost': 2, 'constraints': ( {'type': SHIP_TYPE, 'value': VT_DECIMATOR})},
         {'name': 'Moldy Crow', 'cost': 3, 'constraints': ( {'type': SHIP_TYPE, 'value': HWK_290} )},
         {'name': 'ST-321', 'cost': 3, 'constraints': ( {'type': SHIP_TYPE, 'value': LAMBDA_SHUTTLE} )},
         {'name': 'Outrider', 'cost': 5, 'constraints': ( {'type': SHIP_TYPE, 'value': YT_2400} )},
+        {'name': 'IG-2000', 'canon_name': 'ig2000', 'cost': 0, 'constraints': ( {'type': SHIP_TYPE, 'value': AGGRESSOR} )},
+        {'name': 'Andrasta', 'canon_name': 'andrasta', 'cost': 0,
+         'action': [ { 'type': 'ADD_UPGRADE', 'value': BOMB },{ 'type': 'ADD_UPGRADE', 'value': BOMB } ],
+         'constraints': ( {'type': SHIP_TYPE, 'value': FIRESPRAY_31} )},
+        {'name': 'Virago', 'canon_name': 'virago', 'cost': 1,
+         'action': [ { 'type': 'ADD_UPGRADE', 'value': SYSTEM },{ 'type': 'ADD_UPGRADE', 'value': ILLICIT } ],
+         'constraints': ( {'type': SHIP_TYPE, 'value': STAR_VIPER} )},
+        {'name': 'BTL-A4 Y-Wing', 'canon_name': 'btla4ywing', 'cost': 0, 'constraints': ( {'type': SHIP_TYPE, 'value': Y_WING} )},
+        #TODO: add Andrasta
+
     ),
     SYSTEM: (
         {'name': 'Enhanced Scopes', 'cost': 1},
@@ -184,6 +207,9 @@ upgrades = {
         {'name': 'Proton Torpedos', 'cost': 4},
         {'name': 'Ion Torpedoes', 'cost': 5},
         {'name': 'Advanced Proton Torpedoes', 'cost': 6},
+        {'name': 'Bomb Loadout', 'canon_name' : 'bombloadout', 'cost': 0,
+          'action':[ {'type': 'ADD_UPGRADE', 'value': BOMB}],
+         'constraints': ({'type': SHIP_TYPE, 'value': Y_WING})}
     ),
     BOMB: (
         {'name': 'Seismic Charges', 'cost': 2},
@@ -213,12 +239,15 @@ upgrades = {
          'constraints': ( {'type': SHIP_TYPE, 'value': TIE_PHANTOM} )},
         {'name': 'Advanced Cloaking Device', 'cost': 4, 'constraints': ( {'type': SHIP_TYPE, 'value': TIE_PHANTOM})},
         {'name': 'Experimental Interface', 'cost': 3},
-        {'name': 'B-Wing/E2', 'cost': 1, 'action': {'type': 'ADD_UPGRADE', 'value': CREW}, 'constraints': ( {'type': SHIP_TYPE, 'value': B_WING} )},
+        {'name': 'B-Wing/E2', 'cost': 1,
+         'action':[ {'type': 'ADD_UPGRADE', 'value': CREW}],
+         'constraints': ( {'type': SHIP_TYPE, 'value': B_WING} )},
         {'name': 'Stealth Device', 'cost': 3},
         {'name': 'Hull Upgrade', 'cost': 3},
         {'name': 'Shield Upgrade', 'cost': 4},
         {'name': 'Counter-Measures', 'cost': 3, 'constraints': ( {'type': SHIP_SIZE, 'value': LARGE_SHIP} )},
         {'name': 'Engine Upgrade', 'cost': 4},
+        {'name': 'Autothrusters', 'canon_name': 'autothrusters', 'cost': 2}
     ),
 
     EPT:
@@ -246,6 +275,21 @@ upgrades = {
           {'name': 'Opportunist', 'cost': 4},
 
         ),
+    SALVAGED_ASTROMECH_DROID: (
+        {'name': 'Genius', 'canon_name' : 'genius', 'cost': 0},
+        {'name': 'R4 Agromech', 'canon_name' : 'r4agromech','cost': 2},
+        {'name': 'R4-B11', 'canon_name' : 'r4b11', 'cost': 3},
+        {'name': 'Salvaged Astromech', 'canon_name' : 'salvagedastromech', 'cost': 2},
+        {'name': 'Unhinged Astromech','canon_name' : 'unhingedastromech',  'cost': 1},
+
+    ),
+
+    ILLICIT: (
+       {'name': 'Hot Shot Blaster', 'canon_name' : 'hotshotblaster', 'cost': 3},
+       {'name': 'Dead Mans Switch', 'canon_name' : 'deadmansswitch', 'cost': 2},
+       {'name': 'Feedback Array', 'canon_name' : 'feedbackarray', 'cost': 2},
+       {'name': 'Inertial Dampeners', 'canon_name' : 'inertialdampeners', 'cost': 1},
+    )
 }
 
 ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Antilles', 'cost': 29,
@@ -286,7 +330,17 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                    'upgrades': (TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD)},
                   {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Gold Squadron Pilot', 'cost': 18,
-                   'upgrades': (TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD)} ),
+                   'upgrades': (TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD)} ,
+                  {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Syndicate Thug', 'canon_name':'syndicatethug', 'cost': 18,
+                   'upgrades': (TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
+                  {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Drea Renthal', 'canon_name':'drearenthal', 'cost': 22,
+                   'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
+                   'upgrades': (TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
+                  {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Kavil', 'canon_name':'kavil', 'cost': 24,
+                   'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
+                   'upgrades': (EPT, TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
+
+         ),
 
          A_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Tycho Celchu', 'cost': 26,
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
@@ -344,7 +398,17 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                     'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                     'upgrades': (TURRET, CREW, TITLE, MOD)},
                    {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Rebel Operative', 'cost': 16,
-                    'upgrades': (TURRET, CREW, TITLE, MOD)} ),
+                    'upgrades': (TURRET, CREW, TITLE, MOD)} ,
+                    #scum
+                   {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Torkil Mux', 'cost': 19, 'canon_name':'torkilmux',
+                    'upgrades': (TURRET, CREW, TITLE, MOD, ILLICIT)},
+                   {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Dace Bonearm', 'cost': 23, 'canon_name':'dacebonearm',
+                    'upgrades': (EPT, TURRET, CREW, TITLE, MOD, ILLICIT)},
+                   {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Palob Godalhi', 'cost': 20, 'canon_name':'palobgodalhi',
+                    'upgrades': (EPT, TURRET, CREW, TITLE, MOD, ILLICIT)},
+
+
+         ),
 
 
          E_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Corran Horn', 'cost': 35,
@@ -367,7 +431,26 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                           {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Tala Squadron Pilot', 'cost': 13,
                            'upgrades': (MISSILE, MOD)},
                           {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Bandit Squadron Pilot', 'cost': 12,
-                           'upgrades': (MISSILE, MOD)} ),
+                           'upgrades': (MISSILE, MOD)},
+
+                          #scum
+                          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Binayre Pirate',
+                           'canon_name': 'binayrepirate',
+                           'cost': 12,
+                           'upgrades': (MISSILE, MOD, ILLICIT)},
+                          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Black Sun Soldier',
+                           'canon_name': 'blacksunsoldier',
+                           'cost': 13,
+                           'upgrades': (MISSILE, MOD, ILLICIT)},
+                          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'KaaTo Leeachos',
+                           'canon_name': 'kaatoleeachos',
+                           'cost': 15,
+                           'upgrades': (EPT, MISSILE, MOD, ILLICIT)},
+                          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'NDru Suhlak',
+                           'canon_name': 'ndrusuhlak',
+                           'cost': 17,
+                           'upgrades': (EPT, MISSILE, MOD, ILLICIT)},
+         ),
 
          YT_2400: ({'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Dash Rendar', 'cost': 36,
                     'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
@@ -452,7 +535,18 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                          'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                          'upgrades': (MISSILE, CANNON, BOMB, TITLE, MOD, CREW)},
                         {'ship_size': LARGE_SHIP, 'faction': IMPERIAL, 'name': 'Bounty Hunter', 'cost': 33,
-                         'upgrades': (MISSILE, CANNON, BOMB, TITLE, MOD, CREW)}, ),
+                         'upgrades': (MISSILE, CANNON, BOMB, TITLE, MOD, CREW)},
+                        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Mandalorian Mercenary', 'cost': 35,
+                          'canon_name': 'mandalorianmercenary', 'upgrades': (EPT, ILLICIT, MISSILE, CANNON, BOMB, TITLE, MOD, CREW)},
+                        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Emon Azzameen', 'cost': 36,
+                          'canon_name': 'emonazzameen', 'upgrades': (ILLICIT, MISSILE, CANNON, BOMB, TITLE, MOD, CREW)},
+                        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Kath Scarlet', 'cost': 38,
+                          'canon_name': 'kathscarlet', 'upgrades': (EPT, ILLICIT, MISSILE, CANNON, BOMB, TITLE, MOD, CREW)},
+                        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Boba Fett', 'cost': 39,
+                          'canon_name': 'bobafett', 'upgrades': (EPT, ILLICIT, MISSILE, CANNON, BOMB, TITLE, MOD, CREW)},
+
+
+         ),
 
          LAMBDA_SHUTTLE: ({'ship_size': LARGE_SHIP, 'faction': IMPERIAL, 'name': 'Captain Kagi', 'cost': 27,
                            'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
@@ -511,7 +605,29 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
               'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
               'upgrades': (BOMB, CREW, CREW, CREW, TORPEDO, TITLE, MOD, EPT)},
              {'ship_size': LARGE_SHIP, 'faction': IMPERIAL, 'name': 'Patrol Leader', 'cost': 40,
-              'upgrades': (BOMB, CREW, CREW, CREW, TORPEDO, TITLE, MOD)} )}
+              'upgrades': (BOMB, CREW, CREW, CREW, TORPEDO, TITLE, MOD)}
+         ),
+
+        AGGRESSOR: (
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'IG-88D', 'canon_name': 'ig88d', 'cost': 36,
+                        'upgrades': ( EPT, CANNON, CANNON, BOMB, TITLE, SYSTEM, ILLICIT, MOD   )},
+        ),
+
+
+        STAR_VIPER: (
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Black Sun Enforcer', 'canon_name': 'blacksunenforcer', 'cost': 25,
+                        'upgrades': ( TORPEDO, TITLE, MOD   )},
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Black Sun Vigo', 'canon_name': 'blacksunvigo', 'cost': 27,
+                        'upgrades': ( TORPEDO, TITLE, MOD   )},
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Guri', 'canon_name': 'guri', 'cost': 30,
+                        'upgrades': ( EPT, TORPEDO, TITLE, MOD   )},
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Prince Xizor', 'canon_name': 'princexizor', 'cost': 31,
+                        'upgrades': ( EPT, TORPEDO, TITLE, MOD   )},
+
+        ),
+
+
+         }
 
 alpha_num_only_pattern = re.compile('[\W_]+')
 

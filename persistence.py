@@ -16,9 +16,6 @@ from myapp import db_connector
 from xwingmetadata import XWingMetaData
 import xwingmetadata
 
-
-
-
 from decl_enum import DeclEnum
 from sqlalchemy import Column, Integer, String, func, Date, and_, desc
 from sqlalchemy import ForeignKey
@@ -95,6 +92,10 @@ class ShipType(DeclEnum):
     TIEDEFENDER = xwingmetadata.TIE_DEFENDER_CANON, xwingmetadata.TIE_DEFENDER
     TIEPHANTOM = xwingmetadata.TIE_PHANTOM_CANON, xwingmetadata.TIE_PHANTOM
     DECIMATOR = xwingmetadata.VT_DECIMATOR_CANON, xwingmetadata.VT_DECIMATOR
+    STARVIPER = xwingmetadata.STAR_VIPER_CANON, xwingmetadata.STAR_VIPER
+    AGGRESSOR = xwingmetadata.AGGRESSOR_CANON, xwingmetadata.AGGRESSOR
+    M3_A_INTERCEPTOR = xwingmetadata.M3_A_INTERCEPTOR_CANON, xwingmetadata.M3_A_INTERCEPTOR
+
 
 class Pilot(Base):
     __tablename__ = pilot_table
@@ -444,10 +445,15 @@ class PersistenceManager:
         if ship_type == None and pilot == None:
             return self.db_connector.get_session().query(ShipPilot, Pilot).all()
         else:
-            return \
-            self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_description(ship_type)). \
+            query = self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_description(ship_type)). \
                 filter(ShipPilot.pilot_id == Pilot.id). \
-                filter(pilot == Pilot.name).first()[0]
+                filter(pilot == Pilot.name)
+            result_set = query.first()
+            if result_set is not None:
+                return result_set[0]
+            else:
+                return None
+
 
 
     def get_random_tourney_list(self, tourney):
