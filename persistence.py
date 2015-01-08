@@ -280,6 +280,13 @@ class TourneyRanking(Base):
     tourney            = relationship( Tourney.__name__, back_populates="rankings")
     player             = relationship( TourneyPlayer.__name__, uselist=False)
 
+    def pretty_print(self):
+        for tourney_list in self.tourney.tourney_lists:
+            if tourney_list.player.id == self.player_id:
+                return tourney_list.pretty_print()
+        return ""
+
+
 round_result_table = "round_result"
 class RoundResult(Base):
     __tablename__ = round_result_table
