@@ -249,7 +249,8 @@ class TourneyList(Base):
             i = 1
             if ship.upgrades is not None:
                 for ship_upgrade in ship.upgrades:
-                    ret = ret + " + " + ship_upgrade.upgrade.name
+                    if ship_upgrade.upgrade is not None:
+                        ret = ret + " + " + ship_upgrade.upgrade.name
             if i < len(self.ships):
                 ret = ret + '<br>'
             i = i + 1
