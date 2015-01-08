@@ -62,15 +62,19 @@
             <table class="tg">
                 <tr>
                     <th class="tg-3i0c">Victorious</th>
+                    <th class="tg-3i0c">List</th>
                     <th class="tg-3i0c">Points Scored</th>
                     <th class="tg-3i0c">Defeated</th>
+                    <th class="tg-3i0c">List</th>
                     <th class="tg-3i0c">Points Scored</th>
                 </tr>
             {%  for result in round.results %}
                 <tr>
                     <td class="tg-031e"><a href="{{ result.get_winner_list_url()}}">{{result.winner.player.player_name}}</a></td>
+                    <td class="tg-031e">{{ result.winner.pretty_print() }}
                     <td class="tg-031e">{{ result.winning_score() }}</td>
                     <td class="tg-031e"><a href="{{ result.get_loser_list_url()}}">{{result.loser.player.player_name}}</a></td>
+                    <td class="tg-031e">{{ result.loser.pretty_print() }}
                     <td class="tg-031e">{{ result.losing_score() }}</td>
                 </tr>
             {% endfor %}
