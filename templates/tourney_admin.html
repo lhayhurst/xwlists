@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<br>
+<table id="tourneys" class="display" cellspacing="0" width="100%">
+  <thead>
+  <tr>
+    <th >Name</th>
+    <th>Id</th>
+    <th>Delete</th>
+  </thead>
+  <tbody>
+  </tr>
+      {% for tourney in  tourneys %}
+      <tr>
+         <td>{{  tourney.tourney_name }}</td>
+         <td >{{ tourney.id }}</td>
+         <td ><a href="{{ url_for( 'delete_tourney', tourney=tourney.tourney_name) }}">delete tourney</a></td>
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+<script>
+    $(document).ready( function () {
+        $('#tourneys').dataTable();
+    } );
+</script>
+
+{% endblock %}

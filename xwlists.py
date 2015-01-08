@@ -85,6 +85,11 @@ def mail_error(errortext):
 def about():
     return render_template('about.html')
 
+@app.route( "/tourney_admin")
+def tourney_admin():
+    tourneys = PersistenceManager(myapp.db_connector).get_tourneys()
+    return render_template("tourney_admin.html", tourneys=tourneys)
+
 @app.route("/tourneys")
 def tourneys():
     admin_on = request.args.get('admin')
