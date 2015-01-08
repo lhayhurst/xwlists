@@ -284,7 +284,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_leng
     #pm.db_connector.get_session().commit()
 
 
-    add_sets_and_venue_to_tourney(city, country, players, pm, sets_used, state, t, venue)
+    add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
 
     #finally load the rankings
     for rank in cryodex.ranking.rankings:
@@ -350,7 +350,7 @@ def add_tourney():
 
     tourney_report  = request.files['tourney_report']
 
-    if tourney_report.content_length > 0:
+    if tourney_report:
         filename        = tourney_report.filename
         html            = None
         if tourney_report and allowed_file(filename):

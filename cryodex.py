@@ -151,7 +151,8 @@ class Cryodex:
             self.rounds[round_type].append(cr)
 
             for result in round_results:
-                match     = re.match(r'^(\w+)\s+VS\s+(\w+)\s+-\s+Match\s+Results:\s+(\w+)\s+is\s+the\s+winner\s+(\d+)\s+to\s+(\d+)', result)
+                #most recent cryodex format
+                match     = re.match(r'^(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+(.*?)\s+is\s+the\s+winner\s+(\d+)\s+to\s+(\d+)', result)
                 if match:
                     player1       = match.group(1)
                     player2       = match.group(2)
@@ -163,5 +164,4 @@ class Cryodex:
                     self.players[player2] = player2
 
                     cr.add_result( player1, player2, winner, player1_score, player2_score)
-
         self.ranking.apply_elimination_results( self.rounds )
