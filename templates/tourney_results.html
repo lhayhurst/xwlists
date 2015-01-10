@@ -15,18 +15,19 @@
             <th class="tg-3i0c">Rank</th>
             <th class="tg-3i0c">Player</th>
             <th class="tg-3i0c">Score</th>
-            <th class="tg-310c">List</th>
             <th class="tg-3i0c">Margin of Victory</th>
             <th class="tg-3i0c">Strength of Schedule</th>
+            <th class="tg-3i0c">List</th>
+
         </tr>
     {%  for rank in tourney.rankings %}
             <tr>
                 <td class="tg-031e">{{ rank.rank }}</td>
-                <td class="tg-031e">{{ rank.player.player_name }}</td>
+                <td class="tg-031e">{{ rank.get_player_info() }}</td>
                 <td class="tg-031e">{{ rank.score }}</td>
-                <td class="tg-031e">{{  rank.pretty_print() }}</td>
                 <td class="tg-031e">{{ rank.mov }}</td>
                 <td class="tg-031e">{{ rank.sos }}</td>
+                <td class="tg-031e">{{  rank.pretty_print() }}</td>
 
             </tr>
     {% endfor %}
@@ -63,21 +64,31 @@
             <b>Round {{ round.round_num }}</b>
             <table class="tg">
                 <tr>
-                    <th class="tg-3i0c">Victorious</th>
-                    <th class="tg-3i0c">List</th>
-                    <th class="tg-3i0c">Points Scored</th>
-                    <th class="tg-3i0c">Defeated</th>
-                    <th class="tg-3i0c">List</th>
-                    <th class="tg-3i0c">Points Scored</th>
+                    <th class="tg-3i0c">Player 1</th>
+                    <th class="tg-3i0c">Result</th>
+                    <th class="tg-3i0c">Player 2</th>
+                    <th class="tg-3i0c">Player 1 Points Scored</th>
+                    <th class="tg-3i0c">Points 2 Points Scored</th>
+                    <th class="tg-3i0c">Player 1 List</th>
+                    <th class="tg-3i0c">Player 2 List</th>
                 </tr>
             {%  for result in round.results %}
                 <tr>
-                    <td class="tg-031e"><a href="{{ result.get_winner_list_url()}}">{{result.winner.player.player_name}}</a></td>
-                    <td class="tg-031e">{{ result.winner.pretty_print() }}
-                    <td class="tg-031e">{{ result.winning_score() }}</td>
-                    <td class="tg-031e"><a href="{{ result.get_loser_list_url()}}">{{result.loser.player.player_name}}</a></td>
-                    <td class="tg-031e">{{ result.loser.pretty_print() }}
-                    <td class="tg-031e">{{ result.losing_score() }}</td>
+                    <td class="tg-031e">{{ result.list1.player.player_name }}</td>
+                    <td class="tg-031e">{{ result.get_result() }}
+                    {% if result.bye %}
+                        <td class="tg-031e"></td>
+                        <td class="tg-031e"></td>
+                        <td class="tg-031e"></td>
+                        <td class="tg-031e">{{ result.list1.pretty_print() }}</td>
+                        <td class="tg-031e"></td>
+                    {% else %}
+                        <td class="tg-031e">{{ result.player2_name() }}</td>
+                        <td class="tg-031e">{{ result.list1_score}}</td>
+                        <td class="tg-031e">{{ result.list2_score}}</td>
+                        <td class="tg-031e">{{ result.list1.pretty_print() }}</td>
+                        <td class="tg-031e">{{ result.list2_pretty_print() }}</td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </table>

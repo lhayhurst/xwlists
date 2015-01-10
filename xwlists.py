@@ -213,6 +213,12 @@ def add_tourney_results():
         score       = request.form['score_' + str_i ]
         mov         = request.form['mov_' + str_i ]
         sos         = request.form['sos_' + str_i ]
+        dropped     = request.form['dropped_' + str_i]
+
+        if dropped == "1":
+            dropped = True
+        else:
+            dropped = False
 
         player = TourneyPlayer( tourney=t, player_name=player_name)
         tlist  = TourneyList( tourney=t, player=player)
@@ -238,7 +244,8 @@ def add_tourney_results():
                            elim_rank=elim,
                            mov=mov,
                            sos=sos,
-                           score=int(score))
+                           score=int(score),
+                           dropped=dropped)
         pm.db_connector.get_session().add(r)
 
     pm.db_connector.get_session().commit()
@@ -270,24 +277,29 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_leng
             tr = TourneyRound(round_num=int(round.number), round_type=round.get_round_type(), tourney=t)
             pm.db_connector.get_session().add(tr)
             for round_result in round.results:
-                p1_tourney_list = lists[round_result.player1]
-                p2_tourney_list = lists[round_result.player2]
-                winner = None
-                loser = None
-                if round_result.player1 == round_result.winner:
-                    winner = p1_tourney_list
-                    loser = p2_tourney_list
+                rr = None
+                if round_result.bye:
+                    rr = RoundResult(round=tr, list1=p1_tourney_list, list2=None, winner=None, loser=None,
+                    list1_score=None,
+                    list2_score=None, bye=round_result.bye, draw=round_result.draw)
                 else:
-                    winner = p2_tourney_list
-                    loser = p1_tourney_list
+                    p1_tourney_list = lists[round_result.player1]
+                    p2_tourney_list = None
+                    p2_tourney_list = lists[round_result.player2]
+                    winner = None
+                    loser = None
+                    if round_result.player1 == round_result.winner:
+                        winner = p1_tourney_list
+                        loser = p2_tourney_list
+                    else:
+                        winner = p2_tourney_list
+                        loser = p1_tourney_list
 
-                rr = RoundResult(round=tr, list1=p1_tourney_list, list2=p2_tourney_list, winner=winner, loser=loser,
-                                 list1_score=int(round_result.player1_score),
-                                 list2_score=int(round_result.player2_score))
+
+                    rr = RoundResult(round=tr, list1=p1_tourney_list, list2=p2_tourney_list, winner=winner, loser=loser,
+                                     list1_score=round_result.player1_score,
+                                     list2_score=round_result.player2_score, bye=round_result.bye, draw=round_result.draw)
                 pm.db_connector.get_session().add(rr)
-
-    #pm.db_connector.get_session().commit()
-
 
     add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
 
@@ -299,7 +311,8 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_leng
                            elim_rank=rank.elim_rank,
                            mov=rank.mov,
                            sos=rank.sos,
-                           score=rank.score)
+                           score=rank.score,
+                           dropped=rank.dropped)
         pm.db_connector.get_session().add(r)
 
 
@@ -359,19 +372,19 @@ def add_tourney():
         filename        = tourney_report.filename
         html            = None
         if tourney_report and allowed_file(filename):
-            try:
-                html = tourney_report.read()
-                cryodex = Cryodex(html)
-                t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
-                sfilename = secure_filename(filename) + "." + str(t.id)
-                save_cryodex_file( failed=False, filename=sfilename, html=html)
-                mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
-                return redirect(url_for('tourneys') )
-            except Exception as err:
-                filename=str(uuid.uuid4()) + ".html"
-                save_cryodex_file( failed=True, filename=filename, html=html)
-                mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
-                return render_template( 'tourney_entry_error.html', errortext=str(err))
+        #try:
+            html = tourney_report.read()
+            cryodex = Cryodex(html)
+            t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
+            sfilename = secure_filename(filename) + "." + str(t.id)
+            save_cryodex_file( failed=False, filename=sfilename, html=html)
+            mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
+            return redirect(url_for('tourneys') )
+        # except Exception as err:
+        #         filename=str(uuid.uuid4()) + ".html"
+        #         save_cryodex_file( failed=True, filename=filename, html=html)
+        #         mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
+        #         return render_template( 'tourney_entry_error.html', errortext=str(err))
 
     else: #user didnt provide a cryodex file ... have to do it manually
         try:

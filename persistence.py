@@ -18,7 +18,7 @@ from xwingmetadata import XWingMetaData
 import xwingmetadata
 
 from decl_enum import DeclEnum
-from sqlalchemy import Column, Integer, String, func, Date, and_, desc
+from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean
 from sqlalchemy import ForeignKey
 
 #rollup help
@@ -277,6 +277,7 @@ class TourneyRanking(Base):
     sos                = Column(Integer)
     rank               = Column(Integer)
     elim_rank          = Column(Integer)
+    dropped            = Column(Boolean)
     tourney            = relationship( Tourney.__name__, back_populates="rankings")
     player             = relationship( TourneyPlayer.__name__, uselist=False)
 
@@ -286,6 +287,10 @@ class TourneyRanking(Base):
                 return tourney_list.pretty_print()
         return ""
 
+    def get_player_info(self):
+        if self.dropped:
+            return self.player.player_name + " (dropped)"
+        return self.player.player_name
 
 round_result_table = "round_result"
 class RoundResult(Base):
@@ -296,6 +301,9 @@ class RoundResult(Base):
     list2_id      = Column(ForeignKey('{0}.id'.format(tourney_list_table)))
     winner_id     = Column(ForeignKey('{0}.id'.format(tourney_list_table)))
     loser_id      = Column(ForeignKey('{0}.id'.format(tourney_list_table)))
+    bye           = Column(Boolean)
+    draw          = Column(Boolean)
+
     list1_score   = Column(Integer)
     list2_score   = Column(Integer)
     round         = relationship( TourneyRound.__name__, back_populates="results")
@@ -303,6 +311,26 @@ class RoundResult(Base):
     list2         = relationship( TourneyList.__name__, foreign_keys='RoundResult.list2_id',  uselist=False)
     winner        = relationship( TourneyList.__name__, foreign_keys='RoundResult.winner_id', uselist=False)
     loser         = relationship( TourneyList.__name__, foreign_keys='RoundResult.loser_id',  uselist=False)
+
+
+    def get_result(self):
+        if self.bye is not None and self.bye==True:
+            return "had a bye"
+        if self.draw is not None and self.draw==True:
+            return "drew"
+        if self.winner_id == self.list1.id:
+            return "beat"
+        return "lost to"
+
+    def player2_name(self):
+        if self.list2 is None:
+            return ""
+        return self.list2.player.player_name
+
+    def list2_pretty_print(self):
+        if self.list2 is None:
+            return ""
+        return self.list2.pretty_print()
 
     def winning_score(self):
         if self.winner.id == self.list1.id:
@@ -313,6 +341,7 @@ class RoundResult(Base):
         if self.loser.id == self.list1.id:
             return self.list1_score
         return self.list2_score
+
 
     def get_winner_list_url(self):
         url = url_for( 'display_list', tourney_list_id=self.winner.id )

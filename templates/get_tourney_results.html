@@ -47,9 +47,13 @@
 </style>
 
 <div id="templates" name="templates">
-    <div data-row-span="6" class="data-row-span"></div>
+    <div data-row-span="7" class="data-row-span"></div>
     <div data-field-span="1" class="data-field-span"></div>
     <input type="text" class="data-input template"/>
+    <div class="radio-input template">
+        <input type="radio" value="1">Yes
+        <input type="radio" value="0" checked="checked">No
+    </div>
 </div>
 
 <form id="form"
@@ -64,12 +68,15 @@
 
     <fieldset id="fieldset" name="fieldset">
         <legend>Player results</legend>
-        <div data-row-span="6" >
+        <div data-row-span="7" >
             <div data-field-span="1">
                 <label>Player name</label>
             </div>
             <div data-field-span="1">
                 <label>Score</label>
+            </div>
+            <div data-field-span="1">
+                <label>Dropped</label>
             </div>
             <div data-field-span="1">
                 <label>Pre-Elimination Rank</label>
@@ -84,13 +91,21 @@
                 <label>Strength of Schedule (optional) </label>
             </div>
         </div>
-        <div data-row-span="6" name="data-row-span" id="first-data-row-span">
+        <div data-row-span="7" name="data-row-span" id="first-data-row-span">
             <div data-field-span="1">
                 <input type="text" name="player_name_1" required/>
             </div>
             <div data-field-span="1">
                 <input type="text" name="score_1" data-parsley-type="integer" required/>
             </div>
+
+            <div data-field-span="1">
+                <div>
+                    <input type="radio" name="dropped_1" value="1">Yes
+                    <input type="radio" name="dropped_1" value="0" checked="checked">No
+                </div>
+            </div>
+
             <div data-field-span="1">
                 <input type="text" name="pre_elim_1" data-parsley-type="integer" required/>
             </div>
@@ -120,22 +135,34 @@
 
 <script>
 
-var inputs    = [ 'player_name',  'score', 'pre_elim', 'elim', 'mov',  'sos']
-var required =  [ true,            true,    true,       false,  false,  false]
+var inputs    = [ 'player_name',  'score', 'dropped', 'pre_elim', 'elim', 'mov',   'sos']
+var required =  [ true,            true,    true,      true,       false,  false,  false]
+
+var droppedIndex = 2;
 
 function addRow() {
     rowCount++;
     var dataRowEl       = $('#templates .data-row-span').clone(true).removeClass('template');
     currentFieldSetDiv.after(dataRowEl);
-    for ( i = 0; i < 6; i++ ) {
+    for ( i = 0; i < inputs.length; i++ ) {
         var dataFieldSpanEL = $('#templates .data-field-span').clone(true).removeClass('template');
         dataRowEl.append(dataFieldSpanEL);
-        var inputEl         = $('#templates .data-input').clone(true).removeClass('template');
-        inputEl.attr("name", inputs[i] + "_" + rowCount.toString() );
-        if ( required[i] == true ) {
-            inputEl.attr("required", ""); //javascript is weird.
+
+        //special processing for the stoopid dropped radio button :-(
+        if ( i == droppedIndex ) {
+            var radioDivEl = $('#templates .radio-input').clone(true).removeClass('template');
+            //set the name for both of the two radio inputs inside the div
+            radioDivEl.children().attr("name", inputs[i] + "_" + rowCount.toString() );
+            dataFieldSpanEL.append( radioDivEl );
         }
-        dataFieldSpanEL.append(inputEl);
+        else {
+            var inputEl         = $('#templates .data-input').clone(true).removeClass('template');
+            inputEl.attr("name", inputs[i] + "_" + rowCount.toString() );
+            if ( required[i] == true ) {
+                inputEl.attr("required", ""); //javascript is weird.
+            }
+            dataFieldSpanEL.append(inputEl);
+        }
         $('#num_players').val( rowCount );
     }
     currentFieldSetDiv = dataRowEl;
