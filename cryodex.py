@@ -62,7 +62,7 @@ class CryodexRankings:
 
                 #some names look like this:
                 #(D#3)Douglas Brito
-
+                #so strip it off it is there
 
                 score = rec[2]
                 mov   = rec[3]
