@@ -372,19 +372,19 @@ def add_tourney():
         filename        = tourney_report.filename
         html            = None
         if tourney_report and allowed_file(filename):
-        #try:
-            html = tourney_report.read()
-            cryodex = Cryodex(html)
-            t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
-            sfilename = secure_filename(filename) + "." + str(t.id)
-            save_cryodex_file( failed=False, filename=sfilename, html=html)
-            mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
-            return redirect(url_for('tourneys') )
-        # except Exception as err:
-        #         filename=str(uuid.uuid4()) + ".html"
-        #         save_cryodex_file( failed=True, filename=filename, html=html)
-        #         mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
-        #         return render_template( 'tourney_entry_error.html', errortext=str(err))
+            try:
+                html = tourney_report.read()
+                cryodex = Cryodex(html)
+                t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
+                sfilename = secure_filename(filename) + "." + str(t.id)
+                save_cryodex_file( failed=False, filename=sfilename, html=html)
+                mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
+                return redirect(url_for('tourneys') )
+            except Exception as err:
+                filename=str(uuid.uuid4()) + ".html"
+                save_cryodex_file( failed=True, filename=filename, html=html)
+                mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
+                return render_template( 'tourney_entry_error.html', errortext=str(err))
 
     else: #user didnt provide a cryodex file ... have to do it manually
         try:
