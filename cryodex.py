@@ -72,7 +72,10 @@ class CryodexRankings:
 
                 match = re.match( r'^\(D#\d\)', name)
                 if match:
+                    print "player with a bye:" + name
                     cr.player_name = re.sub(r'^\(D#\d\)', '', name)
+                    print "stripped to:" + cr.name
+
                     cr.dropped = True
 
                 self.rankings.append( cr )
