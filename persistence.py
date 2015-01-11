@@ -318,7 +318,7 @@ class RoundResult(Base):
             return "had a bye"
         if self.draw is not None and self.draw==True:
             return "drew"
-        if self.winner_id == self.list1.id:
+        if self.winner.id == self.list1.id:
             return "beat"
         return "lost to"
 
@@ -342,14 +342,6 @@ class RoundResult(Base):
             return self.list1_score
         return self.list2_score
 
-
-    def get_winner_list_url(self):
-        url = url_for( 'display_list', tourney_list_id=self.winner.id )
-        return url
-
-    def get_loser_list_url(self):
-        url = url_for( 'display_list', tourney_list_id=self.loser.id )
-        return url
 
 
 set_table_name = "xwing_set"

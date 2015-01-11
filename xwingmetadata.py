@@ -223,7 +223,7 @@ upgrades = {
     ),
     MISSILE: (
         {'name': 'Chardaan Refit', 'cost': -2, 'constraints': ({'type': SHIP_TYPE, 'value': A_WING})},
-        {'name': 'Ion Pulse Missile', 'cost': 3},
+        {'name': 'Ion Pulse Missiles', 'cost': 3},
         {'name': 'Proton Rockets', 'cost': 3},
         {'name': 'Concussion Missiles', 'cost': 4},
         {'name': 'Cluster Missiles', 'cost': 4},

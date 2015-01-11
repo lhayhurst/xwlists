@@ -12,9 +12,10 @@ ROUND = "Round"
 
 class CryodexResult:
     def __init__(self, player1, player2, winner, player1_score, player2_score, bye, draw):
-        self.player1       = player1
+        self.player1       = player1.strip()
         self.player1_score = player1_score
-        self.player2       = player2
+        if player2 is not None:
+            self.player2       = player2.strip()
         self.player2_score = player2_score
         self.winner        = winner
         self.bye           = bye
@@ -172,7 +173,7 @@ class Cryodex:
             self.rounds[round_type].append(cr)
 
             for result in round_results:
-                match     = re.match(r'^(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+(.*?)\s+is\s+the\s+winner', result)
+                match     = re.match(r'^\d*[:]*\s*(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+(.*?)\s+is\s+the\s+winner', result)
                 if match:
                     player1       = match.group(1)
                     player2       = match.group(2)
@@ -181,7 +182,7 @@ class Cryodex:
 
                     player1_score = 0
                     player2_score = 0
-                    match     = re.match(r'^.*?\s+VS\s+.*?\s+-\s+Match\s+Results:\s+.*?\s+is\s+the\s+winner\s+(\d+)\s+to\s+(\d+)', result)
+                    match     = re.match(r'^\d*[:]*.*?\s+VS\s+.*?\s+-\s+Match\s+Results:\s+.*?\s+is\s+the\s+winner\s+(\d+)\s+to\s+(\d+)', result)
 
                     if match:
                         player1_score = match.group(1)
@@ -201,7 +202,7 @@ class Cryodex:
                 else:
                     #player got a bye?
                     #Emmanuel Valadares has a BYE
-                    match = re.match(r'^(.*?)\s+has\s+a\s+BYE', result )
+                    match = re.match(r'^\d*[:]*\s*(.*?)\s+has\s+a\s+BYE', result )
                     if match:
                         player1  = match.group(1)
                         player2  = None
@@ -214,7 +215,7 @@ class Cryodex:
                     else:
                         #draw
                         #Kirlian Silvestre VS Joao Henrique - Match Results: Draw
-                        match = re.match(r'^(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+Draw', result)
+                        match = re.match(r'^\d*[:]*\s*(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+Draw', result)
                         if match:
                             player1 = match.group(1)
                             player2 = match.group(2)
