@@ -143,8 +143,9 @@ class Ship(Base):
 
         for ship_upgrade in self.upgrades:
             upgrade = ship_upgrade.upgrade
-            if upgrade.upgrade_type.description == upgrade_name:
-                ret.append( upgrade.name)
+            if upgrade is not None:
+                if upgrade.upgrade_type.description == upgrade_name:
+                    ret.append( upgrade.name)
 
         if num_upgrades > len(ret):
             return ""
