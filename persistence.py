@@ -343,7 +343,13 @@ class RoundResult(Base):
             return self.list1_score
         return self.list2_score
 
+    def get_winner_list_url(self):
+        url = url_for( 'display_list', tourney_list_id=self.winner.id )
+        return url
 
+    def get_loser_list_url(self):
+        url = url_for( 'display_list', tourney_list_id=self.loser.id )
+        return url
 
 set_table_name = "xwing_set"
 class Set(Base):
