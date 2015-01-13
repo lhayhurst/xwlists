@@ -252,10 +252,11 @@ def add_tourney_results():
     return redirect(url_for('tourneys') )
 
 
-def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_length, sets_used, country, state, city, venue):
+def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_length, sets_used, country, state, city, venue, email):
 
     pm = PersistenceManager(myapp.db_connector)
-    t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date, tourney_type=tourney_type, round_length=round_length)
+    t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date,
+                tourney_type=tourney_type, round_length=round_length, email=email, entry_date=datetime.datetime.now())
 
     pm.db_connector.get_session().add(t)
     #add the players
@@ -347,6 +348,7 @@ def add_tourney():
 
     #TODO: better edge testing against user input
     name                  = remove_accents( request.form['name'] )
+    email                 = remove_accents( request.form['email'] )
     type                  = request.form['tourney_type']
     mmddyyyy              = request.form['datepicker'].split('/')
     date                  = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1])) #YYYY, MM, DD
@@ -375,7 +377,7 @@ def add_tourney():
             try:
                 html = tourney_report.read()
                 cryodex = Cryodex(html)
-                t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue )
+                t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email )
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, html=html)
                 mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
@@ -391,7 +393,7 @@ def add_tourney():
             pm = PersistenceManager(myapp.db_connector)
             t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, round_length=round_length)
             pm.db_connector.get_session().add(t)
-            add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
+            add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue, email)
             pm.db_connector.get_session().commit()
             mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
 

@@ -169,10 +169,13 @@ class ShipUpgrade(Base):
 class Tourney(Base):
     __tablename__ = tourney_table
     id = Column(Integer, primary_key=True)
-    tourney_name    = Column(String(128), unique=True)
+    tourney_name    = Column(String(128))
     tourney_date    = Column(Date)
     tourney_type    = Column(String(128))
     round_length    = Column(Integer)
+    email           = Column(String(128))
+    entry_date      = Column(Date)
+
     tourney_lists   = relationship( "TourneyList", back_populates="tourney", cascade="all,delete,delete-orphan" )
     rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)", cascade="all,delete,delete-orphan")
     rankings        = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)", cascade="all,delete,delete-orphan")

@@ -10,11 +10,16 @@
       data-parsley-validate >
     <fieldset>
         <legend>Tourney details</legend>
-        <div data-row-span="1">
+        <div data-row-span="2">
             <div data-field-span="1">
                 <label>Tourney name</label>
                 <input type="text" name="name" required/>
             </div>
+            <div data-field-span="1">
+                <label>Your contact email - this is kept private; used so sozin can provide you help if needed!</label>
+                <input type="text" name="email" data-parsley-type="email" required/>
+            </div>
+
         </div>
         <div data-row-span="4">
             <div data-field-span="1">
