@@ -86,6 +86,7 @@ SCUM = "scum"
 FACTION = "FACTION"
 ADD_EPT = "ADD_EPT"
 
+#TDO: make this less ganky
 def header():
     return [ 'Tourney', 'tourneyType', 'tourneyDate', 'player', FACTION, 'points', 'swiss_standing', 'elim_standing', \
              'listId', 'Ship', 'Pilot', EPT + ".1", EPT + ".2", TITLE, \
