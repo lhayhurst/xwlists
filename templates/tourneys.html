@@ -17,6 +17,7 @@
   <thead>
   <tr>
     <th >Name</th>
+    <th>Date Entered</th>
     <th >Results</th>
     <th >Type</th>
     <th >Date Played</th>
@@ -36,6 +37,7 @@
       {% for key, value in tourneys.iteritems() %}
       <tr>
          <td >{{ key }}</td>
+         <th>{{ value['tourney'].entry_date }}</th>
          <td ><a href="{{ url_for( 'tourney_results', tourney_id=value['tourney'].id ) }}">Browse results</a></td>
          <td >{{ value['tourney'].tourney_type }}</td>
          <td >{{ value['tourney'].tourney_date }}</td>
