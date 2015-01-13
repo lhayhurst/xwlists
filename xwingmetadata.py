@@ -609,8 +609,21 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
          ),
 
         AGGRESSOR: (
-          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'IG-88D', 'canon_name': 'ig88d', 'cost': 36,
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'IG-88A', 'canon_name': 'ig88a', 'cost': 36,
+                        'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT ),
                         'upgrades': ( EPT, CANNON, CANNON, BOMB, TITLE, SYSTEM, ILLICIT, MOD   )},
+
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'IG-88B', 'canon_name': 'ig88b', 'cost': 36,
+                        'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT ),
+                        'upgrades': ( EPT, CANNON, CANNON, BOMB, TITLE, SYSTEM, ILLICIT, MOD   )},
+
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'IG-88C', 'canon_name': 'ig88c', 'cost': 36,
+                        'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT ),
+                        'upgrades': ( EPT, CANNON, CANNON, BOMB, TITLE, SYSTEM, ILLICIT, MOD   )},
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'IG-88D', 'canon_name': 'ig88d', 'cost': 36,
+                        'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT ),
+                        'upgrades': ( EPT, CANNON, CANNON, BOMB, TITLE, SYSTEM, ILLICIT, MOD   )},
+
         ),
 
 
