@@ -69,16 +69,16 @@ def mail_message(subject, message):
     msg = Message(subject, sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
-    with app.app_context():
-        mail.send(msg)
+    #with app.app_context():
+     #   mail.send(msg)
 
 
 def mail_error(errortext):
     msg = Message('XWJuggler Error', sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
     msg.html = '<b>ERROR</b><br><hr>' + errortext
-    with app.app_context():
-        mail.send(msg)
+    #with app.app_context():
+     #   mail.send(msg)
 
 
 @app.route("/about")
@@ -391,9 +391,9 @@ def add_tourney():
     else: #user didnt provide a cryodex file ... have to do it manually
         try:
             pm = PersistenceManager(myapp.db_connector)
-            t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, round_length=round_length)
+            t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, round_length=round_length, email=email)
             pm.db_connector.get_session().add(t)
-            add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue, email)
+            add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue )
             pm.db_connector.get_session().commit()
             mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
 
