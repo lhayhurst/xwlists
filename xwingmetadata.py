@@ -191,6 +191,9 @@ upgrades = {
          'constraints': ( {'type': SHIP_TYPE, 'value': STAR_VIPER} )},
         {'name': 'BTL-A4 Y-Wing', 'canon_name': 'btla4ywing', 'cost': 0, 'constraints': ( {'type': SHIP_TYPE, 'value': Y_WING} )},
         #TODO: add Andrasta
+         {'name': 'TIE/X1', 'canon_name': 'tiex1', 'cost': 0,
+         'action': [ { 'type': 'ADD_UPGRADE', 'value': SYSTEM }  ],
+         'constraints': ( {'type': SHIP_TYPE, 'value': TIE_ADVANCED } ) },
 
     ),
     SYSTEM: (
@@ -198,6 +201,8 @@ upgrades = {
         {'name': 'Fire-Control System', 'cost': 2},
         {'name': 'Advanced Sensors', 'cost': 3},
         {'name': 'Sensor Jammer', 'cost': 4},
+        {'name': 'Advanced Targetting Computer', 'canon_name': 'advancedtargetingcomputer', 'cost': 5},
+
     ),
     TURRET: (
         {'name': 'Blaster Turret', 'cost': 4},
@@ -221,6 +226,8 @@ upgrades = {
         {'name': 'Ion Cannon', 'cost': 3},
         {'name': 'AutoBlaster', 'cost': 5},
         {'name': 'Heavy Laser Cannon', 'cost': 7},
+        {'name': 'Mangler Cannon', 'cost': 4},
+
     ),
     MISSILE: (
         {'name': 'Chardaan Refit', 'cost': -2, 'constraints': ({'type': SHIP_TYPE, 'value': A_WING})},
