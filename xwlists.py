@@ -69,16 +69,16 @@ def mail_message(subject, message):
     msg = Message(subject, sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
-    with app.app_context():
-        mail.send(msg)
+    #with app.app_context():
+     #   mail.send(msg)
 
 
 def mail_error(errortext):
     msg = Message('XWJuggler Error', sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
     msg.html = '<b>ERROR</b><br><hr>' + errortext
-    with app.app_context():
-        mail.send(msg)
+    #with app.app_context():
+     #   mail.send(msg)
 
 
 @app.route("/about")
@@ -280,6 +280,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_leng
             for round_result in round.results:
                 rr = None
                 if round_result.bye:
+                    p1_tourney_list = lists[ round_result.player1 ]
                     rr = RoundResult(round=tr, list1=p1_tourney_list, list2=None, winner=None, loser=None,
                     list1_score=None,
                     list2_score=None, bye=round_result.bye, draw=round_result.draw)
@@ -376,6 +377,7 @@ def add_tourney():
         if tourney_report and allowed_file(filename):
             try:
                 html = tourney_report.read()
+                remove_accents(html)
                 cryodex = Cryodex(html)
                 t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email )
                 sfilename = secure_filename(filename) + "." + str(t.id)

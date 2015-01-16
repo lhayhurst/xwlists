@@ -1,4 +1,5 @@
 import re
+import unittest
 from bs4 import BeautifulSoup
 import collections
 from persistence import RoundType
@@ -173,7 +174,7 @@ class Cryodex:
             self.rounds[round_type].append(cr)
 
             for result in round_results:
-                match     = re.match(r'^\d*[:]*\s*(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+(.*?)\s+is\s+the\s+winner', result)
+                match     = re.match(r'^(?:\d+:)?\s*(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+(.*?)\s+is\s+the\s+winner', result)
                 if match:
                     player1       = match.group(1)
                     player2       = match.group(2)
@@ -182,7 +183,7 @@ class Cryodex:
 
                     player1_score = 0
                     player2_score = 0
-                    match     = re.match(r'^\d*[:]*.*?\s+VS\s+.*?\s+-\s+Match\s+Results:\s+.*?\s+is\s+the\s+winner\s+(\d+)\s+to\s+(\d+)', result)
+                    match     = re.match(r'^(?:\d+:)?.*?\s+VS\s+.*?\s+-\s+Match\s+Results:\s+.*?\s+is\s+the\s+winner\s+(\d+)\s+to\s+(\d+)', result)
 
                     if match:
                         player1_score = match.group(1)
@@ -202,7 +203,9 @@ class Cryodex:
                 else:
                     #player got a bye?
                     #Emmanuel Valadares has a BYE
-                    match = re.match(r'^\d*[:]*\s*(.*?)\s+has\s+a\s+BYE', result )
+                    #or, the most awful case:
+                    #1: 48K has a BYE
+                    match = re.match(r'^(?:\d+:)?\s*(.*?)\s+has\s+a\s+BYE\s*$', result )
                     if match:
                         player1  = match.group(1)
                         player2  = None
@@ -215,7 +218,7 @@ class Cryodex:
                     else:
                         #draw
                         #Kirlian Silvestre VS Joao Henrique - Match Results: Draw
-                        match = re.match(r'^\d*[:]*\s*(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+Draw', result)
+                        match = re.match(r'^(?:\d+:)?\s*(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+Draw', result)
                         if match:
                             player1 = match.group(1)
                             player2 = match.group(2)
@@ -233,3 +236,65 @@ class Cryodex:
 
 
         self.ranking.apply_elimination_results( self.rounds )
+
+
+
+class CryodexTests(unittest.TestCase):
+
+    #@unittest.skip("because")
+    def testMapril(self):
+
+        f = "static/tourneys/mapril.html"
+        f = open(f)
+        html = f.read()
+
+        c = Cryodex(html)
+
+        self.assertEqual( 5, len( c.players.keys() ))
+
+        self.assertTrue( c.rounds.has_key('Round'))
+        rounds = c.rounds[ 'Round']
+        self.assertEqual( 5,len(rounds) )
+        r1 = rounds[0]
+        self.assertEqual( 1, int(r1.number))
+        r1_results = r1.results
+        self.assertEqual( 3, len(r1_results) )
+
+        m1 = r1_results[0]
+        self.assertEqual( 'Mapril', m1.winner )
+        self.assertEqual( 'Fernando', m1.player2)
+        self.assertEqual( 99, m1.player1_score)
+        self.assertEqual( 33, m1.player2_score)
+
+        m2 = r1_results[1]
+        self.assertEqual( 'Alex', m2.winner )
+        self.assertEqual( 'Antonio', m2.player2)
+        self.assertEqual( 100, m2.player1_score)
+        self.assertEqual( 52, m2.player2_score)
+
+        m3 = r1_results[2]
+        self.assertEqual( True, m3.bye )
+        self.assertEqual( '48K', m3.player1)
+
+
+
+
+    def testByeCase(self):
+        # 1: 48K has a BYE
+        # 48K has a bye
+        input = "48K has a bye"
+        bye_expr = re.compile( r'^(?:\d+:)?\s*(.*?)\s+has\s+a\s+bye\s*$', re.IGNORECASE )
+        match = bye_expr.match(input)
+        self.assertTrue(match)
+        self.assertTrue(match.group(1))
+        self.assertEqual( "48K", match.group(1))
+        input = "1: 48K has a BYE"
+        match = bye_expr.match(input)
+        self.assertTrue(match)
+        self.assertTrue(match.group(1))
+        self.assertEqual( "48K", match.group(1))
+
+
+
+if __name__ == "__main__":
+    unittest.main()
