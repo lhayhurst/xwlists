@@ -69,16 +69,16 @@ def mail_message(subject, message):
     msg = Message(subject, sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
-    #with app.app_context():
-     #   mail.send(msg)
+    with app.app_context():
+        mail.send(msg)
 
 
 def mail_error(errortext):
     msg = Message('XWJuggler Error', sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
     msg.html = '<b>ERROR</b><br><hr>' + errortext
-    #with app.app_context():
-     #   mail.send(msg)
+    with app.app_context():
+        mail.send(msg)
 
 
 @app.route("/about")
