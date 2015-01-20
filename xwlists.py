@@ -393,7 +393,7 @@ def add_tourney():
     else: #user didnt provide a cryodex file ... have to do it manually
         try:
             pm = PersistenceManager(myapp.db_connector)
-            t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, round_length=round_length, email=email)
+            t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, round_length=round_length, email=email, entry_date=datetime.datetime.now())
             pm.db_connector.get_session().add(t)
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue )
             pm.db_connector.get_session().commit()

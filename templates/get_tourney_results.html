@@ -69,25 +69,25 @@
     <fieldset id="fieldset" name="fieldset">
         <legend>Player results</legend>
         <div data-row-span="7" >
-            <div data-field-span="1">
+            <div data-field-span="1" id="player-name">
                 <label>Player name</label>
             </div>
-            <div data-field-span="1">
-                <label>Score</label>
+            <div data-field-span="1" id="points-scored">
+                <label>Total Points scored</label>
             </div>
-            <div data-field-span="1">
-                <label>Dropped</label>
+            <div data-field-span="1" id="player-dropped">
+                <label>Did Player Drop?</label>
             </div>
-            <div data-field-span="1">
+            <div data-field-span="1" id="swiss-rank">
                 <label>Swiss Rank</label>
             </div>
-            <div data-field-span="1">
+            <div data-field-span="1" id="elimination-rank">
                 <label>Elimination Rank (optional) </label>
             </div>
-            <div data-field-span="1">
+            <div data-field-span="1" id="mov">
                 <label>Margin of Victory (optional)</label>
             </div>
-            <div data-field-span="1">
+            <div data-field-span="1" id="sos">
                 <label>Strength of Schedule (optional) </label>
             </div>
         </div>
@@ -168,6 +168,18 @@ function addRow() {
     currentFieldSetDiv = dataRowEl;
 
 }
+</script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    Tipped.create('#player-name', "Enter the player's name here", { position: 'topright' } );
+    Tipped.create('#points-scored', "Enter the total number of points the player scored here", { position: 'topright' } );
+    Tipped.create('#player-dropped', "If the player dropped, set this to true", { position: 'topright' } );
+    Tipped.create('#swiss-rank', "The player's final ranking in the swiss rounds; winner is 1, second place is 2, etc", { position: 'topright' } );
+    Tipped.create('#elimination-rank', "The player's final elimination after 'the cut'; winner is 1, second place 2, etc", { position: 'topright' } );
+    Tipped.create('#mov', "The player's final margin of victory", { position: 'topright' } );
+    Tipped.create('#sos', "The player's final strength of schedule", { position: 'topright' } );
+  } );
 </script>
 
 
