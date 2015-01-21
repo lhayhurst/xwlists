@@ -69,16 +69,16 @@ def mail_message(subject, message):
     msg = Message(subject, sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
-    with app.app_context():
-        mail.send(msg)
+    #with app.app_context():
+        #mail.send(msg)
 
 
 def mail_error(errortext):
     msg = Message('XWJuggler Error', sender=ADMINS[0], recipients=ADMINS)
     msg.body = 'text body'
     msg.html = '<b>ERROR</b><br><hr>' + errortext
-    with app.app_context():
-        mail.send(msg)
+    #with app.app_context():
+        #mail.send(msg)
 
 
 @app.route("/about")
@@ -252,11 +252,13 @@ def add_tourney_results():
     return redirect(url_for('tourneys') )
 
 
-def create_tourney(cryodex, tourney_name, tourney_date, tourney_type, round_length, sets_used, country, state, city, venue, email):
+def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
+                   round_length, sets_used, country, state, city, venue, email, participant_count):
 
     pm = PersistenceManager(myapp.db_connector)
     t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date,
-                tourney_type=tourney_type, round_length=round_length, email=email, entry_date=datetime.datetime.now())
+                tourney_type=tourney_type, round_length=round_length, email=email, entry_date=datetime.datetime.now(),
+                participant_count=participant_count)
 
     pm.db_connector.get_session().add(t)
     #add the players
@@ -355,12 +357,12 @@ def add_tourney():
     date                  = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1])) #YYYY, MM, DD
     round_length_dropdown = request.form['round_length_dropdown']
     round_length_userdef  = request.form['round_length_userdef']
+    participant_count     = int(request.form['participant_count'])
     sets_used             = request.form.getlist('sets[]')
     country               = remove_accents(request.form['country'])
     state                 = remove_accents(request.form['state'])
     city                  = remove_accents(request.form['city'])
     venue                 = remove_accents(request.form['venue'])
-
 
     round_length = None
     if round_length_dropdown is None or len(round_length_dropdown) == 0:
@@ -368,8 +370,10 @@ def add_tourney():
     else:
         round_length = int(round_length_dropdown)
 
-
     tourney_report  = request.files['tourney_report']
+
+    print "Request to create tourney name %s from user %s of type %s on day %s with %d participants" % \
+          ( name, email, type, date, participant_count)
 
     if tourney_report:
         filename        = tourney_report.filename
@@ -379,7 +383,7 @@ def add_tourney():
                 html = tourney_report.read()
                 remove_accents(html)
                 cryodex = Cryodex(html)
-                t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email )
+                t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email, participant_count )
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, html=html)
                 mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
@@ -393,13 +397,14 @@ def add_tourney():
     else: #user didnt provide a cryodex file ... have to do it manually
         try:
             pm = PersistenceManager(myapp.db_connector)
-            t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, round_length=round_length, email=email, entry_date=datetime.datetime.now())
+            t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type,
+                        round_length=round_length, email=email, entry_date=datetime.datetime.now(), participant_count=participant_count)
             pm.db_connector.get_session().add(t)
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue )
             pm.db_connector.get_session().commit()
             mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
 
-            return redirect(url_for("get_tourney_results", tourney_id=t.id) )
+            return render_template('get_tourney_results.html', tourney_id=t.id)
         except Exception as err:
             mail_error(errortext=str(err))
             return render_template( 'tourney_entry_error.html', errortext=str(err))

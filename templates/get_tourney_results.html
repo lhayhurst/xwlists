@@ -82,7 +82,7 @@
                 <label>Swiss Rank</label>
             </div>
             <div data-field-span="1" id="elimination-rank">
-                <label>Elimination Rank (optional) </label>
+                <label>Championship Bracket Rank (optional) </label>
             </div>
             <div data-field-span="1" id="mov">
                 <label>Margin of Victory (optional)</label>
@@ -172,11 +172,11 @@ function addRow() {
 
 <script type="text/javascript">
   $(document).ready(function() {
-    Tipped.create('#player-name', "Enter the player's name here", { position: 'topright' } );
-    Tipped.create('#points-scored', "Enter the total number of points the player scored here", { position: 'topright' } );
+    Tipped.create('#player-name',  "The full name of the participating player", {position: 'topright'} )
+    Tipped.create('#points-scored', "Sum of points scored by player (full win:5, modified: 3, draw: 1)", { position: 'topright' } );
     Tipped.create('#player-dropped', "If the player dropped, set this to true", { position: 'topright' } );
     Tipped.create('#swiss-rank', "The player's final ranking in the swiss rounds; winner is 1, second place is 2, etc", { position: 'topright' } );
-    Tipped.create('#elimination-rank', "The player's final elimination after 'the cut'; winner is 1, second place 2, etc", { position: 'topright' } );
+    Tipped.create('#elimination-rank', "The player's final Championship Round place", { position: 'topright' } );
     Tipped.create('#mov', "The player's final margin of victory", { position: 'topright' } );
     Tipped.create('#sos', "The player's final strength of schedule", { position: 'topright' } );
   } );

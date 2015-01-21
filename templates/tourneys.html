@@ -22,6 +22,7 @@
     <th >Type</th>
     <th >Date Played</th>
     <th >Round Length</th>
+    <th>Num. Participants</th>
     <th >Venue/City/State/Country</th>
     <th >Total Lists</th>
     <th >Lists Entered</th>
@@ -42,6 +43,7 @@
          <td >{{ value['tourney'].tourney_type }}</td>
          <td >{{ value['tourney'].tourney_date }}</td>
          <td >{{ value['tourney'].round_length }}</td>
+         <td >{{ value['tourney'].participant_count }}</td>
          <td >{{ value['tourney'].venue_string() }}</td>
          <td >{{  value['num_entered'] + value['num_not_entered']  }}</td>
          <td >{{ value['num_entered'] }} (<a href="{{ url_for( 'browse_list', tourney=key) }}">browse submitted lists</a>) </td>

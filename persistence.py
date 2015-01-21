@@ -169,12 +169,13 @@ class ShipUpgrade(Base):
 class Tourney(Base):
     __tablename__ = tourney_table
     id = Column(Integer, primary_key=True)
-    tourney_name    = Column(String(128))
-    tourney_date    = Column(Date)
-    tourney_type    = Column(String(128))
-    round_length    = Column(Integer)
-    email           = Column(String(128))
-    entry_date      = Column(Date)
+    tourney_name      = Column(String(128))
+    tourney_date      = Column(Date)
+    tourney_type      = Column(String(128))
+    round_length      = Column(Integer)
+    email             = Column(String(128))
+    entry_date        = Column(Date)
+    participant_count = Column(Integer)
 
     tourney_lists   = relationship( "TourneyList", back_populates="tourney", cascade="all,delete,delete-orphan" )
     rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)", cascade="all,delete,delete-orphan")
@@ -564,6 +565,8 @@ class PersistenceManager:
         connection = self.db_connector.get_engine().connect()
         ship_pilot_rollup = connection.execute(ship_pilot_rollup_sql)
 
+        #print "ship pilot rollup sql: " + ship_pilot_rollup_sql.string
+
         filters = [
             TourneyList.tourney_id == Tourney.id ,
             Ship.tlist_id == TourneyList.id ,
@@ -586,6 +589,7 @@ class PersistenceManager:
             group_by( rollup( TourneyList.faction, ShipPilot.ship_type, Pilot.name) ).\
             statement.compile(dialect=mysql.dialect())
 
+        #print "ship pilot upgrade rollup sql: " + upgrade_rollup_sql.string
         upgrade_rollup = connection.execute( upgrade_rollup_sql )
 
 
@@ -618,6 +622,8 @@ class PersistenceManager:
             group_by( rollup( Upgrade.upgrade_type, Upgrade.name) ).\
             statement.compile(dialect=mysql.dialect())
 
+        #print "get_upgrade_rollups: " + upgrade_rollup_sql.string
+
         connection = self.db_connector.get_engine().connect()
         ret = connection.execute(upgrade_rollup_sql)
         return ret
@@ -643,6 +649,8 @@ class PersistenceManager:
                              filter( and_(*filters)).\
                              group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).statement.compile(dialect=mysql.dialect())
 
+        #print "faction ship rollup sql: " + faction_ship_rollup_sql.string
+
         connection = self.db_connector.get_engine().connect()
         faction_ship_rollup = connection.execute(faction_ship_rollup_sql)
 
@@ -666,6 +674,8 @@ class PersistenceManager:
             filter( and_(*filters)).\
             group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).\
             statement.compile(dialect=mysql.dialect())
+
+        print "faction ship rollup upgrade sql: " + upgrade_rollup_sql.string
 
         upgrade_rollup = connection.execute( upgrade_rollup_sql )
         connection.close()
