@@ -16,6 +16,7 @@
 <table id="tourneys" class="display" cellspacing="0" width="100%">
   <thead>
   <tr>
+    <th>Id</th>
     <th >Name</th>
     <th>Date Entered</th>
     <th >Results</th>
@@ -37,6 +38,7 @@
   </tr>
       {% for key, value in tourneys.iteritems() %}
       <tr>
+         <th>{{ value['tourney'].id }}</th>
          <td >{{ key }}</td>
          <th>{{ value['tourney'].entry_date }}</th>
          <td ><a href="{{ url_for( 'tourney_results', tourney_id=value['tourney'].id ) }}">Browse results</a></td>
@@ -62,8 +64,8 @@
     $(document).ready( function () {
         $('#tourneys').dataTable( {
                 "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
-                iDisplayLength: -1
-
+                iDisplayLength: -1,
+                "order": [[ 0, "desc" ]]
         });
     } );
 </script>
