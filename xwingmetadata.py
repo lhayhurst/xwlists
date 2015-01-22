@@ -207,6 +207,7 @@ upgrades = {
     TURRET: (
         {'name': 'Blaster Turret', 'cost': 4},
         {'name': 'Ion Cannon Turret', 'cost': 5},
+        {'name': 'Autoblaster Turret', 'cost': 2 }
     ),
     TORPEDO: (
         {'name': 'Flechette Torpedoes', 'cost': 2},
