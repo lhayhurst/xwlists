@@ -4,6 +4,15 @@ from bs4 import BeautifulSoup
 from persistence import TourneyList, Faction, Ship, ShipUpgrade
 
 
+class FabFetcher:
+    def fetch(self, fab_url):
+        fab_url = fab_url + "&xws=1"
+        response = urllib2.urlopen(fab_url)
+        data = response.read()
+        xws  = json.loads(data)
+        return xws
+
+
 class YASBFetcher:
     def fetch(self, yasb_uri):
         url = "https://yasb-xws.herokuapp.com/?" + yasb_uri

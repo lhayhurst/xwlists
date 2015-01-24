@@ -142,19 +142,23 @@
               onsubmit="return false;"
               data-parsley-validate >
             <fieldset>
-            <legend>Fetch the list from Yet-Another-Squad-Builder or voidstate</legend>
-                <div data-row-span="3" class="list_entry_options" id="list_entry_options">
+            <legend>Fetch the list from YASB, Voidstate, or Fab!</legend>
+                <div data-row-span="4" class="list_entry_options" id="list_entry_options">
                 <div class="yasbdiv" id="yasbdiv" data-field-span="1">
                     <label>Paste the YASB URL below</label>
                     <input type="text" id="yasb" name="yasb"  data-parsley-type="url" />
-                    <button name="getYASBList" id="getYASBList" style="width:400px;height:20px"  disabled>get it!</button>
+                    <button name="getYASBList" id="getYASBList" style="width:200px;height:20px"  disabled>get it!</button>
 
                 </div>
                 <div name="voidstatediv" id="voidstatediv" data-field-span="1">
-                    <label><b>Or</b> type in a voidstate list number to load from voidstate</label>
+                    <label><b>Or</b> type in a voidstate list number </label>
                     <input type="text" id="voidstate" name="voidstate"  data-parsley-type="integer" />
-                    <button name="getVoidStateList" id="getVoidStateList" style="width:400px;height:20px"  disabled>get it!</button>
-
+                    <button name="getVoidStateList" id="getVoidStateList" style="width:200px;height:20px"  disabled>get it!</button>
+                </div>
+                <div name="voidstatediv" id="voidstatediv" data-field-span="1">
+                    <label><b>Or</b>paste in the Fab's Squad Builder Url</label>
+                    <input type="text" id="fab" name="fab"  data-parsley-type="url" />
+                    <button name="getFabList" id="getFabList" style="width:200px;height:20px"  disabled>get it!</button>
                 </div>
                 <div data-field-span="1">
                     <label>xws endpoint fetch status log</label>
@@ -185,7 +189,10 @@
                 document.getElementById('getVoidStateList').disabled = false;
 
             }, false );
+            document.getElementById('fab').addEventListener('keydown', function(e) {
+                document.getElementById('getFabList').disabled = false;
 
+            }, false );
         </script>
 
     </div>
@@ -222,6 +229,7 @@
             $('.faction-choice').click(factionChosen);
             $('#getVoidStateList').click(getVoidStateList);
             $('#getYASBList').click(getYASBList);
+            $('#getFabList').click(getFabList);
 
         }
 
@@ -250,6 +258,29 @@
             updateTotals();
         }
 
+        function getFabList()
+        {
+            http://fabpsb.free.fr/permalink.php?sq=r1a10m2n4p8r30a11n2r9a2n3o1
+            errorMessageSpan = document.getElementById('listFetchErrorMessage');
+            errorMessageSpan.innerHTML = "making xws endpoint lookup to fab's squad builder..."
+
+            fabUrl = document.getElementById('fab').value;
+            var url = "/get_from_fab?fab=" + fabUrl + "&tourney_id=" + tourney_id + "&tourney_list_id=" + tourney_list_id;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: url,
+                success: function (data) {
+                    tourney_id       = data.tourney_id;
+                    tourney_list_id  = data.tourney_list_id;
+                    window.location.replace("/display_list?tourney_list_id=" + tourney_list_id);
+                },
+                error: function (data) {
+                    errorMessageSpan.innerHTML = "something went wrong, got response '" + data.responseJSON.message;
+                },
+                dataType: "json"
+            });
+        }
         function getYASBList()
         {
             //https://geordanr.github.io/xwing/?f=Galactic%20Empire&d=v3!s!70:98,23,-1:-1:-1:;78:27,36,46:-1:9:;15::-1:-1:
@@ -279,8 +310,6 @@
                 },
                 dataType: "json"
             });
-
-
         }
 
         function getVoidStateList()
