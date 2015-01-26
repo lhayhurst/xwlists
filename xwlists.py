@@ -21,7 +21,7 @@ from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
 app =  myapp.create_app()
 UPLOAD_FOLDER = "static/tourneys"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif', 'html'])
+ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif', 'html', 'json'])
 
 is_maintenance_mode = False
 
@@ -377,20 +377,20 @@ def add_tourney():
 
     if tourney_report:
         filename        = tourney_report.filename
-        html            = None
+        data            = None
         if tourney_report and allowed_file(filename):
             try:
-                html = tourney_report.read()
-                remove_accents(html)
-                cryodex = Cryodex(html)
+                data = tourney_report.read()
+                remove_accents(data)
+                cryodex = Cryodex(data, filename)
                 t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email, participant_count )
                 sfilename = secure_filename(filename) + "." + str(t.id)
-                save_cryodex_file( failed=False, filename=sfilename, html=html)
-                mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
+                save_cryodex_file( failed=False, filename=sfilename, html=data)
+                mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
                 return redirect(url_for('tourneys') )
             except Exception as err:
                 filename=str(uuid.uuid4()) + ".html"
-                save_cryodex_file( failed=True, filename=filename, html=html)
+                save_cryodex_file( failed=True, filename=filename, html=data)
                 mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
                 return render_template( 'tourney_entry_error.html', errortext=str(err))
 
