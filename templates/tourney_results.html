@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
+
+<b>Tourney:</b> {{ tourney.tourney_name }}<br>
+<b>Date:</b> {{ tourney.tourney_date }}<br>
+<b>Type:</b> {{ tourney.tourney_type }}<br>
+<b>Num participants:</b> {{ tourney.participant_count }}<br>
+<b>Venue:</b> {{ tourney.venue_string() }}<br>
+
     <br>
     <b>Final Standings</b>
     <hr>

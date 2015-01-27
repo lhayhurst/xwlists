@@ -7,6 +7,7 @@ import unicodedata
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
+import sys
 from werkzeug.utils import secure_filename
 
 from cryodex import Cryodex
@@ -66,19 +67,21 @@ def allowed_file(filename):
 
 
 def mail_message(subject, message):
-    msg = Message(subject, sender=ADMINS[0], recipients=ADMINS)
-    msg.body = 'text body'
-    msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
-    with app.app_context():
-        mail.send(msg)
+    if app.debug == False:
+        msg = Message(subject, sender=ADMINS[0], recipients=ADMINS)
+        msg.body = 'text body'
+        msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
+        with app.app_context():
+            mail.send(msg)
 
 
 def mail_error(errortext):
-    msg = Message('XWJuggler Error', sender=ADMINS[0], recipients=ADMINS)
-    msg.body = 'text body'
-    msg.html = '<b>ERROR</b><br><hr>' + errortext
-    with app.app_context():
-        mail.send(msg)
+    if app.debug == False:
+        msg = Message('XWJuggler Error', sender=ADMINS[0], recipients=ADMINS)
+        msg.body = 'text body'
+        msg.html = '<b>ERROR</b><br><hr>' + errortext
+        with app.app_context():
+            mail.send(msg)
 
 
 @app.route("/about")
@@ -249,7 +252,7 @@ def add_tourney_results():
         pm.db_connector.get_session().add(r)
 
     pm.db_connector.get_session().commit()
-    return redirect(url_for('tourneys') )
+    return render_template( 'tourney_results.html', tourney=t)
 
 
 def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
@@ -387,7 +390,7 @@ def add_tourney():
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, html=data)
                 mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
-                return redirect(url_for('tourneys') )
+                return render_template( 'tourney_results.html', tourney=t)
             except Exception as err:
                 filename=str(uuid.uuid4()) + ".html"
                 save_cryodex_file( failed=True, filename=filename, html=data)
@@ -665,5 +668,7 @@ def charts():
     return render_template('charts.html')
 
 if __name__ == '__main__':
-    app.debug = True
+    if len(sys.argv) == 2:
+        if sys.argv[1] == 'dev':
+            app.debug = True
     app.run()
