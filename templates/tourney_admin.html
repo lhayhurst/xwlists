@@ -16,9 +16,9 @@
       {% for tourney in  tourneys %}
       <tr>
          <td>{{  tourney.tourney_name }}</td>
+         <td >{{ tourney.id }}</td>
          <td>{{  tourney.email }}</td>
          <td>{{  tourney.entry_date }}</td>
-         <td >{{ tourney.id }}</td>
          <td ><a href="{{ url_for( 'delete_tourney', tourney=tourney.tourney_name) }}">delete tourney</a></td>
       </tr>
       {% endfor %}
@@ -27,7 +27,8 @@
 
 <script>
     $(document).ready( function () {
-        $('#tourneys').dataTable();
+        $('#tourneys').dataTable({"order": [[ 2, "desc" ]]
+});
     } );
 </script>
 
