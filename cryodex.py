@@ -44,7 +44,7 @@ class CryodexRound:
             return None
 
 class CryodexRank:
-    def __init__(self, player_name, rank=None, elim_rank=None, score=None, mov=None, sos=None, dropped=False ):
+    def __init__(self, player_name, rank=None, elim_rank=None, score=None, mov=None, sos=None, dropped=False, list_id=None ):
         self.rank        = int(rank)
         self.elim_rank   = elim_rank
         self.player_name = player_name
@@ -52,6 +52,7 @@ class CryodexRank:
         self.mov         = int(mov)
         self.sos         = int(sos)
         self.dropped     = dropped
+        self.list_id     = list_id
 
 
 class CryodexRankings:
@@ -100,7 +101,9 @@ class CryodexRankings:
                 elim  = ranks['elimination']
             if rank.has_key('dropped'):
                 dropped = True
-            cr = CryodexRank( name, swiss, elim, score, mov, sos, dropped )
+            if rank.has_key( "list-id" ):
+                list_id = rank['list-id']
+            cr = CryodexRank( name, swiss, elim, score, mov, sos, dropped, list_id )
             self.rankings.append(cr)
 
     def __init__(self, data, ishtml):

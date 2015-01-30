@@ -275,6 +275,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
         players[player] = tp
         lists[player]   = tlist
 
+
     #pm.db_connector.get_session().commit()
 
     for round_type in cryodex.rounds.keys():
@@ -320,6 +321,20 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
                            sos=rank.sos,
                            score=rank.score,
                            dropped=rank.dropped)
+        if rank.list_id is not None:
+            #cryodex provided a list id ... load it
+            try:
+                tourney_list = lists[rank.player_name]
+                fetcher = VoidStateXWSFetcher()
+                xws = fetcher.fetch(rank.list_id)
+                converter = XWSToJuggler(xws)
+                converter.convert(pm, tourney_list)
+                pm.db_connector.get_session().commit()
+
+            except Exception as err:
+                print ("unable to fetch list id " + rank.list_id + " from voidstate, reason: " + str(err) )
+                mail_error(errortext=str(err) + "<br><br>Unable to fetch list id " + rank.list_id + " from voidstate" )
+
         pm.db_connector.get_session().add(r)
 
 
