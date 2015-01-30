@@ -248,6 +248,9 @@ class TourneyList(Base):
 
 
     def pretty_print(self):
+        if len(self.ships) == 0: #no list
+            ret = '<a href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
+            return Markup(ret)
         ret = ""
         for ship in self.ships:
             ret = ret + ship.ship_pilot.pilot.name
@@ -291,6 +294,8 @@ class TourneyRanking(Base):
             if tourney_list.player.id == self.player_id:
                 return tourney_list.pretty_print()
         return ""
+
+
 
     def get_player_info(self):
         if self.dropped:

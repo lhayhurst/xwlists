@@ -38,10 +38,11 @@
             {%  endfor %}
         <br>
         <i>Thanks for entering this list?  What next?</i>
-        <br><button type="button" onclick="doAnotherList()">Looks good, I want to do another!</button>
+        <button type="button" onclick="deleteAndStartOver()">Oops, its wrong, let me try that again</button><br>
+        <br><button type="button" onclick="doAnotherList()">Looks good, give another random list to enter!</button><br>
         <br>
-        <br>
-        <button type="button" onclick="deleteAndStartOver()">Oops, its wrong, let me try that again</button>
+        <button type="button" onclick="returnToResults()">Looks good, take me back to the tourney results page! </button>
+
 
         </div>
     </div>
@@ -54,6 +55,11 @@
         function deleteAndStartOver() {
             window.location.replace("/delete_list_and_retry?tourney_list_id=" + tourney_list_id );
         }
+
+        function returnToResults() {
+            window.location.replace("/tourney_results?tourney_id=" + tourney_id );
+        }
+
 
     </script>
 {% endblock %}
