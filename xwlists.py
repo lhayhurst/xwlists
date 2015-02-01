@@ -686,4 +686,6 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         if sys.argv[1] == 'dev':
             app.debug = True
+        else:
+            app.debug = False
     app.run()
