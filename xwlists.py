@@ -688,4 +688,6 @@ if __name__ == '__main__':
             app.debug = True
         else:
             app.debug = False
+    else:
+        app.debug = False
     app.run()

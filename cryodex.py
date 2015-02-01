@@ -88,6 +88,7 @@ class CryodexRankings:
     def fromJson(self, data):
         for rank in data:
             name  = rank['name']
+            name = name.strip()
             score = rank['score']
             mov   = rank['mov']
             sos   = rank['sos']
@@ -169,7 +170,7 @@ class Cryodex:
         rounds = collections.OrderedDict()
         for section in soup.findAll(H3):
             if section.text == RANKINGS:
-                self.parse_rankings(section.nextSibling)
+                self.parse_rankings(section.parent.find_all('table')[0])
                 continue
             round_text = self.parse_round_text(section.text)
             if round_text:
@@ -222,8 +223,8 @@ class Cryodex:
                             player1_score = 0
                             player2_score = 100
 
-                    self.players[player1] = player1
-                    self.players[player2] = player2
+                    self.players[player1] = player1.strip()
+                    self.players[player2] = player2.strip()
 
                     cr.add_result(player1, player2, winner, int(player1_score), int(player2_score), bye=False,
                                   draw=False)
@@ -270,7 +271,7 @@ class Cryodex:
 
         #init the player member
         for player in players:
-            self.players[player['name']] = player['name']
+            self.players[player['name'].strip()] = player['name'].strip()
 
         #and the ranking member
         self.ranking = CryodexRankings( players, ishtml=False)
