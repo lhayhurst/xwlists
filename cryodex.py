@@ -95,6 +95,7 @@ class CryodexRankings:
             elim  = None
             dropped = False
             ranks = rank['rank']
+            list_id = None
             if ranks.has_key( 'swiss'):
                 swiss = ranks['swiss']
             if ranks.has_key('elimination'):
@@ -114,9 +115,9 @@ class CryodexRankings:
             self.fromJson(data)
 
     def apply_elimination_results(self, rounds):
-        if not rounds.has_key( ELIM ):
+        if not rounds.has_key( RoundType.ELIMINATION ):
             return
-        elim_rounds = rounds[ELIM]
+        elim_rounds = rounds[RoundType.ELIMINATION]
         i = 0
         for round in elim_rounds:
             i = i + 1
@@ -318,9 +319,10 @@ class Cryodex:
             self.processJson(data)
         elif filename.endswith("html"):
             self.parseHtml(data)
+            self.ranking.apply_elimination_results(self.rounds)
         else:
             raise Exception("Unable to parse cryodex filename " + filename + ", reason: unknown file type (expecting .html or .json)" )
-        self.ranking.apply_elimination_results(self.rounds)
+
 
 
 
@@ -362,7 +364,7 @@ class CryodexTests(unittest.TestCase):
         self.assertEqual( 0, last.score)
         self.assertEqual( 0, last.mov)
         self.assertEqual( 5, last.sos)
-        self.assertEqual( 2, last.dropped )
+        self.assertEqual( True, last.dropped )
 
 
 
@@ -461,6 +463,9 @@ class CryodexTests(unittest.TestCase):
         m3 = r1_results[2]
         self.assertEqual( True, m3.bye )
         self.assertEqual( '48K', m3.player1)
+
+#        rounds = c.rounds[RoundType.ELIMINATION]
+#        self.assertEqual( 2, len(rounds))
 
 
 
