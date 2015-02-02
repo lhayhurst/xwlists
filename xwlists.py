@@ -4,6 +4,7 @@ import urllib
 import datetime
 import uuid
 import unicodedata
+from unidecode import unidecode
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
@@ -342,7 +343,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
     pm.db_connector.get_session().commit()
     return t
 
-def save_cryodex_file( failed, filename, html ):
+def save_cryodex_file( failed, filename, data ):
     dir = None
     if failed:
         dir = os.path.join( static_dir, "cryodex/fail")
@@ -350,12 +351,13 @@ def save_cryodex_file( failed, filename, html ):
         dir = os.path.join( static_dir, "cryodex/success")
     file = os.path.join( dir, filename )
     fd = open( file, 'w' )
-    fd.write( html.encode('ascii', 'ignore') )
+    fd.write( data )
     fd.close()
 
 def remove_accents(input_str):
-    nkfd_form = unicodedata.normalize('NFKD', unicode(input_str))
-    return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
+     input_str = input_str.decode('latin-1')
+     nkfd_form = unicodedata.normalize('NFKD', unicode(input_str))
+     return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
 
 
 @app.route("/get_tourney_results")
@@ -399,16 +401,16 @@ def add_tourney():
         if tourney_report and allowed_file(filename):
             try:
                 data = tourney_report.read()
-                remove_accents(data)
+                data = remove_accents(data)
                 cryodex = Cryodex(data, filename)
                 t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email, participant_count )
                 sfilename = secure_filename(filename) + "." + str(t.id)
-                save_cryodex_file( failed=False, filename=sfilename, html=data)
+                save_cryodex_file( failed=False, filename=sfilename, data=data)
                 mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
                 return render_template( 'tourney_results.html', tourney=t)
             except Exception as err:
                 filename=str(uuid.uuid4()) + ".html"
-                save_cryodex_file( failed=True, filename=filename, html=data)
+                save_cryodex_file( failed=True, filename=filename, data=data)
                 mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
                 return render_template( 'tourney_entry_error.html', errortext=str(err))
 
