@@ -176,6 +176,7 @@ class Tourney(Base):
     email             = Column(String(128))
     entry_date        = Column(Date)
     participant_count = Column(Integer)
+    locked            = Column(Boolean)
 
     tourney_lists   = relationship( "TourneyList", back_populates="tourney", cascade="all,delete,delete-orphan" )
     rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)", cascade="all,delete,delete-orphan")
@@ -196,7 +197,6 @@ class Tourney(Base):
 
     def get_descending_elim_rounds(self):
         ret =  [r for r in self.rounds if r.round_type == RoundType.ELIMINATION]
-        ret.reverse()
         return ret
 
     def headline(self):
@@ -249,8 +249,9 @@ class TourneyList(Base):
 
     def pretty_print(self):
         if len(self.ships) == 0: #no list
-            ret = '<a href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
-            return Markup(ret)
+            if self.tourney.locked == False:
+                ret = '<a href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
+                return Markup(ret)
         ret = ""
         for ship in self.ships:
             ret = ret + ship.ship_pilot.pilot.name
@@ -492,6 +493,8 @@ class PersistenceManager:
     def get_tourney_list(self,tourney_list_id):
         return self.db_connector.get_session().query(TourneyList).filter_by(id=tourney_list_id).first()
 
+    def get_players(self, tourney_id):
+        return self.db_connector.get_session().query(TourneyPlayer).filter_by(tourney_id=tourney_id).all()
 
     def get_canonical_ship_pilot(self, ship_type, pilot):
             query = self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_string(ship_type)). \

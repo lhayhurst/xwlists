@@ -1,3 +1,4 @@
+import json
 import os
 from random import randint
 import urllib
@@ -12,6 +13,7 @@ import sys
 from werkzeug.utils import secure_filename
 
 from cryodex import Cryodex
+from dataeditor import RankingEditor
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue
@@ -68,21 +70,21 @@ def allowed_file(filename):
 
 
 def mail_message(subject, message):
-    if app.debug == False:
-        msg = Message(subject, sender=ADMINS[0], recipients=ADMINS)
-        msg.body = 'text body'
-        msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
-        with app.app_context():
-            mail.send(msg)
+    msg = Message(subject, sender=ADMINS[0], recipients=ADMINS)
+    msg.body = 'text body'
+    msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
+    with app.app_context():
+        print("sending msg " + msg)
+        mail.send(msg)
 
 
 def mail_error(errortext):
-    if app.debug == False:
-        msg = Message('XWJuggler Error', sender=ADMINS[0], recipients=ADMINS)
-        msg.body = 'text body'
-        msg.html = '<b>ERROR</b><br><hr>' + errortext
-        with app.app_context():
-            mail.send(msg)
+    msg = Message('XWJuggler Error', sender=ADMINS[0], recipients=ADMINS)
+    msg.body = 'text body'
+    msg.html = '<b>ERROR</b><br><hr>' + errortext
+    with app.app_context():
+        print("sending msg " + msg)
+        mail.send(msg)
 
 
 @app.route("/about")
@@ -104,6 +106,47 @@ def tourneys():
     summary = PersistenceManager(myapp.db_connector).get_tourney_summary()
     return render_template('tourneys.html', tourneys=summary, admin=admin_on )
 
+@app.route("/get_tourney_details")
+def get_tourney_details():
+    tourney_id   = request.args.get('tourney_id')
+    unlocked     = request.args.get('unlocked')
+    return render_template('edit_tourney.html', tourney_id=tourney_id,
+                                                tourney=PersistenceManager(myapp.db_connector).get_tourney_by_id(tourney_id),
+                                                unlocked=unlocked )
+
+
+def create_default_editor_ranking(i, row):
+    row['player_id'] = None
+    row['player_name'] = 'Player%d' % ( i )
+    row['score'] = 0
+    row['swiss_rank'] = i
+    row['dropped'] = False
+    row['championship_rank'] = None
+    row['mov'] = 0
+    row['sos'] = 0
+
+
+@app.route("/get_rankings")
+def get_tourney_data():
+    tourney_id        = request.args['tourney_id']
+    pm                = PersistenceManager(myapp.db_connector)
+    tourney           = pm.get_tourney_by_id(tourney_id)
+
+    de = RankingEditor( pm, tourney )
+    return de.get_json()
+
+
+
+@app.route("/edit_rankings",methods=['POST'])
+def edit_ranking_row():
+
+    #see https://editor.datatables.net/manual/server
+    tourney_id        = request.args['tourney_id']
+    pm                = PersistenceManager(myapp.db_connector)
+    tourney           = pm.get_tourney_by_id(tourney_id)
+
+    de = RankingEditor(pm, tourney)
+    return de.set_and_get_json(request)
 
 @app.route("/new")
 def new():
@@ -200,61 +243,6 @@ def add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
     tv = TourneyVenue(tourney=t, country=country, state=state, city=city, venue=venue)
     pm.db_connector.get_session().add(tv)
 
-@app.route("/add_tourney_results",methods=['POST'])
-def add_tourney_results():
-    num_players = int(request.form['num_players'])
-    tourney_id  = int(request.form['tourney_id'])
-    pm = PersistenceManager(myapp.db_connector)
-    t = pm.get_tourney_by_id(tourney_id)
-
-    i = 1
-    while i <= num_players:
-        str_i = str(i)
-        i = i + 1
-        player_name = remove_accents(request.form['player_name_' + str_i ])
-        pre_elim    = request.form['pre_elim_' + str_i ]
-        elim        = request.form['elim_' + str_i ]
-        score       = request.form['score_' + str_i ]
-        mov         = request.form['mov_' + str_i ]
-        sos         = request.form['sos_' + str_i ]
-        dropped     = request.form['dropped_' + str_i]
-
-        if dropped == "1":
-            dropped = True
-        else:
-            dropped = False
-
-        player = TourneyPlayer( tourney=t, player_name=player_name)
-        tlist  = TourneyList( tourney=t, player=player)
-        pm.db_connector.get_session().add(tlist)
-        pm.db_connector.get_session().add(player)
-
-        if len(mov) == 0:
-            mov = None
-        else:
-            mov = int(mov)
-        if len(sos) == 0:
-            sos = None
-        else:
-            sos = int(sos)
-        if len(elim) == 0:
-            elim = None
-        else:
-            elim = int(elim)
-
-        r = TourneyRanking(tourney=t,
-                           player=player,
-                           rank=int(pre_elim),
-                           elim_rank=elim,
-                           mov=mov,
-                           sos=sos,
-                           score=int(score),
-                           dropped=dropped)
-        pm.db_connector.get_session().add(r)
-
-    pm.db_connector.get_session().commit()
-    return render_template( 'tourney_results.html', tourney=t)
-
 
 def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
                    round_length, sets_used, country, state, city, venue, email, participant_count):
@@ -262,7 +250,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
     pm = PersistenceManager(myapp.db_connector)
     t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date,
                 tourney_type=tourney_type, round_length=round_length, email=email, entry_date=datetime.datetime.now(),
-                participant_count=participant_count)
+                participant_count=participant_count, locked=True)
 
     pm.db_connector.get_session().add(t)
     #add the players
@@ -360,12 +348,6 @@ def remove_accents(input_str):
      return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
 
 
-@app.route("/get_tourney_results")
-def get_tourney_results():
-    tourney_id = request.args.get('tourney_id')
-    return render_template("get_tourney_results.html", tourney_id=tourney_id)
-
-
 @app.route("/add_tourney",methods=['POST'])
 def add_tourney():
 
@@ -407,7 +389,7 @@ def add_tourney():
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, data=data)
                 mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
-                return render_template( 'tourney_results.html', tourney=t)
+                return redirect( url_for('get_tourney_details', tourney_id=t.id))
             except Exception as err:
                 filename=str(uuid.uuid4()) + ".html"
                 save_cryodex_file( failed=True, filename=filename, data=data)
@@ -417,14 +399,13 @@ def add_tourney():
     else: #user didnt provide a cryodex file ... have to do it manually
         try:
             pm = PersistenceManager(myapp.db_connector)
-            t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type,
+            t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, locked=False,
                         round_length=round_length, email=email, entry_date=datetime.datetime.now(), participant_count=participant_count)
             pm.db_connector.get_session().add(t)
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue )
             pm.db_connector.get_session().commit()
             mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
-
-            return render_template('get_tourney_results.html', tourney_id=t.id)
+            return redirect(url_for('get_tourney_details', tourney_id=t.id))
         except Exception as err:
             mail_error(errortext=str(err))
             return render_template( 'tourney_entry_error.html', errortext=str(err))
@@ -592,6 +573,31 @@ def add_from_voidstate():
          response.status_code = (500)
          return response
 
+@app.route("/unlock_tourney", methods=['POST'])
+def unlock_tourney():
+    key = request.args.get('key')
+    tourney_id = request.args.get('tourney_id')
+    pm = PersistenceManager(myapp.db_connector)
+    try:
+        tourney = pm.get_tourney_by_id(tourney_id)
+        if len(key) and tourney.email == key:
+            response = jsonify( result="success")
+            if tourney.locked == True: #flip the lock
+                tourney.locked = False
+            else:
+                tourney.locked = True
+            pm.db_connector.get_session().commit()
+            return response
+        else:
+            response = jsonify(result="fail")
+            return response
+    except Exception, e:
+        error = "someone tried to unlock tourney_id " + tourney_id + " with email address " + key + " ( expected " + tourney.email + " ) "
+        mail_error( error  )
+        response = jsonify(message=str(e))
+        response.status_code = (500)
+        return response
+
 @app.route("/add_squad",methods=['POST'])
 def add_squad():
          data         = request.json['data']
@@ -622,13 +628,6 @@ def add_squad():
          pm.db_connector.get_session().commit()
 
          return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list.id)
-
-@app.route('/tourney_results')
-def tourney_results():
-    tourney_id = request.args.get('tourney_id')
-    pm = PersistenceManager(myapp.db_connector)
-    tourney = pm.get_tourney_by_id(tourney_id)
-    return render_template('tourney_results.html', tourney=tourney)
 
 @app.route('/display_list')
 def display_list():

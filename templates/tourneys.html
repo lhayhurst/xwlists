@@ -41,15 +41,15 @@
          <th>{{ value['tourney'].id }}</th>
          <td >{{ key }}</td>
          <th>{{ value['tourney'].entry_date }}</th>
-         <td ><a href="{{ url_for( 'tourney_results', tourney_id=value['tourney'].id ) }}">Browse results</a></td>
+         <td ><a href="{{ url_for( 'get_tourney_details', tourney_id=value['tourney'].id ) }}">Browse/edit results</a></td>
          <td >{{ value['tourney'].tourney_type }}</td>
          <td >{{ value['tourney'].tourney_date }}</td>
          <td >{{ value['tourney'].round_length }}</td>
          <td >{{ value['tourney'].participant_count }}</td>
          <td >{{ value['tourney'].venue_string() }}</td>
          <td >{{  value['num_entered'] + value['num_not_entered']  }}</td>
-         <td >{{ value['num_entered'] }} (<a href="{{ url_for( 'browse_list', tourney=key) }}">browse submitted lists</a>) </td>
-         <td >{{ value['num_not_entered'] }} ( <a href="{{ url_for( 'enter_list', tourney=value['tourney'].id) }}">enter a list</a>)</td>
+         <td >{{ value['num_entered'] }} </td>
+         <td >{{ value['num_not_entered'] }} </td>
          <td ><a type="text/csv" href="{{ url_for( 'export_tourney_lists', tourney_id=value['tourney'].id) }}">Export to csv</a></td>
 
          {% if admin %}
