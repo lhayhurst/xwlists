@@ -248,6 +248,7 @@ def add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
                 ts = TourneySet(tourney=t, set=set)
                 pm.db_connector.get_session().add(ts)
     tv = TourneyVenue(tourney=t, country=country, state=state, city=city, venue=venue)
+    t.venue = tv
     pm.db_connector.get_session().add(tv)
 
 
@@ -272,7 +273,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
         lists[player]   = tlist
 
 
-    #pm.db_connector.get_session().commit()
+    pm.db_connector.get_session().commit()
 
     for round_type in cryodex.rounds.keys():
         rounds = cryodex.rounds[round_type]
@@ -317,7 +318,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
                            sos=rank.sos,
                            score=rank.score,
                            dropped=rank.dropped)
-        if rank.list_id is not None:
+        if rank.list_id is not None and len(rank.list_id) > 0:
             #cryodex provided a list id ... load it
             try:
                 tourney_list = lists[rank.player_name]
