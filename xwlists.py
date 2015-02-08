@@ -112,6 +112,7 @@ def get_tourney_results():
     return redirect(url_for('get_tourney_details', tourney_id=tourney_id))
 
 
+
 @app.route("/get_tourney_details")
 def get_tourney_details():
     tourney_id   = request.args.get('tourney_id')
@@ -514,6 +515,18 @@ def enter_list():
                            tourney_list_id=tourney_list.id,
                            tourney_id=tourney.id,
                            tourney=tourney)
+
+@app.route("/get_summaries")
+def get_summaries():
+    try:
+        pm = PersistenceManager(myapp.db_connector)
+        summaries = pm.get_summaries()
+        return json.dumps( summaries  )
+    except Exception, e:
+        response = jsonify(message=str(e))
+        response.status_code = (500)
+        return response
+
 
 @app.route("/get_from_fab", methods=['POST'])
 def get_from_fab():

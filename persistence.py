@@ -426,6 +426,13 @@ class PersistenceManager:
         session.add_all( ship_pilots )
         session.commit()
 
+    def get_summaries(self):
+        num_tourneys = self.db_connector.get_session().query(func.count(Tourney.id)).first()[0]
+        num_lists    = self.db_connector.get_session().query(func.count(TourneyList.id)).first()[0]
+        num_ships    = self.db_connector.get_session().query(func.count(Ship.id)).first()[0]
+        num_upgrades = self.db_connector.get_session().query(func.count(ShipUpgrade.id)).first()[0]
+        return { "tourneys": num_tourneys, "lists": num_lists, "ships": num_ships, "upgrades": num_upgrades}
+
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)
 
