@@ -106,6 +106,14 @@ def tourneys():
     summary = PersistenceManager(myapp.db_connector).get_tourney_summary()
     return render_template('tourneys.html', tourneys=summary, admin=admin_on )
 
+@app.route("/tourney_results")
+def get_tourney_results():
+    tourney_id   = request.args.get('tourney_id')
+    tourney = PersistenceManager(myapp.db_connector).get_tourney_by_id(tourney_id)
+
+    return redirect(url_for('get_tourney_details', tourney_id=tourney_id))
+
+
 @app.route("/get_tourney_details")
 def get_tourney_details():
     tourney_id   = request.args.get('tourney_id')
