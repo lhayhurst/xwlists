@@ -320,7 +320,8 @@ class Cryodex:
             self.processJson(data)
         elif filename.endswith("html"):
             self.parseHtml(data)
-            self.ranking.apply_elimination_results(self.rounds)
+            if self.ranking is not None:
+                self.ranking.apply_elimination_results(self.rounds)
         else:
             raise Exception("Unable to parse cryodex filename " + filename + ", reason: unknown file type (expecting .html or .json)" )
 
