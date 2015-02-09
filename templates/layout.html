@@ -88,6 +88,10 @@
                   <span class="summaries" id="upgrade-count"></span>
                   <span class="summary-title">Upgrades</span>
               </div>
+              <div class="summary-block">
+                  <span class="summaries" id="points-spent"></span>
+                  <span class="summary-title">Points spent</span>
+              </div>
            </div>
     <script>
 
@@ -106,6 +110,8 @@
                     numLists     = data.lists;
                     numShips     = data.ships;
                     numUpgrades  = data.upgrades;
+                    pointsSpent  = data.points_spent;
+
                     tourneysSpan = document.getElementById( 'tourney-count');
                     tourneysSpan.innerHTML = numberWithCommas(numTourneys);
                     listsSpan    = document.getElementById( 'list-count');
@@ -114,6 +120,8 @@
                     shipsSpan.innerHTML = numberWithCommas(numShips);
                     upgradesSpan    = document.getElementById( 'upgrade-count');
                     upgradesSpan.innerHTML = numberWithCommas(numUpgrades);
+                    pointsSpan    = document.getElementById( 'points-spent');
+                    pointsSpan.innerHTML = numberWithCommas(pointsSpent);
 
                 },
                 error: function (data) {
