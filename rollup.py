@@ -9,9 +9,10 @@ class Rollup:
 
 
 
-    def __init__(self,pm, request_type, eliminationOnly):
+    def __init__(self,pm, request_type, eliminationOnly, storeChampionshipsOnly=False):
         self.pm = pm
         self.top32only = eliminationOnly
+        self.storeChampionshipsOnly = storeChampionshipsOnly
 
         self.chart_request_type = request_type
 
@@ -43,15 +44,15 @@ class Rollup:
     def rollup(self):
         sorted_ret = None
         if self.chart_request_type == 'faction-ship-points' or self.chart_request_type == 'faction-ship-count':
-            ret = self._rollup( self.pm.get_ship_faction_rollups(self.top32only), has_pilot=False)
+            ret = self._rollup( self.pm.get_ship_faction_rollups(self.top32only, self.storeChampionshipsOnly), has_pilot=False)
             sorted_ret = sorted( ret, key=lambda record: record['faction'])
 
         elif self.chart_request_type.startswith( 'ship-pilot'):
-            ret = self._rollup( self.pm.get_ship_pilot_rollup(self.top32only), has_pilot=True)
+            ret = self._rollup( self.pm.get_ship_pilot_rollup(self.top32only, self.storeChampionshipsOnly), has_pilot=True)
             sorted_ret = sorted( ret, key=lambda record: record['faction'])
 
         elif self.chart_request_type.startswith('upgrade_type-upgrade'):
-            ret = self._rollup_upgrades( self.pm.get_upgrade_rollups(self.top32only))
+            ret = self._rollup_upgrades( self.pm.get_upgrade_rollups(self.top32only, self.storeChampionshipsOnly))
             sorted_ret = ret
 
         return sorted_ret

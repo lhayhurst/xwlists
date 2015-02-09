@@ -557,7 +557,7 @@ class PersistenceManager:
                 ret[tourney_name]['num_entered'] += 1
         return ret
 
-    def get_ship_pilot_rollup(self, elimination_only):
+    def get_ship_pilot_rollup(self, elimination_only, storeChampionshipsOnly=False):
         session = self.db_connector.get_session()
 
         filters = [
@@ -571,6 +571,9 @@ class PersistenceManager:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
+
+        if storeChampionshipsOnly:
+            filters.append(Tourney.tourney_type == 'Store championship')
 
 
         ship_pilot_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
@@ -599,6 +602,9 @@ class PersistenceManager:
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
+        if storeChampionshipsOnly:
+            filters.append(Tourney.tourney_type == 'Store championship')
+
 
         upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
@@ -615,7 +621,7 @@ class PersistenceManager:
         connection.close()
         return ret
 
-    def get_upgrade_rollups(self, elimination_only):
+    def get_upgrade_rollups(self, elimination_only, storeChampionshipsOnly=False):
 
         session = self.db_connector.get_session()
 
@@ -633,6 +639,9 @@ class PersistenceManager:
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
+        if storeChampionshipsOnly:
+            filters.append(Tourney.tourney_type == 'Store championship')
+
         upgrade_rollup_sql = session.query( Upgrade.upgrade_type, Upgrade.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
                                         func.sum( Upgrade.cost).label("cost_upgrades") ).\
@@ -646,7 +655,7 @@ class PersistenceManager:
         ret = connection.execute(upgrade_rollup_sql)
         return ret
 
-    def get_ship_faction_rollups(self, elimination_only):
+    def get_ship_faction_rollups(self, elimination_only, storeChampionshipsOnly=False):
         session = self.db_connector.get_session()
 
         filters = [TourneyList.tourney_id == Tourney.id ,
@@ -659,6 +668,8 @@ class PersistenceManager:
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
+        if storeChampionshipsOnly:
+            filters.append(Tourney.tourney_type == 'Store championship')
 
 
         faction_ship_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
