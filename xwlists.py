@@ -350,6 +350,23 @@ def save_cryodex_file( failed, filename, data ):
     fd.write( data )
     fd.close()
 
+@app.route("/store_champs")
+def store_champs():
+    pm = PersistenceManager(myapp.db_connector)
+    tourneys = pm.get_tourneys()
+    championship_lists = []
+    for tourney in tourneys:
+        for rank in tourney.rankings:
+            if rank.elim_rank is not None and rank.elim_rank <= 4 and tourney.is_store_championship():
+                rec = { 'tourney' : tourney.tourney_name,
+                        'num_participants': tourney.participant_count,
+                        'player' : rank.player.player_name,
+                        'swiss_standing': rank.rank,
+                        'championship_standing' : rank.elim_rank,
+                        'pretty_print' : rank.pretty_print() }
+                championship_lists.append(rec)
+    return render_template( 'store_champ_lists.html', championship_lists=championship_lists)
+
 def remove_accents(input_str):
      input_str = input_str.decode('latin-1')
      nkfd_form = unicodedata.normalize('NFKD', unicode(input_str))

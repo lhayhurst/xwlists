@@ -185,6 +185,9 @@ class Tourney(Base):
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
     venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
 
+    def is_store_championship(self):
+        return self.tourney_type == 'Store championship'
+
 
     def get_pre_elimination_rounds(self):
         ret = [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]

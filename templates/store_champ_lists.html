@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<table id="championship-lists" class="compact display dataTable" cellspacing="0" width="100%">
+  <thead>
+      <tr>
+        <th >Tourney</th>
+        <th> Num Participants</th>
+        <th >Player</th>
+        <th >Swiss Standing</th>
+        <th >Championship Standing</th>
+        <th>List</th>
+      </tr>
+  </thead>
+
+  {% for list in championship_lists %}
+  <tr>
+      <td>{{ list['tourney'] }}</td>
+      <td>{{ list['num_participants'] }}</td>
+      <td>{{ list['player'] }}</td>
+      <td>{{ list['swiss_standing'] }}</td>
+      <td>{{ list['championship_standing'] }}</td>
+      <td>{{ list['pretty_print'] }}</td>
+  </tr>
+  {% endfor %}
+
+</table>
+
+<script>
+   $(document).ready( function () {
+        $('#championship-lists').dataTable( {
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+            iDisplayLength: -1,
+            "order": [[ 4, "asc" ]]
+
+        });
+    } );
+</script>
+
+{% endblock %}
