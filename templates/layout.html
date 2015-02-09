@@ -42,9 +42,53 @@
         .summaries {
             font-size:150%;
         }
+        .main-title {
+            display: inline-block;
+            position: relative;
+            font-family: 'Helvetica Neue', 'Helvetica', 'Lucida Grande', 'Arial', sans-serif;
+            font-weight: 100;
+            font-size: 48px;
+            top: -18px;
+        }
+        .summary-block {
+            position: relative;
+            top: -10px;
+            display: inline-block;
+            width: 150px;
+            text-align: center;
+        }
+        .summaries {
+            display: block;
+            font-weight: 100;
+            color: #c8d6ff;
+            font-family: 'Helvetica Neue', 'Helvetica', 'Lucida Grande', 'Arial', sans-serif;
+        }
+        .summary-title {
+            display: block;
+            font-size: 11px;
+            font-family: 'Helvetica', 'Lucida Grande', 'Arial', sans-serif;
+        }
     </style>
 	<div id="conteneur">
-		  <div id="header"><span>X-Wing List Juggler</span>&nbsp;&nbsp;&nbsp;<span class="summaries" id="tourney-count"></span>&nbsp;&nbsp;&nbsp;<span class="summaries" id="list-count"></span>&nbsp;&nbsp;&nbsp;<span class="summaries" id="ship-count"></span>&nbsp;&nbsp;&nbsp;<span class="summaries" id="upgrade-count"></span></div>
+		  <div id="header">
+              <span class="main-title">X-Wing List Juggler</span>
+              <div class="summary-block">
+                  <span class="summaries" id="tourney-count"></span>
+                  <span class="summary-title">Tournies</span>
+              </div>
+              <div class="summary-block">
+                  <span class="summaries" id="list-count"></span>
+                  <span class="summary-title">Lists</span>
+              </div>
+              <div class="summary-block">
+                  <span class="summaries" id="ship-count"></span>
+                  <span class="summary-title">Ships</span>
+              </div>
+              <div class="summary-block">
+                  <span class="summaries" id="upgrade-count"></span>
+                  <span class="summary-title">Upgrades</span>
+              </div>
+           </div>
     <script>
 
         function numberWithCommas(x) {
@@ -63,13 +107,13 @@
                     numShips     = data.ships;
                     numUpgrades  = data.upgrades;
                     tourneysSpan = document.getElementById( 'tourney-count');
-                    tourneysSpan.innerHTML = numberWithCommas(numTourneys) + " tourneys";
+                    tourneysSpan.innerHTML = numberWithCommas(numTourneys);
                     listsSpan    = document.getElementById( 'list-count');
-                    listsSpan.innerHTML = numberWithCommas(numLists) + " players ";
+                    listsSpan.innerHTML = numberWithCommas(numLists);
                     shipsSpan    = document.getElementById( 'ship-count');
-                    shipsSpan.innerHTML = numberWithCommas(numShips) + " ships"
+                    shipsSpan.innerHTML = numberWithCommas(numShips);
                     upgradesSpan    = document.getElementById( 'upgrade-count');
-                    upgradesSpan.innerHTML = numberWithCommas(numUpgrades) + " upgrades"
+                    upgradesSpan.innerHTML = numberWithCommas(numUpgrades);
 
                 },
                 error: function (data) {
