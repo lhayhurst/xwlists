@@ -431,7 +431,7 @@ class PersistenceManager:
 
     def get_summaries(self):
         num_tourneys      = self.db_connector.get_session().query(func.count(Tourney.id)).first()[0]
-        num_lists         = self.db_connector.get_session().query(func.count(TourneyList.id)).first()[0]
+        num_lists         = self.db_connector.get_session().query(func.count(TourneyList.id)).filter(TourneyList.points >0).first()[0]
         num_ships         = self.db_connector.get_session().query(func.count(Ship.id)).first()[0]
         num_upgrades      = self.db_connector.get_session().query(func.count(ShipUpgrade.id)).first()[0]
         points_spent      = self.db_connector.get_session().query(func.sum(TourneyList.points)).first()[0]
@@ -439,7 +439,7 @@ class PersistenceManager:
                  "lists": num_lists,
                  "ships": num_ships,
                  "upgrades": num_upgrades,
-                 "points_spent" : str(points_spent) }
+                 "points_spent" : int(points_spent) }
 
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)

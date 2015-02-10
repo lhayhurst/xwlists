@@ -36,6 +36,10 @@ static_dir = os.path.join( here, app.config['UPLOAD_FOLDER'] )
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
+from werkzeug.contrib.cache import SimpleCache
+banner_cache = SimpleCache()
+
+
 app.config.update(dict(
     DEBUG = True,
     MAIL_SERVER = 'smtp.gmail.com',
@@ -537,8 +541,11 @@ def enter_list():
 @app.route("/get_summaries")
 def get_summaries():
     try:
-        pm = PersistenceManager(myapp.db_connector)
-        summaries = pm.get_summaries()
+        summaries = banner_cache.get('banner-summary-data')
+        if summaries is None:
+            pm = PersistenceManager(myapp.db_connector)
+            summaries = pm.get_summaries()
+            banner_cache.set( 'banner-summary-data', summaries, timeout=5*60)
         return json.dumps( summaries  )
     except Exception, e:
         response = jsonify(message=str(e))
