@@ -31,7 +31,7 @@ class RankingEditor:
             while i <= participant_count:
                 player = TourneyPlayer( tourney_id=tourney_id, player_name="Player %d" % (i ) )
                 self.pm.db_connector.get_session().add(player)
-                i = i+1
+
 
                 ranking = TourneyRanking( tourney_id=tourney_id,  player=player,
                               score=0, mov=0, sos=0, rank=i, elim_rank=None, dropped=False )
@@ -43,6 +43,7 @@ class RankingEditor:
                 self.tourney.tourney_players.append(player)
                 self.tourney.rankings.append(ranking)
                 self.tourney.tourney_lists.append(tourney_list)
+                i = i+1
 
             self.pm.db_connector.get_session().commit()
 
