@@ -360,15 +360,24 @@ def store_champs():
     tourneys = pm.get_tourneys()
     championship_lists = []
     for tourney in tourneys:
+        had_championship_cut = tourney.had_championship_cut()
         for rank in tourney.rankings:
-            if rank.elim_rank is not None and rank.elim_rank <= 4 and tourney.is_store_championship():
-                rec = { 'tourney' : tourney.tourney_name,
-                        'num_participants': tourney.participant_count,
-                        'player' : rank.player.player_name,
-                        'swiss_standing': rank.rank,
-                        'championship_standing' : rank.elim_rank,
-                        'pretty_print' : rank.pretty_print() }
-                championship_lists.append(rec)
+            if tourney.is_store_championship():
+                use = False
+                if rank.elim_rank is not None and rank.elim_rank <= 4:
+                    use = True
+                else:
+                    if not had_championship_cut and rank.rank >=1 and rank.rank <= 4:
+                        use  = True
+
+                if use:
+                    rec = { 'tourney' : tourney.tourney_name,
+                            'num_participants': tourney.participant_count,
+                            'player' : rank.player.player_name,
+                            'swiss_standing': rank.rank,
+                            'championship_standing' : rank.elim_rank,
+                            'pretty_print' : rank.pretty_print() }
+                    championship_lists.append(rec)
     return render_template( 'store_champ_lists.html', championship_lists=championship_lists)
 
 def remove_accents(input_str):

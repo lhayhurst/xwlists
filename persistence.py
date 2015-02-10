@@ -188,6 +188,12 @@ class Tourney(Base):
     def is_store_championship(self):
         return self.tourney_type == 'Store championship'
 
+    def had_championship_cut(self):
+        for r in self.rankings:
+            if r.elim_rank is not None:
+                return True
+        return False
+
 
     def get_pre_elimination_rounds(self):
         ret = [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]
