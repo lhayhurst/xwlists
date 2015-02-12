@@ -37,7 +37,7 @@ MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
 from werkzeug.contrib.cache import SimpleCache
-banner_cache = SimpleCache()
+simple_cache = SimpleCache()
 
 
 app.config.update(dict(
@@ -79,7 +79,7 @@ def mail_message(subject, message):
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
     with app.app_context():
         print("sending msg ")
-        #mail.send(msg)
+        mail.send(msg)
 
 
 def mail_error(errortext):
@@ -88,7 +88,7 @@ def mail_error(errortext):
     msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
         print("sending msg ")
-        #mail.send(msg)
+        mail.send(msg)
 
 
 @app.route("/about")
@@ -356,29 +356,26 @@ def save_cryodex_file( failed, filename, data ):
 
 @app.route("/store_champs")
 def store_champs():
-    pm = PersistenceManager(myapp.db_connector)
-    tourneys = pm.get_tourneys()
-    championship_lists = []
-    for tourney in tourneys:
-        had_championship_cut = tourney.had_championship_cut()
-        for rank in tourney.rankings:
-            if tourney.is_store_championship():
-                use = False
-                if rank.elim_rank is not None and rank.elim_rank <= 4:
-                    use = True
-                else:
-                    if not had_championship_cut and rank.rank >=1 and rank.rank <= 4:
-                        use  = True
 
-                if use:
+    store_champs = simple_cache.get('store-champ-data')
+    if store_champs is None:
+        pm = PersistenceManager(myapp.db_connector)
+        tourneys = pm.get_tourneys()
+        store_champs = []
+        for tourney in tourneys:
+            for rank in tourney.rankings:
+                if tourney.is_store_championship():
                     rec = { 'tourney' : tourney.tourney_name,
                             'num_participants': tourney.participant_count,
                             'player' : rank.player.player_name,
                             'swiss_standing': rank.rank,
                             'championship_standing' : rank.elim_rank,
                             'pretty_print' : rank.pretty_print() }
-                    championship_lists.append(rec)
-    return render_template( 'store_champ_lists.html', championship_lists=championship_lists)
+                    store_champs.append(rec)
+
+        simple_cache.set( 'store-champ-data', store_champs, timeout=5*60)
+
+    return render_template( 'store_champ_lists.html', championship_lists=store_champs)
 
 def remove_accents(input_str):
      input_str = input_str.decode('latin-1')
@@ -426,7 +423,7 @@ def add_tourney():
                 t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email, participant_count )
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, data=data)
-                mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
+                #mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
                 return redirect( url_for('get_tourney_details', tourney_id=t.id))
             except Exception as err:
                 filename=str(uuid.uuid4()) + ".html"
@@ -442,7 +439,7 @@ def add_tourney():
             pm.db_connector.get_session().add(t)
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue )
             pm.db_connector.get_session().commit()
-            mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
+            #mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
             return redirect(url_for('get_tourney_details', tourney_id=t.id))
         except Exception as err:
             mail_error(errortext=str(err))
@@ -550,11 +547,11 @@ def enter_list():
 @app.route("/get_summaries")
 def get_summaries():
     try:
-        summaries = banner_cache.get('banner-summary-data')
+        summaries = simple_cache.get('banner-summary-data')
         if summaries is None:
             pm = PersistenceManager(myapp.db_connector)
             summaries = pm.get_summaries()
-            banner_cache.set( 'banner-summary-data', summaries, timeout=5*60)
+            simple_cache.set( 'banner-summary-data', summaries, timeout=5*60)
         return json.dumps( summaries  )
     except Exception, e:
         response = jsonify(message=str(e))
@@ -701,8 +698,8 @@ def display_list():
                            admin=admin,
                            image_src=image_src,
                            tourney_list=tourney_list,
-                           tourney_list_id=tourney_list.id,
                            tourney=tourney_list.tourney,
+                           tourney_list_id=tourney_list.id,
                            tourney_id=tourney_list.tourney.id )
 
 @app.route('/down')

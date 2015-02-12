@@ -1,6 +1,17 @@
 {% extends "layout.html" %}
 {% block content %}
 
+<style>
+    .percentInput { position:relative; display: inline-block; }
+    .percentInput span { position: absolute; top:2px; right: 4px; line-height:100%; vertical-align: middle; }
+    .num_percent { width:35px; text-align: right; padding-right: 15px; }
+</style>
+<div class="percentInput">
+    <label>Show top </label><input maxlength="3" type="number" data-parsley-type="integer" name="percent" id="percent" class="num_percent" value="1">
+    <span>%</span>
+</div><label> of lists (tab or click out to trigger a filter)</label>
+<div><label>Show championship lists only</label><input id="championship_only" type="checkbox" onclick="redraw()" ></div>
+
 <table id="championship-lists" class="compact display dataTable" cellspacing="0" width="100%">
   <thead>
       <tr>
@@ -27,6 +38,51 @@
 </table>
 
 <script>
+
+    jQuery.fn.dataTableExt.afnFiltering.push(
+        function( oSettings, aData, iDataIndex ) {
+            var percentage = document.getElementById('percent').value * 1;
+
+            if ( percentage === "" )
+            {
+                return true;
+            }
+
+            var chmponly   = document.getElementById('championship_only').checked;
+
+
+            var numPlayers = aData[1] == "-" ? 0 : aData[1]*1;
+            var swiss      = aData[3] == "-" ? 0 : aData[3]*1;
+            var elim       = aData[4] == "None" ? 0 : aData[4]*1;
+            console.log(aData[4]);
+            console.log(chmponly);
+
+            var maxValue   = Math.ceil(percentage/100 * numPlayers);
+
+
+            if ( chmponly ) {
+                if ( elim === 0 ) {
+                    return false;
+                }
+                if ( elim < maxValue ) {
+                    return true;
+                }
+                return false;
+            }
+            else  {
+                if ( swiss === 0 ) {
+                    return false;
+                }
+                else if ( swiss < maxValue )
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    );
+
+
    $(document).ready( function () {
         $('#championship-lists').dataTable( {
             "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
@@ -35,6 +91,18 @@
 
         });
     } );
+    $('#percent').parsley();
+
+    function redraw() {
+        var table = $('#championship-lists').DataTable();
+        table.draw();
+
+    }
+
+    $('#percent').blur( function() {
+        redraw();
+    });
+
 </script>
 
 {% endblock %}
