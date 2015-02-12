@@ -121,6 +121,16 @@ def get_tourney_results():
 def get_tourney_details():
     tourney_id   = request.args.get('tourney_id')
     unlocked     = request.args.get('unlocked')
+
+    pm                = PersistenceManager(myapp.db_connector)
+    tourney           = pm.get_tourney_by_id(tourney_id)
+
+    if not tourney.locked and tourney.all_lists_entered():
+        tourney.locked = True
+        pm.db_connector.get_session().commit()
+        unlocked = False
+
+
     return render_template('edit_tourney.html', tourney_id=tourney_id,
                                                 tourney=PersistenceManager(myapp.db_connector).get_tourney_by_id(tourney_id),
                                                 unlocked=unlocked )
@@ -262,7 +272,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
     pm = PersistenceManager(myapp.db_connector)
     t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date,
                 tourney_type=tourney_type, round_length=round_length, email=email, entry_date=datetime.datetime.now(),
-                participant_count=participant_count, locked=True)
+                participant_count=participant_count, locked=False)
 
     pm.db_connector.get_session().add(t)
     #add the players
@@ -337,7 +347,6 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
                 mail_error(errortext=str(err) + "<br><br>Unable to fetch list id " + rank.list_id + " from voidstate" )
 
         pm.db_connector.get_session().add(r)
-
 
     #and commit all the work
     pm.db_connector.get_session().commit()
@@ -593,6 +602,7 @@ def get_from_yasb():
         xws     = fetcher.fetch( yasb )
         converter = XWSToJuggler(xws)
         converter.convert( pm, tourney_list )
+
         pm.db_connector.get_session().commit()
         return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list_id)
     except Exception, e:
