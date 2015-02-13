@@ -496,7 +496,7 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
          TIE_ADVANCED: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Darth Vader', 'cost': 29,
                          'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                          'upgrades': (MISSILE, EPT, MOD, TITLE)},
-                        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Maarek Steel', 'cost': 27,
+                        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Maarek Stele', 'cost': 27,
                          'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                          'upgrades': (MISSILE, EPT, MOD, TITLE)},
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Storm Squadron Pilot', 'cost': 23,
