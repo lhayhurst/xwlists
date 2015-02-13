@@ -195,10 +195,10 @@ class Tourney(Base):
         return False
 
     def all_lists_entered(self):
-        if len(self.tourney_lists) != self.participant_count:
-            return False
+        for tl in self.tourney_lists:
+            if len(tl.ships) == 0:
+                return False
         return True
-
 
     def get_pre_elimination_rounds(self):
         ret = [r for r in self.rounds if r.round_type == RoundType.PRE_ELIMINATION]

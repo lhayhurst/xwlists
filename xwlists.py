@@ -125,7 +125,7 @@ def get_tourney_details():
     pm                = PersistenceManager(myapp.db_connector)
     tourney           = pm.get_tourney_by_id(tourney_id)
 
-    if not tourney.locked and tourney.all_lists_entered():
+    if tourney.all_lists_entered():
         tourney.locked = True
         pm.db_connector.get_session().commit()
         unlocked = False
