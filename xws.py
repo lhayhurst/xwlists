@@ -74,15 +74,32 @@ class XWSToJuggler:
 
             if ship_pilot.has_key('upgrades'):
                 upgrades = ship_pilot['upgrades']
+                hastiex1 = False
+                #this is a nasty hack but, what can you do
+                for upgrade_type in upgrades.keys():
+                    if upgrade_type == 'title':
+                        for title in upgrades[upgrade_type]:
+                            if title == 'tiex1':
+                                hastiex1 = True
+                                break
+
                 for upgrade_type in upgrades.keys():
                     if upgrade_type is None or upgrade_type == 'undefined':
                         raise Exception("got undefined upgrade type from xws source!" )
+
 
                     for upgrade_name in upgrades[upgrade_type]:
                         upgrade = pm.get_upgrade_canonical(upgrade_type, upgrade_name)
                         if upgrade is None:
                             raise Exception("xws lookup failed for upgrade " +  upgrade_name )
-                        points  = points + upgrade.cost
+                        if hastiex1 and upgrade_type=='system':
+                            cost = upgrade.cost
+                            cost = cost - 4
+                            if cost < 0:
+                                cost = 0
+                            points  = points + cost
+                        else:
+                            points  = points + upgrade.cost
                         ship_upgrade = ShipUpgrade( ship_id=ship.id, upgrade=upgrade )
                         ship.upgrades.append( ship_upgrade )
 

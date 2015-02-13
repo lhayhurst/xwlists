@@ -191,7 +191,6 @@ upgrades = {
          'action': [ { 'type': 'ADD_UPGRADE', 'value': SYSTEM },{ 'type': 'ADD_UPGRADE', 'value': ILLICIT } ],
          'constraints': ( {'type': SHIP_TYPE, 'value': STAR_VIPER} )},
         {'name': 'BTL-A4 Y-Wing', 'canon_name': 'btla4ywing', 'cost': 0, 'constraints': ( {'type': SHIP_TYPE, 'value': Y_WING} )},
-        #TODO: add Andrasta
          {'name': 'TIE/X1', 'canon_name': 'tiex1', 'cost': 0,
          'action': [ { 'type': 'ADD_UPGRADE', 'value': SYSTEM }  ],
          'constraints': ( {'type': SHIP_TYPE, 'value': TIE_ADVANCED } ) },
@@ -496,14 +495,14 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
 
          TIE_ADVANCED: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Darth Vader', 'cost': 29,
                          'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
-                         'upgrades': (MISSILE, EPT, MOD)},
+                         'upgrades': (MISSILE, EPT, MOD, TITLE)},
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Maarek Steel', 'cost': 27,
                          'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
-                         'upgrades': (MISSILE, EPT, MOD)},
+                         'upgrades': (MISSILE, EPT, MOD, TITLE)},
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Storm Squadron Pilot', 'cost': 23,
-                         'upgrades': (MISSILE, MOD)},
+                         'upgrades': (MISSILE, MOD, TITLE)},
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Tempest Squadron Pilot', 'cost': 21,
-                         'upgrades': (MISSILE, MOD)} ),
+                         'upgrades': (MISSILE, MOD, TITLE)} ),
 
          TIE_INTERCEPTOR: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Soontir Fel', 'cost': 27,
                             'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
