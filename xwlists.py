@@ -120,14 +120,13 @@ def get_tourney_results():
 @app.route("/get_tourney_details")
 def get_tourney_details():
     tourney_id   = request.args.get('tourney_id')
-    unlocked     = request.args.get('unlocked')
 
     pm                = PersistenceManager(myapp.db_connector)
     tourney           = pm.get_tourney_by_id(tourney_id)
 
     return render_template('edit_tourney.html', tourney_id=tourney_id,
                                                 tourney=PersistenceManager(myapp.db_connector).get_tourney_by_id(tourney_id),
-                                                unlocked=unlocked )
+                                                unlocked=False )
 
 
 def create_default_editor_ranking(i, row):
