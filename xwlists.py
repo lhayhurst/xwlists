@@ -485,6 +485,7 @@ def browse_list():
     tourney_lists = tourney.tourney_lists
     return render_template( 'tourney_lists.html', tourney=tourney, tourney_lists=tourney_lists, admin=admin)
 
+#WTF googlebot?
 @app.route("/delete_list_and_retry_list_entry")
 def delete_list_and_retry():
     tourney_list_id = request.args.get('tourney_list_id')
