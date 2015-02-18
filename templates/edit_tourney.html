@@ -10,9 +10,42 @@
 
 </style>
 
+
 <script>
 
     var tourney_id = {{ tourney_id }}
+    function isZeroOrNoneOrNull(val) {
+        if ( val == 0 || val === "" || val == null ) {
+            return true;
+        }
+        return false;
+    }
+    jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+
+        "champ-sort-asc": function ( a, b ) {
+            console.log("champ sort asc, "  + a + " vs " + b);
+            if ( isZeroOrNoneOrNull(a)) {
+                console.log("-1")
+                return 1;
+            }
+            if ( isZeroOrNoneOrNull(b) ) {
+                return -1;
+            }
+            return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+        },
+
+        "champ-sort-desc": function ( a, b ) {
+            console.log("champ sort asc, "  + a + " vs " + b);
+            if ( isZeroOrNoneOrNull(a) ) {
+                console.log("1")
+                return -1;
+            }
+            if ( isZeroOrNoneOrNull(b) ) {
+                return 1;
+            }
+            return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+        }
+    } );
     $(document).ready(function() {
 
         editor = new $.fn.dataTable.Editor({
@@ -143,9 +176,12 @@
                 {
                     "targets" : [4,6,7],
                     "width": "5%"
+                },
+                {
+                    "type": "champ-sort", targets: [3,4]
                 }
             ],
-            order: [ 3, 'asc' ],
+            "order": [[4, "asc"],[3,"asc" ]],
             tableTools: {
                 sRowSelect: "os",
                 sRowSelector: 'td:first-child',
