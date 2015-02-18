@@ -23,9 +23,7 @@
     jQuery.extend( jQuery.fn.dataTableExt.oSort, {
 
         "champ-sort-asc": function ( a, b ) {
-            console.log("champ sort asc, "  + a + " vs " + b);
             if ( isZeroOrNoneOrNull(a)) {
-                console.log("-1")
                 return 1;
             }
             if ( isZeroOrNoneOrNull(b) ) {
@@ -35,9 +33,7 @@
         },
 
         "champ-sort-desc": function ( a, b ) {
-            console.log("champ sort asc, "  + a + " vs " + b);
             if ( isZeroOrNoneOrNull(a) ) {
-                console.log("1")
                 return -1;
             }
             if ( isZeroOrNoneOrNull(b) ) {
@@ -65,13 +61,12 @@
                     "name": "score"
                 },
                 {
-                    label: "Championship Rank",
-                    name: "championship_rank"
-                },
-
-                {
                     label: "Swiss Rank",
                     name: "swiss_rank"
+                },
+                {
+                    label: "Championship Rank",
+                    name: "championship_rank"
                 },
                 {
                     label: "Margin of Victory",
@@ -175,7 +170,7 @@
                     "visible"    : false
                 },
                 {
-                    "targets" : [2,5,6,7],
+                    "targets" : [2,3,4,5,6,7],
                     "width": "5%"
                 },
                 {
@@ -184,23 +179,10 @@
                 },
 
                 {
-                    "type": "champ-sort", targets: [3,4]
-                },
-                {
-                    targets: [3],
-                    orderData: [3,4],
-                    "width": "5%"
-
-                },
-                {
-                    targets: [4],
-                    orderData: [4,3],
-                    "width": "5%"
-
+                    "type": "champ-sort", targets: [4,3]
                 }
-
             ],
-            order: [3, "asc"],
+            order: [[3, "asc"], [4, "asc"]],
             tableTools: {
                 sRowSelect: "os",
                 sRowSelector: 'td:first-child',
@@ -236,8 +218,8 @@
                         <th>Player Id</th>
                         <th>Player Name</th>
                         <th>Score</th>
-                        <th>Championship Rank</th>
                         <th>Swiss Rank</th>
+                        <th>Championship Rank</th>
                         <th>Margin of Victory</th>
                         <th>Strength of Schedule</th>
                         <th>Dropped?</th>
