@@ -488,6 +488,7 @@ def browse_list():
 @app.route("/delete_list_and_retry")
 def delete_list_and_retry():
     tourney_list_id = request.args.get('tourney_list_id')
+    print("calling delete list and retry on tourney id " + tourney_list_id)
 
     pm = PersistenceManager(myapp.db_connector)
     tourney_list = pm.get_tourney_list(tourney_list_id)
