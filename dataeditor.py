@@ -129,6 +129,6 @@ class RankingEditor:
 
         list = ""
         return json.dumps( { "row" : { "player_id": player.id, "player_name": player.player_name,
-                                       "score": ranking.score,
-                                       "swiss_rank" : ranking.rank, "championship_rank": ranking.elim_rank, "mov": ranking.mov,
+                                       "score": ranking.score, "swiss_rank" : ranking.rank,
+                                       "championship_rank": ranking.elim_rank, "mov": ranking.mov,
                                        "sos": ranking.sos, "dropped": ranking.dropped, "list":ranking.pretty_print()}} )
