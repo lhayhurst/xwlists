@@ -492,19 +492,22 @@ def delete_list_and_retry():
 
     pm = PersistenceManager(myapp.db_connector)
     tourney_list = pm.get_tourney_list(tourney_list_id)
-    pm.delete_tourney_list_details( tourney_list )
+    #pm.delete_tourney_list_details( tourney_list )
+    #todo: figure out better way to delete tourney list details ...
     return redirect( url_for('enter_list', tourney=tourney_list.tourney.id, tourney_list_id=tourney_list.id ) )
 
 
 @app.route("/delete_list")
 def delete_list():
+    print("deleting list...")
     tourney_list_id = request.args.get('tourney_list_id')
     tourney_name    = request.args.get('tourney')
     admin           = request.args.get('admin')
 
     pm = PersistenceManager(myapp.db_connector)
     tourney_list = pm.get_tourney_list(tourney_list_id)
-    pm.delete_tourney_list_details( tourney_list )
+    #TODO: figure out a better way of deleting lists ...
+    #pm.delete_tourney_list_details( tourney_list )
     return redirect( url_for('browse_list', tourney=tourney_name, admin=admin ) )
 
 
