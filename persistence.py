@@ -277,8 +277,8 @@ class TourneyList(Base):
             if i < len(self.ships):
                 ret = ret + '<br>'
             i = i + 1
-        #if not self.tourney.locked:
-            #ret = ret + '<br><a href="' + url_for('delete_list_and_retry', tourney_list_id=self.id, ) + '">Re-enter list</a>'
+        if not self.tourney.locked:
+            ret = ret + '<br><a href="' + url_for('display_list', tourney_list_id=self.id, ) + '"rel="nofollow">Manage list</a>'
         return Markup( ret )
 
 tourney_round_table = "tourney_round"
