@@ -395,19 +395,10 @@
         function copySquadMember(obj)
         {
             var squadMember = $(obj).parent().parent();
-            //clone = $(squadMember).clone();
-            //$(clone).insertBefore( squadMember );
-            copy = addSquadMember($('.faction-label').text()  );
-
-            copyShipSelect = copy.find('.ship .select');
-            selectedShip = copyShipSelect.select2('data').text;
-            copyShipSelect.select2("val", selectedShip, true);
-
-            selectedPilot = squadMember.find('.row .pilot .select')
-
-            updateTotals();
-        }
-
+            clone = $(squadMember).clone(true, true);
+            $(clone).insertBefore( squadMember );
+             updateTotals();
+         }
         function numSquadMembers() {
             var count = 0;
             $('.squad-member').not('.template').each(function(i, member) {
