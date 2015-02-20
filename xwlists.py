@@ -10,13 +10,14 @@ import unicodedata
 from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
 import sys
+from sqlalchemy import func
 from werkzeug.utils import secure_filename
 
 from cryodex import Cryodex
 from dataeditor import RankingEditor
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
-    TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue
+    TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event
 from rollup import Rollup
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
@@ -95,6 +96,11 @@ def mail_error(errortext):
 def about():
     return render_template('about.html')
 
+@app.route("/events")
+def events():
+    events = PersistenceManager(myapp.db_connector).get_events()
+    return render_template("event.html", events=events)
+
 @app.route( "/tourney_admin")
 def tourney_admin():
     tourneys = PersistenceManager(myapp.db_connector).get_tourneys()
@@ -160,7 +166,16 @@ def edit_ranking_row():
     tourney           = pm.get_tourney_by_id(tourney_id)
 
     de = RankingEditor(pm, tourney)
-    return de.set_and_get_json(request)
+
+    event = Event(remote_address=request.remote_addr,
+                  event_date=func.now(),
+                  event="edit ranking row")
+
+    ret = de.set_and_get_json(request, event)
+    event.event_details = event.event_details + " in tourney " + tourney.tourney_name
+    pm.db_connector.get_session().add(event)
+    pm.db_connector.get_session().commit()
+    return ret
 
 @app.route("/new")
 def new():
@@ -223,6 +238,12 @@ def export_all_lists():
         ret = get_tourney_lists_as_text(tourney, make_header)
         make_header = False
         rows.extend( ret )
+
+    event = Event(remote_address=request.remote_addr,
+                  event_date=func.now(),
+                  event="export all tourney lists")
+    pm.get_session().add(event)
+    pm.get_session().commit()
     return csv_response( rows, "all_lists_download.csv")
 
 
@@ -233,6 +254,14 @@ def export_tourney_lists():
     tourney    = pm.get_tourney_by_id(tourney_id)
 
     ret = get_tourney_lists_as_text(tourney)
+
+    event = Event(remote_address=request.remote_addr,
+                  event_date=func.now(),
+                  event="export tourney lists",
+                  event_details="exported tourney %s" % ( tourney.tourney_name ))
+    pm.db_connector.get_session().add(event)
+    pm.db_connector.get_session().commit()
+
     return csv_response( ret, "tourney_list_download.csv")
 
 
@@ -243,6 +272,14 @@ def delete_tourney():
     tourney_name = request.args.get('tourney')
     pm = PersistenceManager(myapp.db_connector)
     pm.delete_tourney(tourney_name)
+
+    event = Event(remote_address=request.remote_addr,
+                  event_date=func.now(),
+                  event="delete tourney",
+                  event_details="deleted tourney %s" % ( tourney_name ))
+    pm.db_connector.get_session().add(event)
+    pm.db_connector.get_session().commit()
+
     return redirect(url_for('tourneys') )
 
 
@@ -425,7 +462,15 @@ def add_tourney():
                 t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email, participant_count )
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, data=data)
-                #mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
+
+                event = Event(remote_address=request.remote_addr,
+                              event_date=func.now(),
+                              event="create tourney",
+                              event_details="created tourney %s from croydex input" % ( t.tourney_name ))
+                pm = PersistenceManager(myapp.db_connector)
+                pm.db_connector.get_session().add(event)
+                pm.db_connector.get_session().commit()
+                mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
                 return redirect( url_for('get_tourney_details', tourney_id=t.id))
             except Exception as err:
                 filename=str(uuid.uuid4()) + ".html"
@@ -441,7 +486,14 @@ def add_tourney():
             pm.db_connector.get_session().add(t)
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue )
             pm.db_connector.get_session().commit()
-            #mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
+            event = Event(remote_address=request.remote_addr,
+                          event_date=func.now(),
+                          event="create tourney",
+                          event_details="created tourney %s from manual input" % ( t.tourney_name ))
+            pm = PersistenceManager(myapp.db_connector)
+            pm.db_connector.get_session().add(event)
+            pm.db_connector.get_session().commit()
+            mail_message("New manual tourney created", "A new tourney named '%s' with id %d was created!" % ( t.tourney_name, t.id ))
             return redirect(url_for('get_tourney_details', tourney_id=t.id))
         except Exception as err:
             mail_error(errortext=str(err))
@@ -494,6 +546,15 @@ def delete_list_and_retry():
     pm = PersistenceManager(myapp.db_connector)
     tourney_list = pm.get_tourney_list(tourney_list_id)
     pm.delete_tourney_list_details( tourney_list )
+
+    event = Event(remote_address=request.remote_addr,
+                  event_date=func.now(),
+                  event="delete list",
+                  event_details="deleted list id %d from tourney %s" % ( tourney_list.id, tourney_list.tourney.tourney_name ))
+    pm = PersistenceManager(myapp.db_connector)
+    pm.db_connector.get_session().add(event)
+    pm.db_connector.get_session().commit()
+
     return redirect( url_for('enter_list', tourney=tourney_list.tourney.id, tourney_list_id=tourney_list.id ) )
 
 @app.route( "/success")
@@ -525,6 +586,14 @@ def enter_list():
     image_src = None
     if tourney_list.image is not None:
         image_src = urllib.quote(tourney_list.image)
+
+    event = Event(remote_address=request.remote_addr,
+                  event_date=func.now(),
+                  event="create list",
+                  event_details="created list %d for tourney %s" % ( tourney_list.id,  tourney.tourney_name ))
+    pm = PersistenceManager(myapp.db_connector)
+    pm.db_connector.get_session().add(event)
+    pm.db_connector.get_session().commit()
 
     return render_template('list_entry.html',
                            meta=m,
@@ -619,14 +688,22 @@ def unlock_tourney():
     key = request.args.get('key')
     tourney_id = request.args.get('tourney_id')
     pm = PersistenceManager(myapp.db_connector)
+    state = ""
     try:
         tourney = pm.get_tourney_by_id(tourney_id)
         if len(key) and tourney.email == key:
             response = jsonify( result="success")
             if tourney.locked == True: #flip the lock
                 tourney.locked = False
+                state = "unlocked"
             else:
                 tourney.locked = True
+                state = "locked"
+            event = Event(remote_address=request.remote_addr,
+                  event_date=func.now(),
+                  event="lock/unlock tourney",
+                  event_details="set tourney %s to state %s" % ( tourney.tourney_name, state ))
+            pm.db_connector.get_session().add(event)
             pm.db_connector.get_session().commit()
             return response
         else:

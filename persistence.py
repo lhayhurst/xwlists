@@ -18,7 +18,7 @@ from xwingmetadata import XWingMetaData
 import xwingmetadata
 
 from decl_enum import DeclEnum
-from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean
+from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean, DateTime
 from sqlalchemy import ForeignKey
 
 #rollup help
@@ -47,6 +47,7 @@ tourney_list_table = "tourney_list"
 tlist_table = 'tlist'
 tourney_round = "tourney_round"
 tourney_result = "tourney_result"
+event_table = "event"
 
 Base = db_connector.get_base()
 
@@ -96,6 +97,14 @@ class ShipType(DeclEnum):
     STARVIPER = xwingmetadata.STAR_VIPER_CANON, xwingmetadata.STAR_VIPER
     AGGRESSOR = xwingmetadata.AGGRESSOR_CANON, xwingmetadata.AGGRESSOR
     M3_A_INTERCEPTOR = xwingmetadata.M3_A_INTERCEPTOR_CANON, xwingmetadata.M3_A_INTERCEPTOR
+
+class Event(Base):
+    __tablename__ = event_table
+    id = Column( Integer, primary_key=True)
+    remote_address = Column( String(32))
+    event_date = Column( DateTime )
+    event = Column( String(32))
+    event_details = Column( String(256))
 
 
 class Pilot(Base):
@@ -453,6 +462,10 @@ class PersistenceManager:
                  "ships": num_ships,
                  "upgrades": num_upgrades,
                  "points_spent" : int(points_spent) }
+
+
+    def get_events(self):
+        return self.db_connector.get_session().query(Event)
 
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)

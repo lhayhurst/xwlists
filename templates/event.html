@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<table id="events" class="display" cellspacing="0" width="100%">
+  <thead>
+  <tr>
+    <th>Id</th>
+    <th>DateTime</th>
+    <th>IP Address</th>
+    <th>Event</th>
+    <th>Details</th>
+  </thead>
+  <tbody>
+  </tr>
+      {% for event in events %}
+      <tr>
+         <td>{{  event.id }}</td>
+         <td >{{ event.event_date }}</td>
+         <td>{{  event.remote_address }}</td>
+         <td>{{  event.event }}</td>
+         <td>{{  event.event_details }}</td>
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+<script>
+    $(document).ready( function () {
+        $('#events').dataTable({
+            "order": [[ 1, "desc" ]],
+            "columns": [
+                { "data": "id", class:"dt-center compact"},
+                { "data": "event_date", class:"dt-center compact" },
+                { "data": "remote_address", class:"dt-center compact"  },
+                { "data": "event", class:"dt-center compact"  },
+                { "data": "event_details", class:"dt-center compact"  }
+            ]
+});
+    } );
+</script>
+
+{% endblock %}

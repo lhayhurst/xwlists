@@ -62,8 +62,9 @@ class RankingEditor:
 
         return json.dumps(ret)
 
-    def set_and_get_json(self, request):
+    def set_and_get_json(self, request, event):
         #see https://editor.datatables.net/manual/server
+        event_details = ""
         players           = self.tourney.tourney_players
         #get the client data
         action            = request.values['action']
@@ -115,6 +116,7 @@ class RankingEditor:
                     ranking.rank = swiss_rank
                     ranking.elim_rank = champ_rank
                     ranking.dropped = dropped
+                    event.event_details = "edited player %s " % ( player.player_name )
                     break
         elif action == CREATE:
             player = TourneyPlayer( tourney_id=self.tourney.id, player_name=player_name)
@@ -124,6 +126,7 @@ class RankingEditor:
                           score=score, mov=mov, sos=sos, rank=swiss_rank, elim_rank=champ_rank, dropped=dropped )
             self.tourney.rankings.append( ranking)
             self.pm.db_connector.get_session().add(ranking)
+            event.event_details = "added player %s " % ( player.player_name )
 
         self.pm.db_connector.get_session().commit()
 
