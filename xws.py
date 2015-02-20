@@ -1,6 +1,6 @@
 import json
 import urllib2
-from bs4 import BeautifulSoup
+from BeautifulSoup import BeautifulSoup
 from persistence import TourneyList, Faction, Ship, ShipUpgrade
 
 

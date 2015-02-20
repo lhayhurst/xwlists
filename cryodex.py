@@ -1,8 +1,8 @@
 import json
 import re
 import unittest
-from bs4 import BeautifulSoup
 import collections
+from BeautifulSoup import BeautifulSoup
 from persistence import RoundType
 
 RANKINGS = 'Rankings'

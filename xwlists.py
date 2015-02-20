@@ -5,7 +5,7 @@ import urllib
 import datetime
 import uuid
 import unicodedata
-from unidecode import unidecode
+
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
