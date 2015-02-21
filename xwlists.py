@@ -683,6 +683,7 @@ def add_from_voidstate():
          response.status_code = (500)
          return response
 
+#see https://www.pythonanywhere.com/wiki/WebAppClientIPAddresses
 def remote_address(request):
     if request.headers.has_key( 'X-Real-IP'):
         return request.headers[ 'X-Real-IP' ]

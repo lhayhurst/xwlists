@@ -32,15 +32,12 @@ class VoidStateXWSFetcher:
         full_code_div = soup.find(id= 'view_full')
         if full_code_div is None:
             return None
-        codes = full_code_div.find_all('code')
-        if len(codes) is not 1:
-            return None
-        code = codes[0].text
+        code = full_code_div.find('code')
 
         if code is None:
             return None
 
-        xws = json.loads(code )
+        xws = json.loads(code.text )
         return xws
 
 class XWSToJuggler:
