@@ -2,6 +2,7 @@ import json
 from persistence import TourneyPlayer, TourneyRanking, TourneyList
 
 
+
 def str2bool(v):
   return v.lower() in ("yes", "true", "True", "t", "1")
 
@@ -62,13 +63,12 @@ class RankingEditor:
 
         return json.dumps(ret)
 
-    def set_and_get_json(self, request, event):
+    def set_and_get_json(self, request, player_name, event):
         #see https://editor.datatables.net/manual/server
         event_details = ""
         players           = self.tourney.tourney_players
         #get the client data
         action            = request.values['action']
-        player_name = request.values['data[player_name]']
         swiss_rank  = request.values['data[swiss_rank]']
         champ_rank  = request.values['data[championship_rank]']
 
@@ -124,13 +124,15 @@ class RankingEditor:
             self.pm.db_connector.get_session().add(player)
             ranking = TourneyRanking( tourney_id=self.tourney.id,  player=player,
                           score=score, mov=mov, sos=sos, rank=swiss_rank, elim_rank=champ_rank, dropped=dropped )
+            tourney_list = TourneyList( tourney_id=self.tourney.id, player=player )
+            self.tourney.tourney_lists.append(tourney_list)
+            self.pm.db_connector.get_session().add(tourney_list)
             self.tourney.rankings.append( ranking)
             self.pm.db_connector.get_session().add(ranking)
             event.event_details = "added player %s " % ( player.player_name )
 
         self.pm.db_connector.get_session().commit()
 
-        list = ""
         return json.dumps( { "row" : { "player_id": player.id, "player_name": player.player_name,
                                        "score": ranking.score, "swiss_rank" : ranking.rank,
                                        "championship_rank": ranking.elim_rank, "mov": ranking.mov,

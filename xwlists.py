@@ -171,7 +171,9 @@ def edit_ranking_row():
                   event_date=func.now(),
                   event="edit ranking row")
 
-    ret = de.set_and_get_json(request, event)
+    player_name = request.values['data[player_name]']
+    player_name = remove_accents(player_name)
+    ret = de.set_and_get_json(request, player_name, event)
     event.event_details = event.event_details + " in tourney " + tourney.tourney_name
     pm.db_connector.get_session().add(event)
     pm.db_connector.get_session().commit()
@@ -470,7 +472,8 @@ def add_tourney():
                 pm = PersistenceManager(myapp.db_connector)
                 pm.db_connector.get_session().add(event)
                 pm.db_connector.get_session().commit()
-                mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
+                #mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
+                print "getting tourney details"
                 return redirect( url_for('get_tourney_details', tourney_id=t.id))
             except Exception as err:
                 filename=str(uuid.uuid4()) + ".html"
