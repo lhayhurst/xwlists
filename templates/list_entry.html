@@ -135,6 +135,12 @@
             </fieldset>
         </form>
 
+<script>
+    $(document).ready(function() {
+        document.getElementById('yasb').focus();
+});
+</script>
+
         <form id="list_entry_options-form"
               name="list_entry_options-form"
               class="grid-form"
@@ -146,7 +152,7 @@
                 <div data-row-span="4" class="list_entry_options" id="list_entry_options">
                 <div class="yasbdiv" id="yasbdiv" data-field-span="1">
                     <label>First Paste the YASB URL into the blank text area above the 'get it' button, and then click the button</label>
-                    <input type="text" id="yasb" name="yasb"  data-parsley-type="url" />
+                    <input type="text" id="yasb" name="yasb"  data-parsley-type="url"  />
                     <button name="getYASBList" id="getYASBList" style="width:200px;height:20px"  disabled>get it!</button>
 
                 </div>

@@ -18,7 +18,7 @@
          <td >{{ event.event_date }}</td>
          <td>{{  event.remote_address }}</td>
          <td>{{  event.event }}</td>
-         <td>{{  event.event_details }}</td>
+         <td>{{  event.get_event_details() }}</td>
       </tr>
       {% endfor %}
   </tbody>

@@ -3,6 +3,7 @@ from flask import url_for
 from markupsafe import Markup
 from sqlalchemy.dialects import mysql
 from sqlalchemy.sql.operators import ColumnOperators
+from decoder import decode
 
 __author__ = 'lhayhurst'
 
@@ -105,6 +106,9 @@ class Event(Base):
     event_date = Column( DateTime )
     event = Column( String(32))
     event_details = Column( String(256))
+
+    def get_event_details(self):
+        return decode( self.event_details )
 
 
 class Pilot(Base):

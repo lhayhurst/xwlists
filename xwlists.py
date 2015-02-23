@@ -15,6 +15,7 @@ from werkzeug.utils import secure_filename
 
 from cryodex import Cryodex
 from dataeditor import RankingEditor
+from decoder import decode
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event
@@ -172,7 +173,7 @@ def edit_ranking_row():
                   event="edit ranking row")
 
     player_name = request.values['data[player_name]']
-    player_name = remove_accents(player_name)
+    player_name = decode(player_name)
     ret = de.set_and_get_json(request, player_name, event)
     event.event_details = event.event_details + " in tourney " + tourney.tourney_name
     pm.db_connector.get_session().add(event)
@@ -418,18 +419,13 @@ def store_champs():
 
     return render_template( 'store_champ_lists.html', championship_lists=store_champs)
 
-def remove_accents(input_str):
-     input_str = input_str.decode('latin-1')
-     nkfd_form = unicodedata.normalize('NFKD', unicode(input_str))
-     return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
-
 
 @app.route("/add_tourney",methods=['POST'])
 def add_tourney():
 
     #TODO: better edge testing against user input
-    name                  = remove_accents( request.form['name'] )
-    email                 = remove_accents( request.form['email'] )
+    name                  = decode( request.form['name'] )
+    email                 = decode( request.form['email'] )
     type                  = request.form['tourney_type']
     mmddyyyy              = request.form['datepicker'].split('/')
     date                  = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1])) #YYYY, MM, DD
@@ -437,10 +433,10 @@ def add_tourney():
     round_length_userdef  = request.form['round_length_userdef']
     participant_count     = int(request.form['participant_count'])
     sets_used             = request.form.getlist('sets[]')
-    country               = remove_accents(request.form['country'])
-    state                 = remove_accents(request.form['state'])
-    city                  = remove_accents(request.form['city'])
-    venue                 = remove_accents(request.form['venue'])
+    country               = decode(request.form['country'])
+    state                 = decode(request.form['state'])
+    city                  = decode(request.form['city'])
+    venue                 = decode(request.form['venue'])
 
     round_length = None
     if round_length_dropdown is None or len(round_length_dropdown) == 0:
@@ -459,7 +455,7 @@ def add_tourney():
         if tourney_report and allowed_file(filename):
             try:
                 data = tourney_report.read()
-                data = remove_accents(data)
+                data = decode(data)
                 cryodex = Cryodex(data, filename)
                 t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email, participant_count )
                 sfilename = secure_filename(filename) + "." + str(t.id)
@@ -472,7 +468,7 @@ def add_tourney():
                 pm = PersistenceManager(myapp.db_connector)
                 pm.db_connector.get_session().add(event)
                 pm.db_connector.get_session().commit()
-                #mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
+                mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
                 print "getting tourney details"
                 return redirect( url_for('get_tourney_details', tourney_id=t.id))
             except Exception as err:
