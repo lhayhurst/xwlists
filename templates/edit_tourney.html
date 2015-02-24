@@ -200,7 +200,7 @@
  <div class="main-section">
      <div>
         <button name="lock" id="lock" style="border:none"><img src="" height="30" width="30" ></button>
-        <b>Tourney name:</b> {{ tourney.tourney_name }}
+        <b>Tourney name:</b> {{ tourney.get_tourney_name() }}
         <b>    Date:</b> {{ tourney.tourney_date }}
         <b>    Type:</b> {{ tourney.tourney_type }}
         <b>Num participants:</b> {{ tourney.participant_count }}
@@ -249,7 +249,7 @@
                 </thead>
                 {%  for result in round.results %}
                     <tr>
-                        <td >{{ result.list1.player.player_name }}</td>
+                        <td >{{ result.player1_name() }}</td>
                         <td >{{ result.get_result() }}
                         {% if result.bye %}
                             <td></td>
@@ -289,7 +289,7 @@
                 </thead>
                 {%  for result in round.results %}
                     <tr>
-                        <td >{{ result.list1.player.player_name }}</td>
+                        <td >{{ result.player1_name() }}</td>
                         <td >{{ result.get_result() }}
                         {% if result.bye %}
                             <td></td>

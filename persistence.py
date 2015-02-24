@@ -198,6 +198,10 @@ class Tourney(Base):
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
     venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
 
+
+    def get_tourney_name(self):
+        return decode(self.tourney_name)
+
     def is_store_championship(self):
         return self.tourney_type == 'Store championship'
 
@@ -242,7 +246,7 @@ class Tourney(Base):
                 ret = ret + "/" + self.venue.country
         else:
             ret = "Unknown"
-        return ret
+        return decode(ret)
 
 tourney_player_table = "tourney_player"
 class TourneyPlayer(Base):
@@ -362,10 +366,13 @@ class RoundResult(Base):
             return "beat"
         return "lost to"
 
+    def player1_name(self):
+        return decode(self.list1.player.player_name)
+
     def player2_name(self):
         if self.list2 is None:
             return ""
-        return self.list2.player.player_name
+        return decode(self.list2.player.player_name)
 
     def list2_pretty_print(self):
         if self.list2 is None:
@@ -583,7 +590,7 @@ class PersistenceManager:
         ret = OrderedDict()
 
         for tl in tourney_lists:
-            tourney_name = tl.tourney.tourney_name
+            tourney_name = tl.tourney.get_tourney_name()
             if not ret.has_key(tourney_name):
                 ret[tourney_name] = { 'num_entered' : 0, 'num_not_entered' : 0, 'tourney': tl.tourney}
             if len(tl.ships) == 0:

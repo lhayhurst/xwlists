@@ -4,9 +4,6 @@ from random import randint
 import urllib
 import datetime
 import uuid
-import unicodedata
-
-
 from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
 import sys
@@ -81,7 +78,7 @@ def mail_message(subject, message):
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
     with app.app_context():
         print("sending msg ")
-        mail.send(msg)
+        #mail.send(msg)
 
 
 def mail_error(errortext):
@@ -90,7 +87,7 @@ def mail_error(errortext):
     msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
         print("sending msg ")
-        mail.send(msg)
+        #mail.send(msg)
 
 
 @app.route("/about")
@@ -393,7 +390,7 @@ def save_cryodex_file( failed, filename, data ):
         dir = os.path.join( static_dir, "cryodex/success")
     file = os.path.join( dir, filename )
     fd = open( file, 'w' )
-    fd.write( data )
+    fd.write( data.encode('utf8') )
     fd.close()
 
 @app.route("/store_champs")
@@ -407,9 +404,9 @@ def store_champs():
         for tourney in tourneys:
             for rank in tourney.rankings:
                 if tourney.is_store_championship():
-                    rec = { 'tourney' : tourney.tourney_name,
+                    rec = { 'tourney' : decode(tourney.tourney_name),
                             'num_participants': tourney.participant_count,
-                            'player' : rank.player.player_name,
+                            'player' : decode(rank.player.player_name),
                             'swiss_standing': rank.rank,
                             'championship_standing' : rank.elim_rank,
                             'pretty_print' : rank.pretty_print() }
@@ -471,11 +468,12 @@ def add_tourney():
                 mail_message("New cryodex tourney created", "A new tourney named '%s' with id %d was created from file %s!" % ( t.tourney_name, t.id, filename ))
                 print "getting tourney details"
                 return redirect( url_for('get_tourney_details', tourney_id=t.id))
-            except Exception as err:
+            except (Exception,UnicodeEncodeError ) as err:
                 filename=str(uuid.uuid4()) + ".html"
                 save_cryodex_file( failed=True, filename=filename, data=data)
                 mail_error(errortext=str(err) + "<br><br>Filename =" + filename )
                 return render_template( 'tourney_entry_error.html', errortext=str(err))
+
 
     else: #user didnt provide a cryodex file ... have to do it manually
         try:
