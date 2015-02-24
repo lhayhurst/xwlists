@@ -43,7 +43,7 @@ STAR_VIPER_CANON = 'starviper'
 STAR_VIPER = "Star Viper"
 AGGRESSOR_CANON = 'aggressor'
 AGGRESSOR = 'Aggressor'
-M3_A_INTERCEPTOR_CANON = 'm3ascykinterceptor'
+M3_A_INTERCEPTOR_CANON = 'm3ainterceptor'
 M3_A_INTERCEPTOR = 'M3-A Syck Interceptor'
 
 
