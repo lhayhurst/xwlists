@@ -18,7 +18,6 @@
   <tr>
     <th>Id</th>
     <th >Name</th>
-    <th>Date Entered</th>
     <th >Results</th>
     <th >Type</th>
     <th >Date Played</th>
@@ -40,7 +39,6 @@
       <tr>
          <th>{{ value['tourney'].id }}</th>
          <td >{{ key }}</td>
-         <th>{{ value['tourney'].entry_date }}</th>
          <td ><a href="{{ url_for( 'get_tourney_details', tourney_id=value['tourney'].id ) }}">Browse/edit results</a></td>
          <td >{{ value['tourney'].tourney_type }}</td>
          <td >{{ value['tourney'].tourney_date }}</td>
@@ -78,6 +76,7 @@
     };
     $(document).ready( function () {
         $.fn.dataTable.moment( 'YYYY-MM-DD HH:mm:ss' );
+        $.fn.dataTable.moment( 'YYYY-MM-DD' );
         $('#tourneys').dataTable( {
                 "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
                 iDisplayLength: -1,
