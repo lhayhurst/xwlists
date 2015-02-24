@@ -23,7 +23,7 @@
     <th >Type</th>
     <th >Date Played</th>
     <th >Round Length</th>
-    <th>Num. Participants</th>
+    <th>Players</th>
     <th >Venue/City/State/Country</th>
     <th >Total Lists</th>
     <th >Lists Entered</th>
@@ -61,7 +61,23 @@
 </table>
 
 <script>
+    $.fn.dataTable.moment = function ( format, locale ) {
+        var types = $.fn.dataTable.ext.type;
+
+        // Add type detection
+        types.detect.unshift( function ( d ) {
+            return moment( d, format, locale, true ).isValid() ?
+                'moment-'+format :
+                null;
+        } );
+
+        // Add sorting method - use an integer for the sorting
+        types.order[ 'moment-'+format+'-pre' ] = function ( d ) {
+            return moment( d, format, locale, true ).unix();
+        };
+    };
     $(document).ready( function () {
+        $.fn.dataTable.moment( 'YYYY-MM-DD HH:mm:ss' );
         $('#tourneys').dataTable( {
                 "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
                 iDisplayLength: -1,
