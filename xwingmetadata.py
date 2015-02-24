@@ -43,8 +43,8 @@ STAR_VIPER_CANON = 'starviper'
 STAR_VIPER = "Star Viper"
 AGGRESSOR_CANON = 'aggressor'
 AGGRESSOR = 'Aggressor'
-M3_A_INTERCEPTOR_CANON = 'm3ainterceptor'
-M3_A_INTERCEPTOR = 'M3-A Interceptor'
+M3_A_INTERCEPTOR_CANON = 'm3ascykinterceptor'
+M3_A_INTERCEPTOR = 'M3-A Syck Interceptor'
 
 
 EPT = "Elite Pilot Talent"
@@ -154,6 +154,11 @@ upgrades = {
         {'name': 'Ysanne Isard', 'cost': 4,
          'constraints': ( IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT ),},
         {'name': 'K4 Security Droid', 'cost': 3, 'constraints': ( SCUM_FACTION_CONSTRAINT )},
+        {'name': 'Greedo', 'cost': 1,
+         'constraints': ( SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT ),},
+        {'name': 'K4 Security Droid', 'cost': 3, 'constraints': ( SCUM_FACTION_CONSTRAINT )},
+
+
     ),
     DROID: (
         {'name': 'R2 Astromech', 'cost': 1},
@@ -194,6 +199,15 @@ upgrades = {
          {'name': 'TIE/X1', 'canon_name': 'tiex1', 'cost': 0,
          'action': [ { 'type': 'ADD_UPGRADE', 'value': SYSTEM }  ],
          'constraints': ( {'type': SHIP_TYPE, 'value': TIE_ADVANCED } ) },
+         {'name': 'Heavy Scyk Interceptor (Cannon)', 'canon_name': 'heavyscykinterceptor', 'cost': 2,
+         'action': [ { 'type': 'ADD_UPGRADE', 'value': CANNON }  ],
+         'constraints': ( {'type': SHIP_TYPE, 'value': M3_A_INTERCEPTOR } ) },
+         {'name': 'Heavy Scyk Interceptor (Torpedo)', 'canon_name': 'heavyscykinterceptor', 'cost': 2,
+         'action': [ { 'type': 'ADD_UPGRADE', 'value': TORPEDO }  ],
+         'constraints': ( {'type': SHIP_TYPE, 'value': M3_A_INTERCEPTOR } ) },
+         {'name': 'Heavy Scyk Interceptor (Missile)', 'canon_name': 'heavyscykinterceptor', 'cost': 2,
+         'action': [ { 'type': 'ADD_UPGRADE', 'value': MISSILE }  ],
+         'constraints': ( {'type': SHIP_TYPE, 'value': M3_A_INTERCEPTOR } ) },
 
     ),
     SYSTEM: (
@@ -207,7 +221,8 @@ upgrades = {
     TURRET: (
         {'name': 'Blaster Turret', 'cost': 4},
         {'name': 'Ion Cannon Turret', 'cost': 5},
-        {'name': 'Autoblaster Turret', 'cost': 2 }
+        {'name': 'Autoblaster Turret', 'cost': 2 },
+
     ),
     TORPEDO: (
         {'name': 'Flechette Torpedoes', 'cost': 2},
@@ -228,6 +243,7 @@ upgrades = {
         {'name': 'AutoBlaster', 'cost': 5},
         {'name': 'Heavy Laser Cannon', 'cost': 7},
         {'name': 'Mangler Cannon', 'cost': 4},
+        {'name': 'Flechette Cannon', 'cost': 2},
 
     ),
     MISSILE: (
@@ -409,6 +425,8 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                    {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Rebel Operative', 'cost': 16,
                     'upgrades': (TURRET, CREW, TITLE, MOD)} ,
                     #scum
+                   {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Spice Runner', 'cost': 16, 'canon_name':'spicerunner',
+                    'upgrades': (TURRET, CREW, TITLE, MOD, ILLICIT)},
                    {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Torkil Mux', 'cost': 19, 'canon_name':'torkilmux',
                     'upgrades': (TURRET, CREW, TITLE, MOD, ILLICIT)},
                    {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Dace Bonearm', 'cost': 23, 'canon_name':'dacebonearm',
@@ -648,6 +666,18 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
 
         ),
 
+        M3_A_INTERCEPTOR: (
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Cartel Spacer', 'canon_name': 'cartelspacer', 'cost': 14,
+                        'upgrades': ( TITLE, MOD   )},
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Tansarii Point Veteran', 'canon_name': 'tansariipointveteran', 'cost': 17,
+                        'upgrades': ( EPT, TITLE, MOD   )},
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Laetin Ashera', 'canon_name': 'laetinashera', 'cost': 18,
+                        'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT ),
+                        'upgrades': ( TITLE, MOD   )},
+          {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Serissu', 'canon_name': 'serissu', 'cost': 20,
+                        'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT ),
+                        'upgrades': ( EPT, TITLE, MOD   )},
+        ),
 
          }
 

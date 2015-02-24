@@ -117,11 +117,11 @@
 
                 <div data-field-span="1">
                     <label>Player name</label>
-                    <textarea rows="1" name="player" disabled>{{ tourney_list.player.player_name }}</textarea>
+                    <textarea rows="1" name="player" disabled>{{ tourney_list.player.get_player_name() }}</textarea>
                 </div>
                 <div data-field-span="1">
                     <label>Tourney name</label>
-                    <textarea rows="1" name="player" disabled>{{ tourney.tourney_name}} </textarea>
+                    <textarea rows="1" name="player" disabled>{{ tourney.get_tourney_name()}} </textarea>
                 </div>
                 <div data-field-span="1">
                     <label>Tourney date</label>

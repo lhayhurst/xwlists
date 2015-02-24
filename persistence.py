@@ -263,6 +263,9 @@ class TourneyPlayer(Base):
             return self.tourney_lists[0]
         return None
 
+    def get_player_name(self):
+        return decode(self.player_name)
+
 
 class TourneyList(Base):
     __tablename__    = tourney_list_table

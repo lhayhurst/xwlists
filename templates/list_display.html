@@ -23,8 +23,8 @@
         </div>
         <div class="entries">
             <div>
-                <b>Tourney:</b>  {{ tourney.tourney_name }}<br>
-                <b>Player name:</b>  {{ tourney_list.player.player_name }}<br>
+                <b>Tourney:</b>  {{ tourney.get_tourney_name() }}<br>
+                <b>Player name:</b>  {{ tourney_list.player.get_player_name() }}<br>
                 <b>Player faction:</b> {{  tourney_list.faction.description }}<br>
                 <b>List total:</b> <p class="alignright sub-total">{{ tourney_list.points }}</p>
             </div>
