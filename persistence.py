@@ -204,7 +204,7 @@ class Tourney(Base):
     def num_entered_lists(self):
         count = 0
         for list in self.tourney_lists:
-            if len(list.ships) > 0:
+            if list.points > 0:
                 count = count + 1
         return count
 
