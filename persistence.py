@@ -293,7 +293,7 @@ class TourneyList(Base):
     def pretty_print(self):
         if len(self.ships) == 0: #no list
             if self.tourney.locked == False:
-                ret = '<a href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
+                ret = '<a rel="nofollow" href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
                 return Markup(ret)
         ret = ""
         for ship in self.ships:

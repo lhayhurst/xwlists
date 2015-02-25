@@ -10,7 +10,7 @@
 
 <br>
 <a href="/new">add a new tourney</a><br><br>
-<a href="/export_all_lists">export all tourneys to csv</a><br>
+<a href="/export_all_lists" rel="nofollow">export all tourneys to csv</a><br>
 
 <br>
 <table id="tourneys" class="display" cellspacing="0" width="100%">
@@ -48,7 +48,7 @@
          <td >{{ total_list_count  }}</td>
          <td >{{ num_entered_lists }} </td>
          <td >{{ total_list_count - num_entered_lists }}</td>
-         <td ><a type="text/csv" href="{{ url_for( 'export_tourney_lists', tourney_id=tourney.id) }}">Export to csv</a></td>
+         <td ><a type="text/csv" rel="nofollow" href="{{ url_for( 'export_tourney_lists', tourney_id=tourney.id) }}">Export to csv</a></td>
       </tr>
       {% endfor %}
   </tbody>

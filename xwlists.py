@@ -242,8 +242,8 @@ def export_all_lists():
     event = Event(remote_address=remote_address(request),
                   event_date=func.now(),
                   event="export all tourney lists")
-    pm.get_session().add(event)
-    pm.get_session().commit()
+    pm.db_connector.get_session().add(event)
+    pm.db_connector.get_session().commit()
     return csv_response( rows, "all_lists_download.csv")
 
 
