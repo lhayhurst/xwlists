@@ -215,7 +215,7 @@ upgrades = {
         {'name': 'Fire-Control System', 'cost': 2},
         {'name': 'Advanced Sensors', 'cost': 3},
         {'name': 'Sensor Jammer', 'cost': 4},
-        {'name': 'Advanced Targetting Computer', 'canon_name': 'advancedtargetingcomputer', 'cost': 5},
+        {'name': 'Advanced Targetting Computer', 'canon_name': 'advtargetingcomputer', 'cost': 5},
 
     ),
     TURRET: (
