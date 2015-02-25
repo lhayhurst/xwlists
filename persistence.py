@@ -198,6 +198,15 @@ class Tourney(Base):
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
     venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
 
+    def total_list_count(self):
+        return self.participant_count
+
+    def num_entered_lists(self):
+        count = 0
+        for list in self.tourney_lists:
+            if len(list.ships) > 0:
+                count = count + 1
+        return count
 
     def get_tourney_name(self):
         return decode(self.tourney_name)
@@ -585,22 +594,6 @@ class PersistenceManager:
         if randomRow is None:
             return None
         return randomRow[1]
-
-    def get_tourney_summary(self):
-        session = self.db_connector.get_session()
-        tourney_lists = session.query(TourneyList).join(Tourney).order_by(desc(Tourney.tourney_date)).all()
-
-        ret = OrderedDict()
-
-        for tl in tourney_lists:
-            tourney_name = tl.tourney.get_tourney_name()
-            if not ret.has_key(tourney_name):
-                ret[tourney_name] = { 'num_entered' : 0, 'num_not_entered' : 0, 'tourney': tl.tourney}
-            if len(tl.ships) == 0:
-                ret[tourney_name]['num_not_entered'] += 1
-            else:
-                ret[tourney_name]['num_entered'] += 1
-        return ret
 
     def get_ship_pilot_rollup(self, elimination_only, storeChampionshipsOnly=False):
         session = self.db_connector.get_session()

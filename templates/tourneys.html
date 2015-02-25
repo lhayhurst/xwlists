@@ -35,24 +35,22 @@
   </thead>
   <tbody>
   </tr>
-      {% for key, value in tourneys.iteritems() %}
+      {% for tourney in tourneys %}
       <tr>
-         <th>{{ value['tourney'].id }}</th>
-         <td >{{ key }}</td>
-         <td ><a href="{{ url_for( 'get_tourney_details', tourney_id=value['tourney'].id ) }}">Browse/edit results</a></td>
-         <td >{{ value['tourney'].tourney_type }}</td>
-         <td >{{ value['tourney'].tourney_date }}</td>
-         <td >{{ value['tourney'].round_length }}</td>
-         <td >{{ value['tourney'].participant_count }}</td>
-         <td >{{ value['tourney'].venue_string() }}</td>
-         <td >{{  value['num_entered'] + value['num_not_entered']  }}</td>
-         <td >{{ value['num_entered'] }} </td>
-         <td >{{ value['num_not_entered'] }} </td>
-         <td ><a type="text/csv" href="{{ url_for( 'export_tourney_lists', tourney_id=value['tourney'].id) }}">Export to csv</a></td>
-
-         {% if admin %}
-         <td ><a href="{{ url_for( 'delete_tourney', tourney=key) }}">delete tourney</a></td>
-         {%  endif %}
+         {% set num_entered_lists = tourney.num_entered_lists() %}
+         {% set total_list_count  = tourney.total_list_count() %}
+         <th>{{ tourney.id }}</th>
+         <td >{{ tourney.get_tourney_name() }}</td>
+         <td ><a href="{{ url_for( 'get_tourney_details', tourney_id=tourney.id ) }}">Browse/edit results</a></td>
+         <td >{{ tourney.tourney_type }}</td>
+         <td >{{ tourney.tourney_date }}</td>
+         <td >{{ tourney.round_length }}</td>
+         <td >{{ tourney.participant_count }}</td>
+         <td >{{ tourney.venue_string() }}</td>
+         <td >{{ total_list_count  }}</td>
+         <td >{{ num_entered_lists }} </td>
+         <td >{{ total_list_count - num_entered_lists }}</td>
+         <td ><a type="text/csv" href="{{ url_for( 'export_tourney_lists', tourney_id=tourney.id) }}">Export to csv</a></td>
       </tr>
       {% endfor %}
   </tbody>

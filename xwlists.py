@@ -111,8 +111,8 @@ def tourneys():
         admin_on = True
     else:
         admin_on = False
-    summary = PersistenceManager(myapp.db_connector).get_tourney_summary()
-    return render_template('tourneys.html', tourneys=summary, admin=admin_on )
+    tourneys = PersistenceManager(myapp.db_connector).get_tourneys()
+    return render_template('tourneys.html', tourneys=tourneys, admin=admin_on )
 
 @app.route("/tourney_results")
 def get_tourney_results():
