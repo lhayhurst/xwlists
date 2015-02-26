@@ -108,8 +108,10 @@ class Event(Base):
     event_details = Column( String(256))
 
     def get_event_details(self):
-        return decode( self.event_details )
-
+        if self.event_details is None or len(self.event_details) == 0:
+            return ""
+        else:
+            return decode( self.event_details )
 
 class Pilot(Base):
     __tablename__ = pilot_table
