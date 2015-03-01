@@ -9,7 +9,7 @@ from flask.ext.mail import Mail, Message
 import sys
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
-from api import Tournaments, Tournament
+#from api import Tournaments, Tournament
 
 from cryodex import Cryodex
 from dataeditor import RankingEditor
@@ -21,6 +21,7 @@ from rollup import Rollup
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
 #from flask.ext import restful
+
 
 app =  myapp.create_app()
 UPLOAD_FOLDER = "static/tourneys"
