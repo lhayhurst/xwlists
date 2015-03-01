@@ -20,7 +20,7 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
 from rollup import Rollup
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
-from flask.ext import restful
+#from flask.ext import restful
 
 app =  myapp.create_app()
 UPLOAD_FOLDER = "static/tourneys"
@@ -58,9 +58,9 @@ mail = Mail(app)
 session = myapp.db_connector.get_session()
 
 
-api = restful.Api(app)
-api.add_resource(Tournaments, '/api/v1/tournaments')
-api.add_resource(Tournament, '/api/v1/tournament/<int:tourney_id>' )
+#api = restful.Api(app)
+#api.add_resource(Tournaments, '/api/v1/tournaments')
+#api.add_resource(Tournament, '/api/v1/tournament/<int:tourney_id>' )
 
 @app.before_request
 def check_for_maintenance():
