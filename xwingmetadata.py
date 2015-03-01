@@ -298,6 +298,9 @@ upgrades = {
           {'name': 'Ruthlessness', 'cost': 3},
           {'name': 'Expose', 'cost': 4},
           {'name': 'Opportunist', 'cost': 4},
+          {'name': 'Bodyguard', 'cost': 2},
+          {'name': 'Calculation', 'cost': 1},
+
 
         ),
     SALVAGED_ASTROMECH_DROID: (

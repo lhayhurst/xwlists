@@ -489,6 +489,9 @@ class PersistenceManager:
                  "points_spent" : int(points_spent) }
 
 
+    def get_tourney_ids(self):
+        return self.db_connector.get_session().query(Tourney.id).all()
+
     def get_events(self):
         return self.db_connector.get_session().query(Event)
 

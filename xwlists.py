@@ -9,6 +9,7 @@ from flask.ext.mail import Mail, Message
 import sys
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
+from api import Tournaments, Tournament
 
 from cryodex import Cryodex
 from dataeditor import RankingEditor
@@ -19,7 +20,7 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
 from rollup import Rollup
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
-
+from flask.ext import restful
 
 app =  myapp.create_app()
 UPLOAD_FOLDER = "static/tourneys"
@@ -57,6 +58,10 @@ mail = Mail(app)
 session = myapp.db_connector.get_session()
 
 
+api = restful.Api(app)
+api.add_resource(Tournaments, '/api/v1/tournaments')
+api.add_resource(Tournament, '/api/v1/tournament/<int:tourney_id>' )
+
 @app.before_request
 def check_for_maintenance():
     if is_maintenance_mode and request.path != url_for('down'):
@@ -78,7 +83,7 @@ def mail_message(subject, message):
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
     with app.app_context():
         print("sending msg ")
-        #mail.send(msg)
+        mail.send(msg)
 
 
 def mail_error(errortext):
@@ -87,7 +92,7 @@ def mail_error(errortext):
     msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
         print("sending msg ")
-        #mail.send(msg)
+        mail.send(msg)
 
 
 @app.route("/about")
@@ -265,8 +270,6 @@ def export_tourney_lists():
     return csv_response( ret, "tourney_list_download.csv")
 
 
-
-
 @app.route("/delete_tourney")
 def delete_tourney():
     tourney_name = request.args.get('tourney')
@@ -362,6 +365,8 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
                            sos=rank.sos,
                            score=rank.score,
                            dropped=rank.dropped)
+        pm.db_connector.get_session().add(r)
+        pm.db_connector.get_session().commit()
         if rank.list_id is not None and len(rank.list_id) > 0:
             #cryodex provided a list id ... load it
             try:
@@ -370,13 +375,12 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
                 xws = fetcher.fetch(rank.list_id)
                 converter = XWSToJuggler(xws)
                 converter.convert(pm, tourney_list)
-                pm.db_connector.get_session().commit()
 
             except Exception as err:
                 print ("unable to fetch list id " + rank.list_id + " from voidstate, reason: " + str(err) )
                 mail_error(errortext=str(err) + "<br><br>Unable to fetch list id " + rank.list_id + " from voidstate" )
 
-        pm.db_connector.get_session().add(r)
+
 
     #and commit all the work
     pm.db_connector.get_session().commit()
