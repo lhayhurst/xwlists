@@ -51,7 +51,7 @@ class RankingEditor:
         for ranking in rankings:
             row = {}
             row['player_id'] = ranking.player_id
-            row['player_name'] = ranking.player.player_name
+            row['player_name'] = ranking.player.get_player_name()
             row['score'] = ranking.score
             row['swiss_rank']  = ranking.rank
             row['dropped']     = ranking.dropped
@@ -133,7 +133,7 @@ class RankingEditor:
 
         self.pm.db_connector.get_session().commit()
 
-        return json.dumps( { "row" : { "player_id": player.id, "player_name": player.player_name,
+        return json.dumps( { "row" : { "player_id": player.id, "player_name": player.get_player_name(),
                                        "score": ranking.score, "swiss_rank" : ranking.rank,
                                        "championship_rank": ranking.elim_rank, "mov": ranking.mov,
                                        "sos": ranking.sos, "dropped": ranking.dropped, "list":ranking.pretty_print()}} )
