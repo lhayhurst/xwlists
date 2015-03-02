@@ -360,13 +360,16 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                   {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Gold Squadron Pilot', 'cost': 18,
                    'upgrades': (TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD)} ,
                   {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Syndicate Thug', 'canon_name':'syndicatethug', 'cost': 18,
-                   'upgrades': (TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
+                   'upgrades': (TITLE,  TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
+                  {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Hired Gun', 'canon_name':'hiredgun', 'cost': 20,
+                   'upgrades': (TITLE,  TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
+
                   {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Drea Renthal', 'canon_name':'drearenthal', 'cost': 22,
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
-                   'upgrades': (TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
+                   'upgrades': (TITLE,  TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
                   {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Kavil', 'canon_name':'kavil', 'cost': 24,
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
-                   'upgrades': (EPT, TITLE, DROID, TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
+                   'upgrades': (EPT, TITLE, TORPEDO, TORPEDO, TURRET, MOD, SALVAGED_ASTROMECH_DROID)},
 
          ),
 
