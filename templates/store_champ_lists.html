@@ -8,10 +8,10 @@
 </style>
 
 <div class="percentInput">
-    <label>Show top </label><input maxlength="3" type="number" data-parsley-type="integer" name="percent" id="percent" class="num_percent" value="25">
+    <label>Show top </label><input maxlength="3" type="number" data-parsley-type="integer" name="percent" id="percent" class="num_percent" value="25" >
     <span>%</span>
 </div><label> of lists (tab or click out to trigger a filter)</label>
-<div><label>Show championship (elimination) lists only</label><input id="championship_only" type="checkbox" onclick="redraw()" ></div>
+<div><label>Show only tournaments that cut to championship rounds</label><input id="championship_only" type="checkbox" onclick="redraw()" ></div>
 
 <table id="championship-lists" class="compact display dataTable" cellspacing="0" width="100%">
   <thead>
@@ -55,11 +55,9 @@
             var numPlayers = aData[1] == "-" ? 0 : aData[1]*1;
             var swiss      = aData[3] == "-" ? 0 : aData[3]*1;
             var elim       = aData[4] == "None" ? 0 : aData[4]*1;
-            console.log(aData[4]);
-            console.log(chmponly);
 
             var maxValue   = Math.ceil(percentage/100 * numPlayers);
-
+            console.log(maxValue)
 
             if ( chmponly ) {
                 if ( elim === 0 ) {
@@ -71,12 +69,16 @@
                 return false;
             }
             else  {
-                if ( swiss === 0 ) {
-                    return false;
-                }
-                else if ( swiss < maxValue )
-                {
+                if ( elim > 0 && elim < maxValue) {
                     return true;
+                }
+                else {
+                    if (swiss === 0) {
+                        return false;
+                    }
+                    if (elim == 0 && swiss < maxValue) {
+                        return true;
+                    }
                 }
             }
             return false;
