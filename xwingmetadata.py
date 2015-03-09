@@ -226,7 +226,7 @@ upgrades = {
     ),
     TORPEDO: (
         {'name': 'Flechette Torpedoes', 'cost': 2},
-        {'name': 'Proton Torpedos', 'cost': 4},
+        {'name': 'Proton Torpedoes', 'cost': 4},
         {'name': 'Ion Torpedoes', 'cost': 5},
         {'name': 'Advanced Proton Torpedoes', 'cost': 6},
         {'name': 'Bomb Loadout', 'canon_name' : 'bombloadout', 'cost': 0,
