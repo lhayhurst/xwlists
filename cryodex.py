@@ -267,6 +267,9 @@ class Cryodex:
         json_data = json.loads(data)
         if json_data is None:
             raise Exception("Unable to parse json data: " + data )
+
+        if json_data.has_key('tournament'): #for the new tournament api
+            json_data = json_data['tournament']
         players = json_data['players']
 
         #init the player member

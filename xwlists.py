@@ -9,7 +9,7 @@ from flask.ext.mail import Mail, Message
 import sys
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
-#from api import Tournaments, Tournament
+from api import Tournaments, Tournament
 
 from cryodex import Cryodex
 from dataeditor import RankingEditor
@@ -20,7 +20,7 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
 from rollup import Rollup
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
-#from flask.ext import restful
+from flask.ext import restful
 
 
 app =  myapp.create_app()
@@ -59,9 +59,9 @@ mail = Mail(app)
 session = myapp.db_connector.get_session()
 
 
-#api = restful.Api(app)
-#api.add_resource(Tournaments, '/api/v1/tournaments')
-#api.add_resource(Tournament, '/api/v1/tournament/<int:tourney_id>' )
+api = restful.Api(app)
+api.add_resource(Tournaments, '/api/v1/tournaments')
+api.add_resource(Tournament, '/api/v1/tournament/<int:tourney_id>' )
 
 @app.before_request
 def check_for_maintenance():

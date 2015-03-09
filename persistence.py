@@ -322,6 +322,13 @@ class TourneyRound(Base):
     results       = relationship( "RoundResult", back_populates="round", cascade="all,delete,delete-orphan")
     tourney       = relationship( Tourney.__name__, back_populates="rounds")
 
+    def round_type_str(self):
+        if self.round_type == RoundType.PRE_ELIMINATION:
+            return 'swiss'
+        elif self.round_type == RoundType.ELIMINATION:
+            return 'elimination'
+        return ''
+
 tourney_ranking_table = "tourney_ranking"
 class TourneyRanking(Base):
     __tablename__      = tourney_ranking_table
@@ -379,6 +386,13 @@ class RoundResult(Base):
         if self.winner.id == self.list1.id:
             return "beat"
         return "lost to"
+
+    def get_result_for_json(self):
+        if self.bye is not None and self.bye==True:
+            return "bye"
+        if self.draw is not None and self.draw==True:
+            return "draw"
+        return "win"
 
     def player1_name(self):
         return decode(self.list1.player.player_name)
