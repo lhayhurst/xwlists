@@ -41,7 +41,7 @@ class Tournaments(restful.Resource):
         ret = []
         for id in ids:
             ret.append(id[0])
-        return json.dumps(ret)
+        return json.dumps({ 'tournaments' : ret } )
 
 
 class TourneyToJsonConverter:
