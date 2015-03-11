@@ -5,6 +5,8 @@ import myapp
 from persistence import PersistenceManager
 
 
+
+
 class apiTest(unittest.TestCase):
     def testGetTournaments(self):
         resp = get('http://localhost:5000/api/v1/tournaments')
