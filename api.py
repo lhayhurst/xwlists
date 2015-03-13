@@ -1,3 +1,6 @@
+from xwingmetadata import sets_and_expansions
+
+SETS_USED = 'sets_used'
 DROPPED = 'dropped'
 VENUE = 'venue'
 __author__ = 'lhayhurst'
@@ -5,7 +8,8 @@ __author__ = 'lhayhurst'
 import json
 from flask import jsonify, request
 import myapp
-from persistence import PersistenceManager, Tourney, TourneyVenue, TourneyPlayer, TourneyRanking, TourneyList
+from persistence import PersistenceManager, Tourney, TourneyVenue, TourneyPlayer, TourneyRanking, TourneyList, \
+    RoundResult, TourneyRound, RoundType, TourneySet, Set
 from flask.ext import restful
 from flask.ext.restful import reqparse
 import dateutil.parser
@@ -53,6 +57,14 @@ class Tournaments(restful.Resource):
 
     required_fields = [ NAME, DATE, TYPE, ROUND_LENGTH, PARTICIPANT_COUNT ]
     tourney_types   = [ "World Championship", "Nationals", "Regional", "Store Championship", "Vassal play",  "Other"]
+    valid_sets      = sets_and_expansions.keys()
+
+    def convert_round_type_string(self, str):
+        if str == SWISS:
+            return RoundType.PRE_ELIMINATION
+        if str == ELIMINATION:
+            return RoundType.ELIMINATION
+        return ""
 
     def missing_required_field(self, t):
         for rf in Tournaments.required_fields:
@@ -73,14 +85,6 @@ class Tournaments(restful.Resource):
         if json_data is not None:
             if json_data.has_key(TOURNAMENT):
                 t = json_data[TOURNAMENT]
-
-                email        = None
-                sets_used = None
-                rounds = None
-                country = None
-                city = None
-                state = None
-                venue = None
 
                 #it should have all the required fields
                 missing_field = self.missing_required_field(t)
@@ -117,6 +121,18 @@ class Tournaments(restful.Resource):
                     #don't bother validating it :-)
                     tourney.email = email
 
+                #set gook
+                if t.has_key(SETS_USED):
+                    sets_used = t[SETS_USED]
+                    for s in sets_used:
+                        if not s in Tournaments.valid_sets:
+                            return self.four_oh_four("unknown xwing set %s provided, bailing out" % ( s ) )
+                        set = pm.get_set(s)
+                        if set is None:
+                            return self.four_oh_four("unknown xwing set %s provided, bailing out" % ( s ) )
+                        ts = TourneySet(tourney=tourney, set=set)
+                        pm.db_connector.get_session().add(ts)
+
                 #venue gook
                 if t.has_key(VENUE):
                     vhref = t[VENUE]
@@ -132,19 +148,24 @@ class Tournaments(restful.Resource):
                     tourney.venue = venue
 
                 #now see if the players are there.  if so, add 'em
+                tlists = {}
                 if t.has_key(PLAYERS):
                     players = t[PLAYERS]
                     i = 1
                     for p in players:
                         player  = TourneyPlayer( player_name="Player %d" % ( i ) )
                         ranking = TourneyRanking( player=player)
+                        player.result = ranking
                         tourney_list = TourneyList( tourney=tourney, player=player )
+                        tlists[ player.player_name ] = tourney_list #stash it away for later use
                         tourney.tourney_players.append( player )
                         tourney.tourney_lists.append( tourney_list )
+                        tourney.rankings.append( ranking )
 
                         i = i + 1
                         if p.has_key( PLAYER_NAME ):
                             player.player_name = p[PLAYER_NAME]
+                            tlists[ player.player_name ] = tourney_list
                         if p.has_key( MOV ):
                             ranking.mov = p[ MOV ]
                         if p.has_key( SCORE ):
@@ -156,9 +177,77 @@ class Tournaments(restful.Resource):
                         if p.has_key( RANK ):
                             r = p[RANK]
                             if r.has_key( SWISS ):
-                                ranking.swiss = r[SWISS]
+                                ranking.rank = r[SWISS]
                             if r.has_key( ELIMINATION ):
                                 ranking.elim_rank  = r[ELIMINATION]
+
+                #round by round results, if it exists
+                if t.has_key( ROUNDS ):
+                    for r in t[ROUNDS]:
+                        if not r.has_key( ROUND_TYPE ):
+                            return self.four_oh_four("Round type not found in tourney rounds, giving up!")
+                        round_type = self.convert_round_type_string(r[ROUND_TYPE])
+                        if round_type is None:
+                            return self.four_oh_four("Round type %s is not valid, giving up!" % ( round_type ))
+                        if not r.has_key( ROUND_NUMBER):
+                            return self.four_oh_four("Round number not found in tourney rounds, giving up!")
+                        round_number = r[ROUND_NUMBER]
+                        if not r.has_key( MATCHES ):
+                            return self.four_oh_four("List of match results not found in tourney round, giving up!")
+                        tourney_round = TourneyRound( round_num=round_number, round_type=round_type, tourney=tourney)
+                        tourney.rounds.append(tourney_round)
+
+                        matches = r[MATCHES]
+                        for m in matches:
+                            if not m.has_key( PLAYER1 ):
+                                return self.four_oh_four("Player one not found in match, giving up!")
+                            player1 = m[PLAYER1]
+                            if not m.has_key(RESULT):
+                               return self.four_oh_four("Result not found in match, giving up!")
+                            if not tlists.has_key(player1):
+                                return self.four_oh_four("Player %s 's list could not be found, giving up " % player1)
+
+                            result = m[RESULT]
+                            round_result = None
+                            if result == 'win' or result == 'draw':
+                                if not m.has_key( PLAYER2 ):
+                                    return self.four_oh_four("Player two not found in match, giving up!")
+                                player2 = m[PLAYER2]
+                                if not tlists.has_key(player2):
+                                    return self.four_oh_four("Player %s 's list could not be found, giving up " % player2)
+
+                                if not m.has_key( PLAYER1_POINTS ):
+                                    return self.four_oh_four("Player one points not found in match, giving up!")
+                                player1_points = m[PLAYER1_POINTS]
+                                if not m.has_key( PLAYER2_POINTS ):
+                                    return self.four_oh_four("Player two points not found in match, giving up!")
+                                player2_points = m[PLAYER2_POINTS]
+                                was_draw = False
+                                if result == 'draw':
+                                    was_draw = True
+                                winner = None
+                                loser = None
+
+                                if player1_points > player2_points:
+                                    winner = tlists[player1]
+                                    loser  = tlists[player2]
+                                else:
+                                    winner = tlists[player2]
+                                    loser  = tlists[player1]
+                                round_result = RoundResult(round=tourney_round, list1=tlists[player1], list2=tlists[player2],
+                                                 winner=winner, loser=loser,
+                                                 list1_score=player1_points,
+                                                 list2_score=player2_points,
+                                                 bye=False, draw=was_draw)
+                            elif result == 'bye':
+                                round_result = RoundResult(round=tourney_round, list1=tlists[player1],
+                                                           list2=None, winner=None, loser=None,
+                                                            list1_score=None,
+                                                            list2_score=None, bye=True, draw=False)
+                            else:
+                                return self.four_oh_four("Unknown match result %s, giving up!" % ( result ))
+                            tourney_round.results.append( round_result )
+
 
                 pm.db_connector.get_session().commit()
 

@@ -5,6 +5,10 @@ from sqlalchemy.dialects import mysql
 from sqlalchemy.sql.operators import ColumnOperators
 from decoder import decode
 
+ELIMINATION = 'elimination'
+
+SWISS = 'swiss'
+
 __author__ = 'lhayhurst'
 
 import random
@@ -324,10 +328,12 @@ class TourneyRound(Base):
 
     def round_type_str(self):
         if self.round_type == RoundType.PRE_ELIMINATION:
-            return 'swiss'
+            return SWISS
         elif self.round_type == RoundType.ELIMINATION:
-            return 'elimination'
-        return ''
+            return ELIMINATION
+        return None
+
+
 
 tourney_ranking_table = "tourney_ranking"
 class TourneyRanking(Base):
