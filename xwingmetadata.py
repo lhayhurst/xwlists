@@ -156,7 +156,7 @@ upgrades = {
         {'name': 'K4 Security Droid', 'cost': 3, 'constraints': ( SCUM_FACTION_CONSTRAINT )},
         {'name': 'Greedo', 'cost': 1,
          'constraints': ( SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT ),},
-        {'name': 'K4 Security Droid', 'cost': 3, 'constraints': ( SCUM_FACTION_CONSTRAINT )},
+        {'name': 'Outlaw Tech', 'cost': 2, 'constraints': ( SCUM_FACTION_CONSTRAINT )},
 
 
     ),
