@@ -1,6 +1,6 @@
 import json
 import unittest
-from requests import put, get, post
+from requests import put, get, post, delete
 import myapp
 from persistence import PersistenceManager
 
@@ -14,7 +14,7 @@ class apiTest(unittest.TestCase):
         self.assertTrue(ids is not None)
         self.assertTrue(len(ids) > 0)
 
-    def testPutTournament(self):
+    def testPutAndDeleteTournament(self):
         t = {"tournament": {"name": "foobar", "date": "2015-05-25",
                             "type": "Store Championship", "round_length": 60, "participant_count": 30,
                             'venue':
@@ -208,6 +208,17 @@ class apiTest(unittest.TestCase):
         self.assertEqual( "win", res1.get_result_for_json())
         self.assertEqual( 100, res1.list1_score)
         self.assertEqual( 48, res1.list2_score)
+
+        #ok, now delete the thing
+        j = { "appname": 'test',
+              "passcode": '@]P9c2kFLKT96L.WT('}
+
+        id = tourney.id
+        resp = delete('http://localhost:5000/api/v1/tournament/299' ,
+                    data=json.dumps(j))
+        self.assertEqual(204, resp.status_code)
+
+
 
     # tests various error conditions
     def testPutTournamentBad(self):
