@@ -210,12 +210,12 @@ class apiTest(unittest.TestCase):
         self.assertEqual( 48, res1.list2_score)
 
         #ok, now delete the thing
-        j = { "appname": 'test',
-              "passcode": '@]P9c2kFLKT96L.WT('}
+        j = { "api_token": tourney.api_token }
 
         id = tourney.id
-        resp = delete('http://localhost:5000/api/v1/tournament/299' ,
+        resp = delete('http://localhost:5000/api/v1/tournament/%d' % id  ,
                     data=json.dumps(j))
+        print resp.text
         self.assertEqual(204, resp.status_code)
 
 

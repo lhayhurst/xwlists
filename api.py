@@ -1,7 +1,6 @@
-APPNAME = 'appname'
-PASSCODE = 'passcode'
 __author__ = 'lhayhurst'
 
+import uuid
 from xwingmetadata import sets_and_expansions
 import json
 from flask import jsonify, request
@@ -11,7 +10,7 @@ from persistence import PersistenceManager, Tourney, TourneyVenue, TourneyPlayer
 from flask.ext import restful
 import dateutil.parser
 
-
+API_TOKEN = "api_token"
 SETS_USED = 'sets_used'
 DROPPED = 'dropped'
 VENUE = 'venue'
@@ -253,9 +252,13 @@ class Tournaments(restful.Resource):
                                 return self.four_oh_four("Unknown match result %s, giving up!" % ( result ))
                             tourney_round.results.append(round_result)
 
+                #looking good.
+                #grab a uuid to finish the job
+                tourney.api_token = str(uuid.uuid4())
                 pm.db_connector.get_session().commit()
 
-                response = jsonify({TOURNAMENT: {NAME: tourney.tourney_name, "id": tourney.id}})
+
+                response = jsonify({TOURNAMENT: {NAME: tourney.tourney_name, "id": tourney.id, API_TOKEN: tourney.api_token }})
                 response.status_code = 201
                 return response
 
@@ -317,7 +320,6 @@ class TourneyToJsonConverter:
 
 
 class Tournament(restful.Resource):
-    codes = {'test': '@]P9c2kFLKT96L.WT('}
 
     def four_oh_four(self, text):
         response = jsonify(message=text)
@@ -346,16 +348,13 @@ class Tournament(restful.Resource):
             return self.four_oh_four("bad json received!")
         if json_data is None:
             return self.four_oh_four("delete call for tourney_id %d missing json payload, giving up " % (tourney_id))
-        if not json_data.has_key('%s' % APPNAME ):
-            return self.four_oh_four("delete call is missing appname json ")
-        appname = json_data[ APPNAME ]
-        if not json_data.has_key(PASSCODE):
-            return self.four_oh_four("delete call is missing passcode json")
-        passcode = json_data[ PASSCODE ]
-        if not Tournament.codes.has_key( appname ):
-            return self.four_oh_four("couldn't find appname, bailing out")
-        if Tournament.codes[appname] != passcode:
-            return self.four_oh_four("passcode didn't match, bailing out ")
+
+        api_token = json_data[ API_TOKEN ]
+        if not json_data.has_key(API_TOKEN):
+            return self.four_oh_four("delete call is missing API token json, bailing out ...")
+
+        if not api_token == t.api_token:
+            return self.four_oh_four("delete call token_id did not match, bailing out ....")
 
         #whew. aaaaalmost there...
         try:
