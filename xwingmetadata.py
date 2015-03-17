@@ -110,6 +110,8 @@ sets_and_expansions = {  'Core Set' : [],
                          'Wave 6': ['Most Wanted Expansion', 'StarViper Expansion', 'IG-2000 Expanson', 'M3-A Interceptor Expansion' ]
 }
 
+formats = { 'Standard - 100 Point Dogfight', 'Epic Play - 300 points', 'Escalation'}
+format_default = 'Standard - 100 Point Dogfight'
 
 factions = [ REBEL, IMPERIAL, SCUM ]
 

@@ -10,14 +10,27 @@
       data-parsley-validate >
     <fieldset>
         <legend>Tourney details</legend>
-        <div data-row-span="2">
+        <div data-row-span="4">
             <div data-field-span="1">
                 <label>Tourney name</label>
                 <input type="text" name="name" required/>
             </div>
             <div data-field-span="1">
-                <label>Your contact email - this is kept private; used so sozin can provide you help if needed!</label>
+                <label>Your contact email - kept private; used so sozin can provide you help if needed!</label>
                 <input type="text" name="email" data-parsley-type="email" required/>
+            </div>
+            <div data-field-span="1">
+                <label>Tourney format</label>
+                <select id="tourney_format_dropdown" name="tourney_format_dropdown" placeholder="Select a format that matches your tourney" data-parsley-notDefaultSelection='' data-parsley-group="tourney-format-default">
+                    {%  for f in tourney_formats %}
+                        <option></option>
+                        <option value="{{ f }}">{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div data-field-span="1">
+                <label>Or enter your own format</label>
+                <input type="text" name="tourney_format_custom" id="tourney_format_custom" data-parsley-notDefaultSelection='' data-parsley-group="tourney-format-custom" />
             </div>
 
         </div>
@@ -28,7 +41,7 @@
             </div>
             <div data-field-span="1">
                 <label>Type of tourney</label>
-                <select id="tourney_type" name="tourney_type" placeholder="Select a tourney type" required>
+                <select id="tourney_type" name="tourney_type" placeholder="Select a tourney type" data-init-text="Store championship" required>
                     <option></option>
                     <option value="World championship">World championship</option>
                     <option value="Regional">Nationals</option>
@@ -103,9 +116,51 @@
 <script>
 // just for the demos, avoids form submit
 
+function field_is_valid(formInstance, field_name) {
+    if (formInstance.isValid(field_name, true) ) {
+        $('.invalid-form-error-message').html('');
+        return true;
+    }
+    return false;
+}
+
+function round_len1_valid(formInstance)
+{
+    return field_is_valid(formInstance, 'round-len1');
+}
+
+function round_len2_valid(formInstance)
+{
+    return field_is_valid(formInstance, 'round-len2');
+
+}
+
+function tourney_format_default_valid(formInstance)
+{
+    return field_is_valid(formInstance, 'tourney-format-default');
+}
+
+
+function tourney_format_custom_valid(formInstance)
+{
+    return field_is_valid(formInstance, 'tourney-format-custom');
+}
 
 
 $(document).ready(function(){
+    var tourney_format_default = {{ format_default | tojson | safe }}
+    $('#tourney_format_dropdown').val(tourney_format_default);
+
+    document.getElementById('tourney_format_custom').addEventListener('keydown', function(e) {
+        $('#tourney_format_dropdown').select2( 'val', '' );
+
+    }, false );
+
+    $('#tourney_format_dropdown').on( 'change', function(e) {
+        $('#tourney_format_custom').val("")
+    })
+
+
     window.ParsleyValidator.addValidator('notDefaultSelection', function(value, requirement) {
             return value.length > 0 },32 );
 
@@ -115,31 +170,48 @@ $(document).ready(function(){
     $('#country').select2();
     $("#datepicker").datepicker({ startDate:'01/01/2012' } ); // first selectable date is 1st Jan 2000 });
     $('#form').parsley();
-    $('#tourney_type').select2()
-    $('#round_length_dropdown').select2()
+    $('#tourney_type').select2();
+    $('#round_length_dropdown').select2();
+    $('#tourney_format_dropdown').select2();
     $('#sets').select2();
-    $('#sets > option').prop("selected", "selected")
+    $('#sets > option').prop("selected", "selected");
     $("#sets").trigger("change");
     $('#form').parsley().subscribe('parsley:form:validate', function (formInstance) {
         console.log("parsley:form:validate");
         // if one of these blocks is not failing do not prevent submission
         // we use here group validation with option force (validate even non required fields)
-        if (formInstance.isValid('round-len1', true) ) {
-            $('.invalid-form-error-message').html('');
-            return;
-        }
-        else if ( formInstance.isValid('round-len2', true)) {
-            $('.invalid-form-error-message').html('');
-            return;
-        }
-        console.log("neither is valid")
-        // else stop form submission
-        formInstance.submitEvent.preventDefault();
 
-        // and display a gentle message
-        $('.invalid-form-error-message')
-          .html("You must correctly fill the fields of at least one of the round length blocks!")
-          .addClass("filled");
+        if ( round_len1_valid(formInstance) ) {
+            if ( tourney_format_default_valid(formInstance) ) {
+                return;
+            }
+            else if ( tourney_format_custom_valid(formInstance) ) {
+                return;
+            }
+        }
+        else if ( round_len2_valid(formInstance) ) {
+            if ( tourney_format_default_valid(formInstance) ) {
+                return;
+            }
+            else if ( tourney_format_custom_valid(formInstance) ) {
+                return;
+            }
+
+        }
+
+        formInstance.submitEvent.preventDefault();
+        if ( round_len1_valid(formInstance) == false && round_len2_valid(formInstance) == false ) {
+            // and display a gentle message
+            $('.invalid-form-error-message')
+                    .html("You must correctly fill the fields of at least one of the round length blocks!")
+                    .addClass("filled");
+
+        }
+        else if ( tourney_format_default_valid(formInstance) == false && tourney_format_custom_valid(formInstance) == false ) {
+            $('.invalid-form-error-message')
+                    .html("You must correctly fill the fields of at least one of the tourney format blocks!")
+                    .addClass("filled");
+        }
         return;
   });
 

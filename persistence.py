@@ -197,7 +197,7 @@ class Tourney(Base):
     participant_count = Column(Integer)
     locked            = Column(Boolean)
     api_token         = Column(String(128))
-
+    format            = Column(String(128))
 
     tourney_lists   = relationship( "TourneyList", back_populates="tourney", cascade="all,delete,delete-orphan" )
     rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)", cascade="all,delete,delete-orphan")

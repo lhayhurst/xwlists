@@ -199,12 +199,13 @@
 
  <div class="main-section">
      <div>
-        <button name="lock" id="lock" style="border:none"><img src="" height="30" width="30" ></button>
+        <button name="lock" id="lock" style="border:none"><img src="" height="30" width="30" ></button><br>
         <b>Tourney name:</b> {{ tourney.get_tourney_name() }}
-        <b>    Date:</b> {{ tourney.tourney_date }}
-        <b>    Type:</b> {{ tourney.tourney_type }}
         <b>Num participants:</b> {{ tourney.participant_count }}
-        <b>Venue:</b> {{ tourney.venue_string() }}
+        <b>Date:</b> {{ tourney.tourney_date }}
+        <b>Type:</b> {{ tourney.tourney_type }}
+        <b>Format:</b> {{  tourney.format }}<br>
+         <b>Venue:</b> {{ tourney.venue_string() }}
         <div id="lock-email-div" hidden><label>Enter the email address used to create this tourney</label><input type="text" id="keytext" name="keytext"/><button id="key-check" >go!</button><span class="error_text" id="key-check-status"></span><br></div>
         <br>
         <hr>

@@ -5,11 +5,12 @@ import myapp
 from persistence import PersistenceManager
 
 
-
+dev_url  =  'http://localhost:5000/api/v1/tournaments'
+prod_url = 'http://lists.starwarsclubhouse.com/api/v1/tournaments'
 
 class apiTest(unittest.TestCase):
     def testGetTournaments(self):
-        resp = get('http://localhost:5000/api/v1/tournaments')
+        resp = get(prod_url)
         ids = resp.json()
         self.assertTrue(ids is not None)
         self.assertTrue(len(ids) > 0)
@@ -143,7 +144,7 @@ class apiTest(unittest.TestCase):
         }
 
 
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(prod_url,
                     data=json.dumps(t))
         self.assertEqual(201, resp.status_code)
         js = resp.json()
@@ -213,7 +214,7 @@ class apiTest(unittest.TestCase):
         j = { "api_token": tourney.api_token }
 
         id = tourney.id
-        resp = delete('http://localhost:5000/api/v1/tournament/%d' % id  ,
+        resp = delete(prod_url + "/" + id  ,
                     data=json.dumps(j))
         print resp.text
         self.assertEqual(204, resp.status_code)
@@ -223,56 +224,56 @@ class apiTest(unittest.TestCase):
     # tests various error conditions
     def testPutTournamentBad(self):
         #no data payload
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(dev_url,
                     data=None)
         self.assertEqual(404, resp.status_code)
 
         #empty data payload
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(dev_url,
                     data=json.dumps({}))
         self.assertEqual(404, resp.status_code)
 
         #no tournament fields
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(dev_url,
                     data=json.dumps({"tournament": {}}))
         self.assertEqual(404, resp.status_code)
 
         #missing required fields 1
         t = {"tournament": {"name": "foobar"}}
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(dev_url,
                     data=json.dumps(t))
         self.assertEqual(404, resp.status_code)
 
         #missing required fields 2
         t = {"tournament": {"name": "foobar", "date": "2015-05-25"}}
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(dev_url,
                     data=json.dumps(t))
         self.assertEqual(404, resp.status_code)
 
         #missing required fields 3
         t = {"tournament": {"name": "foobar", "date": "2015-05-25", "type": "Store Championship"}}
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(dev_url,
                     data=json.dumps(t))
         self.assertEqual(404, resp.status_code)
 
         #missing required fields 4
         t = {"tournament": {"name": "foobar", "date": "2015-05-25",
                             "type": "Store Championship", "round_length": 60}}
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(dev_url,
                     data=json.dumps(t))
         self.assertEqual(404, resp.status_code)
 
         #invalidly formatted date
         t = {"tournament": {"name": "foobar", "date": "foobar",
                             "type": "Store Championship", "round_length": 60, "participant_count": 30}}
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(dev_url,
                     data=json.dumps(t))
         self.assertEqual(404, resp.status_code)
 
         #invalidly formatted type
         t = {"tournament": {"name": "foobar", "date": "2015-05-25",
                             "type": "Smore Championship", "round_length": 60, "participant_count": 30}}
-        resp = post('http://localhost:5000/api/v1/tournaments',
+        resp = post(dev_url,
                     data=json.dumps(t))
         self.assertEqual(404, resp.status_code)
 
