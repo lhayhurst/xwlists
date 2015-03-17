@@ -84,7 +84,7 @@ def mail_message(subject, message):
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
     with app.app_context():
         print("sending msg ")
-        mail.send(msg)
+        #mail.send(msg)
 
 
 def mail_error(errortext):
@@ -93,7 +93,7 @@ def mail_error(errortext):
     msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
         print("sending msg ")
-        mail.send(msg)
+        #mail.send(msg)
 
 
 @app.route("/about")
@@ -185,7 +185,10 @@ def edit_ranking_row():
 
 @app.route("/new")
 def new():
-    return render_template('new_tourney.html', sets=sorted(xwingmetadata.sets_and_expansions.keys()))
+    set = sorted(xwingmetadata.sets_and_expansions.keys() )
+    return render_template('new_tourney.html', sets      = set,
+                                               tourney_formats = xwingmetadata.formats,
+                                               format_default  = xwingmetadata.format_default )
 
 def generate( rows ):
     for r in rows:
@@ -301,12 +304,12 @@ def add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
 
 
 def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
-                   round_length, sets_used, country, state, city, venue, email, participant_count):
+                   round_length, sets_used, country, state, city, venue, email, participant_count, tourney_format):
 
     pm = PersistenceManager(myapp.db_connector)
     t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date,
                 tourney_type=tourney_type, round_length=round_length, email=email, entry_date=datetime.datetime.now(),
-                participant_count=participant_count, locked=False)
+                participant_count=participant_count, locked=False, format=tourney_format)
 
     pm.db_connector.get_session().add(t)
     #add the players
@@ -433,6 +436,8 @@ def add_tourney():
     date                  = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1])) #YYYY, MM, DD
     round_length_dropdown = request.form['round_length_dropdown']
     round_length_userdef  = request.form['round_length_userdef']
+    tourney_format_def    = request.form['tourney_format_dropdown']
+    tourney_format_custom = request.form['tourney_format_custom']
     participant_count     = int(request.form['participant_count'])
     sets_used             = request.form.getlist('sets[]')
     country               = decode(request.form['country'])
@@ -445,6 +450,12 @@ def add_tourney():
         round_length = int(round_length_userdef)
     else:
         round_length = int(round_length_dropdown)
+
+    tourney_format = None
+    if tourney_format_def is None or len(tourney_format_def) == 0:
+        tourney_format = decode(tourney_format_custom)
+    else:
+        tourney_format = str(tourney_format_def)
 
     tourney_report  = request.files['tourney_report']
 
@@ -459,7 +470,9 @@ def add_tourney():
                 data = tourney_report.read()
                 data = decode(data)
                 cryodex = Cryodex(data, filename)
-                t = create_tourney(cryodex, name, date, type, round_length, sets_used, country, state, city, venue, email, participant_count )
+                t = create_tourney(cryodex, name, date, type, round_length,
+                                   sets_used, country, state, city, venue, email, participant_count, tourney_format )
+                print t.tourney_format
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, data=data)
 
@@ -484,7 +497,8 @@ def add_tourney():
         try:
             pm = PersistenceManager(myapp.db_connector)
             t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, locked=False,
-                        round_length=round_length, email=email, entry_date=datetime.datetime.now(), participant_count=participant_count)
+                        round_length=round_length, email=email, entry_date=datetime.datetime.now(),
+                        participant_count=participant_count,format=tourney_format)
             pm.db_connector.get_session().add(t)
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue )
             pm.db_connector.get_session().commit()
