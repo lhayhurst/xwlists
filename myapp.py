@@ -4,6 +4,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+#see https://www.pythonanywhere.com/wiki/WebAppClientIPAddresses
+def remote_address(request):
+    if request.headers.has_key( 'X-Real-IP'):
+        return request.headers[ 'X-Real-IP' ]
+    else:
+        return request.remote_addr
 
 class MyDatabaseConnector(object):
     engine = None

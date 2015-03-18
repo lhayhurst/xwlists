@@ -515,7 +515,7 @@ class PersistenceManager:
         return self.db_connector.get_session().query(Tourney.id).all()
 
     def get_events(self):
-        return self.db_connector.get_session().query(Event)
+        return self.db_connector.get_session().query(Event).order_by( Event.id)
 
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)

@@ -1,3 +1,5 @@
+
+
 FORMAT = 'format'
 __author__ = 'lhayhurst'
 
@@ -7,9 +9,10 @@ import json
 from flask import jsonify, request
 import myapp
 from persistence import PersistenceManager, Tourney, TourneyVenue, TourneyPlayer, TourneyRanking, TourneyList, \
-    RoundResult, TourneyRound, RoundType, TourneySet
+    RoundResult, TourneyRound, RoundType, TourneySet, Event
 from flask.ext import restful
 import dateutil.parser
+from sqlalchemy import func
 
 API_TOKEN = "api_token"
 SETS_USED = 'sets_used'
@@ -259,6 +262,15 @@ class Tournaments(restful.Resource):
                 #looking good.
                 #grab a uuid to finish the job
                 tourney.api_token = str(uuid.uuid4())
+
+                #and log it
+                event = Event(remote_address=myapp.remote_address(request),
+                  event_date=func.now(),
+                  event="API",
+                  event_details="tournament API: tourney creation via POST")
+
+                pm.db_connector.get_session().add( event )
+
                 pm.db_connector.get_session().commit()
 
 
@@ -339,6 +351,16 @@ class Tournament(restful.Resource):
             response = jsonify(message="tourney %d not found" % ( tourney_id ))
             response.status_code = 404
             return response
+
+        #and log it
+        event = Event(remote_address=myapp.remote_address(request),
+          event_date=func.now(),
+          event="API",
+          event_details="tournament API: tourney GET")
+        pm.db_connector.get_session().add( event )
+
+        pm.db_connector.get_session().commit()
+
         return TourneyToJsonConverter().convert(t)
 
     def delete(self, tourney_id):
@@ -367,6 +389,16 @@ class Tournament(restful.Resource):
             pm.delete_tourney_by_id( tourney_id )
         except Exception:
             return self.four_oh_four("unable to delete tourney %d, bailing out " % ( tourney_id ) )
+
+         #and log it
+        event = Event(remote_address=myapp.remote_address(request),
+          event_date=func.now(),
+          event="API",
+          event_details="tournament API: tourney delete %d" % ( tourney_id ))
+        pm.db_connector.get_session().add( event )
+        pm.db_connector.get_session().commit()
+
+
         response = jsonify(message="deleted tourney id %d" % ( tourney_id ))
         response.status_code = 204
         return response

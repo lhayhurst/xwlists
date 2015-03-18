@@ -171,7 +171,7 @@ def edit_ranking_row():
 
     de = RankingEditor(pm, tourney)
 
-    event = Event(remote_address=remote_address(request),
+    event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
                   event="edit ranking row")
 
@@ -248,7 +248,7 @@ def export_all_lists():
         make_header = False
         rows.extend( ret )
 
-    event = Event(remote_address=remote_address(request),
+    event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
                   event="export all tourney lists")
     pm.db_connector.get_session().add(event)
@@ -264,7 +264,7 @@ def export_tourney_lists():
 
     ret = get_tourney_lists_as_text(tourney)
 
-    event = Event(remote_address=remote_address(request),
+    event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
                   event="export tourney lists",
                   event_details="exported tourney %s" % ( tourney.tourney_name ))
@@ -280,7 +280,7 @@ def delete_tourney():
     pm = PersistenceManager(myapp.db_connector)
     pm.delete_tourney(tourney_name)
 
-    event = Event(remote_address=remote_address(request),
+    event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
                   event="delete tourney",
                   event_details="deleted tourney %s" % ( tourney_name ))
@@ -476,7 +476,7 @@ def add_tourney():
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, data=data)
 
-                event = Event(remote_address=remote_address(request),
+                event = Event(remote_address=myapp.remote_address(request),
                               event_date=func.now(),
                               event="create tourney",
                               event_details="created tourney %s from croydex input" % ( t.tourney_name ))
@@ -502,7 +502,7 @@ def add_tourney():
             pm.db_connector.get_session().add(t)
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue )
             pm.db_connector.get_session().commit()
-            event = Event(remote_address=remote_address(request),
+            event = Event(remote_address=myapp.remote_address(request),
                           event_date=func.now(),
                           event="create tourney",
                           event_details="created tourney %s from manual input" % ( t.tourney_name ))
@@ -563,7 +563,7 @@ def delete_list_and_retry():
     tourney_list = pm.get_tourney_list(tourney_list_id)
     pm.delete_tourney_list_details( tourney_list )
 
-    event = Event(remote_address=remote_address(request),
+    event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
                   event="delete list",
                   event_details="deleted list id %d from tourney %s" % ( tourney_list.id, tourney_list.tourney.tourney_name ))
@@ -603,7 +603,7 @@ def enter_list():
     if tourney_list.image is not None:
         image_src = urllib.quote(tourney_list.image)
 
-    event = Event(remote_address=remote_address(request),
+    event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
                   event="create list",
                   event_details="created list %d for tourney %s" % ( tourney_list.id,  tourney.tourney_name ))
@@ -699,14 +699,6 @@ def add_from_voidstate():
          response.status_code = (500)
          return response
 
-#see https://www.pythonanywhere.com/wiki/WebAppClientIPAddresses
-def remote_address(request):
-    if request.headers.has_key( 'X-Real-IP'):
-        return request.headers[ 'X-Real-IP' ]
-    else:
-        return request.remote_addr
-
-
 @app.route("/unlock_tourney", methods=['POST'])
 def unlock_tourney():
     key = request.args.get('key')
@@ -723,7 +715,7 @@ def unlock_tourney():
             else:
                 tourney.locked = True
                 state = "locked"
-            event = Event(remote_address=remote_address(request),
+            event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
                   event="lock/unlock tourney",
                   event_details="set tourney %s to state %s" % ( tourney.tourney_name, state ))
