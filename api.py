@@ -76,9 +76,9 @@ class Tournaments(restful.Resource):
                 return rf
         return None
 
-    def four_oh_four(self, text):
+    def bail(self, text, code):
         response = jsonify(message=text)
-        response.status_code = 404
+        response.status_code = code
         return response
 
     def post(self):
@@ -86,7 +86,7 @@ class Tournaments(restful.Resource):
         try:
             json_data = request.get_json(force=True)
         except Exception:
-            return self.four_oh_four("bad json received!")
+            return self.bail("bad json received!", 403)
         if json_data is not None:
             if json_data.has_key(TOURNAMENT):
                 t = json_data[TOURNAMENT]
@@ -94,8 +94,8 @@ class Tournaments(restful.Resource):
                 # it should have all the required fields
                 missing_field = self.missing_required_field(t)
                 if missing_field is not None:
-                    return self.four_oh_four(
-                        "invalid tourney submission, must contain required fields, missing %s " % ( missing_field ))
+                    return self.bail(
+                        "invalid tourney submission, must contain required fields, missing %s " % ( missing_field ), 403)
 
                 tourney_name = t[NAME]
                 tourney_date = t[DATE]
@@ -108,11 +108,11 @@ class Tournaments(restful.Resource):
                 try:
                     parsed_date = dateutil.parser.parse(tourney_date)
                 except Exception:
-                    return self.four_oh_four("invalid tourney date %s" % ( parsed_date ))
+                    return self.bail("invalid tourney date %s" % ( parsed_date ), 403)
 
                 #validate the tourney type
                 if not tourney_type in Tournaments.tourney_types:
-                    return self.four_oh_four("invalid tourney type %s" % ( tourney_type ))
+                    return self.bail("invalid tourney type %s" % ( tourney_type ), 403)
 
                 #good to go!
                 pm = PersistenceManager(myapp.db_connector)
@@ -135,10 +135,10 @@ class Tournaments(restful.Resource):
                     sets_used = t[SETS_USED]
                     for s in sets_used:
                         if not s in Tournaments.valid_sets:
-                            return self.four_oh_four("unknown xwing set %s provided, bailing out" % ( s ))
+                            return self.bail("unknown xwing set %s provided, bailing out" % ( s ), 403)
                         set = pm.get_set(s)
                         if set is None:
-                            return self.four_oh_four("unknown xwing set %s provided, bailing out" % ( s ))
+                            return self.bail("unknown xwing set %s provided, bailing out" % ( s ), 403)
                         ts = TourneySet(tourney=tourney, set=set)
                         pm.db_connector.get_session().add(ts)
 
@@ -194,43 +194,43 @@ class Tournaments(restful.Resource):
                 if t.has_key(ROUNDS):
                     for r in t[ROUNDS]:
                         if not r.has_key(ROUND_TYPE):
-                            return self.four_oh_four("Round type not found in tourney rounds, giving up!")
+                            return self.bail("Round type not found in tourney rounds, giving up!", 403)
                         round_type = self.convert_round_type_string(r[ROUND_TYPE])
                         if round_type is None:
-                            return self.four_oh_four("Round type %s is not valid, giving up!" % ( round_type ))
+                            return self.bail("Round type %s is not valid, giving up!" % ( round_type ), 403)
                         if not r.has_key(ROUND_NUMBER):
-                            return self.four_oh_four("Round number not found in tourney rounds, giving up!")
+                            return self.bail("Round number not found in tourney rounds, giving up!", 403)
                         round_number = r[ROUND_NUMBER]
                         if not r.has_key(MATCHES):
-                            return self.four_oh_four("List of match results not found in tourney round, giving up!")
+                            return self.bail("List of match results not found in tourney round, giving up!", 403)
                         tourney_round = TourneyRound(round_num=round_number, round_type=round_type, tourney=tourney)
                         tourney.rounds.append(tourney_round)
 
                         matches = r[MATCHES]
                         for m in matches:
                             if not m.has_key(PLAYER1):
-                                return self.four_oh_four("Player one not found in match, giving up!")
+                                return self.bail("Player one not found in match, giving up!", 403)
                             player1 = m[PLAYER1]
                             if not m.has_key(RESULT):
-                                return self.four_oh_four("Result not found in match, giving up!")
+                                return self.bail("Result not found in match, giving up!", 403)
                             if not tlists.has_key(player1):
-                                return self.four_oh_four("Player %s 's list could not be found, giving up " % player1)
+                                return self.bail("Player %s 's list could not be found, giving up " % (  player1 ), 403)
 
                             result = m[RESULT]
                             round_result = None
                             if result == 'win' or result == 'draw':
                                 if not m.has_key(PLAYER2):
-                                    return self.four_oh_four("Player two not found in match, giving up!")
+                                    return self.bail("Player two not found in match, giving up!", 403)
                                 player2 = m[PLAYER2]
                                 if not tlists.has_key(player2):
-                                    return self.four_oh_four(
-                                        "Player %s 's list could not be found, giving up " % player2)
+                                    return self.bail(
+                                        "Player %s 's list could not be found, giving up " % ( player2 ), 403 )
 
                                 if not m.has_key(PLAYER1_POINTS):
-                                    return self.four_oh_four("Player one points not found in match, giving up!")
+                                    return self.bail("Player one points not found in match, giving up!", 403)
                                 player1_points = m[PLAYER1_POINTS]
                                 if not m.has_key(PLAYER2_POINTS):
-                                    return self.four_oh_four("Player two points not found in match, giving up!")
+                                    return self.bail("Player two points not found in match, giving up!", 403)
                                 player2_points = m[PLAYER2_POINTS]
                                 was_draw = False
                                 if result == 'draw':
@@ -256,7 +256,7 @@ class Tournaments(restful.Resource):
                                                            list1_score=None,
                                                            list2_score=None, bye=True, draw=False)
                             else:
-                                return self.four_oh_four("Unknown match result %s, giving up!" % ( result ))
+                                return self.bail("Unknown match result %s, giving up!" % ( result ), 403)
                             tourney_round.results.append(round_result)
 
                 #looking good.
@@ -279,10 +279,10 @@ class Tournaments(restful.Resource):
                 return response
 
             else:
-                return self.four_oh_four(
-                    "invalid tourney submission, must contain required fields, missing %s " % ( TOURNAMENTS ))
+                return self.bail(
+                    "invalid tourney submission, must contain required fields, missing %s " % ( TOURNAMENTS ), 403)
         else:
-            return self.four_oh_four("invalid tourney submission, must contain a json payload")
+            return self.bail("invalid tourney submission, must contain a json payload", 403)
 
 
 class TourneyToJsonConverter:
@@ -339,9 +339,9 @@ class TourneyToJsonConverter:
 
 class Tournament(restful.Resource):
 
-    def four_oh_four(self, text):
+    def bail(self, text, code):
         response = jsonify(message=text)
-        response.status_code = 404
+        response.status_code = code
         return response
 
     def get(self, tourney_id):
@@ -349,7 +349,7 @@ class Tournament(restful.Resource):
         t = pm.get_tourney_by_id(tourney_id)
         if t is None:
             response = jsonify(message="tourney %d not found" % ( tourney_id ))
-            response.status_code = 404
+            response.status_code = 403
             return response
 
         #and log it
@@ -367,28 +367,28 @@ class Tournament(restful.Resource):
         pm = PersistenceManager(myapp.db_connector)
         t = pm.get_tourney_by_id(tourney_id)
         if t is None:
-            return self.four_oh_four("tourney %d not found" % ( tourney_id ))
+            return self.bail("tourney %d not found" % ( tourney_id ), 403)
 
         json_data = None
         try:
             json_data = request.get_json(force=True)
         except Exception:
-            return self.four_oh_four("bad json received!")
+            return self.bail("bad json received!", 403)
         if json_data is None:
-            return self.four_oh_four("delete call for tourney_id %d missing json payload, giving up " % (tourney_id))
+            return self.bail("delete call for tourney_id %d missing json payload, giving up " % (tourney_id), 403)
 
         api_token = json_data[ API_TOKEN ]
         if not json_data.has_key(API_TOKEN):
-            return self.four_oh_four("delete call is missing API token json, bailing out ...")
+            return self.bail("delete call is missing API token json, bailing out ...", 403)
 
         if not api_token == t.api_token:
-            return self.four_oh_four("delete call token_id did not match, bailing out ....")
+            return self.bail("delete call token_id did not match, bailing out ....", 403)
 
         #whew. aaaaalmost there...
         try:
             pm.delete_tourney_by_id( tourney_id )
         except Exception:
-            return self.four_oh_four("unable to delete tourney %d, bailing out " % ( tourney_id ) )
+            return self.bail("unable to delete tourney %d, bailing out " % ( tourney_id ), 403 )
 
          #and log it
         event = Event(remote_address=myapp.remote_address(request),

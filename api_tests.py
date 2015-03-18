@@ -229,56 +229,56 @@ class apiTest(unittest.TestCase):
         #no data payload
         resp = post(dev_url,
                     data=None)
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
         #empty data payload
         resp = post(dev_url,
                     data=json.dumps({}))
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
         #no tournament fields
         resp = post(dev_url,
                     data=json.dumps({"tournament": {}}))
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
         #missing required fields 1
         t = {"tournament": {"name": "foobar"}}
         resp = post(dev_url,
                     data=json.dumps(t))
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
         #missing required fields 2
         t = {"tournament": {"name": "foobar", "date": "2015-05-25"}}
         resp = post(dev_url,
                     data=json.dumps(t))
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
         #missing required fields 3
         t = {"tournament": {"name": "foobar", "date": "2015-05-25", "type": "Store Championship"}}
         resp = post(dev_url,
                     data=json.dumps(t))
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
         #missing required fields 4
         t = {"tournament": {"name": "foobar", "date": "2015-05-25",
                             "type": "Store Championship", "round_length": 60}}
         resp = post(dev_url,
                     data=json.dumps(t))
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
         #invalidly formatted date
         t = {"tournament": {"name": "foobar", "date": "foobar",
                             "type": "Store Championship", "round_length": 60, "participant_count": 30}}
         resp = post(dev_url,
                     data=json.dumps(t))
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
         #invalidly formatted type
         t = {"tournament": {"name": "foobar", "date": "2015-05-25",
                             "type": "Smore Championship", "round_length": 60, "participant_count": 30}}
         resp = post(dev_url,
                     data=json.dumps(t))
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
 
 if __name__ == "__main__":
