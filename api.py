@@ -1,3 +1,4 @@
+FORMAT = 'format'
 __author__ = 'lhayhurst'
 
 import uuid
@@ -122,6 +123,9 @@ class Tournaments(restful.Resource):
                     email = t[EMAIL]
                     #don't bother validating it :-)
                     tourney.email = email
+
+                if t.has_key(FORMAT):
+                    tourney.format = t[FORMAT]
 
                 #set gook
                 if t.has_key(SETS_USED):
@@ -279,6 +283,8 @@ class TourneyToJsonConverter:
         tournament[DATE] = str(t.tourney_date)
         tournament[TYPE] = t.tourney_type
         tournament[ROUND_LENGTH] = t.round_length
+        if t.format is not None:
+            tournament[FORMAT] = t.format
 
         # build the tournament to ranking map
         #naive assumption: assume the rankings are there

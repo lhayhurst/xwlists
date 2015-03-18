@@ -84,7 +84,7 @@ def mail_message(subject, message):
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
     with app.app_context():
         print("sending msg ")
-        #mail.send(msg)
+        mail.send(msg)
 
 
 def mail_error(errortext):
@@ -93,7 +93,7 @@ def mail_error(errortext):
     msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
         print("sending msg ")
-        #mail.send(msg)
+        mail.send(msg)
 
 
 @app.route("/about")

@@ -10,7 +10,7 @@ prod_url = 'http://lists.starwarsclubhouse.com/api/v1/tournaments'
 
 class apiTest(unittest.TestCase):
     def testGetTournaments(self):
-        resp = get(prod_url)
+        resp = get(dev_url)
         ids = resp.json()
         self.assertTrue(ids is not None)
         self.assertTrue(len(ids) > 0)
@@ -29,6 +29,7 @@ class apiTest(unittest.TestCase):
                                           "Rebel Aces Expansion"
 
                             ],
+                            'format': 'Standard - 100 Point Dogfight',
                             'players': [
                                 {
                                     "name": "Lyle Hayhurst",
@@ -144,7 +145,7 @@ class apiTest(unittest.TestCase):
         }
 
 
-        resp = post(prod_url,
+        resp = post(dev_url,
                     data=json.dumps(t))
         self.assertEqual(201, resp.status_code)
         js = resp.json()
@@ -160,6 +161,7 @@ class apiTest(unittest.TestCase):
         self.assertTrue(tourney is not None)
         self.assertEqual(tourney.tourney_name, 'foobar')
         self.assertEqual(str(tourney.tourney_date), '2015-05-25')
+        self.assertEqual(tourney.format, 'Standard - 100 Point Dogfight')
         self.assertEqual(tourney.tourney_type, "Store Championship")
         self.assertEqual(tourney.round_length, 60)
         self.assertEqual(tourney.participant_count, 30)
@@ -214,7 +216,8 @@ class apiTest(unittest.TestCase):
         j = { "api_token": tourney.api_token }
 
         id = tourney.id
-        resp = delete(prod_url + "/" + id  ,
+        delete_url = 'http://localhost:5000/api/v1/tournament/' + str(id)
+        resp = delete(delete_url ,
                     data=json.dumps(j))
         print resp.text
         self.assertEqual(204, resp.status_code)
