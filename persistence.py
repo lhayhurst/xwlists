@@ -206,6 +206,13 @@ class Tourney(Base):
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
     venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
 
+
+    def get_player_by_name(self, player_name):
+        for player in self.tourney_players:
+            if player.player_name == player_name:
+                return player
+        return None
+
     def total_list_count(self):
         return self.participant_count
 

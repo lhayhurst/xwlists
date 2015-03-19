@@ -212,10 +212,97 @@ class apiTest(unittest.TestCase):
         self.assertEqual( 100, res1.list1_score)
         self.assertEqual( 48, res1.list2_score)
 
+        id = tourney.id
+
+        #ok, now try changing the tourney via various updates
+        #first try changing the name
+        t = {"tournament": {"name": "barbaz", 'date': "2000-01-01",
+                            "type": "World Championship", "round_length": 61, "participant_count": 31,
+                            'players': [
+                                {
+                                    "name": "Lyle Hayhurst",
+                                    "new_name": "Kyle Hayhurst",
+                                    "mov": 100,
+                                    "score": 100,
+                                    "sos": 100,
+                                    'dropped': True,
+                                    "rank": {
+                                        "swiss": 5,
+                                        "elimination": 10
+                                    }
+                                },
+                                {
+                                    "name": "New Player Bob",
+                                    "mov": 100,
+                                    "score": 100,
+                                    "sos": 100,
+                                    'dropped': True,
+                                    "rank": {
+                                        "swiss": 5,
+                                        "elimination": 10
+                                    }
+                                },
+                            ]
+                    }
+        }
+
+        update_url = 'http://localhost:5000/api/v1/tournament/' + str(id)
+        resp = put( update_url, data=json.dumps(t))
+        self.assertEqual( 200, resp.status_code)
+        js = resp.json()
+        js = js['tournament']
+        self.assertTrue(js.has_key('name'))
+        self.assertTrue(js.has_key('id'))
+        self.assertTrue(js['name'] == 'barbaz')
+
+        #look it up
+        pm.db_connector = myapp.MyDatabaseConnector()
+        tourney2 = pm.get_tourney_by_id(int(js['id']))
+        self.assertTrue(tourney2 is not None)
+        self.assertEqual( "barbaz", tourney2.tourney_name)
+        self.assertEqual( "2000-01-01", str(tourney2.tourney_date))
+        self.assertEqual( "World Championship", tourney2.tourney_type)
+        self.assertEqual( int(61), tourney2.round_length)
+        self.assertEqual( int(31), tourney2.participant_count )
+
+        #verify that the name change stuck
+        player = tourney2.get_player_by_name("Lyle Hayhurst")
+        self.assertTrue( player is None )
+        player = tourney2.get_player_by_name("Kyle Hayhurst")
+        self.assertTrue( player is not None)
+
+        #and the rankings
+        result = player.result
+        self.assertTrue( result is not None )
+        self.assertEqual( 100, result.mov )
+        self.assertEqual( 100, result.sos )
+        self.assertEqual( 100, result.score )
+        self.assertEqual( 5, result.rank )
+        self.assertEqual( 10, result.elim_rank )
+        self.assertEqual( True, result.dropped )
+
+        #and the new player
+        player = tourney2.get_player_by_name("New Player Bob")
+        self.assertTrue( player is not None)
+
+        #and the rankings
+        result = player.result
+        self.assertTrue( result is not None )
+        self.assertEqual( 100, result.mov )
+        self.assertEqual( 100, result.sos )
+        self.assertEqual( 100, result.score )
+        self.assertEqual( 5, result.rank )
+        self.assertEqual( 10, result.elim_rank )
+        self.assertEqual( True, result.dropped )
+
+
+
+
+
+
         #ok, now delete the thing
         j = { "api_token": tourney.api_token }
 
-        id = tourney.id
         delete_url = 'http://localhost:5000/api/v1/tournament/' + str(id)
         resp = delete(delete_url ,
                     data=json.dumps(j))
