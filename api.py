@@ -1,3 +1,4 @@
+PLAYER = 'player'
 NEW_PLAYER_NAME = 'new_name'
 BYE = 'bye'
 DRAW = 'draw'
@@ -57,6 +58,15 @@ class TournamentApiHelper:
     tourney_types = ["World Championship", "Nationals", "Regional", "Store Championship", "Vassal play", "Other"]
     valid_sets = sets_and_expansions.keys()
 
+    def check_token(self, json_data, tourney ):
+        if not json_data.has_key(API_TOKEN):
+            return self.bail("Missing API token json, bailing out ...", 403)
+        api_token = json_data[ API_TOKEN ]
+        if not api_token == tourney.api_token:
+            return self.bail("Token_id did not match, bailing out ....", 403)
+        return None
+
+
     def convert_round_type_string(self, str):
         if str == SWISS:
             return RoundType.PRE_ELIMINATION
@@ -70,6 +80,12 @@ class TournamentApiHelper:
                 return rf
         return None
 
+    def isint(self, s):
+        try:
+            int(s)
+            return True
+        except ValueError:
+            return False
 
     def bail(self, text, code):
         response = jsonify(message=text)
@@ -101,6 +117,24 @@ class TournamentApiHelper:
                 venue.venue = vhref[VENUE]
             tourney.venue = venue
 
+    def extract_player(self, p, player, ranking):
+        if p.has_key(PLAYER_NAME):
+            player.player_name = p[PLAYER_NAME]
+        if p.has_key(MOV):
+            ranking.mov = p[MOV]
+        if p.has_key(SCORE):
+            ranking.score = p[SCORE]
+        if p.has_key(SOS):
+            ranking.sos = p[SOS]
+        if p.has_key(DROPPED):
+            ranking.dropped = p[DROPPED]
+        if p.has_key(RANK):
+            r = p[RANK]
+            if r.has_key(SWISS):
+                ranking.rank = r[SWISS]
+            if r.has_key(ELIMINATION):
+                ranking.elim_rank = r[ELIMINATION]
+
     def extract_players(self, t, tourney):
         tlists = {}
         if t.has_key(PLAYERS):
@@ -112,14 +146,17 @@ class TournamentApiHelper:
 
                 #first see if the tourney already has a player and player list matching this player's name
                 #if so, update it rather than creating a new one
-                if p.has_key(PLAYER_NAME):
-                    player = tourney.get_player_by_name(p[PLAYER_NAME])
+                if not p.has_key(PLAYER_NAME):
+                    return self.bail( "received empty player set", 403 )
+                player_name = p[PLAYER_NAME]
+                player = tourney.get_player_by_name(p[PLAYER_NAME])
+
                 if player is None:
                     player = TourneyPlayer(player_name="Player %d" % ( i ))
                     ranking = TourneyRanking(player=player)
                     player.result = ranking
                     tourney_list = TourneyList(tourney=tourney, player=player)
-                    tlists[player.player_name] = tourney_list  # stash it away for later use
+                    tlists[p[PLAYER_NAME]] = tourney_list  # stash it away for later use
                     tourney.tourney_players.append(player)
                     tourney.tourney_lists.append(tourney_list)
                     tourney.rankings.append(ranking)
@@ -127,27 +164,10 @@ class TournamentApiHelper:
                     i = i + 1
                 else:
                     ranking = player.result
+                    tlists[p[PLAYER_NAME]] = player.get_first_tourney_list()
 
-                if p.has_key(PLAYER_NAME):
-                    if p.has_key(NEW_PLAYER_NAME):
-                        player.player_name = p[NEW_PLAYER_NAME]
-                    else:
-                        player.player_name = p[PLAYER_NAME]
-                    tlists[player.player_name] = player.get_first_tourney_list()
-                if p.has_key(MOV):
-                    ranking.mov = p[MOV]
-                if p.has_key(SCORE):
-                    ranking.score = p[SCORE]
-                if p.has_key(SOS):
-                    ranking.sos = p[SOS]
-                if p.has_key(DROPPED):
-                    ranking.dropped = p[DROPPED]
-                if p.has_key(RANK):
-                    r = p[RANK]
-                    if r.has_key(SWISS):
-                        ranking.rank = r[SWISS]
-                    if r.has_key(ELIMINATION):
-                        ranking.elim_rank = r[ELIMINATION]
+
+                self.extract_player(p, player, ranking)
 
         return tlists
 
@@ -239,7 +259,7 @@ class TournamentApiHelper:
 
 
 
-class Tournaments(restful.Resource):
+class TournamentsAPI(restful.Resource):
     def get(self):
         pm = PersistenceManager(myapp.db_connector)
         ids = pm.get_tourney_ids()
@@ -321,7 +341,7 @@ class Tournaments(restful.Resource):
                 pm.db_connector.get_session().add( event )
                 pm.db_connector.get_session().commit()
 
-                response = jsonify({TOURNAMENT: {NAME: tourney.tourney_name, "id": tourney.id, API_TOKEN: tourney.api_token }})
+                response = jsonify({TOURNAMENT: {NAME: tourney.tourney_name, ID: tourney.id, API_TOKEN: tourney.api_token }})
                 response.status_code = 201
                 return response
 
@@ -330,7 +350,6 @@ class Tournaments(restful.Resource):
                     "invalid tourney submission, must contain required fields, missing %s " % ( TOURNAMENTS ), 403)
         else:
             return helper.bail("invalid tourney submission, must contain a json payload", 403)
-
 
 class TourneyToJsonConverter:
     def convert(self, t):
@@ -383,8 +402,46 @@ class TourneyToJsonConverter:
 
         return json.dumps(ret)
 
+class PlayerAPI(restful.Resource):
+    def get(self, tourney_id):
+        helper = TournamentApiHelper()
+        if not helper.isint(tourney_id) :
+            return helper.bail("invalid tourney id %d passed to player get" % ( tourney_id), 403)
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id(tourney_id)
+        if tourney is None:
+            return helper.bail("failed to look up tourney id %d" % ( tourney_id, 403 ))
+        ret = []
+        for player in tourney.tourney_players:
+            ret.append( { PLAYER_NAME: player.player_name, ID: player.id })
+        return json.dumps({PLAYERS: ret})
 
-class Tournament(restful.Resource):
+    def put(self, player_id):
+        helper = TournamentApiHelper()
+        if not helper.isint(player_id) :
+            return helper.bail("invalid player_id id %d passed to player get" % ( player_id), 403)
+        pm = PersistenceManager(myapp.db_connector)
+        player = pm.get_player_by_id(player_id)
+        if player is None:
+            return helper.bail("failed to look up tourney id %d" % ( player, 403 ))
+
+        json_data = None
+        try:
+            json_data = request.get_json(force=True)
+        except Exception:
+            return helper.bail("bad json received!", 403)
+        if json_data is not None:
+            bail = helper.check_token( json_data, player.tourney )
+            if bail:
+                return bail
+            if not json_data.has_key(PLAYER):
+                return helper.bail( "player put missing player key", 403 )
+            p = json_data[PLAYER]
+
+            self.extract_player(p, player, player.result )
+
+
+class TournamentAPI(restful.Resource):
 
     def put(self, tourney_id):
         pm = PersistenceManager(myapp.db_connector)
@@ -404,6 +461,11 @@ class Tournament(restful.Resource):
         except Exception:
             return helper.bail("bad json received!", 403)
         if json_data is not None:
+
+            bail = helper.check_token( json_data, tourney )
+            if bail:
+                return bail
+
             if json_data.has_key(TOURNAMENT):
                 t = json_data[TOURNAMENT]
                 if t.has_key(NAME):
@@ -498,12 +560,9 @@ class Tournament(restful.Resource):
         if json_data is None:
             return helper.bail("delete call for tourney_id %d missing json payload, giving up " % (tourney_id), 403)
 
-        api_token = json_data[ API_TOKEN ]
-        if not json_data.has_key(API_TOKEN):
-            return helper.bail("delete call is missing API token json, bailing out ...", 403)
-
-        if not api_token == t.api_token:
-            return helper.bail("delete call token_id did not match, bailing out ....", 403)
+        bail = helper.check_token( json_data, t )
+        if bail:
+            return bail
 
         #whew. aaaaalmost there...
         try:

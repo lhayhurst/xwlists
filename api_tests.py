@@ -248,6 +248,7 @@ class apiTest(unittest.TestCase):
 
         update_url = 'http://localhost:5000/api/v1/tournament/' + str(id)
         resp = put( update_url, data=json.dumps(t))
+        print resp.text
         self.assertEqual( 200, resp.status_code)
         js = resp.json()
         js = js['tournament']
@@ -306,8 +307,47 @@ class apiTest(unittest.TestCase):
         delete_url = 'http://localhost:5000/api/v1/tournament/' + str(id)
         resp = delete(delete_url ,
                     data=json.dumps(j))
-        print resp.text
+        #print resp.text
         self.assertEqual(204, resp.status_code)
+
+    def isint(self, s):
+        try:
+            int(s)
+            return True
+        except ValueError:
+            return False
+
+    def testPlayerAPI(self):
+
+        t = {"tournament": {"name": "playertests", "date": "2015-05-25",
+                            "type": "Store Championship", "round_length": 60, "participant_count": 30,
+                            "players": [ { "name": "bob"}, {"name" : "bill"}  ]}}
+        resp = post(dev_url,
+                    data=json.dumps(t))
+        self.assertEqual(201, resp.status_code)
+        tjson = resp.json()
+        self.assertTrue( tjson is not None )
+        tjson = tjson['tournament']
+        player_url = 'http://localhost:5000/api/v1/players/' + str(tjson['id'])
+        resp = get( player_url )
+        print resp.text
+        self.assertEqual( 200, resp.status_code )
+        players = json.loads( resp.json() )
+        players = players['players']
+        self.assertTrue( len(players) == 2)
+        bob = players[0]
+        self.assertTrue( bob[ 'name'] == 'bob')
+        self.assertTrue( bob.has_key( "id"))
+        self.assertTrue (self.isint( bob['id']))
+        self.assertTrue( int(bob['id'] > 0 ))
+
+        bill = players[1]
+        self.assertTrue( bill[ 'name'] == 'bill')
+        self.assertTrue( bill.has_key( "id"))
+        self.assertTrue (self.isint( bill['id']))
+        self.assertTrue( int(bill['id'] > 0 ))
+
+        #ok, get works just fine.  now let's change a player!
 
 
 

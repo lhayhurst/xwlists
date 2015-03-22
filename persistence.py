@@ -282,6 +282,7 @@ class TourneyPlayer(Base):
     tourney_lists    = relationship( "TourneyList", back_populates='player')
     result           = relationship("TourneyRanking", back_populates='player', uselist=False )
 
+
     def get_first_tourney_list(self):
         if self.tourney_lists:
             return self.tourney_lists[0]
