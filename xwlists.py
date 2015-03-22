@@ -9,7 +9,7 @@ from flask.ext.mail import Mail, Message
 import sys
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
-from api import Tournaments, Tournament
+from api import TournamentsAPI, TournamentAPI, PlayerAPI
 
 from cryodex import Cryodex
 from dataeditor import RankingEditor
@@ -60,8 +60,9 @@ session = myapp.db_connector.get_session()
 
 
 api = restful.Api(app)
-api.add_resource(Tournaments, '/api/v1/tournaments')
-api.add_resource(Tournament, '/api/v1/tournament/<int:tourney_id>' )
+api.add_resource(TournamentsAPI, '/api/v1/tournaments')
+api.add_resource(TournamentAPI, '/api/v1/tournament/<int:tourney_id>' )
+api.add_resource(PlayerAPI, '/api/v1/players/<int:tourney_id>' )
 
 @app.before_request
 def check_for_maintenance():
@@ -459,8 +460,8 @@ def add_tourney():
 
     tourney_report  = request.files['tourney_report']
 
-    print "Request to create tourney name %s from user %s of type %s on day %s with %d participants" % \
-          ( name, email, type, date, participant_count)
+    mail_message("New tourney creation attempt", "Request to create tourney name %s from user %s of type %s on day %s with %d participants" % \
+          ( name, email, type, date, participant_count) )
 
     if tourney_report:
         filename        = tourney_report.filename
@@ -472,7 +473,6 @@ def add_tourney():
                 cryodex = Cryodex(data, filename)
                 t = create_tourney(cryodex, name, date, type, round_length,
                                    sets_used, country, state, city, venue, email, participant_count, tourney_format )
-                print t.tourney_format
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file( failed=False, filename=sfilename, data=data)
 
