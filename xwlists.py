@@ -454,7 +454,10 @@ def add_tourney():
 
     tourney_format = None
     if tourney_format_def is None or len(tourney_format_def) == 0:
-        tourney_format = decode(tourney_format_custom)
+        if tourney_format_custom is None or len(tourney_format_custom) == 0:
+            tourney_format = xwingmetadata.format_default
+        else:
+            tourney_format = decode(tourney_format_custom)
     else:
         tourney_format = str(tourney_format_def)
 
