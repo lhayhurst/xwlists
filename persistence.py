@@ -213,6 +213,12 @@ class Tourney(Base):
                 return player
         return None
 
+    def get_player_by_id(self, player_id):
+        for player in self.tourney_players:
+            if player.id == player_id:
+                return player
+        return None
+
     def total_list_count(self):
         return self.participant_count
 

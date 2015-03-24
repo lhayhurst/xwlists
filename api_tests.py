@@ -156,6 +156,8 @@ class apiTest(unittest.TestCase):
         self.assertTrue(js['name'] == 'foobar')
 
         # look it up in the db and verify that stuff matched out ok
+        myapp.db_connector.close()
+        myapp.db_connector.connect()
         pm = PersistenceManager(myapp.db_connector)
         tourney = pm.get_tourney_by_id(int(js['id']))
         self.assertTrue(tourney is not None)
@@ -214,93 +216,6 @@ class apiTest(unittest.TestCase):
 
         id = tourney.id
 
-        #ok, now try changing the tourney via various updates
-        #first try changing the name
-        t = {"tournament": {"name": "barbaz", 'date': "2000-01-01",
-                            "type": "World Championship", "round_length": 61, "participant_count": 31,
-                            'players': [
-                                {
-                                    "name": "Lyle Hayhurst",
-                                    "new_name": "Kyle Hayhurst",
-                                    "mov": 100,
-                                    "score": 100,
-                                    "sos": 100,
-                                    'dropped': True,
-                                    "rank": {
-                                        "swiss": 5,
-                                        "elimination": 10
-                                    }
-                                },
-                                {
-                                    "name": "New Player Bob",
-                                    "mov": 100,
-                                    "score": 100,
-                                    "sos": 100,
-                                    'dropped': True,
-                                    "rank": {
-                                        "swiss": 5,
-                                        "elimination": 10
-                                    }
-                                },
-                            ]
-                    }
-        }
-
-        update_url = 'http://localhost:5000/api/v1/tournament/' + str(id)
-        resp = put( update_url, data=json.dumps(t))
-        print resp.text
-        self.assertEqual( 200, resp.status_code)
-        js = resp.json()
-        js = js['tournament']
-        self.assertTrue(js.has_key('name'))
-        self.assertTrue(js.has_key('id'))
-        self.assertTrue(js['name'] == 'barbaz')
-
-        #look it up
-        pm.db_connector = myapp.MyDatabaseConnector()
-        tourney2 = pm.get_tourney_by_id(int(js['id']))
-        self.assertTrue(tourney2 is not None)
-        self.assertEqual( "barbaz", tourney2.tourney_name)
-        self.assertEqual( "2000-01-01", str(tourney2.tourney_date))
-        self.assertEqual( "World Championship", tourney2.tourney_type)
-        self.assertEqual( int(61), tourney2.round_length)
-        self.assertEqual( int(31), tourney2.participant_count )
-
-        #verify that the name change stuck
-        player = tourney2.get_player_by_name("Lyle Hayhurst")
-        self.assertTrue( player is None )
-        player = tourney2.get_player_by_name("Kyle Hayhurst")
-        self.assertTrue( player is not None)
-
-        #and the rankings
-        result = player.result
-        self.assertTrue( result is not None )
-        self.assertEqual( 100, result.mov )
-        self.assertEqual( 100, result.sos )
-        self.assertEqual( 100, result.score )
-        self.assertEqual( 5, result.rank )
-        self.assertEqual( 10, result.elim_rank )
-        self.assertEqual( True, result.dropped )
-
-        #and the new player
-        player = tourney2.get_player_by_name("New Player Bob")
-        self.assertTrue( player is not None)
-
-        #and the rankings
-        result = player.result
-        self.assertTrue( result is not None )
-        self.assertEqual( 100, result.mov )
-        self.assertEqual( 100, result.sos )
-        self.assertEqual( 100, result.score )
-        self.assertEqual( 5, result.rank )
-        self.assertEqual( 10, result.elim_rank )
-        self.assertEqual( True, result.dropped )
-
-
-
-
-
-
         #ok, now delete the thing
         j = { "api_token": tourney.api_token }
 
@@ -328,12 +243,12 @@ class apiTest(unittest.TestCase):
         tjson = resp.json()
         self.assertTrue( tjson is not None )
         tjson = tjson['tournament']
-        player_url = 'http://localhost:5000/api/v1/players/' + str(tjson['id'])
-        resp = get( player_url )
-        print resp.text
-        self.assertEqual( 200, resp.status_code )
-        players = json.loads( resp.json() )
-        players = players['players']
+        tourney_id = tjson["id"]
+        api_token = tjson['api_token']
+        self.assertTrue( api_token is not None and len(api_token) > 0 )
+
+        self.assertTrue( tourney_id is not None)
+        players = tjson['players']
         self.assertTrue( len(players) == 2)
         bob = players[0]
         self.assertTrue( bob[ 'name'] == 'bob')
@@ -347,7 +262,114 @@ class apiTest(unittest.TestCase):
         self.assertTrue (self.isint( bill['id']))
         self.assertTrue( int(bill['id'] > 0 ))
 
-        #ok, get works just fine.  now let's change a player!
+        #ok, get works just fine.
+        #ty out player get
+        player_get_url = 'http://localhost:5000/api/v1/tournament/' + str(tourney_id) + "/players"
+        print player_get_url
+        resp = get( player_get_url )
+        print resp.text
+        self.assertEqual( 200, resp.status_code)
+        pjson = resp.json()
+
+        self.assertTrue(pjson.has_key('players'))
+        players = pjson['players']
+        bob = players[0]
+        self.assertTrue( bob[ 'name'] == 'bob')
+        self.assertTrue( bob.has_key( "id"))
+        self.assertTrue (self.isint( bob['id']))
+        self.assertTrue( int(bob['id'] > 0 ))
+
+        bill = players[1]
+        self.assertTrue( bill[ 'name'] == 'bill')
+        self.assertTrue( bill.has_key( "id"))
+        self.assertTrue (self.isint( bill['id']))
+        self.assertTrue( int(bill['id'] > 0 ))
+
+        #and now the player put
+        p = {"api_token": api_token,
+            "players": [ { 'id': bob['id'], 'name': "bob2"}, { 'id': bill['id'], "name" : "bill2"}  ] }
+
+        resp = put( player_get_url , data=json.dumps(p))
+        print resp.text
+        self.assertEqual( 200, resp.status_code)
+
+        #look it up in the database and verify that the names were changed properly
+        myapp.db_connector.close()
+        myapp.db_connector.connect()
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id(tourney_id)
+        self.assertTrue( tourney is not None)
+
+        p1 = tourney.get_player_by_name("bob2")
+        self.assertTrue( p1 is not None )
+        self.assertTrue( p1.player_name == "bob2")
+        self.assertTrue( p1.id == bob['id'] )
+
+        p2 = tourney.get_player_by_name("bill2")
+        self.assertTrue( p2 is not None )
+        self.assertTrue( p2.player_name == "bill2")
+        self.assertTrue( p2.id == bill['id'] )
+
+        #add some new names via post
+        p = {"api_token": api_token,
+            "players": [ {  'name': "joe"}, {  "name" : "jenny"}  ] }
+
+        resp = post( player_get_url , data=json.dumps(p))
+        print resp.text
+        self.assertEqual( 201, resp.status_code)
+        tjson = resp.json()
+        self.assertTrue( tjson is not None )
+        tjson = tjson['players']
+        print tjson
+        p1 = tjson[0]
+        self.assertTrue( p1 is not None )
+        self.assertTrue( p1['name'] == 'joe')
+        self.assertTrue( p1['id'] is not None)
+        p2 = tjson[1]
+        self.assertTrue( p2 is not None )
+        self.assertTrue( p2['name'] == 'jenny')
+        self.assertTrue( p2['id'] is not None)
+
+        #look it up in the database and verify that it stuck
+        myapp.db_connector.close()
+        myapp.db_connector.connect()
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id(tourney_id)
+        self.assertTrue( tourney is not None)
+
+        dp1 = tourney.get_player_by_name("joe")
+        self.assertTrue( dp1 is not None )
+        self.assertTrue( dp1.player_name == "joe")
+        self.assertTrue( dp1.id == p1['id'] )
+
+        dp2 = tourney.get_player_by_name("jenny")
+        self.assertTrue( dp2 is not None )
+        self.assertTrue( dp2.player_name == "jenny")
+        self.assertTrue( dp2.id == p2['id'] )
+
+        #ok, now try to delete!
+        #try to take out jenny
+
+        d = {"api_token": api_token}
+        delete_url = 'http://localhost:5000/api/v1/tournament/' + str(tourney_id) + "/player/" + str(p2['id'])
+        resp = delete( delete_url , data=json.dumps(d))
+        print resp.text
+        self.assertEqual( 200, resp.status_code)
+
+        myapp.db_connector.close()
+        myapp.db_connector.connect()
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id(tourney_id)
+        self.assertTrue( tourney is not None)
+
+        dp1 = tourney.get_player_by_name("joe")
+        self.assertTrue( dp1 is not None )
+        self.assertTrue( dp1.player_name == "joe")
+        self.assertTrue( dp1.id == p1['id'] )
+
+        dp2 = tourney.get_player_by_name("jenny")
+        self.assertTrue( dp2 is  None )
+
 
 
 

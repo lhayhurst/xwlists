@@ -1,3 +1,4 @@
+PLAYERS = 'players'
 PLAYER = 'player'
 NEW_PLAYER_NAME = 'new_name'
 BYE = 'bye'
@@ -149,7 +150,12 @@ class TournamentApiHelper:
                 if not p.has_key(PLAYER_NAME):
                     return self.bail( "received empty player set", 403 )
                 player_name = p[PLAYER_NAME]
-                player = tourney.get_player_by_name(p[PLAYER_NAME])
+                if p.has_key(ID):
+                    player = tourney.get_player_by_id( p[ID])
+                    if player is None:
+                        return self.bail("couldn't find player with id %d, giving up" % ( p[ID], 403))
+                else:
+                    player = tourney.get_player_by_name(p[PLAYER_NAME])
 
                 if player is None:
                     player = TourneyPlayer(player_name="Player %d" % ( i ))
@@ -341,7 +347,14 @@ class TournamentsAPI(restful.Resource):
                 pm.db_connector.get_session().add( event )
                 pm.db_connector.get_session().commit()
 
-                response = jsonify({TOURNAMENT: {NAME: tourney.tourney_name, ID: tourney.id, API_TOKEN: tourney.api_token }})
+                players = []
+                for player in tourney.tourney_players:
+                    players.append( { NAME: player.player_name, ID: player.id })
+
+                response = jsonify({TOURNAMENT: {NAME: tourney.tourney_name,
+                                                 ID: tourney.id,
+                                                 API_TOKEN: tourney.api_token,
+                                                 PLAYERS: players } } )
                 response.status_code = 201
                 return response
 
@@ -350,6 +363,107 @@ class TournamentsAPI(restful.Resource):
                     "invalid tourney submission, must contain required fields, missing %s " % ( TOURNAMENTS ), 403)
         else:
             return helper.bail("invalid tourney submission, must contain a json payload", 403)
+
+class PlayerAPI(restful.Resource):
+    def delete(self, tourney_id, player_id ):
+        helper = TournamentApiHelper()
+        json_data = None
+        try:
+             json_data = request.get_json(force=True)
+        except Exception:
+             return helper.bail("bad json received!", 403)
+
+        if not helper.isint(tourney_id) :
+            return helper.bail("invalid tourney_id  %d passed to player delete" % ( tourney_id), 403)
+        if not helper.isint(player_id) :
+            return helper.bail("invalid player  %d passed to player delete" % ( player_id), 403)
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id( tourney_id)
+        bail = helper.check_token(json_data, tourney)
+        if bail:
+            return bail
+        player = tourney.get_player_by_id(player_id)
+        if player is None:
+            return helper.bail("couldn't find player %d, bailing out" % ( player_id), 403)
+        pm.db_connector.get_session().delete( player )
+        pm.db_connector.get_session().commit()
+
+class PlayersAPI(restful.Resource):
+
+    def get(self, tourney_id):
+        helper = TournamentApiHelper()
+        if not helper.isint(tourney_id) :
+            return helper.bail("invalid tourney_id  %d passed to player get" % ( tourney_id), 403)
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id( tourney_id)
+        if tourney is None:
+            return helper.bail("failed to look up tourney id %d for player get" % ( tourney_id), 403)
+
+        players = []
+        for player in tourney.tourney_players:
+            players.append( { NAME: player.player_name, ID: player.id })
+
+        response = jsonify({PLAYERS: players})
+        response.status_code = 200
+        return response
+
+    def put_or_post(self, helper, tourney_id ):
+        if not helper.isint(tourney_id) :
+             return helper.bail("invalid tourney_id  %d passed to player get" % ( tourney_id), 403)
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id( tourney_id)
+        if tourney is None:
+             return helper.bail("failed to look up tourney id %d for player get" % ( tourney_id), 403)
+
+        json_data = None
+        try:
+             json_data = request.get_json(force=True)
+        except Exception:
+             return helper.bail("bad json received!", 403)
+        if json_data is not None:
+            bail = helper.check_token(json_data, tourney)
+            if bail:
+                return bail, None
+        if not json_data.has_key(PLAYERS):
+            return helper.bail("player put missing player key", 403), None
+
+        helper.extract_players( json_data, tourney )
+        pm.db_connector.get_session().commit()
+
+        players = []
+        for player in tourney.tourney_players:
+            players.append( { NAME: player.player_name, ID: player.id })
+        return None, players
+
+    def post(self, tourney_id):
+        helper = TournamentApiHelper()
+        bail, players = self.put_or_post( helper, tourney_id )
+        if bail:
+            return bail
+        #only return the players that the caller created
+        json_data = None
+        try:
+             json_data = request.get_json(force=True)
+        except Exception:
+             return helper.bail("bad json received!", 403)
+        new_players = json_data[PLAYERS]
+        ret = []
+        for p in players:
+            for np in new_players:
+                if p[NAME] == np[PLAYER_NAME]:
+                    ret.append(p)
+
+        response = jsonify({PLAYERS: ret})
+        response.status_code = 201
+        return response
+
+    def put(self, tourney_id):
+        helper = TournamentApiHelper()
+        bail, players = self.put_or_post( helper, tourney_id )
+        if bail:
+            return bail
+
+
 
 class TourneyToJsonConverter:
     def convert(self, t):
@@ -402,43 +516,6 @@ class TourneyToJsonConverter:
 
         return json.dumps(ret)
 
-class PlayerAPI(restful.Resource):
-    def get(self, tourney_id):
-        helper = TournamentApiHelper()
-        if not helper.isint(tourney_id) :
-            return helper.bail("invalid tourney id %d passed to player get" % ( tourney_id), 403)
-        pm = PersistenceManager(myapp.db_connector)
-        tourney = pm.get_tourney_by_id(tourney_id)
-        if tourney is None:
-            return helper.bail("failed to look up tourney id %d" % ( tourney_id, 403 ))
-        ret = []
-        for player in tourney.tourney_players:
-            ret.append( { PLAYER_NAME: player.player_name, ID: player.id })
-        return json.dumps({PLAYERS: ret})
-
-    def put(self, player_id):
-        helper = TournamentApiHelper()
-        if not helper.isint(player_id) :
-            return helper.bail("invalid player_id id %d passed to player get" % ( player_id), 403)
-        pm = PersistenceManager(myapp.db_connector)
-        player = pm.get_player_by_id(player_id)
-        if player is None:
-            return helper.bail("failed to look up tourney id %d" % ( player, 403 ))
-
-        json_data = None
-        try:
-            json_data = request.get_json(force=True)
-        except Exception:
-            return helper.bail("bad json received!", 403)
-        if json_data is not None:
-            bail = helper.check_token( json_data, player.tourney )
-            if bail:
-                return bail
-            if not json_data.has_key(PLAYER):
-                return helper.bail( "player put missing player key", 403 )
-            p = json_data[PLAYER]
-
-            self.extract_player(p, player, player.result )
 
 
 class TournamentAPI(restful.Resource):
@@ -461,10 +538,6 @@ class TournamentAPI(restful.Resource):
         except Exception:
             return helper.bail("bad json received!", 403)
         if json_data is not None:
-
-            bail = helper.check_token( json_data, tourney )
-            if bail:
-                return bail
 
             if json_data.has_key(TOURNAMENT):
                 t = json_data[TOURNAMENT]
