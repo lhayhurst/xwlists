@@ -643,7 +643,7 @@ class TournamentAPI(restful.Resource):
         t = pm.get_tourney_by_id(tourney_id)
         if t is None:
             response = jsonify(message="tourney %d not found" % ( tourney_id ))
-            response.status_code = 403
+            response.status_code = 404
             return response
 
         #and log it
