@@ -232,6 +232,106 @@ class apiTest(unittest.TestCase):
         except ValueError:
             return False
 
+    def testAxelCase(self):
+        t = {"tournament": {"name": "playertests", "date": "2015-05-25",
+                            "type": "Store Championship", "round_length": 60, "participant_count": 30 } }
+        resp = post(dev_url,
+                    data=json.dumps(t))
+        self.assertEqual(201, resp.status_code)
+        tjson = resp.json()
+        self.assertTrue( tjson is not None )
+        tjson = tjson['tournament']
+        tourney_id = tjson["id"]
+        api_token = tjson['api_token']
+        self.assertTrue( api_token is not None and len(api_token) > 0 )
+
+        #add the players
+        p =  [ { "name": "bob"}, {"name" : "bill"}  ]
+        t = { 'api_token': api_token,
+              'players': p
+        }
+
+        player_get_url = 'http://localhost:5000/api/v1/tournament/' + str(tourney_id) + "/players"
+        resp = post( player_get_url , data=json.dumps(t))
+        print resp.text
+        self.assertEqual( 201, resp.status_code)
+        pjson = resp.json()
+
+        self.assertTrue(pjson.has_key('players'))
+        players = pjson['players']
+        bob = players[0]
+        self.assertTrue( bob[ 'name'] == 'bob')
+        self.assertTrue( bob.has_key( "id"))
+        self.assertTrue (self.isint( bob['id']))
+        self.assertTrue( int(bob['id'] > 0 ))
+
+        bill = players[1]
+        self.assertTrue( bill[ 'name'] == 'bill')
+        self.assertTrue( bill.has_key( "id"))
+        self.assertTrue (self.isint( bill['id']))
+        self.assertTrue( int(bill['id'] > 0 ))
+
+        #ok, now enter the rest of the data
+        t = { 'api_token': api_token,
+              'tournament': {
+                  'format': 'Standard - 100 Point Dogfight',
+                  'players': [
+                      {
+                          "player_id": bob['id'],
+                          "mov": 622,
+                          "score": 20,
+                          "sos": 50,
+                          'dropped': False,
+                          "rank": {
+                              "swiss": 1,
+                              "elimination": 2
+                          }
+                      },
+                      {
+                          'player_id': bill['id'],
+                          "mov": 647,
+                          "score": 15,
+                          "sos": 45,
+                          'dropped': True,
+                          "rank": {
+                              "swiss": 2,
+                              "elimination": 4
+                          }
+                      } ],
+
+                  "rounds": [
+                      {
+                          "round-type": "swiss",
+                          "round-number": 1,
+                          "matches": [
+                              {
+                                  "player1_id": bob['id'],
+                                  "player1points": 100,
+                                  "player2_id":  bill['id'],
+                                  "player2points": 48,
+                                  "result": "win"
+                              },
+                          ]
+                      }
+                  ]
+              }
+        }
+        url = 'http://localhost:5000/api/v1/tournament/' + str(tourney_id)
+
+        resp = put(url,
+                    data=json.dumps(t))
+        self.assertEqual(200, resp.status_code)
+        tjson = resp.json()
+        self.assertTrue( tjson is not None )
+        tjson = tjson['tournament']
+
+
+
+
+
+
+
+
     def testPlayerAPI(self):
 
         t = {"tournament": {"name": "playertests", "date": "2015-05-25",
@@ -287,7 +387,7 @@ class apiTest(unittest.TestCase):
 
         #and now the player put
         p = {"api_token": api_token,
-            "players": [ { 'id': bob['id'], 'name': "bob2"}, { 'id': bill['id'], "name" : "bill2"}  ] }
+            "players": [ { 'player_id': bob['id'], 'name': 'bob2' }, { 'player_id': bill['id'], 'name': 'bill2' }  ] }
 
         resp = put( player_get_url , data=json.dumps(p))
         print resp.text

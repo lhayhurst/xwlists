@@ -1,3 +1,6 @@
+PLAYER_ID = 'player_id'
+PLAYER2_ID = 'player2_id'
+PLAYER1_ID = 'player1_id'
 PLAYERS = 'players'
 PLAYER = 'player'
 NEW_PLAYER_NAME = 'new_name'
@@ -137,7 +140,9 @@ class TournamentApiHelper:
                 ranking.elim_rank = r[ELIMINATION]
 
     def extract_players(self, t, tourney):
-        tlists = {}
+        tlists_by_id = {}
+        tlists_by_name = {}
+
         if t.has_key(PLAYERS):
             players = t[PLAYERS]
             i = 1
@@ -147,14 +152,13 @@ class TournamentApiHelper:
 
                 #first see if the tourney already has a player and player list matching this player's name
                 #if so, update it rather than creating a new one
-                if not p.has_key(PLAYER_NAME):
-                    return self.bail( "received empty player set", 403 )
-                player_name = p[PLAYER_NAME]
-                if p.has_key(ID):
-                    player = tourney.get_player_by_id( p[ID])
+                if p.has_key(PLAYER_ID):
+                    player = tourney.get_player_by_id( p[PLAYER_ID])
                     if player is None:
-                        return self.bail("couldn't find player with id %d, giving up" % ( p[ID], 403))
+                        return self.bail("couldn't find player with id %d, giving up" % ( p[PLAYER_ID], 403)), None, None
                 else:
+                    if not p.has_key(PLAYER_NAME):
+                        return self.bail("neither an id or a name was provided, giving up ", 403 ), None, None
                     player = tourney.get_player_by_name(p[PLAYER_NAME])
 
                 if player is None:
@@ -162,7 +166,9 @@ class TournamentApiHelper:
                     ranking = TourneyRanking(player=player)
                     player.result = ranking
                     tourney_list = TourneyList(tourney=tourney, player=player)
-                    tlists[p[PLAYER_NAME]] = tourney_list  # stash it away for later use
+                    tlists_by_id[player.id] = tourney_list  # stash it away for later use
+                    if p.has_key(PLAYER_NAME):
+                        tlists_by_name[ p[PLAYER_NAME]] = tourney_list
                     tourney.tourney_players.append(player)
                     tourney.tourney_lists.append(tourney_list)
                     tourney.rankings.append(ranking)
@@ -170,12 +176,14 @@ class TournamentApiHelper:
                     i = i + 1
                 else:
                     ranking = player.result
-                    tlists[p[PLAYER_NAME]] = player.get_first_tourney_list()
+                    tlists_by_id[player.id] = player.get_first_tourney_list()
+                    if p.has_key(PLAYER_NAME):
+                        tlists_by_name[ p[PLAYER_NAME]] = tlists_by_id[player.id]
 
 
                 self.extract_player(p, player, ranking)
 
-        return tlists
+        return None, tlists_by_id, tlists_by_name
 
     def extract_set(self, t, tourney, pm):
         if t.has_key(SETS_USED):
@@ -192,7 +200,7 @@ class TournamentApiHelper:
         return None
 
 
-    def extract_rounds(self, t, tourney, tlists):
+    def extract_rounds(self, t, tourney, tlists_by_id, tlists_by_name):
         if not t.has_key(ROUNDS):
             return None
         for r in t[ROUNDS]:
@@ -210,24 +218,50 @@ class TournamentApiHelper:
             tourney.rounds.append(tourney_round)
 
             matches = r[MATCHES]
+
             for m in matches:
-                if not m.has_key(PLAYER1):
-                    return self.helper.bail("Player one not found in match, giving up!", 403)
-                player1 = m[PLAYER1]
+                player1_name = None
+                player1_id   = None
+                if m.has_key(PLAYER1):
+                    player1_name = m[PLAYER1]
+                if m.has_key( PLAYER1_ID ):
+                    player1_id = m[PLAYER1_ID]
+                if player1_name is None and player1_id is None:
+                    return self.helper.bail("Player one name and id not found in match, giving up!", 403)
+
+                #get the list
+                player1_list = None
+                if player1_name is not None and tlists_by_name.has_key(player1_name):
+                    player1_list = tlists_by_name[player1_name]
+                elif player1_id is not None and tlists_by_id.has_key( player1_id ):
+                    player1_list = tlists_by_id[player1_id]
+                if player1_list is None:
+                    return self.helper.bail("PlayerOne's list could not be found, giving up ", 403)
+
+
                 if not m.has_key(RESULT):
                     return self.helper.bail("Result not found in match, giving up!", 403)
-                if not tlists.has_key(player1):
-                    return self.helper.bail("Player %s 's list could not be found, giving up " % (  player1 ), 403)
-
                 result = m[RESULT]
                 round_result = None
                 if result == WIN or result == DRAW:
-                    if not m.has_key(PLAYER2):
-                        return self.helper.bail("Player two not found in match, giving up!", 403)
-                    player2 = m[PLAYER2]
-                    if not tlists.has_key(player2):
-                        return self.helper.bail(
-                            "Player %s 's list could not be found, giving up " % ( player2 ), 403 )
+                    player2_name = None
+                    player2_id   = None
+                    if m.has_key(PLAYER2):
+                        player2_name = m[PLAYER2]
+                    if m.has_key(PLAYER2_ID):
+                        player2_id = m[PLAYER2_ID]
+                    if player2_name is None and player2_id is None:
+                        return self.helper.bail("Player two name and id not found in match, giving up!", 403)
+
+                    #get the list
+                    player2_list = None
+                    if player2_name is not None and tlists_by_name.has_key(player2_name):
+                        player2_list = tlists_by_name[player2_name]
+                    elif player2_id is not None and tlists_by_id.has_key( player2_id ):
+                        player2_list = tlists_by_id[player2_id]
+                    if player2_list is None:
+                        return self.helper.bail("Player2's list could not be found, giving up ", 403)
+
 
                     if not m.has_key(PLAYER1_POINTS):
                         return self.helper.bail("Player one points not found in match, giving up!", 403)
@@ -242,19 +276,19 @@ class TournamentApiHelper:
                     loser = None
 
                     if player1_points > player2_points:
-                        winner = tlists[player1]
-                        loser = tlists[player2]
+                        winner = player1_list
+                        loser =  player2_list
                     else:
-                        winner = tlists[player2]
-                        loser = tlists[player1]
-                    round_result = RoundResult(round=tourney_round, list1=tlists[player1],
-                                               list2=tlists[player2],
+                        winner = player2_list
+                        loser =  player1_list
+                    round_result = RoundResult(round=tourney_round, list1=player1_list,
+                                               list2=player2_list,
                                                winner=winner, loser=loser,
                                                list1_score=player1_points,
                                                list2_score=player2_points,
                                                bye=False, draw=was_draw)
                 elif result == BYE:
-                    round_result = RoundResult(round=tourney_round, list1=tlists[player1],
+                    round_result = RoundResult(round=tourney_round, list1=player1_list,
                                                list2=None, winner=None, loser=None,
                                                list1_score=None,
                                                list2_score=None, bye=True, draw=False)
@@ -322,15 +356,17 @@ class TournamentsAPI(restful.Resource):
                 helper.extract_tourney_format(t, tourney)
                 helper.extract_venue(t, tourney)
                 #now see if the players are there.  if so, add 'em
-                tlists = helper.extract_players(t, tourney) #round by round results, if it exists
+                bail, tlists_by_id, tlists_by_name = helper.extract_players(t, tourney) #round by round results, if it exists
 
+                if bail:
+                    return bail
 
                 #set gook
                 bailout = helper.extract_set(t, tourney, pm )
                 if bailout:
                     return bailout
 
-                bailout = helper.extract_rounds(t, tourney, tlists )
+                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name )
                 if bailout:
                     return bailout
 
@@ -427,7 +463,9 @@ class PlayersAPI(restful.Resource):
         if not json_data.has_key(PLAYERS):
             return helper.bail("player put missing player key", 403), None
 
-        helper.extract_players( json_data, tourney )
+        bail, tl1,tl2 = helper.extract_players( json_data, tourney )
+        if bail:
+            return bail
         pm.db_connector.get_session().commit()
 
         players = []
@@ -568,12 +606,14 @@ class TournamentAPI(restful.Resource):
                 helper.extract_email(t, tourney)
                 helper.extract_tourney_format(t, tourney)
                 helper.extract_venue(t, tourney)
-                tlists = helper.extract_players(t, tourney) #round by round results, if it exists
+                bail, tlists_by_id, tlists_by_name = helper.extract_players(t, tourney) #round by round results, if it exists
+                if bail:
+                    return bail
                 bailout = helper.extract_set(t, tourney, pm )
                 if bailout:
                     return bailout
 
-                bailout = helper.extract_rounds(t, tourney, tlists )
+                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name )
                 if bailout:
                     return bailout
 
