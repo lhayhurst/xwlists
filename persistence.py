@@ -207,6 +207,12 @@ class Tourney(Base):
     venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
 
 
+    def get_round(self, round_type, round_num):
+        for round in self.rounds:
+            if round.round_type == round_type and round.round_num == round_num:
+                return round
+        return None
+
     def get_player_by_name(self, player_name):
         for player in self.tourney_players:
             if player.player_name == player_name:
@@ -349,6 +355,17 @@ class TourneyRound(Base):
             return ELIMINATION
         return None
 
+    def get_win_or_draw_result(self, winner, loser, was_draw):
+        for result in self.results:
+            if was_draw == result.draw and result.winner.id == winner.id and result.loser.id == loser.id:
+               return result
+        return None
+
+    def get_bye_result(self, winner):
+        for result in self.results:
+            if result.bye == True and result.winner == winner:
+                return result
+        return None
 
 
 tourney_ranking_table = "tourney_ranking"

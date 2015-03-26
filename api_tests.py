@@ -16,134 +16,42 @@ class apiTest(unittest.TestCase):
         self.assertTrue(len(ids) > 0)
 
     def testPutAndDeleteTournament(self):
+        players = [{"name": "Lyle Hayhurst", "mov": 622, "score": 20, "sos": 50, 'dropped': False,
+                         "rank": {"swiss": 1, "elimination": 2}},
+                        {"name": "Matt Babiash", "mov": 647, "score": 15, "sos": 45, 'dropped': True,
+                         "rank": {"swiss": 2, "elimination": 4}},
+                        {"name": "Brandon Prokos", "mov": 647, "score": 15, "sos": 45, 'dropped': True,
+                         "rank": {"swiss": 2, "elimination": 4}},
+                        {"name": "Phil Kalata", "mov": 647, "score": 15, "sos": 45, 'dropped': True,
+                         "rank": {"swiss": 2, "elimination": 4}},
+                        {"name": "Zach Carriger", "mov": 647, "score": 15, "sos": 45, 'dropped': True,
+                         "rank": {"swiss": 2, "elimination": 4}},
+                        {"name": "David Pontier", "mov": 647, "score": 15, "sos": 45, 'dropped': True,
+                         "rank": {"swiss": 2, "elimination": 4}}, ]
+
+        trounds = [{"round-type": "swiss", "round-number": 1, "matches": [
+            {"player1": "Lyle Hayhurst", "player1points": 100, "player2": "Brandon Prokos", "player2points": 48,
+             "result": "win"},
+            {"player1": "Zach Carriger", "player1points": 32, "player2": "Phil Kalata", "player2points": 0,
+             "result": "win"}]}, {"round-type": "elimination", "round-number": 4, "matches": [
+            {"player1": "Lyle Hayhurst", "player1points": 100, "player2": "Matt Babiash", "player2points": 80,
+             "result": "win"},
+            {"player1": "Phil Kalata", "player1points": 0, "player2": "David Pontier", "player2points": 100,
+             "result": "win"}]}]
+
+        sets = ["Core Set", "Wave 1", "Wave 2", "Wave 3", "Wave 4", "Wave 5", "Wave 6", "GR-75 Expansion",
+                      "CR90 Expansion", "Imperial Aces Expansion", "Rebel Aces Expansion"]
+        venue = {'country': 'United States', 'state': 'Illinois', 'city': 'Chicago', 'venue': 'Dice Dojo'}
         t = {"tournament": {"name": "foobar", "date": "2015-05-25",
                             "type": "Store Championship", "round_length": 60, "participant_count": 30,
-                            'venue':
-                                {'country': 'United States', 'state': 'Illinois', 'city': 'Chicago',
-                                 'venue': 'Dice Dojo'
-                                },
-                            'sets_used': ["Core Set", "Wave 1", "Wave 2", "Wave 3",
-                                          "Wave 4", "Wave 5", "Wave 6",
-                                          "GR-75 Expansion", "CR90 Expansion",
-                                          "Imperial Aces Expansion",
-                                          "Rebel Aces Expansion"
-
-                            ],
+                            'venue': venue,
+                            'sets_used': sets,
                             'format': 'Standard - 100 Point Dogfight',
-                            'players': [
-                                {
-                                    "name": "Lyle Hayhurst",
-                                    "mov": 622,
-                                    "score": 20,
-                                    "sos": 50,
-                                    'dropped': False,
-                                    "rank": {
-                                        "swiss": 1,
-                                        "elimination": 2
-                                    }
-                                },
-                                {
-                                    "name": "Matt Babiash",
-                                    "mov": 647,
-                                    "score": 15,
-                                    "sos": 45,
-                                    'dropped': True,
-                                    "rank": {
-                                        "swiss": 2,
-                                        "elimination": 4
-                                    }
-                                },
-                                {
-                                    "name": "Brandon Prokos",
-                                    "mov": 647,
-                                    "score": 15,
-                                    "sos": 45,
-                                    'dropped': True,
-                                    "rank": {
-                                        "swiss": 2,
-                                        "elimination": 4
-                                    }
-                                },
-                                {
-                                    "name": "Phil Kalata",
-                                    "mov": 647,
-                                    "score": 15,
-                                    "sos": 45,
-                                    'dropped': True,
-                                    "rank": {
-                                        "swiss": 2,
-                                        "elimination": 4
-                                    }
-                                },
-                                {
-                                    "name": "Zach Carriger",
-                                    "mov": 647,
-                                    "score": 15,
-                                    "sos": 45,
-                                    'dropped': True,
-                                    "rank": {
-                                        "swiss": 2,
-                                        "elimination": 4
-                                    }
-                                },
-                                {
-                                    "name": "David Pontier",
-                                    "mov": 647,
-                                    "score": 15,
-                                    "sos": 45,
-                                    'dropped': True,
-                                    "rank": {
-                                        "swiss": 2,
-                                        "elimination": 4
-                                    }
-                                },
-                            ],
-                            "rounds": [
-                                {
-                                    "round-type": "swiss",
-                                    "round-number": 1,
-                                    "matches": [
-                                        {
-                                            "player1": "Lyle Hayhurst",
-                                            "player1points": 100,
-                                            "player2": "Brandon Prokos",
-                                            "player2points": 48,
-                                            "result": "win"
-                                        },
-                                        {
-                                            "player1": "Zach Carriger",
-                                            "player1points": 32,
-                                            "player2": "Phil Kalata",
-                                            "player2points": 0,
-                                            "result": "win"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "round-type": "elimination",
-                                    "round-number": 4,
-                                    "matches": [
-                                        {
-                                            "player1": "Lyle Hayhurst",
-                                            "player1points": 100,
-                                            "player2": "Matt Babiash",
-                                            "player2points": 80,
-                                            "result": "win"
-                                        },
-                                        {
-                                            "player1": "Phil Kalata",
-                                            "player1points": 0,
-                                            "player2": "David Pontier",
-                                            "player2points": 100,
-                                            "result": "win"
-                                        }
-                                    ]
-                                }
-                            ]
+                            'players': players,
+                            "rounds": trounds
 
                 }
         }
-
 
         resp = post(dev_url,
                     data=json.dumps(t))
@@ -216,13 +124,28 @@ class apiTest(unittest.TestCase):
 
         id = tourney.id
 
+        #resubmit it to try to create dupes
+        t['api_token'] = js['api_token']
+        url = 'http://localhost:5000/api/v1/tournament/' + str(tourney.id)
+        resp = put(url,
+                    data=json.dumps(t))
+        self.assertEqual(200, resp.status_code)
+
+        #ok, change one of the results
+        trounds[0]['matches'][0]['player1points'] =  99
+        t['tournament']['name'] = 'changed name'
+        resp = put(url,
+                    data=json.dumps(t))
+        self.assertEqual(200, resp.status_code)
+
+
         #ok, now delete the thing
         j = { "api_token": tourney.api_token }
 
         delete_url = 'http://localhost:5000/api/v1/tournament/' + str(id)
         resp = delete(delete_url ,
                     data=json.dumps(j))
-        #print resp.text
+        print resp.text
         self.assertEqual(204, resp.status_code)
 
     def isint(self, s):
@@ -271,11 +194,7 @@ class apiTest(unittest.TestCase):
         self.assertTrue (self.isint( bill['id']))
         self.assertTrue( int(bill['id'] > 0 ))
 
-        #ok, now enter the rest of the data
-        t = { 'api_token': api_token,
-              'tournament': {
-                  'format': 'Standard - 100 Point Dogfight',
-                  'players': [
+        p =  [
                       {
                           "player_id": bob['id'],
                           "mov": 622,
@@ -297,8 +216,13 @@ class apiTest(unittest.TestCase):
                               "swiss": 2,
                               "elimination": 4
                           }
-                      } ],
+                      } ]
 
+        #ok, now enter the rest of the data
+        t = { 'api_token': api_token,
+              'tournament': {
+                  'format': 'Standard - 100 Point Dogfight',
+                  'players': p ,
                   "rounds": [
                       {
                           "round-type": "swiss",
@@ -323,7 +247,14 @@ class apiTest(unittest.TestCase):
         self.assertEqual(200, resp.status_code)
         tjson = resp.json()
         self.assertTrue( tjson is not None )
-        tjson = tjson['tournament']
+
+        myapp.db_connector.close()
+        myapp.db_connector.connect()
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id(tourney_id)
+        self.assertTrue( tourney is not None)
+        self.assertTrue(len(tourney.tourney_players) == 2 )
+
 
 
 

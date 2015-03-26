@@ -200,10 +200,10 @@ class TournamentApiHelper:
         return None
 
 
-    def extract_rounds(self, t, tourney, tlists_by_id, tlists_by_name):
-        if not t.has_key(ROUNDS):
+    def extract_rounds(self, tournament_json, tourney, tlists_by_id, tlists_by_name, pm):
+        if not tournament_json.has_key(ROUNDS):
             return None
-        for r in t[ROUNDS]:
+        for r in tournament_json[ROUNDS]:
             if not r.has_key(ROUND_TYPE):
                 return self.helper.bail("Round type not found in tourney rounds, giving up!", 403)
             round_type = self.convert_round_type_string(r[ROUND_TYPE])
@@ -214,8 +214,12 @@ class TournamentApiHelper:
             round_number = r[ROUND_NUMBER]
             if not r.has_key(MATCHES):
                 return self.helper.bail("List of match results not found in tourney round, giving up!", 403)
-            tourney_round = TourneyRound(round_num=round_number, round_type=round_type, tourney=tourney)
-            tourney.rounds.append(tourney_round)
+
+            #check to see if the round already exists
+            tourney_round = tourney.get_round( round_type, round_number )
+            if tourney_round is None:
+                tourney_round = TourneyRound(round_num=round_number, round_type=round_type, tourney=tourney)
+                tourney.rounds.append(tourney_round)
 
             matches = r[MATCHES]
 
@@ -281,20 +285,47 @@ class TournamentApiHelper:
                     else:
                         winner = player2_list
                         loser =  player1_list
-                    round_result = RoundResult(round=tourney_round, list1=player1_list,
-                                               list2=player2_list,
-                                               winner=winner, loser=loser,
-                                               list1_score=player1_points,
-                                               list2_score=player2_points,
-                                               bye=False, draw=was_draw)
+
+                    #create a new result unless it already exists
+                    round_result = tourney_round.get_win_or_draw_result( winner, loser, was_draw )
+                    if round_result is None:
+                        round_result = RoundResult(round=tourney_round, list1=player1_list,
+                                                   list2=player2_list,
+                                                   winner=winner, loser=loser,
+                                                   list1_score=player1_points,
+                                                   list2_score=player2_points,
+                                                   bye=False, draw=was_draw)
+                        tourney_round.results.append(round_result)
+
+                    else:
+                        round_result.round = tourney_round
+                        round_result.list1 = player1_list
+                        round_result.list2 = player2_list
+                        round_result.winner = winner
+                        round_result.loser = loser
+                        round_result.list1_score = player1_points
+                        round_result.list2_score = player2_points
+                        round_result.bye = False
+                        round_result.draw = was_draw
                 elif result == BYE:
-                    round_result = RoundResult(round=tourney_round, list1=player1_list,
-                                               list2=None, winner=None, loser=None,
-                                               list1_score=None,
-                                               list2_score=None, bye=True, draw=False)
+                    round_result = tourney_round.get_bye_result(winner)
+                    if round_result is None:
+                        round_result = RoundResult(round=tourney_round, list1=player1_list,
+                                                   list2=None, winner=None, loser=None,
+                                                   list1_score=None,
+                                                   list2_score=None, bye=True, draw=False)
+                        tourney_round.results.append(round_result)
+                    else:
+                        round_result.round = tourney_round
+                        round_result.list1 = player1_list
+                        round_result.bye = True
+                        round_result.draw = False
                 else:
                     return self.helper.bail("Unknown match result %s, giving up!" % ( result ), 403)
-                tourney_round.results.append(round_result)
+                pm.db_connector.get_session().add( round_result )
+                pm.db_connector.get_session().add( tourney_round )
+
+        pm.db_connector.get_session().flush()
         return None
 
 
@@ -366,7 +397,7 @@ class TournamentsAPI(restful.Resource):
                 if bailout:
                     return bailout
 
-                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name )
+                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name , pm )
                 if bailout:
                     return bailout
 
@@ -577,6 +608,10 @@ class TournamentAPI(restful.Resource):
             return helper.bail("bad json received!", 403)
         if json_data is not None:
 
+            bail = helper.check_token(json_data, tourney)
+            if bail:
+                bail
+
             if json_data.has_key(TOURNAMENT):
                 t = json_data[TOURNAMENT]
                 if t.has_key(NAME):
@@ -613,7 +648,7 @@ class TournamentAPI(restful.Resource):
                 if bailout:
                     return bailout
 
-                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name )
+                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name, pm )
                 if bailout:
                     return bailout
 
@@ -624,7 +659,6 @@ class TournamentAPI(restful.Resource):
                   event_details="tournament API: tourney update via POST")
 
                 pm.db_connector.get_session().add( event )
-                pm.db_connector.get_session().add( tourney )
                 pm.db_connector.get_session().commit()
 
                 response = jsonify({TOURNAMENT: {NAME: tourney.tourney_name, "id": tourney.id, API_TOKEN: tourney.api_token }})
