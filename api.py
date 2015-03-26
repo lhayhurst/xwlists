@@ -212,19 +212,21 @@ class TournamentApiHelper:
                 return self.helper.bail("Round type %s is not valid, giving up!" % ( round_type ), 403)
             if not r.has_key(ROUND_NUMBER):
                 return self.helper.bail("Round number not found in tourney rounds, giving up!", 403)
-            round_number = r[ROUND_NUMBER]
             if not r.has_key(MATCHES):
                 return self.helper.bail("List of match results not found in tourney round, giving up!", 403)
 
 
         #if any rounds exist, just take them all out and start from scratch
-        tourney.reset_rounds()
+        if len(tourney.rounds) > 0:
+            tourney.reset_rounds(pm.db_connector.get_session() )
 
         for r in tournament_json[ROUNDS]:
             round_number = r[ROUND_NUMBER]
             round_type = self.convert_round_type_string(r[ROUND_TYPE])
             tourney_round = TourneyRound(round_num=round_number, round_type=round_type, tourney=tourney)
             tourney.rounds.append(tourney_round)
+            pm.db_connector.get_session().add( tourney_round )
+
 
             matches = r[MATCHES]
 
@@ -292,43 +294,24 @@ class TournamentApiHelper:
                         loser =  player1_list
 
                     #create a new result unless it already exists
-                    round_result = tourney_round.get_win_or_draw_result( winner, loser, was_draw )
-                    if round_result is None:
-                        round_result = RoundResult(round=tourney_round, list1=player1_list,
-                                                   list2=player2_list,
-                                                   winner=winner, loser=loser,
-                                                   list1_score=player1_points,
-                                                   list2_score=player2_points,
-                                                   bye=False, draw=was_draw)
-                        tourney_round.results.append(round_result)
+                    round_result = RoundResult(round=tourney_round, list1=player1_list,
+                                               list2=player2_list,
+                                               winner=winner, loser=loser,
+                                               list1_score=player1_points,
+                                               list2_score=player2_points,
+                                               bye=False, draw=was_draw)
+                    tourney_round.results.append(round_result)
 
-                    else:
-                        round_result.round = tourney_round
-                        round_result.list1 = player1_list
-                        round_result.list2 = player2_list
-                        round_result.winner = winner
-                        round_result.loser = loser
-                        round_result.list1_score = player1_points
-                        round_result.list2_score = player2_points
-                        round_result.bye = False
-                        round_result.draw = was_draw
                 elif result == BYE:
-                    round_result = tourney_round.get_bye_result(winner)
-                    if round_result is None:
-                        round_result = RoundResult(round=tourney_round, list1=player1_list,
-                                                   list2=None, winner=None, loser=None,
-                                                   list1_score=None,
-                                                   list2_score=None, bye=True, draw=False)
-                        tourney_round.results.append(round_result)
-                    else:
-                        round_result.round = tourney_round
-                        round_result.list1 = player1_list
-                        round_result.bye = True
-                        round_result.draw = False
+                    round_result = RoundResult(round=tourney_round, list1=player1_list,
+                                               list2=None, winner=None, loser=None,
+                                               list1_score=None,
+                                               list2_score=None, bye=True, draw=False)
+                    tourney_round.results.append(round_result)
                 else:
                     return self.helper.bail("Unknown match result %s, giving up!" % ( result ), 403)
+                tourney_round.results.append(round_result)
                 pm.db_connector.get_session().add( round_result )
-                pm.db_connector.get_session().add( tourney_round )
 
         pm.db_connector.get_session().flush()
         return None

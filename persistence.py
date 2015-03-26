@@ -206,8 +206,14 @@ class Tourney(Base):
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
     venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
 
-    def reset_rounds(self):
-       rounds = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)", cascade="all,delete,delete-orphan")
+    def reset_rounds(self, session ):
+        goners = []
+        for round in self.rounds:
+            session.delete(round)
+            goners.append(round)
+        for goner in goners:
+            self.rounds.remove(goner)
+        session.commit()
 
 
     def get_round(self, round_type, round_num):
