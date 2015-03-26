@@ -203,6 +203,7 @@ class TournamentApiHelper:
     def extract_rounds(self, tournament_json, tourney, tlists_by_id, tlists_by_name, pm):
         if not tournament_json.has_key(ROUNDS):
             return None
+
         for r in tournament_json[ROUNDS]:
             if not r.has_key(ROUND_TYPE):
                 return self.helper.bail("Round type not found in tourney rounds, giving up!", 403)
@@ -215,11 +216,15 @@ class TournamentApiHelper:
             if not r.has_key(MATCHES):
                 return self.helper.bail("List of match results not found in tourney round, giving up!", 403)
 
-            #check to see if the round already exists
-            tourney_round = tourney.get_round( round_type, round_number )
-            if tourney_round is None:
-                tourney_round = TourneyRound(round_num=round_number, round_type=round_type, tourney=tourney)
-                tourney.rounds.append(tourney_round)
+
+        #if any rounds exist, just take them all out and start from scratch
+        tourney.reset_rounds()
+
+        for r in tournament_json[ROUNDS]:
+            round_number = r[ROUND_NUMBER]
+            round_type = self.convert_round_type_string(r[ROUND_TYPE])
+            tourney_round = TourneyRound(round_num=round_number, round_type=round_type, tourney=tourney)
+            tourney.rounds.append(tourney_round)
 
             matches = r[MATCHES]
 
