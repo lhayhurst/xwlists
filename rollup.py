@@ -108,10 +108,11 @@ class Rollup:
                          'color' : self.get_faction_color(faction),
                          'drilldown' : drilldown
                         })
-        for ship in self.ships.keys():
-            val       = self.ships[ship]
+        for faction_and_ship in self.ships.keys():
+            val       = self.ships[faction_and_ship]
             faction   = val['faction']
             drilldown = faction_drilldowns[faction]
+            faction, ship = faction_and_ship.split(':')
             drilldown[ 'categories'].append( ship )
             ratio = 0.0
             if not self.use_points:
@@ -124,8 +125,8 @@ class Rollup:
     def create_ship_pilot_doughnut_data(self):
         ret = []
         ship_drilldowns = {}
-        for ship_name in self.ships.keys():
-            faction = self.ships[ship_name]['faction']
+        for faction_and_ship_name in self.ships.keys():
+            faction, ship_name = faction_and_ship_name.split( ':')
 
             drilldown = {
                 'name': ship_name,
@@ -138,9 +139,9 @@ class Rollup:
 
             ratio = 0.0
             if not self.use_points:
-                ratio = self.to_float(self.to_float(self.ships[ship_name]['cnt']) / self.to_float(self.grand_count))
+                ratio = self.to_float(self.to_float(self.ships[faction_and_ship_name]['cnt']) / self.to_float(self.grand_count))
             else:
-                ratio = self.to_float(self.to_float(self.ships[ship_name]['cost']) / self.to_float(self.grand_sum))
+                ratio = self.to_float(self.to_float(self.ships[faction_and_ship_name]['cost']) / self.to_float(self.grand_sum))
 
             ret.append({'y': ratio,
                         'faction': faction,
@@ -193,11 +194,12 @@ class Rollup:
                     href = self.factions[faction.description]
                     href['cost'] += cost
             elif self.is_ship_total( faction, ship, has_pilot, pilot):
+                hkey = faction.description + ":" + ship.description
                 #ship total
-                if not self.ships.has_key(ship.description):
-                    self.ships[ ship.description ] = { 'faction': faction.description, 'cnt': cnt, 'cost': cost}
+                if not self.ships.has_key(hkey):
+                    self.ships[ hkey ] = { 'faction': faction.description, 'cnt': cnt, 'cost': cost}
                 else:
-                    href = self.ships[ship.description]
+                    href = self.ships[hkey]
                     href['cost'] += cost
             else: #full pilot row
                 if not self.pilots.has_key( pilot ):
