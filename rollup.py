@@ -135,7 +135,7 @@ class Rollup:
                 'color': self.get_faction_color(faction)
             }
 
-            ship_drilldowns[ship_name] = drilldown
+            ship_drilldowns[faction_and_ship_name] = drilldown
 
             ratio = 0.0
             if not self.use_points:
@@ -151,7 +151,8 @@ class Rollup:
         for pilot in self.pilots.keys():
             val = self.pilots[pilot]
             ship = val['ship']
-            drilldown = ship_drilldowns[ship]
+            faction = val['faction']
+            drilldown = ship_drilldowns[faction+":"+ship]
             drilldown['categories'].append(pilot)
             ratio = 0.0
             if not self.use_points:
