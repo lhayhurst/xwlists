@@ -13,13 +13,13 @@ __author__ = 'lhayhurst'
 import uuid
 from xwingmetadata import sets_and_expansions
 import json
-from flask import jsonify, request
+from flask import jsonify, request, abort
 import myapp
 from persistence import PersistenceManager, Tourney, TourneyVenue, TourneyPlayer, TourneyRanking, TourneyList, \
     RoundResult, TourneyRound, RoundType, TourneySet, Event
 from flask.ext import restful
 import dateutil.parser
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 API_TOKEN = "api_token"
 SETS_USED = 'sets_used'
@@ -717,3 +717,37 @@ class TournamentAPI(restful.Resource):
         response = jsonify(message="deleted tourney id %d" % ( tourney_id ))
         response.status_code = 204
         return response
+
+class TournamentSearchAPI(restful.Resource):
+    '''
+        Accepts POST { "query": "some_search_string" }
+        Returns dict of tourney_id: tourney_data for substring query
+        Substring is checked in tourney name and venue.
+    '''
+    def post(self):
+        try:
+            query = request.form['query'].decode('utf-8')
+        except (KeyError, UnicodeEncodeError, UnicodeDecodeError):
+            abort(400)
+
+        pm = PersistenceManager(myapp.db_connector)
+        tourneys = pm.db_connector.get_session().query(Tourney)\
+            .join(TourneyVenue)\
+            .filter(
+                or_(
+                    Tourney.tourney_name.like('%{}%'.format(query)),
+                    TourneyVenue.venue.like('%{}%'.format(query))
+                )
+            )
+
+        response = {
+            t.id: {
+                'name': t.tourney_name,
+                'venue': t.venue.venue,
+                'date': t.tourney_date.strftime('%Y-%m-%d'), # no timezone was kept :(
+            }
+        for t in tourneys }
+
+        return jsonify(response)
+
+
