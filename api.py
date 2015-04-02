@@ -10,6 +10,9 @@ WIN = 'win'
 FORMAT = 'format'
 __author__ = 'lhayhurst'
 
+import logging
+logger = logging.getLogger(__name__)
+
 import uuid
 from xwingmetadata import sets_and_expansions
 import json
@@ -56,6 +59,7 @@ STATE = 'state'
 COUNTRY = 'country'
 VENUE = 'venue'
 EMAIL = 'email'
+XWS = 'xws'
 
 class TournamentApiHelper:
 
@@ -141,6 +145,7 @@ class TournamentApiHelper:
                 ranking.elim_rank = r[ELIMINATION]
 
     def extract_players(self, t, tourney):
+        pm = PersistenceManager(myapp.db_connector)
         tlists_by_id = {}
         tlists_by_name = {}
 
@@ -181,6 +186,12 @@ class TournamentApiHelper:
                     if p.has_key(PLAYER_NAME):
                         tlists_by_name[ p[PLAYER_NAME]] = tlists_by_id[player.id]
 
+                # add list via XWS
+                if XWS in p:
+                    try:
+                        XWSToJuggler(p[XWS]).convert(pm, tourney_list)
+                    except Exception as e:
+                        print "Could not convert XWS: {} (XWS was {!r})".format(e, p[XWS])
 
                 self.extract_player(p, player, ranking)
 
@@ -453,9 +464,9 @@ class PlayerAPI(restful.Resource):
             return helper.bail("bad json received!", 403)
 
         if not helper.isint(tourney_id) :
-            return helper.bail("invalid tourney_id  %d passed to player post" % ( tourney_id), 403)
+            return helper.bail("invalid tourney_id  %d passed to player post" % ( tourney_id), 400)
         if not helper.isint(player_id) :
-            return helper.bail("invalid player  %d passed to player post" % ( player_id), 403)
+            return helper.bail("invalid player  %d passed to player post" % ( player_id), 400)
         pm = PersistenceManager(myapp.db_connector)
         tourney = pm.get_tourney_by_id( tourney_id)
         bail = helper.check_token(json_data, tourney)
@@ -463,20 +474,20 @@ class PlayerAPI(restful.Resource):
             return bail
         player = tourney.get_player_by_id(player_id)
         if player is None:
-            return helper.bail("couldn't find player %d, bailing out" % ( player_id), 403)
+            return helper.bail("couldn't find player %d, bailing out" % ( player_id), 400)
 
         dirty = False
 
         # add list via XWS
-        if 'xws' in json_data:
+        if XWS in json_data:
             dirty = True
             try:
                 new_tourney_list = TourneyList(tourney_id=tourney_id, player_id=player_id)
                 player.tourney_lists.append(new_tourney_list)
-                XWSToJuggler(json_data['xws']).convert(pm, new_tourney_list)
+                XWSToJuggler(json_data[XWS]).convert(pm, new_tourney_list)
             except:
                 pm.db_connector.get_session().rollback()
-                return helper.bail('Could not add list via XWS', 500)
+                return helper.bail('Could not add list via XWS', 400)
 
         # other potential edits
 
@@ -486,6 +497,7 @@ class PlayerAPI(restful.Resource):
         return jsonify({
             'player': {
                 'id': player.id,
+                'tourney_id': tourney.id,
                 'name': player.player_name,
             }
         })
