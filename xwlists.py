@@ -9,7 +9,7 @@ from flask.ext.mail import Mail, Message
 import sys
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
-from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI
+from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI
 
 from cryodex import Cryodex
 from dataeditor import RankingEditor
@@ -66,6 +66,7 @@ api.add_resource(PlayersAPI, '/api/v1/tournament/<int:tourney_id>/players' )
 api.add_resource(PlayerAPI, '/api/v1/tournament/<int:tourney_id>/player/<int:player_id>' )
 
 api.add_resource(TournamentSearchAPI, '/api/v1/search/tournaments')
+api.add_resource(TournamentTokenAPI, '/api/v1/tournament/<int:tourney_id>/token')
 
 
 @app.before_request

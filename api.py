@@ -783,8 +783,14 @@ class TournamentSearchAPI(restful.Resource):
     '''
     def post(self):
         try:
-            query = request.form['query'].decode('utf-8')
-        except (KeyError, UnicodeEncodeError, UnicodeDecodeError):
+            query = request.form['query']
+        except KeyError:
+            json_data = request.get_json(force=True)
+            query = json_data['query']
+
+        try:
+            query = query.decode('utf-8')
+        except (UnicodeEncodeError, UnicodeDecodeError):
             abort(400)
 
         pm = PersistenceManager(myapp.db_connector)
@@ -807,4 +813,26 @@ class TournamentSearchAPI(restful.Resource):
 
         return jsonify(response)
 
+class TournamentTokenAPI(restful.Resource):
+    '''
+        Accepts POST { "email": "email@used.to.create" }
+        If email is valid, returns dict of api_token: api_token
+    '''
+    def post(self, tourney_id):
+        helper = TournamentApiHelper()
 
+        try:
+            email = request.form['email']
+        except KeyError:
+            json_data = request.get_json(force=True)
+            email = json_data['email']
+
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id(tourney_id)
+        if tourney is None:
+            return helper.bail("tourney %d not found" % ( tourney_id ), 404)
+
+        if email != tourney.email:
+            return helper.bail("incorrect email for tourney {}".format(tourney_id), 404)
+
+        return jsonify({"api_token": tourney.api_token})
