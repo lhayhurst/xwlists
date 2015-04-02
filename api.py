@@ -10,9 +10,6 @@ WIN = 'win'
 FORMAT = 'format'
 __author__ = 'lhayhurst'
 
-import logging
-logger = logging.getLogger(__name__)
-
 import uuid
 from xwingmetadata import sets_and_expansions
 import json
