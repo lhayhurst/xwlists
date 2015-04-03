@@ -21,9 +21,11 @@ from rollup import Rollup
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
 from flask.ext import restful
+from flask_cors import CORS
 
 
 app =  myapp.create_app()
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 UPLOAD_FOLDER = "static/tourneys"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif', 'html', 'json'])
