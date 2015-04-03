@@ -628,7 +628,7 @@ class TourneyToJsonConverter:
                 resref[PLAYER2_POINTS] = result.list2_score
                 resref[RESULT] = result.get_result_for_json()
 
-        return json.dumps(ret)
+        return ret
 
 
 
@@ -734,7 +734,7 @@ class TournamentAPI(restful.Resource):
 
         pm.db_connector.get_session().commit()
 
-        return TourneyToJsonConverter().convert(t)
+        return jsonify(TourneyToJsonConverter().convert(t))
 
     def delete(self, tourney_id):
         pm = PersistenceManager(myapp.db_connector)
