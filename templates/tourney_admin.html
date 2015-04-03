@@ -15,7 +15,7 @@
   </tr>
       {% for tourney in  tourneys %}
       <tr>
-         <td>{{  tourney.tourney_name }}</td>
+         <td>{{  tourney.get_tourney_name() }}</td>
          <td >{{ tourney.id }}</td>
          <td>{{  tourney.email }}</td>
          <td>{{  tourney.entry_date }}</td>
