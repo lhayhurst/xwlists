@@ -9,7 +9,7 @@ from flask.ext.mail import Mail, Message
 import sys
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
-from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI
+from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI
 
 from cryodex import Cryodex
 from dataeditor import RankingEditor
@@ -21,9 +21,11 @@ from rollup import Rollup
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
 from flask.ext import restful
+from flask_cors import CORS
 
 
 app =  myapp.create_app()
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 UPLOAD_FOLDER = "static/tourneys"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif', 'html', 'json'])
@@ -64,6 +66,9 @@ api.add_resource(TournamentsAPI, '/api/v1/tournaments')
 api.add_resource(TournamentAPI, '/api/v1/tournament/<int:tourney_id>' )
 api.add_resource(PlayersAPI, '/api/v1/tournament/<int:tourney_id>/players' )
 api.add_resource(PlayerAPI, '/api/v1/tournament/<int:tourney_id>/player/<int:player_id>' )
+
+api.add_resource(TournamentSearchAPI, '/api/v1/search/tournaments')
+api.add_resource(TournamentTokenAPI, '/api/v1/tournament/<int:tourney_id>/token')
 
 
 @app.before_request

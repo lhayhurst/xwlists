@@ -13,13 +13,14 @@ __author__ = 'lhayhurst'
 import uuid
 from xwingmetadata import sets_and_expansions
 import json
-from flask import jsonify, request
+from flask import jsonify, request, abort
 import myapp
 from persistence import PersistenceManager, Tourney, TourneyVenue, TourneyPlayer, TourneyRanking, TourneyList, \
     RoundResult, TourneyRound, RoundType, TourneySet, Event
 from flask.ext import restful
 import dateutil.parser
-from sqlalchemy import func
+from sqlalchemy import func, or_
+from xws import XWSToJuggler
 
 API_TOKEN = "api_token"
 SETS_USED = 'sets_used'
@@ -55,6 +56,7 @@ STATE = 'state'
 COUNTRY = 'country'
 VENUE = 'venue'
 EMAIL = 'email'
+XWS = 'xws'
 
 class TournamentApiHelper:
 
@@ -140,6 +142,7 @@ class TournamentApiHelper:
                 ranking.elim_rank = r[ELIMINATION]
 
     def extract_players(self, t, tourney):
+        pm = PersistenceManager(myapp.db_connector)
         tlists_by_id = {}
         tlists_by_name = {}
 
@@ -180,6 +183,12 @@ class TournamentApiHelper:
                     if p.has_key(PLAYER_NAME):
                         tlists_by_name[ p[PLAYER_NAME]] = tlists_by_id[player.id]
 
+                # add list via XWS
+                if XWS in p:
+                    try:
+                        XWSToJuggler(p[XWS]).convert(pm, tourney_list)
+                    except Exception as e:
+                        print "Could not convert XWS: {} (XWS was {!r})".format(e, p[XWS])
 
                 self.extract_player(p, player, ranking)
 
@@ -443,6 +452,53 @@ class PlayerAPI(restful.Resource):
         pm.db_connector.get_session().delete( player )
         pm.db_connector.get_session().commit()
 
+    def post(self, tourney_id, player_id):
+        helper = TournamentApiHelper()
+        json_data = None
+        try:
+            json_data = request.get_json(force=True)
+        except Exception:
+            return helper.bail("bad json received!", 403)
+
+        if not helper.isint(tourney_id) :
+            return helper.bail("invalid tourney_id  %d passed to player post" % ( tourney_id), 400)
+        if not helper.isint(player_id) :
+            return helper.bail("invalid player  %d passed to player post" % ( player_id), 400)
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id( tourney_id)
+        bail = helper.check_token(json_data, tourney)
+        if bail:
+            return bail
+        player = tourney.get_player_by_id(player_id)
+        if player is None:
+            return helper.bail("couldn't find player %d, bailing out" % ( player_id), 400)
+
+        dirty = False
+
+        # add list via XWS
+        if XWS in json_data:
+            dirty = True
+            try:
+                tourney_list = player.tourney_lists[-1]
+                XWSToJuggler(json_data[XWS]).convert(pm, tourney_list)
+            except:
+                pm.db_connector.get_session().rollback()
+                return helper.bail('Could not add list via XWS', 400)
+
+        # other potential edits
+
+        if dirty:
+            pm.db_connector.get_session().commit()
+
+        return jsonify({
+            'player': {
+                'id': player.id,
+                'tourney_id': tourney.id,
+                'name': player.player_name,
+            }
+        })
+
+
 class PlayersAPI(restful.Resource):
 
     def get(self, tourney_id):
@@ -571,7 +627,7 @@ class TourneyToJsonConverter:
                 resref[PLAYER2_POINTS] = result.list2_score
                 resref[RESULT] = result.get_result_for_json()
 
-        return json.dumps(ret)
+        return ret
 
 
 
@@ -677,7 +733,7 @@ class TournamentAPI(restful.Resource):
 
         pm.db_connector.get_session().commit()
 
-        return TourneyToJsonConverter().convert(t)
+        return jsonify(TourneyToJsonConverter().convert(t))
 
     def delete(self, tourney_id):
         pm = PersistenceManager(myapp.db_connector)
@@ -717,3 +773,70 @@ class TournamentAPI(restful.Resource):
         response = jsonify(message="deleted tourney id %d" % ( tourney_id ))
         response.status_code = 204
         return response
+
+class TournamentSearchAPI(restful.Resource):
+    '''
+        Accepts POST { "query": "some_search_string" }
+        Returns dict of tourney_id: tourney_data for substring query
+        Substring is checked in tourney name and venue.
+    '''
+    def post(self):
+        try:
+            query = request.form['query']
+        except KeyError:
+            json_data = request.get_json(force=True)
+            query = json_data['query']
+
+        try:
+            query = query.decode('utf-8')
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            abort(400)
+
+        pm = PersistenceManager(myapp.db_connector)
+        tourneys = pm.db_connector.get_session().query(Tourney)\
+            .join(TourneyVenue)\
+            .filter(
+                or_(
+                    Tourney.tourney_name.like('%{}%'.format(query)),
+                    TourneyVenue.venue.like('%{}%'.format(query))
+                )
+            )
+
+        response = {
+            t.id: {
+                'name': t.tourney_name,
+                'venue': t.venue.venue,
+                'date': t.tourney_date.strftime('%Y-%m-%d'), # no timezone was kept :(
+            }
+        for t in tourneys }
+
+        return jsonify(response)
+
+class TournamentTokenAPI(restful.Resource):
+    '''
+        Accepts POST { "email": "email@used.to.create" }
+        If email is valid, returns dict of api_token: api_token
+        Creates api_token if needed.
+    '''
+    def post(self, tourney_id):
+        helper = TournamentApiHelper()
+
+        try:
+            email = request.form['email']
+        except KeyError:
+            json_data = request.get_json(force=True)
+            email = json_data['email']
+
+        pm = PersistenceManager(myapp.db_connector)
+        tourney = pm.get_tourney_by_id(tourney_id)
+        if tourney is None:
+            return helper.bail("tourney %d not found" % ( tourney_id ), 404)
+
+        if email != tourney.email:
+            return helper.bail("incorrect email for tourney {}".format(tourney_id), 404)
+
+        if tourney.api_token is None:
+            tourney.api_token = str(uuid.uuid4())
+            pm.db_connector.get_session().commit()
+
+        return jsonify({"api_token": tourney.api_token})
