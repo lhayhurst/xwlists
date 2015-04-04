@@ -817,6 +817,7 @@ class TournamentTokenAPI(restful.Resource):
     '''
         Accepts POST { "email": "email@used.to.create" }
         If email is valid, returns dict of api_token: api_token
+        Creates api_token if needed.
     '''
     def post(self, tourney_id):
         helper = TournamentApiHelper()
@@ -834,5 +835,9 @@ class TournamentTokenAPI(restful.Resource):
 
         if email != tourney.email:
             return helper.bail("incorrect email for tourney {}".format(tourney_id), 404)
+
+        if tourney.api_token is None:
+            tourney.api_token = str(uuid.uuid4())
+            pm.db_connector.get_session().commit()
 
         return jsonify({"api_token": tourney.api_token})
