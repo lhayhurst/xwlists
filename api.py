@@ -479,9 +479,8 @@ class PlayerAPI(restful.Resource):
         if XWS in json_data:
             dirty = True
             try:
-                new_tourney_list = TourneyList(tourney_id=tourney_id, player_id=player_id)
-                player.tourney_lists.append(new_tourney_list)
-                XWSToJuggler(json_data[XWS]).convert(pm, new_tourney_list)
+                tourney_list = player.tourney_lists[-1]
+                XWSToJuggler(json_data[XWS]).convert(pm, tourney_list)
             except:
                 pm.db_connector.get_session().rollback()
                 return helper.bail('Could not add list via XWS', 400)
