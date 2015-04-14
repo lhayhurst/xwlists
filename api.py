@@ -1,3 +1,21 @@
+from decoder import decode
+
+__author__ = 'lhayhurst'
+
+import uuid
+import json
+
+from flask import jsonify, request, abort
+from flask.ext import restful
+import dateutil.parser
+from sqlalchemy import func, or_
+
+from xwingmetadata import sets_and_expansions
+import myapp
+from persistence import PersistenceManager, Tourney, TourneyVenue, TourneyPlayer, TourneyRanking, TourneyList, \
+    RoundResult, TourneyRound, RoundType, TourneySet, Event
+from xws import XWSToJuggler
+
 PLAYER_ID = 'player_id'
 PLAYER2_ID = 'player2_id'
 PLAYER1_ID = 'player1_id'
@@ -8,19 +26,9 @@ BYE = 'bye'
 DRAW = 'draw'
 WIN = 'win'
 FORMAT = 'format'
-__author__ = 'lhayhurst'
 
-import uuid
-from xwingmetadata import sets_and_expansions
-import json
-from flask import jsonify, request, abort
-import myapp
-from persistence import PersistenceManager, Tourney, TourneyVenue, TourneyPlayer, TourneyRanking, TourneyList, \
-    RoundResult, TourneyRound, RoundType, TourneySet, Event
-from flask.ext import restful
-import dateutil.parser
-from sqlalchemy import func, or_
-from xws import XWSToJuggler
+
+
 
 API_TOKEN = "api_token"
 SETS_USED = 'sets_used'
@@ -58,16 +66,16 @@ VENUE = 'venue'
 EMAIL = 'email'
 XWS = 'xws'
 
-class TournamentApiHelper:
 
+class TournamentApiHelper:
     required_fields = [NAME, DATE, TYPE, ROUND_LENGTH, PARTICIPANT_COUNT]
     tourney_types = ["World Championship", "Nationals", "Regional", "Store Championship", "Vassal play", "Other"]
     valid_sets = sets_and_expansions.keys()
 
-    def check_token(self, json_data, tourney ):
+    def check_token(self, json_data, tourney):
         if not json_data.has_key(API_TOKEN):
             return self.bail("Missing API token json, bailing out ...", 403)
-        api_token = json_data[ API_TOKEN ]
+        api_token = json_data[API_TOKEN]
         if not api_token == tourney.api_token:
             return self.bail("Token_id did not match, bailing out ....", 403)
         return None
@@ -102,7 +110,7 @@ class TournamentApiHelper:
         # add email if it exists
         if t.has_key(EMAIL):
             email = t[EMAIL]
-            #don't bother validating it :-)
+            # don't bother validating it :-)
             tourney.email = email
 
     def extract_tourney_format(self, t, tourney):
@@ -150,18 +158,19 @@ class TournamentApiHelper:
             players = t[PLAYERS]
             i = 1
             for p in players:
-                player  = None
+                player = None
                 ranking = None
 
-                #first see if the tourney already has a player and player list matching this player's name
+                # first see if the tourney already has a player and player list matching this player's name
                 #if so, update it rather than creating a new one
                 if p.has_key(PLAYER_ID):
-                    player = tourney.get_player_by_id( p[PLAYER_ID])
+                    player = tourney.get_player_by_id(p[PLAYER_ID])
                     if player is None:
-                        return self.bail("couldn't find player with id %d, giving up" % ( p[PLAYER_ID], 403)), None, None
+                        return self.bail(
+                            "couldn't find player with id %d, giving up" % ( p[PLAYER_ID], 403)), None, None
                 else:
                     if not p.has_key(PLAYER_NAME):
-                        return self.bail("neither an id or a name was provided, giving up ", 403 ), None, None
+                        return self.bail("neither an id or a name was provided, giving up ", 403), None, None
                     player = tourney.get_player_by_name(p[PLAYER_NAME])
 
                 if player is None:
@@ -171,17 +180,17 @@ class TournamentApiHelper:
                     tourney_list = TourneyList(tourney=tourney, player=player)
                     tlists_by_id[player.id] = tourney_list  # stash it away for later use
                     if p.has_key(PLAYER_NAME):
-                        tlists_by_name[ p[PLAYER_NAME]] = tourney_list
+                        tlists_by_name[p[PLAYER_NAME]] = tourney_list
                     tourney.tourney_players.append(player)
                     tourney.tourney_lists.append(tourney_list)
                     tourney.rankings.append(ranking)
-                    player.tourney_lists.append( tourney_list )
+                    player.tourney_lists.append(tourney_list)
                     i = i + 1
                 else:
                     ranking = player.result
                     tlists_by_id[player.id] = player.get_first_tourney_list()
                     if p.has_key(PLAYER_NAME):
-                        tlists_by_name[ p[PLAYER_NAME]] = tlists_by_id[player.id]
+                        tlists_by_name[p[PLAYER_NAME]] = tlists_by_id[player.id]
 
                 # add list via XWS
                 if XWS in p:
@@ -225,26 +234,25 @@ class TournamentApiHelper:
                 return self.helper.bail("List of match results not found in tourney round, giving up!", 403)
 
 
-        #if any rounds exist, just take them all out and start from scratch
+        # if any rounds exist, just take them all out and start from scratch
         if len(tourney.rounds) > 0:
-            tourney.reset_rounds(pm.db_connector.get_session() )
+            tourney.reset_rounds(pm.db_connector.get_session())
 
         for r in tournament_json[ROUNDS]:
             round_number = r[ROUND_NUMBER]
             round_type = self.convert_round_type_string(r[ROUND_TYPE])
             tourney_round = TourneyRound(round_num=round_number, round_type=round_type, tourney=tourney)
             tourney.rounds.append(tourney_round)
-            pm.db_connector.get_session().add( tourney_round )
-
+            pm.db_connector.get_session().add(tourney_round)
 
             matches = r[MATCHES]
 
             for m in matches:
                 player1_name = None
-                player1_id   = None
+                player1_id = None
                 if m.has_key(PLAYER1):
                     player1_name = m[PLAYER1]
-                if m.has_key( PLAYER1_ID ):
+                if m.has_key(PLAYER1_ID):
                     player1_id = m[PLAYER1_ID]
                 if player1_name is None and player1_id is None:
                     return self.helper.bail("Player one name and id not found in match, giving up!", 403)
@@ -253,11 +261,10 @@ class TournamentApiHelper:
                 player1_list = None
                 if player1_name is not None and tlists_by_name.has_key(player1_name):
                     player1_list = tlists_by_name[player1_name]
-                elif player1_id is not None and tlists_by_id.has_key( player1_id ):
+                elif player1_id is not None and tlists_by_id.has_key(player1_id):
                     player1_list = tlists_by_id[player1_id]
                 if player1_list is None:
                     return self.helper.bail("PlayerOne's list could not be found, giving up ", 403)
-
 
                 if not m.has_key(RESULT):
                     return self.helper.bail("Result not found in match, giving up!", 403)
@@ -265,7 +272,7 @@ class TournamentApiHelper:
                 round_result = None
                 if result == WIN or result == DRAW:
                     player2_name = None
-                    player2_id   = None
+                    player2_id = None
                     if m.has_key(PLAYER2):
                         player2_name = m[PLAYER2]
                     if m.has_key(PLAYER2_ID):
@@ -277,11 +284,10 @@ class TournamentApiHelper:
                     player2_list = None
                     if player2_name is not None and tlists_by_name.has_key(player2_name):
                         player2_list = tlists_by_name[player2_name]
-                    elif player2_id is not None and tlists_by_id.has_key( player2_id ):
+                    elif player2_id is not None and tlists_by_id.has_key(player2_id):
                         player2_list = tlists_by_id[player2_id]
                     if player2_list is None:
                         return self.helper.bail("Player2's list could not be found, giving up ", 403)
-
 
                     if not m.has_key(PLAYER1_POINTS):
                         return self.helper.bail("Player one points not found in match, giving up!", 403)
@@ -297,10 +303,10 @@ class TournamentApiHelper:
 
                     if player1_points > player2_points:
                         winner = player1_list
-                        loser =  player2_list
+                        loser = player2_list
                     else:
                         winner = player2_list
-                        loser =  player1_list
+                        loser = player1_list
 
                     #create a new result unless it already exists
                     round_result = RoundResult(round=tourney_round, list1=player1_list,
@@ -320,11 +326,10 @@ class TournamentApiHelper:
                 else:
                     return self.helper.bail("Unknown match result %s, giving up!" % ( result ), 403)
                 tourney_round.results.append(round_result)
-                pm.db_connector.get_session().add( round_result )
+                pm.db_connector.get_session().add(round_result)
 
         pm.db_connector.get_session().flush()
         return None
-
 
 
 class TournamentsAPI(restful.Resource):
@@ -354,7 +359,8 @@ class TournamentsAPI(restful.Resource):
                 missing_field = helper.missing_required_field(t)
                 if missing_field is not None:
                     return helper.bail(
-                        "invalid tourney submission, must contain required fields, missing %s " % ( missing_field ), 403)
+                        "invalid tourney submission, must contain required fields, missing %s " % ( missing_field ),
+                        403)
 
                 tourney_name = t[NAME]
                 tourney_date = t[DATE]
@@ -362,7 +368,7 @@ class TournamentsAPI(restful.Resource):
                 round_length = t[ROUND_LENGTH]
                 participant_count = t[PARTICIPANT_COUNT]
 
-                #validate the tourney date
+                # validate the tourney date
                 parsed_date = None
                 try:
                     parsed_date = dateutil.parser.parse(tourney_date)
@@ -384,17 +390,18 @@ class TournamentsAPI(restful.Resource):
                 helper.extract_tourney_format(t, tourney)
                 helper.extract_venue(t, tourney)
                 #now see if the players are there.  if so, add 'em
-                bail, tlists_by_id, tlists_by_name = helper.extract_players(t, tourney) #round by round results, if it exists
+                bail, tlists_by_id, tlists_by_name = helper.extract_players(t,
+                                                                            tourney)  #round by round results, if it exists
 
                 if bail:
                     return bail
 
                 #set gook
-                bailout = helper.extract_set(t, tourney, pm )
+                bailout = helper.extract_set(t, tourney, pm)
                 if bailout:
                     return bailout
 
-                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name , pm )
+                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name, pm)
                 if bailout:
                     return bailout
 
@@ -404,21 +411,21 @@ class TournamentsAPI(restful.Resource):
 
                 #and log it
                 event = Event(remote_address=myapp.remote_address(request),
-                  event_date=func.now(),
-                  event="API",
-                  event_details="tournament API: tourney creation via POST")
+                              event_date=func.now(),
+                              event="API",
+                              event_details="tournament API: tourney creation via POST")
 
-                pm.db_connector.get_session().add( event )
+                pm.db_connector.get_session().add(event)
                 pm.db_connector.get_session().commit()
 
                 players = []
                 for player in tourney.tourney_players:
-                    players.append( { NAME: player.player_name, ID: player.id })
+                    players.append({NAME: player.get_player_name(), ID: player.id})
 
-                response = jsonify({TOURNAMENT: {NAME: tourney.tourney_name,
+                response = jsonify({TOURNAMENT: {NAME: decode(tourney.tourney_name),
                                                  ID: tourney.id,
                                                  API_TOKEN: tourney.api_token,
-                                                 PLAYERS: players } } )
+                                                 PLAYERS: players}})
                 response.status_code = 201
                 return response
 
@@ -428,28 +435,29 @@ class TournamentsAPI(restful.Resource):
         else:
             return helper.bail("invalid tourney submission, must contain a json payload", 403)
 
+
 class PlayerAPI(restful.Resource):
-    def delete(self, tourney_id, player_id ):
+    def delete(self, tourney_id, player_id):
         helper = TournamentApiHelper()
         json_data = None
         try:
-             json_data = request.get_json(force=True)
+            json_data = request.get_json(force=True)
         except Exception:
-             return helper.bail("bad json received!", 403)
+            return helper.bail("bad json received!", 403)
 
-        if not helper.isint(tourney_id) :
+        if not helper.isint(tourney_id):
             return helper.bail("invalid tourney_id  %d passed to player delete" % ( tourney_id), 403)
-        if not helper.isint(player_id) :
+        if not helper.isint(player_id):
             return helper.bail("invalid player  %d passed to player delete" % ( player_id), 403)
         pm = PersistenceManager(myapp.db_connector)
-        tourney = pm.get_tourney_by_id( tourney_id)
+        tourney = pm.get_tourney_by_id(tourney_id)
         bail = helper.check_token(json_data, tourney)
         if bail:
             return bail
         player = tourney.get_player_by_id(player_id)
         if player is None:
             return helper.bail("couldn't find player %d, bailing out" % ( player_id), 403)
-        pm.db_connector.get_session().delete( player )
+        pm.db_connector.get_session().delete(player)
         pm.db_connector.get_session().commit()
 
     def post(self, tourney_id, player_id):
@@ -460,12 +468,12 @@ class PlayerAPI(restful.Resource):
         except Exception:
             return helper.bail("bad json received!", 403)
 
-        if not helper.isint(tourney_id) :
+        if not helper.isint(tourney_id):
             return helper.bail("invalid tourney_id  %d passed to player post" % ( tourney_id), 400)
-        if not helper.isint(player_id) :
+        if not helper.isint(player_id):
             return helper.bail("invalid player  %d passed to player post" % ( player_id), 400)
         pm = PersistenceManager(myapp.db_connector)
-        tourney = pm.get_tourney_by_id( tourney_id)
+        tourney = pm.get_tourney_by_id(tourney_id)
         bail = helper.check_token(json_data, tourney)
         if bail:
             return bail
@@ -494,43 +502,42 @@ class PlayerAPI(restful.Resource):
             'player': {
                 'id': player.id,
                 'tourney_id': tourney.id,
-                'name': player.player_name,
+                'name': player.get_player_name(),
             }
         })
 
 
 class PlayersAPI(restful.Resource):
-
     def get(self, tourney_id):
         helper = TournamentApiHelper()
-        if not helper.isint(tourney_id) :
+        if not helper.isint(tourney_id):
             return helper.bail("invalid tourney_id  %d passed to player get" % ( tourney_id), 403)
         pm = PersistenceManager(myapp.db_connector)
-        tourney = pm.get_tourney_by_id( tourney_id)
+        tourney = pm.get_tourney_by_id(tourney_id)
         if tourney is None:
             return helper.bail("failed to look up tourney id %d for player get" % ( tourney_id), 403)
 
         players = []
         for player in tourney.tourney_players:
-            players.append( { NAME: player.player_name, ID: player.id })
+            players.append({NAME: player.get_player_name(), ID: player.id})
 
         response = jsonify({PLAYERS: players})
         response.status_code = 200
         return response
 
-    def put_or_post(self, helper, tourney_id ):
-        if not helper.isint(tourney_id) :
-             return helper.bail("invalid tourney_id  %d passed to player get" % ( tourney_id), 403)
+    def put_or_post(self, helper, tourney_id):
+        if not helper.isint(tourney_id):
+            return helper.bail("invalid tourney_id  %d passed to player get" % ( tourney_id), 403)
         pm = PersistenceManager(myapp.db_connector)
-        tourney = pm.get_tourney_by_id( tourney_id)
+        tourney = pm.get_tourney_by_id(tourney_id)
         if tourney is None:
-             return helper.bail("failed to look up tourney id %d for player get" % ( tourney_id), 403)
+            return helper.bail("failed to look up tourney id %d for player get" % ( tourney_id), 403)
 
         json_data = None
         try:
-             json_data = request.get_json(force=True)
+            json_data = request.get_json(force=True)
         except Exception:
-             return helper.bail("bad json received!", 403)
+            return helper.bail("bad json received!", 403)
         if json_data is not None:
             bail = helper.check_token(json_data, tourney)
             if bail:
@@ -538,27 +545,27 @@ class PlayersAPI(restful.Resource):
         if not json_data.has_key(PLAYERS):
             return helper.bail("player put missing player key", 403), None
 
-        bail, tl1,tl2 = helper.extract_players( json_data, tourney )
+        bail, tl1, tl2 = helper.extract_players(json_data, tourney)
         if bail:
             return bail
         pm.db_connector.get_session().commit()
 
         players = []
         for player in tourney.tourney_players:
-            players.append( { NAME: player.player_name, ID: player.id })
+            players.append({NAME: player.get_player_name(), ID: player.id})
         return None, players
 
     def post(self, tourney_id):
         helper = TournamentApiHelper()
-        bail, players = self.put_or_post( helper, tourney_id )
+        bail, players = self.put_or_post(helper, tourney_id)
         if bail:
             return bail
-        #only return the players that the caller created
+        # only return the players that the caller created
         json_data = None
         try:
-             json_data = request.get_json(force=True)
+            json_data = request.get_json(force=True)
         except Exception:
-             return helper.bail("bad json received!", 403)
+            return helper.bail("bad json received!", 403)
         new_players = json_data[PLAYERS]
         ret = []
         for p in players:
@@ -572,10 +579,9 @@ class PlayersAPI(restful.Resource):
 
     def put(self, tourney_id):
         helper = TournamentApiHelper()
-        bail, players = self.put_or_post( helper, tourney_id )
+        bail, players = self.put_or_post(helper, tourney_id)
         if bail:
             return bail
-
 
 
 class TourneyToJsonConverter:
@@ -584,7 +590,7 @@ class TourneyToJsonConverter:
         ret = {}
         ret[TOURNAMENT] = tournament
         tournament[ID] = t.id
-        tournament[NAME] = t.tourney_name
+        tournament[NAME] = t.get_tourney_name()
         tournament[DATE] = str(t.tourney_date)
         tournament[TYPE] = t.tourney_type
         tournament[ROUND_LENGTH] = t.round_length
@@ -592,12 +598,12 @@ class TourneyToJsonConverter:
             tournament[FORMAT] = t.format
 
         # build the tournament to ranking map
-        #naive assumption: assume the rankings are there
+        # naive assumption: assume the rankings are there
         players = []
         tournament[PLAYERS] = players
         for ranking in t.rankings:
             player = {}
-            player[PLAYER_NAME] = ranking.player.player_name
+            player[PLAYER_NAME] = ranking.player.get_player_name()
             player[SCORE] = ranking.score
             player[MOV] = ranking.mov
             player[SOS] = ranking.sos
@@ -630,9 +636,7 @@ class TourneyToJsonConverter:
         return ret
 
 
-
 class TournamentAPI(restful.Resource):
-
     def put(self, tourney_id):
         pm = PersistenceManager(myapp.db_connector)
         tourney = pm.get_tourney_by_id(tourney_id)
@@ -641,7 +645,7 @@ class TournamentAPI(restful.Resource):
             response.status_code = 403
             return response
 
-        #go through and try to update what we can.
+        # go through and try to update what we can.
         json_data = None
         helper = TournamentApiHelper()
         self.helper = helper
@@ -685,27 +689,29 @@ class TournamentAPI(restful.Resource):
                 helper.extract_email(t, tourney)
                 helper.extract_tourney_format(t, tourney)
                 helper.extract_venue(t, tourney)
-                bail, tlists_by_id, tlists_by_name = helper.extract_players(t, tourney) #round by round results, if it exists
+                bail, tlists_by_id, tlists_by_name = helper.extract_players(t,
+                                                                            tourney)  #round by round results, if it exists
                 if bail:
                     return bail
-                bailout = helper.extract_set(t, tourney, pm )
+                bailout = helper.extract_set(t, tourney, pm)
                 if bailout:
                     return bailout
 
-                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name, pm )
+                bailout = helper.extract_rounds(t, tourney, tlists_by_id, tlists_by_name, pm)
                 if bailout:
                     return bailout
 
                 #and log it
                 event = Event(remote_address=myapp.remote_address(request),
-                  event_date=func.now(),
-                  event="API",
-                  event_details="tournament API: tourney update via POST")
+                              event_date=func.now(),
+                              event="API",
+                              event_details="tournament API: tourney update via POST")
 
-                pm.db_connector.get_session().add( event )
+                pm.db_connector.get_session().add(event)
                 pm.db_connector.get_session().commit()
 
-                response = jsonify({TOURNAMENT: {NAME: tourney.tourney_name, "id": tourney.id, API_TOKEN: tourney.api_token }})
+                response = jsonify(
+                    {TOURNAMENT: {NAME: tourney.get_tourney_name(), "id": tourney.id, API_TOKEN: tourney.api_token}})
                 response.status_code = 200
                 return response
 
@@ -724,12 +730,12 @@ class TournamentAPI(restful.Resource):
             response.status_code = 404
             return response
 
-        #and log it
+        # and log it
         event = Event(remote_address=myapp.remote_address(request),
-          event_date=func.now(),
-          event="API",
-          event_details="tournament API: tourney GET")
-        pm.db_connector.get_session().add( event )
+                      event_date=func.now(),
+                      event="API",
+                      event_details="tournament API: tourney GET")
+        pm.db_connector.get_session().add(event)
 
         pm.db_connector.get_session().commit()
 
@@ -751,28 +757,28 @@ class TournamentAPI(restful.Resource):
         if json_data is None:
             return helper.bail("delete call for tourney_id %d missing json payload, giving up " % (tourney_id), 403)
 
-        bail = helper.check_token( json_data, t )
+        bail = helper.check_token(json_data, t)
         if bail:
             return bail
 
-        #whew. aaaaalmost there...
+        # whew. aaaaalmost there...
         try:
-            pm.delete_tourney_by_id( tourney_id )
+            pm.delete_tourney_by_id(tourney_id)
         except Exception:
-            return helper.bail("unable to delete tourney %d, bailing out " % ( tourney_id ), 403 )
+            return helper.bail("unable to delete tourney %d, bailing out " % ( tourney_id ), 403)
 
-         #and log it
+            #and log it
         event = Event(remote_address=myapp.remote_address(request),
-          event_date=func.now(),
-          event="API",
-          event_details="tournament API: tourney delete %d" % ( tourney_id ))
-        pm.db_connector.get_session().add( event )
+                      event_date=func.now(),
+                      event="API",
+                      event_details="tournament API: tourney delete %d" % ( tourney_id ))
+        pm.db_connector.get_session().add(event)
         pm.db_connector.get_session().commit()
-
 
         response = jsonify(message="deleted tourney id %d" % ( tourney_id ))
         response.status_code = 204
         return response
+
 
 class TournamentSearchAPI(restful.Resource):
     '''
@@ -780,6 +786,7 @@ class TournamentSearchAPI(restful.Resource):
         Returns dict of tourney_id: tourney_data for substring query
         Substring is checked in tourney name and venue.
     '''
+
     def post(self):
         try:
             query = request.form['query']
@@ -793,24 +800,25 @@ class TournamentSearchAPI(restful.Resource):
             abort(400)
 
         pm = PersistenceManager(myapp.db_connector)
-        tourneys = pm.db_connector.get_session().query(Tourney)\
-            .join(TourneyVenue)\
+        tourneys = pm.db_connector.get_session().query(Tourney) \
+            .join(TourneyVenue) \
             .filter(
-                or_(
-                    Tourney.tourney_name.like('%{}%'.format(query)),
-                    TourneyVenue.venue.like('%{}%'.format(query))
-                )
+            or_(
+                Tourney.tourney_name.like('%{}%'.format(query)),
+                TourneyVenue.venue.like('%{}%'.format(query))
             )
+        )
 
         response = {
             t.id: {
                 'name': t.tourney_name,
                 'venue': t.venue.venue,
-                'date': t.tourney_date.strftime('%Y-%m-%d'), # no timezone was kept :(
+                'date': t.tourney_date.strftime('%Y-%m-%d'),  # no timezone was kept :(
             }
-        for t in tourneys }
+            for t in tourneys}
 
         return jsonify(response)
+
 
 class TournamentTokenAPI(restful.Resource):
     '''
@@ -818,6 +826,7 @@ class TournamentTokenAPI(restful.Resource):
         If email is valid, returns dict of api_token: api_token
         Creates api_token if needed.
     '''
+
     def post(self, tourney_id):
         helper = TournamentApiHelper()
 
