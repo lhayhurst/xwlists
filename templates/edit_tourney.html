@@ -7,9 +7,12 @@
         max-width: 1400px;
         margin: 1 auto;
     }
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
 
 </style>
-
 
 <script>
 
@@ -238,7 +241,7 @@
             <b>Top {{ round.round_num }}</b>
 
 
-            <table class="compact display dataTable">
+            <table class="compact display dataTable" role="grid" style="width:100%;">
                 <thead>
                     <th>Player 1</th>
                     <th>Result</th>
@@ -278,7 +281,7 @@
             <b>Round {{ round.round_num }}</b>
 
 
-            <table class="compact display dataTable">
+            <table class="compact display dataTable" style="width:100%;">
                 <thead>
                     <th>Player 1</th>
                     <th>Result</th>
