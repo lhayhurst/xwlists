@@ -4,6 +4,11 @@ from markupsafe import Markup
 from sqlalchemy.dialects import mysql
 from sqlalchemy.sql.operators import ColumnOperators
 from decoder import decode
+from sqlalchemy import and_, or_
+
+REGIONAL = 'Regional'
+
+STORE_CHAMPIONSHIP = 'Store championship'
 
 ELIMINATION = 'elimination'
 
@@ -15,7 +20,7 @@ import random
 
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.sql import ColumnElement
+from sqlalchemy.sql import ColumnElement, ClauseElement, literal
 from sqlalchemy.sql.elements import _clause_element_as_expr
 
 from myapp import db_connector
@@ -35,6 +40,19 @@ class rollup(ColumnElement):
 @compiles(rollup, "mysql")
 def _mysql_rollup(element, compiler, **kw):
     return "%s WITH ROLLUP" % (', '.join([compiler.process(e, **kw) for e in element.elements]))
+
+class Match(ClauseElement):
+    def __init__(self, columns, value):
+        self.columns = columns
+        self.value = literal(value)
+
+@compiles(Match)
+def _match(element, compiler, **kw):
+    return "MATCH (%s) AGAINST (%s IN BOOLEAN MODE)" % (
+               ", ".join(compiler.process(c, **kw) for c in element.columns),
+               compiler.process(element.value)
+             )
+
 
 
 #TABLES
@@ -407,7 +425,8 @@ class TourneyRanking(Base):
 
 round_result_table = "round_result"
 class RoundResult(Base):
-    __tablename__ = round_result_table
+    __tablename__   = round_result_table
+
     id            = Column(Integer, primary_key=True)
     round_id      = Column(ForeignKey('{0}.id'.format(tourney_round_table)))
     list1_id      = Column(ForeignKey('{0}.id'.format(tourney_list_table)))
@@ -671,7 +690,7 @@ class PersistenceManager:
             return None
         return randomRow[1]
 
-    def get_ship_pilot_rollup(self, elimination_only, storeChampionshipsOnly=False):
+    def get_ship_pilot_rollup(self, elimination_only, storeChampionshipsOnly=False, regionalChampionshipsOnly=False):
         session = self.db_connector.get_session()
 
         filters = [
@@ -686,8 +705,7 @@ class PersistenceManager:
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        if storeChampionshipsOnly:
-            filters.append(Tourney.tourney_type == 'Store championship')
+        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
 
 
         ship_pilot_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
@@ -716,9 +734,7 @@ class PersistenceManager:
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        if storeChampionshipsOnly:
-            filters.append(Tourney.tourney_type == 'Store championship')
-
+        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
 
         upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
@@ -735,7 +751,7 @@ class PersistenceManager:
         connection.close()
         return ret
 
-    def get_upgrade_rollups(self, elimination_only, storeChampionshipsOnly=False):
+    def get_upgrade_rollups(self, elimination_only, storeChampionshipsOnly=False, regionalChampionshipsOnly=False):
 
         session = self.db_connector.get_session()
 
@@ -753,8 +769,7 @@ class PersistenceManager:
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        if storeChampionshipsOnly:
-            filters.append(Tourney.tourney_type == 'Store championship')
+        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
 
         upgrade_rollup_sql = session.query( Upgrade.upgrade_type, Upgrade.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
@@ -769,7 +784,16 @@ class PersistenceManager:
         ret = connection.execute(upgrade_rollup_sql)
         return ret
 
-    def get_ship_faction_rollups(self, elimination_only, storeChampionshipsOnly=False):
+    def apply_tourney_type_filter(self, filters, regionalChampionshipsOnly, storeChampionshipsOnly):
+        if storeChampionshipsOnly == True and regionalChampionshipsOnly == True:
+            filters.append(or_(Tourney.tourney_type == ('%s' % STORE_CHAMPIONSHIP),
+                               Tourney.tourney_type == ('%s' % REGIONAL)))
+        elif storeChampionshipsOnly == True and regionalChampionshipsOnly == False:
+            filters.append(Tourney.tourney_type == STORE_CHAMPIONSHIP)
+        elif storeChampionshipsOnly == False and regionalChampionshipsOnly == True:
+            filters.append(Tourney.tourney_type == REGIONAL)
+
+    def get_ship_faction_rollups(self, elimination_only, storeChampionshipsOnly=False, regionalChampionshipsOnly=False):
         session = self.db_connector.get_session()
 
         filters = [TourneyList.tourney_id == Tourney.id ,
@@ -782,8 +806,7 @@ class PersistenceManager:
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        if storeChampionshipsOnly:
-            filters.append(Tourney.tourney_type == 'Store championship')
+        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
 
 
         faction_ship_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
@@ -810,6 +833,7 @@ class PersistenceManager:
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
+        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
 
         upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
                                         func.count( Upgrade.id).label("num_upgrades"),

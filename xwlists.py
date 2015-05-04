@@ -18,6 +18,7 @@ import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event
 from rollup import Rollup
+from search import Search
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
 from flask.ext import restful
@@ -107,6 +108,20 @@ def mail_error(errortext):
 @app.route("/about")
 def about():
     return render_template('about.html')
+
+@app.route("/search")
+def search():
+    return render_template("search.html")
+
+@app.route("/search_results", methods=['POST'])
+def get_search_results():
+    search_text = request.json['search-text']
+    s = Search( search_text )
+    results = s.search()
+    return render_template( 'search_results.html', results=results), 200
+
+# tourney_tourney_name, tourney_tourney_type , tourney_player_player_name, tourney_list_faction, ship_pilot_ship_type,
+#
 
 @app.route("/events")
 def events():
@@ -808,7 +823,11 @@ def index():
 @app.route("/get_chart_data", methods=['POST'])
 def get_chart_data():
     data         = request.json['data']
-    rollup       = Rollup( PersistenceManager(myapp.db_connector), data['value'], data['eliminationOnly'], data['storeChampionshipsOnly'] )
+    rollup       = Rollup( PersistenceManager(myapp.db_connector),
+                           data['value'],
+                           data['eliminationOnly'],
+                           data['storeChampionshipsOnly'],
+                           data['regionalChampionshipsOnly'])
     chart_data   = rollup.rollup()
     return jsonify(data=chart_data,
                    title=data['value'] + rollup.title(),
