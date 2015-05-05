@@ -529,7 +529,21 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Storm Squadron Pilot', 'cost': 23,
                          'upgrades': (MISSILE, MOD, TITLE)},
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Tempest Squadron Pilot', 'cost': 21,
-                         'upgrades': (MISSILE, MOD, TITLE)} ),
+                         'upgrades': (MISSILE, MOD, TITLE)},
+
+                        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Commander Alozen', 'cost': 25,
+                         'upgrades': (MISSILE, MOD, TITLE)},
+
+                        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Juno Eclipse', 'cost': 28,
+                         'upgrades': (MISSILE, MOD, TITLE)},
+
+                        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Lieutenant Colzet', 'cost': 23,
+                         'upgrades': (MISSILE, MOD, TITLE)},
+
+                        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Zertik Strom', 'cost': 26,
+                         'upgrades': (MISSILE, MOD, TITLE)},
+
+         ),
 
          TIE_INTERCEPTOR: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Soontir Fel', 'cost': 27,
                             'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
