@@ -1,11 +1,12 @@
 import re
 import unittest
+
 from sqlalchemy import and_, or_, func
-from sqlalchemy.dialects import mysql
 from whoosh.qparser import QueryParser
 from whoosh.query import Term
+
 import myapp
-from persistence import Match, Tourney, TourneyVenue, TourneyPlayer, TourneyList, Ship, ShipPilot, Pilot, ShipUpgrade, \
+from persistence import TourneyList, Ship, ShipPilot, Pilot, ShipUpgrade, \
     Upgrade, PersistenceManager
 
 
@@ -83,13 +84,6 @@ class Search:
 
         myapp.db_connector.connect()
         session = myapp.db_connector.get_session()
-
-        match = session.query(  TourneyList.id ).\
-            join( Ship).\
-            join( ShipPilot).\
-            join( Pilot ).\
-            outerjoin( ShipUpgrade).\
-            outerjoin( Upgrade )
 
         subq = session.query( TourneyList.id.label("tourney_list_id"),
                               func.group_concat( ShipPilot.ship_type.distinct()).label("ship_name" ),
