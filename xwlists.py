@@ -113,15 +113,20 @@ def about():
 def search():
     return render_template("search.html")
 
+@app.route("/search_guide")
+def search_guide():
+    return render_template("search_guide.html")
+
+
 @app.route("/search_results", methods=['POST'])
 def get_search_results():
-    search_text = request.json['search-text']
-    s = Search( search_text )
-    results = s.search()
-    return render_template( 'search_results.html', results=results), 200
-
-# tourney_tourney_name, tourney_tourney_type , tourney_player_player_name, tourney_list_faction, ship_pilot_ship_type,
-#
+    try:
+        search_text = request.json['search-text']
+        s = Search( search_text )
+        results = s.search()
+        return render_template( 'search_results.html', results=results), 200
+    except ValueError, e:
+        return render_template( 'search_error.html', errortext=str(e))
 
 @app.route("/events")
 def events():

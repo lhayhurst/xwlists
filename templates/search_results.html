@@ -1,0 +1,48 @@
+<link rel="stylesheet" type="text/css" href="static/jquery.dataTables.css">
+<link rel="stylesheet" type="text/css" href="static/dataTables.tableTools.min.css">
+<link rel="stylesheet" type="text/css" href="static/dataTables.editor.min.css">
+
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+
+<table id="lists" class="compact display dataTable" cellspacing="0" width="100%">
+  <thead>
+      <tr>
+        <th>Tourney</th>
+        <th>Type</th>
+        <th >Player</th>
+        <th >Swiss Standing</th>
+        <th >Championship Standing</th>
+        <th>List</th>
+      </tr>
+  </thead>
+
+  {% for list in results %}
+  <tr>
+      <td>{{ list.tourney.get_tourney_name() }}</td>
+      <td>{{ list.tourney.tourney_type }}</td>
+      <td>{{ list.player.get_player_name() }}</td>
+      <td>{{ list.player.result.rank }}</td>
+      <td>{{ list.player.result.elim_rank }}</td>
+      <td>{{ list.pretty_print() }}</td>
+
+  </tr>
+  {% endfor %}
+
+</table>
+
+<script>
+        $(document).ready( function () {
+        $('#lists').dataTable( {
+                "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+                iDisplayLength: -1,
+                "order": [[ 0, "desc" ]]
+        });
+    } );
+
+
+</script>

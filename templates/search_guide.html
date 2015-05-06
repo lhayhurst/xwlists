@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block content %}
+
+The ListJuggler search supports a subset of the <a href="https://pythonhosted.org/Whoosh/querylang.html">Whoosh query language.</a>
+
+The general format of a search is something like:<br><br>
+
+    s=yt1300 AND (u=wolf OR u=c3p0) OR (p=Dash AND u=outrider)<br><br>
+
+This will search for every YT1300 that has either a lone wolf upgrade or c3p0.<br><br>
+
+You have to give hints to ListJuggler to tell it what you are looking for.  It understands ships, pilots, and upgrades.<br><br>
+
+    To find a ship, you can say <b>ship=yt1300</b> or <b>s=yt1300</b>.<br><br>
+
+    To find a pilot, you can say <b>pilot=Han</b> or <b>p=han</b>.<br><br>
+
+    To find an upgrade, you can say <b>upgrade=Outrider</b> or <b>u=outrider</b><br><br>
+
+A few other hints to help you along:
+<ul>
+<li>You can use either the long, English name of something, or its canonical name.  The full list of searchable names can be found on the  <a href="https://github.com/elistevens/xws-spec/blob/master/README_NAMES.md">xws specification page</a></li>
+<li>If you have a search expression with spaces in it -- for example, "Push the Limit" -- use the canonical xws name instead, "pushthelimit"</li>
+<li>Wildcards are used behind the scenes - for example, if you want to search for every list with Han and Chewbacca "p=Han AND p=Chew" will work.</li>
+<li>If you don't specify an AND clause, it is inferred. "p=Han p=Chew" is the same thing as the above example.</li>
+</ul>
+
+
+
+
+{% endblock %}

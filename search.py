@@ -1,57 +1,138 @@
+import re
 import unittest
-from sqlalchemy import and_
+from sqlalchemy import and_, or_, func
 from sqlalchemy.dialects import mysql
+from whoosh.qparser import QueryParser
+from whoosh.query import Term
 import myapp
 from persistence import Match, Tourney, TourneyVenue, TourneyPlayer, TourneyList, Ship, ShipPilot, Pilot, ShipUpgrade, \
-    Upgrade
+    Upgrade, PersistenceManager
+
 
 def wildcard(term):
-    return "*" + term + "*"
+    return term
+
+
+expression_map = { 'AND' : and_,
+                   'and' : and_,
+                   'or'  : or_,
+                   'OR'  : or_ }
+
+PILOT_MATCH = "pilot_match"
+SHIP_MATCH  = "ship_match"
+UPGRADE_MATCH = "upgrade_match"
+term_type_map = { "p": PILOT_MATCH,
+                  "pilot": PILOT_MATCH,
+                  "s" : SHIP_MATCH,
+                  "ship" : SHIP_MATCH,
+                  "u" : UPGRADE_MATCH,
+                  "upgrade" : UPGRADE_MATCH
+                }
+
+def tree_to_expr(tree, subq):
+    if isinstance(tree, Term):
+        term = str(tree.text)
+        term_type, term_value = term.split("=")
+        match_expr = term_type_map[ term_type ]
+        if match_expr == PILOT_MATCH:
+            return subq.c.pilot_name.like( '%' + term_value + '%')
+        elif match_expr == SHIP_MATCH:
+            return subq.c.ship_name.like( '%' + term_value + '%')
+        elif match_expr == UPGRADE_MATCH:
+            return subq.c.upgrade_name.like( '%' + term_value + '%')
+    fn = expression_map[tree.JOINT.strip()]
+    return fn(
+        *(
+            [tree_to_expr( child, subq) for child in tree ]
+        )
+    )
+
+kvpair = re.compile( r'^(s=.+)|(ship=.+)|(p=.+)|(pilot=.+)|(u=.+)|(upgrade=.+)')
 
 class Search:
 
-    def __init__(self, tourney_name=None, locale_name=None, player_name=None, ship_name=None, pilot_name=None, upgrade_name=None):
-        self.tourney_name = tourney_name
-        self.locale_name = locale_name
-        self.player_name = player_name
-        self.ship_name = ship_name
-        self.pilot_name = pilot_name
-        self.upgrade_name = upgrade_name
+    def is_valid_term(self, q):
+        if isinstance(q, Term):
+            term = str(q.text)
+            m    = kvpair.match( term )
+            if m is None:
+                return False
+            else:
+                return True
+        else:
+            return True
 
-    def search(self):
+    def validate_search_term(self, q):
+        if not self.is_valid_term(q):
+            return "Invalid search query: "
+
+        if len(q.all_terms()) > 1:
+            for i in q:
+                if not self.is_valid_term(i):
+                    return "Invalid search query: "
+
+        return None
+
+    def __init__(self, search_term):
+
+        parser = QueryParser("content", schema=None)
+        q = parser.parse(search_term)
+        invalid = self.validate_search_term(q)
+        if invalid:
+            raise ValueError(invalid + search_term)
 
         myapp.db_connector.connect()
         session = myapp.db_connector.get_session()
 
-        and_clauses = []
-        if self.tourney_name is not None:
-             and_clauses.append( Match([Tourney.tourney_name, Tourney.tourney_type], wildcard(self.tourney_name) ) )
-        if self.locale_name is not None:
-            and_clauses.append( Match([TourneyVenue.country, TourneyVenue.state, TourneyVenue.city, TourneyVenue.venue ], wildcard( self.locale_name ) ))
-        if self.player_name is not None:
-            and_clauses.append( Match([TourneyPlayer.player_name], wildcard( self.player_name ) ))
-        if self.ship_name is not None:
-            and_clauses.append( Match([ShipPilot.ship_type], wildcard( self.ship_name ) ) )
-        if self.pilot_name is not None:
-            and_clauses.append( Match([Pilot.name, Pilot.canon_name], wildcard(self.pilot_name) ))
-        if self.upgrade_name is not None:
-            and_clauses.append( Match([Upgrade.name, Upgrade.canon_name], wildcard(self.upgrade_name ) ) )
-
-
-        match = session.query( Tourney, TourneyPlayer, TourneyList, Ship, ShipPilot, Pilot, ShipUpgrade, Upgrade).\
-            join( TourneyVenue).\
-            join( TourneyPlayer).\
-            join( TourneyList).\
+        match = session.query(  TourneyList.id ).\
             join( Ship).\
             join( ShipPilot).\
             join( Pilot ).\
             outerjoin( ShipUpgrade).\
-            outerjoin( Upgrade).\
-            filter( and_( *and_clauses ) ).\
-            statement.compile(dialect=mysql.dialect())
+            outerjoin( Upgrade )
 
-        connection = myapp.db_connector.get_engine().connect()
-        ret = connection.execute(match)
+        subq = session.query( TourneyList.id.label("tourney_list_id"),
+                              func.group_concat( ShipPilot.ship_type.distinct()).label("ship_name" ),
+                              func.group_concat( func.concat( Pilot.name, " ", Pilot.canon_name )).label("pilot_name"),
+                              func.group_concat( func.concat( Upgrade.name, " ", Upgrade.canon_name ) ).label("upgrade_name") ). \
+            join(Ship). \
+            join(ShipPilot). \
+            join(Pilot). \
+            outerjoin(ShipUpgrade). \
+            outerjoin(Upgrade).\
+            group_by( TourneyList.id).subquery()
+
+
+        fn  = tree_to_expr(q, subq)
+        self.query = session.query(subq.c.tourney_list_id).filter( fn )
+
+
+
+# select * from ( SELECT tourney_list.id AS tourney_list_id ,
+# GROUP_CONCAT(distinct ship_pilot.ship_type  SEPARATOR ' ' ) as ship,
+# GROUP_CONCAT(distinct CONCAT( pilot.name, ' ',  pilot.canon_name)  SEPARATOR ' ' ) as pilot1,
+# GROUP_CONCAT(distinct CONCAT( upgrade.name, ' ',  upgrade.canon_name)  SEPARATOR ' ' ) as uprade
+#  FROM tourney_list
+# INNER JOIN ship ON tourney_list.id = ship.tlist_id
+# INNER JOIN ship_pilot ON ship_pilot.id = ship.ship_pilot_id
+# INNER JOIN pilot ON pilot.id = ship_pilot.pilot_id
+# LEFT OUTER JOIN ship_upgrade ON ship.id = ship_upgrade.ship_id
+# LEFT OUTER JOIN upgrade ON upgrade.id = ship_upgrade.upgrade_id
+# group by tourney_list.id ) as rr
+# WHERE  rr.pilot1 like '%Dash%' and rr.pilot1 like '%Chew%'
+
+    def search(self):
+
+        ret = []
+        seen = {}
+        pm = PersistenceManager( myapp.db_connector )
+
+        for rec in self.query:
+             list_id = rec[0]
+             if not seen.has_key( list_id ):
+                 list    = pm.get_tourney_list( list_id )
+                 seen[list_id] = 1
+                 ret.append( list )
 
         return ret
 
@@ -62,17 +143,21 @@ class SearchTest(unittest.TestCase):
 
     def testSearch(self):
 
-        myapp.db_connector.connect()
-        session = myapp.db_connector.get_session()
+        with self.assertRaises(ValueError):
+            Search("foo")
 
-        mysearch = Search( tourney_name="world",  locale_name="roseville",
-                           player_name="dom", ship_name="tie", pilot_name="soontir", upgrade_name="target")
+        with self.assertRaises(ValueError):
+            Search("a=bar")
 
-        ret = mysearch.search()
+        with self.assertRaises(ValueError):
+            Search("=bar")
 
-        self.assertTrue( ret.rowcount == 1)
-        result = [r[0] for r in ret]
-        print result
+        with self.assertRaises(ValueError):
+            Search("s=")
+
+        with self.assertRaises(ValueError):
+            Search("s=bar and s=baz")
+
 
 if __name__ == "__main__":
     unittest.main()
