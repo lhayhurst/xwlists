@@ -15,9 +15,10 @@ def wildcard(term):
 
 
 expression_map = { 'AND' : and_,
-                   'and' : and_,
-                   'or'  : or_,
                    'OR'  : or_ }
+
+and_regex = re.compile( r'\s+and\s+')
+or_regex = re.compile( r'\s+or\s+')
 
 PILOT_MATCH = "pilot_match"
 SHIP_MATCH  = "ship_match"
@@ -72,6 +73,7 @@ def tree_to_expr(tree, subq):
 
 kvpair = re.compile( r'^(s=.+)|(ship=.+)|(p=.+)|(pilot=.+)|(u=.+)|(country=.+)|(state=.+)|(city=.+)|(venue=.+)|(type=.+)')
 
+
 class Search:
 
     def is_valid_term(self, q):
@@ -97,6 +99,9 @@ class Search:
         return None
 
     def __init__(self, search_term):
+
+        search_term = re.sub( and_regex, ' AND ',  search_term )
+        search_term = re.sub( or_regex, ' OR ', search_term)
 
         parser = QueryParser("content", schema=None)
         q = parser.parse(search_term)
