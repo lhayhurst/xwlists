@@ -26,6 +26,7 @@ COUNTRY_MATCH = "country_match"
 STATE_MATCH   = "state_match"
 CITY_MATCH    = "city_match"
 VENUE_MATCH   = "venue_match"
+TOURNEY_TYPE  = "tourney_type"
 
 term_type_map = { "p": PILOT_MATCH,
                   "pilot": PILOT_MATCH,
@@ -36,7 +37,8 @@ term_type_map = { "p": PILOT_MATCH,
                   "country" : COUNTRY_MATCH,
                   "state" : STATE_MATCH,
                   "city" : CITY_MATCH,
-                  "venue" : VENUE_MATCH
+                  "venue" : VENUE_MATCH,
+                  "type" : TOURNEY_TYPE
                 }
 
 def tree_to_expr(tree, subq):
@@ -58,6 +60,8 @@ def tree_to_expr(tree, subq):
             return subq.c.city_name.like( '%' + term_value + '%')
         elif match_expr == VENUE_MATCH:
             return subq.c.venue_name.like( '%' + term_value + '%')
+        elif match_expr == TOURNEY_TYPE:
+            return subq.c.tourney_type.like( '%' + term_value + '%')
 
     fn = expression_map[tree.JOINT.strip()]
     return fn(
@@ -66,7 +70,7 @@ def tree_to_expr(tree, subq):
         )
     )
 
-kvpair = re.compile( r'^(s=.+)|(ship=.+)|(p=.+)|(pilot=.+)|(u=.+)|(country=.+)|(state=.+)|(city=.+)|(venue=.+)')
+kvpair = re.compile( r'^(s=.+)|(ship=.+)|(p=.+)|(pilot=.+)|(u=.+)|(country=.+)|(state=.+)|(city=.+)|(venue=.+)|(type=.+)')
 
 class Search:
 
@@ -108,6 +112,7 @@ class Search:
                               TourneyVenue.state.label("state_name"),
                               TourneyVenue.city.label("city_name"),
                               TourneyVenue.venue.label("venue_name"),
+                              Tourney.tourney_type.label("tourney_type"),
                               func.group_concat( ShipPilot.ship_type.distinct()).label("ship_name" ),
                               func.group_concat( func.concat( Pilot.name, " ", Pilot.canon_name )).label("pilot_name"),
                               func.group_concat( func.concat( Upgrade.name, " ", Upgrade.canon_name ) ).label("upgrade_name") ). \
