@@ -5,18 +5,73 @@ The ListJuggler search supports a subset of the <a href="https://pythonhosted.or
 
 The general format of a search is something like:<br><br>
 
-    p=Han AND (s=awing OR s=z95)<br><br>
+    p=Han AND (s=awing OR s=z95) AND (state=Illinois OR state=Indiana) <br><br>
 
-This will search for list that brought Han Solo and an AWing or a Headhunter<br><br>
+This will search for list that brought Han Solo and an AWing or a Headhunter, in the states of Illinois or Indiana.<br><br>
 
 You have to give hints to ListJuggler to tell it what you are looking for.  It understands ships, pilots, and upgrades.<br><br>
 
-    To find a ship, you can say <b>ship=yt1300</b> or <b>s=yt1300</b>.<br><br>
+<table border="1">
+<thead>
+    <td>Prefix</td>
+    <td>Meaning</td>
+    <td>Example</td>
+</thead>
+<tbody>
+    <tr>
+        <td>ship</td>
+        <td>The Xwing ship name</td>
+        <td>ship=yt1300</td>
+    </tr>
+    <tr>
+        <td>s</td>
+        <td>The Xwing ship name</td>
+        <td>s=yt1300</td>
+    </tr>
+    <tr>
+        <td>pilot</td>
+        <td>The Xwing pilot name</td>
+        <td>pilot=han</td>
+    </tr>
+    <tr>
+        <td>p</td>
+        <td>The Xwing pilot name</td>
+        <td>p=han</td>
+    </tr>
+    <tr>
+        <td>upgrade</td>
+        <td>The Xwing upgrade name</td>
+        <td>upgrade=falcon</td>
+    </tr>
+    <tr>
+        <td>u</td>
+        <td>The Xwing upgrade name</td>
+        <td>u=falcon</td>
+    </tr>
+    <tr>
+        <td>country</td>
+        <td>The country where the tourney was played</td>
+        <td>country=Canada</td>
+    </tr>
+    <tr>
+        <td>state</td>
+        <td>The state where the tourney was played</td>
+        <td>state=Quebec</td>
+    </tr>
+    <tr>
+        <td>city</td>
+        <td>The city where the tourney was played</td>
+        <td>city=Chicago</td>
+    </tr>
+    <tr>
+        <td>venue</td>
+        <td>The venue where the tourney was played</td>
+        <td>venue=Dice</td>
+    </tr>
 
-    To find a pilot, you can say <b>pilot=Han</b> or <b>p=han</b>.<br><br>
-
-    To find an upgrade, you can say <b>upgrade=Outrider</b> or <b>u=outrider</b><br><br>
-
+</tbody>
+</table>
+<br>
 A few other hints to help you along:
 <ul>
 <li>You can use either the long, English name of something, or its canonical name.  The full list of searchable names can be found on the  <a href="https://github.com/elistevens/xws-spec/blob/master/README_NAMES.md">xws specification page</a></li>
