@@ -179,7 +179,7 @@ upgrades = {
     ),
     TITLE: (
         {'name': 'Slave 1', 'cost': 0,
-          'action': [ { 'type': 'ADD_UPGRADE', 'value': BOMB } ],
+          'action': [ { 'type': 'ADD_UPGRADE', 'value': TORPEDO } ],
          'constraints': ( {'type': SHIP_TYPE, 'value': FIRESPRAY_31})},
         {'name': 'Royal Guard TIE', 'cost': 0,
          'action': [{'type': 'ADD_UPGRADE', 'value': MOD}],
