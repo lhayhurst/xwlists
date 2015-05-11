@@ -178,7 +178,9 @@ upgrades = {
         {'name': 'R2-D2', 'cost': 4, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )}
     ),
     TITLE: (
-        {'name': 'Slave 1', 'cost': 0, 'constraints': ( {'type': SHIP_TYPE, 'value': FIRESPRAY_31})},
+        {'name': 'Slave 1', 'cost': 0,
+          'action': [ { 'type': 'ADD_UPGRADE', 'value': BOMB } ],
+         'constraints': ( {'type': SHIP_TYPE, 'value': FIRESPRAY_31})},
         {'name': 'Royal Guard TIE', 'cost': 0,
          'action': [{'type': 'ADD_UPGRADE', 'value': MOD}],
          'constraints': ( {'type': SHIP_TYPE, 'value': TIE_INTERCEPTOR})},
