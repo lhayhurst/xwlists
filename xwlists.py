@@ -710,7 +710,7 @@ endpoints = { VOIDSTATE : 'http://xwing-builder.co.uk/import',
 #     return response.text
 
 
-@app.route("/mysqldb")
+@app.route("/mysqldb", methods=['GET'])
 def get_mysql_dump_file():
     return send_from_directory( directory="dbs", filename="prod.sql")
 
