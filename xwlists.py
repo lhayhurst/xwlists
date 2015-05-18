@@ -21,7 +21,7 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
 from rollup import Rollup
 from search import Search
 import xwingmetadata
-from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher, XWSListConverter
+from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
 from flask.ext import restful
 from flask_cors import CORS
 from requests import post
@@ -696,18 +696,18 @@ def get_from_fab():
 endpoints = { VOIDSTATE : 'http://xwing-builder.co.uk/import',
               YASB:  'https://yasb-xws.herokuapp.com'  }
 
-@app.route( "/export_xws")
-def export_xws():
-    tourney_list_id  = request.args.get('tourney_list_id')
-    destination = request.args.get('destination')
-    pm = PersistenceManager(myapp.db_connector)
-    tourney_list = pm.get_tourney_list(tourney_list_id)
-    converter = XWSListConverter( tourney_list )
-    endpoint =  endpoints[destination]
-
-    response = post( endpoint,  data=json.dumps(converter.data ) )
-    print response
-    return response.text
+# @app.route( "/export_xws")
+# def export_xws():
+#     tourney_list_id  = request.args.get('tourney_list_id')
+#     destination = request.args.get('destination')
+#     pm = PersistenceManager(myapp.db_connector)
+#     tourney_list = pm.get_tourney_list(tourney_list_id)
+#     converter = XWSListConverter( tourney_list )
+#     endpoint =  endpoints[destination]
+#
+#     response = post( endpoint,  data=json.dumps(converter.data ) )
+#     print response
+#     return response.text
 
 
 @app.route("/mysql")
