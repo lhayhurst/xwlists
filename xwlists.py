@@ -712,7 +712,7 @@ endpoints = { VOIDSTATE : 'http://xwing-builder.co.uk/import',
 
 @app.route("/mysqldb", methods=['GET'])
 def get_mysql_dump_file():
-    print "trying to fetch prod.sql"
+    print "trying to fetch prod.sql from mysqldb endpoint"
     return send_from_directory( directory="dbs", filename="prod.sql")
 
 
