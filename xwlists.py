@@ -696,7 +696,7 @@ def get_from_fab():
 @app.route("/mysql")
 def mysql():
     print "trying to fetch prod.sql from mysqldb endpoint"
-    return send_from_directory( directory="dbs", filename="prod.sql")
+    return url_for( 'static', filename='prod.sql')
 
 
 
