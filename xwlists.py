@@ -4,9 +4,10 @@ from random import randint
 import urllib
 import datetime
 import uuid
-from flask import render_template, request, url_for, redirect, jsonify, Response
+from flask import render_template, request, url_for, redirect, jsonify, Response, send_from_directory
 from flask.ext.mail import Mail, Message
 import sys
+import requests
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI
@@ -20,10 +21,14 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
 from rollup import Rollup
 from search import Search
 import xwingmetadata
-from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
+from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher, XWSListConverter
 from flask.ext import restful
 from flask_cors import CORS
+from requests import post
 
+YASB = 'yasb'
+
+VOIDSTATE = "voidstate"
 
 app =  myapp.create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -127,6 +132,8 @@ def get_search_results():
         return render_template( 'search_results.html', results=results), 200
     except ValueError, e:
         return render_template( 'search_error.html', errortext=str(e))
+
+
 
 @app.route("/events")
 def events():
@@ -684,6 +691,29 @@ def get_from_fab():
          response = jsonify(message=str(e))
          response.status_code = (500)
          return response
+
+
+endpoints = { VOIDSTATE : 'http://xwing-builder.co.uk/import',
+              YASB:  'https://yasb-xws.herokuapp.com'  }
+
+@app.route( "/export_xws")
+def export_xws():
+    tourney_list_id  = request.args.get('tourney_list_id')
+    destination = request.args.get('destination')
+    pm = PersistenceManager(myapp.db_connector)
+    tourney_list = pm.get_tourney_list(tourney_list_id)
+    converter = XWSListConverter( tourney_list )
+    endpoint =  endpoints[destination]
+
+    response = post( endpoint,  data=json.dumps(converter.data ) )
+    print response
+    return response.text
+
+
+@app.route("/mysql")
+def get_mysql_dump_file():
+    return send_from_directory( directory="dbs", filename="prod.sql")
+
 
 @app.route("/get_from_yasb", methods=['POST'])
 def get_from_yasb():
