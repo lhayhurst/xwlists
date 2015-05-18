@@ -693,9 +693,15 @@ def get_from_fab():
          return response
 
 
-endpoints = { VOIDSTATE : 'http://xwing-builder.co.uk/import',
-              YASB:  'https://yasb-xws.herokuapp.com'  }
+@app.route("/mysql")
+def mysql():
+    print "trying to fetch prod.sql from mysqldb endpoint"
+    return send_from_directory( directory="dbs", filename="prod.sql")
 
+
+
+#endpoints = { VOIDSTATE : 'http://xwing-builder.co.uk/import',
+#              YASB:  'https://yasb-xws.herokuapp.com'  }
 # @app.route( "/export_xws")
 # def export_xws():
 #     tourney_list_id  = request.args.get('tourney_list_id')
@@ -709,11 +715,6 @@ endpoints = { VOIDSTATE : 'http://xwing-builder.co.uk/import',
 #     print response
 #     return response.text
 
-
-@app.route("/mysqldb", methods=['GET'])
-def get_mysql_dump_file():
-    print "trying to fetch prod.sql from mysqldb endpoint"
-    return send_from_directory( directory="dbs", filename="prod.sql")
 
 
 @app.route("/get_from_yasb", methods=['POST'])
