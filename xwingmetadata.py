@@ -159,8 +159,7 @@ upgrades = {
         {'name': 'Greedo', 'cost': 1,
          'constraints': ( SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT ),},
         {'name': 'Outlaw Tech', 'cost': 2, 'constraints': ( SCUM_FACTION_CONSTRAINT )},
-
-
+        {'name': 'Emperor Palpatine', 'cost': 8, 'constraints': ( IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT ) },
     ),
     DROID: (
         {'name': 'R2 Astromech', 'cost': 1},
