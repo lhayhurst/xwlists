@@ -3,6 +3,32 @@ import urllib2
 from BeautifulSoup import BeautifulSoup
 from persistence import TourneyList, Faction, Ship, ShipUpgrade
 
+class XWSListConverter:
+    def __init__(self, list):
+        self.data = {}
+        self.data['faction'] = str(list.faction.value)
+        pilots = []
+        self.data['pilots'] = pilots
+        self.data['version'] = "0.2.1"
+        self.data['vendor'] = { 'listjuggler': {} }
+
+        for ship in list.ships:
+            sp = ship.ship_pilot
+            p  = sp.pilot
+            pilot_href = {}
+            pilots.append( pilot_href )
+            pilot_href[ "name"]   = p.canon_name
+            pilot_href[ "ship"]   = str(sp.ship_type.value)
+            pilot_upgrades = {}
+            if len(ship.upgrades) > 0:
+                pilot_href['upgrades'] = pilot_upgrades
+            for ship_upgrade in ship.upgrades:
+                ut = str(ship_upgrade.upgrade.upgrade_type.value)
+                if not pilot_upgrades.has_key(ut):
+                    pilot_upgrades[ut] = []
+                pilot_upgrades[ut].append( ship_upgrade.upgrade.canon_name)
+
+
 
 class FabFetcher:
     def fetch(self, fab_url):
