@@ -121,6 +121,8 @@ update pilot set pilot_skill=6 where canon_name='laetinashera';
 update pilot set pilot_skill=8 where canon_name='serissu';
 update pilot set pilot_skill=4 where canon_name='hiredgun';
 
+update pilot set pilot_skill=4 where canon_name='stormsquadronpilot';
+update pilot set pilot_skill=5 where canon_name='shadowsquadronpilot';
 
 
 
