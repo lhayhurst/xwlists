@@ -309,6 +309,26 @@ function populateStates( countryElementId, stateElementId ){
 	}
 }
 
+function setCountryAndStateValue( countryElementId, country, stateElementId, state) {
+	var countryElement = document.getElementById(countryElementId);
+    var stateElement   = document.getElementById(stateElementId);
+    for ( var i = 0; i < country_arr.length; i++ ) {
+        //console.log(countryElement.options[i])
+        if ( countryElement.options[i].value == country ) {
+            countryElement.options[i].selected = true;
+            break;
+        }
+    }
+    populateStates( countryElementId, stateElementId );
+    for ( var i = 0; i < stateElement.length; i++ ) {
+        console.log( stateElement.options[i]);
+        if(stateElement.options[i].value == state) {
+          stateElement.options[i].selected = true;
+          break;
+        }
+    }
+}
+
 function populateCountries(countryElementId, stateElementId){
 	// given the id of the <select> tag as function argument, it inserts <option> tags
 	var countryElement = document.getElementById(countryElementId);

@@ -14,6 +14,16 @@
 
 </style>
 
+
+<script>
+    var locked     = {{ tourney.locked | tojson | safe }}
+    var tourney_id = {{  tourney.id | tojson | safe }}
+    var lockImg    = "static/images/lock.png";
+    var unlockImg  = "static/images/unlock.png"
+    var lockEditor;
+</script>
+
+
 <script>
 
     var tourney_id = {{ tourney_id }}
@@ -211,7 +221,14 @@
          <b>Venue:</b> {{ tourney.venue_string() }}
         <div id="lock-email-div" hidden><label>Enter the email address used to create this tourney</label><input type="text" id="keytext" name="keytext"/><button id="key-check" >go!</button><span class="error_text" id="key-check-status"></span><br></div>
         <br>
-        <hr>
+        <div id="edit_tourney_details_div">
+        <script>
+            if ( ! locked ) {
+                document.writeln('<a href="edit_tourney_details?tourney_id=' + tourney_id + '">Edit tourney details</a>')
+            }
+        </script>
+        </div>
+         <hr>
 
     </div>
 
@@ -319,12 +336,6 @@
 
 
  <script>
-    var locked     = {{ tourney.locked | tojson | safe }}
-    var tourney_id = {{  tourney.id | tojson | safe }}
-    var lockImg    = "static/images/lock.png";
-    var unlockImg  = "static/images/unlock.png"
-    var lockEditor;
-
     $(document).ready(function() {
 
         lockButtonEl = $('#lock');
@@ -354,6 +365,7 @@
     {
         k = document.getElementById('keytext').value;
         log = document.getElementById('key-check-status');
+        edit_br = document.getElementById('edit_tourney_details_div')
         log.innerHTML = "trying to unlock..."
         var action;
         url = "/unlock_tourney?key="+k+"&tourney_id="+tourney_id;
@@ -372,12 +384,14 @@
                     if (locked) {
                         locked = false;
                         img.attr( "src", unlockImg);
+                        edit_br.innerHTML = '<a href="edit_tourney_details?tourney_id=' + tourney_id + '">Edit tourney details</a>'
                         createButton.show();
                         editButton.show();
                     }
                     else {
                         locked = true;
                         img.attr("src", lockImg);
+                        edit_br.innerHTML = ""
                         createButton.hide();
                         editButton.hide();
 

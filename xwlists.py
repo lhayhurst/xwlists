@@ -24,7 +24,6 @@ import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
 from flask.ext import restful
 from flask_cors import CORS
-from requests import post
 
 YASB = 'yasb'
 
@@ -161,6 +160,76 @@ def get_tourney_results():
     return redirect(url_for('get_tourney_details', tourney_id=tourney_id))
 
 
+@app.route("/edit_tourney_details")
+def edit_tourney_details():
+    tourney_id   = request.args.get('tourney_id')
+
+    pm                = PersistenceManager(myapp.db_connector)
+    tourney           = pm.get_tourney_by_id(tourney_id)
+
+    tourney_date      = tourney.tourney_date
+    date_str          = "%d/%d/%d" % ( tourney_date.month, tourney_date.day, tourney_date.year)
+    print "tourney date is " + date_str
+
+    return render_template('edit_tourney_details.html', tourney_id=tourney_id,
+                                                tourney=tourney,
+                                                tourney_formats = xwingmetadata.formats,
+                                                tourney_date = date_str,
+                                                unlocked=False )
+
+@app.route("/update_tourney_details/",methods=['POST'])
+def update_tourney_details():
+    tourney_id            = request.form['tourney_id']
+    name                  = decode( request.form['name'] )
+    type                  = request.form['tourney_type']
+    print request.form['datepicker']
+    mmddyyyy              = request.form['datepicker'].split('/')
+    date                  = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1])) #YYYY, MM, DD
+    round_length  = request.form['round_length_userdef']
+    tourney_format_def    = request.form['tourney_format_dropdown']
+    tourney_format_custom = request.form['tourney_format_custom']
+    participant_count     = int(request.form['participant_count'])
+    country               = decode(request.form['country'])
+    state                 = decode(request.form['state'])
+    city                  = decode(request.form['city'])
+    venue                 = decode(request.form['venue'])
+
+
+    tourney_format = None
+    if tourney_format_def is None or len(tourney_format_def) == 0:
+        if tourney_format_custom is None or len(tourney_format_custom) == 0:
+            tourney_format = xwingmetadata.format_default
+        else:
+            tourney_format = decode(tourney_format_custom)
+    else:
+        tourney_format = str(tourney_format_def)
+
+
+    pm                = PersistenceManager(myapp.db_connector)
+    tourney           = pm.get_tourney_by_id(tourney_id)
+
+    tourney.tourney_name = name
+    tourney.tourney_type  = type
+    tourney.tourney_date = date
+    tourney.round_length = round_length
+    tourney.format = tourney_format
+    tourney.participant_count = participant_count
+    tourney.venue.country = country
+    tourney.venue.state = state
+    tourney.venue.city = city
+    tourney.venue.venue = venue
+
+    event = Event(remote_address=myapp.remote_address(request),
+                  event_date=func.now(),
+                  event="edit tourney information",
+                  event_details="edited " + name )
+
+    pm.db_connector.get_session().add(event)
+    pm.db_connector.get_session().commit()
+
+    return redirect( url_for( 'get_tourney_details', tourney_id=tourney_id) )
+
+
 
 @app.route("/get_tourney_details")
 def get_tourney_details():
@@ -169,9 +238,13 @@ def get_tourney_details():
     pm                = PersistenceManager(myapp.db_connector)
     tourney           = pm.get_tourney_by_id(tourney_id)
 
+    unlocked = True
+    if tourney.locked:
+        unlocked = False
+
     return render_template('edit_tourney.html', tourney_id=tourney_id,
-                                                tourney=PersistenceManager(myapp.db_connector).get_tourney_by_id(tourney_id),
-                                                unlocked=False )
+                                                tourney=tourney,
+                                                unlocked=unlocked )
 
 
 def create_default_editor_ranking(i, row):

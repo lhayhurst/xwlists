@@ -1,114 +1,85 @@
 {% extends "layout.html" %}
 {% block content %}
 
+
 <form id="form"
       class="grid-form"
-      action="{{ url_for('add_tourney') }}"
+      action="{{ url_for('update_tourney_details') }}"
       method=POST
       class="add-entry"
       enctype="multipart/form-data"
       data-parsley-validate >
     <fieldset>
-        <legend>Tourney details</legend>
-        <div data-row-span="4">
+        <legend>Click on a cell to edit tourney details</legend>
+        <div data-row-span="3">
             <div data-field-span="1">
                 <label>Tourney name</label>
-                <input type="text" name="name" required/>
+                <input type="text" name="name" value="{{ tourney.tourney_name }}" required/>
             </div>
-            <div data-field-span="1">
-                <label>Your contact email - kept private; used so sozin can provide you help if needed!</label>
-                <input type="text" name="email" data-parsley-type="email" required/>
-            </div>
-            <div data-field-span="1">
+                <div data-field-span="1">
                 <label>Tourney format</label>
-                <select id="tourney_format_dropdown" name="tourney_format_dropdown" placeholder="Select a format that matches your tourney" data-parsley-notDefaultSelection='' data-parsley-group="tourney-format-default">
+                <input type="text" name="tourney_format_custom" id="tourney_format_custom" value="{{ tourney.format }}" data-parsley-notDefaultSelection='' data-parsley-group="tourney-format-custom" />
+            </div>
+            <div data-field-span="1">
+                <label>Or pick a different format</label>
+                <select id="tourney_format_dropdown" name="tourney_format_dropdown"  placeholder="Select a format that matches your tourney" data-parsley-notDefaultSelection='' data-parsley-group="tourney-format-default">
                     <option></option>
                     {%  for f in tourney_formats %}
                         <option value="{{ f }}">{{ f }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div data-field-span="1">
-                <label>Or enter your own format</label>
-                <input type="text" name="tourney_format_custom" id="tourney_format_custom" data-parsley-notDefaultSelection='' data-parsley-group="tourney-format-custom" />
-            </div>
 
         </div>
-        <div data-row-span="5">
+        <div data-row-span="4">
             <div data-field-span="1">
                 <label>Date played</label>
-                <input type="text" id="datepicker" name="datepicker" required/>
+                <input type="text" id="datepicker" name="datepicker" value="{{ tourney_date }}" required/>
             </div>
             <div data-field-span="1">
                 <label>Type of tourney</label>
-                <select id="tourney_type" name="tourney_type" placeholder="Select a tourney type" data-init-text="Store championship" required>
-                    <option></option>
+                <select id="tourney_type" name="tourney_type" placeholder="Select a tourney type" required>
                     <option value="World championship">World championship</option>
-                    <option value="Regional">Nationals</option>
+                    <option value="Nationals">Nationals</option>
                     <option value="Regional">Regional</option>
                     <option value="Store championship">Store championship</option>
                     <option value="Vassal play">Vassal play</option>
                     <option value="Other">Other</option>
                 </select>
+                <script>
+                    var tourney_type     = {{ tourney.tourney_type | tojson | safe }}
+                    document.getElementById('tourney_type').value = tourney_type;
+                </script>
             </div>
             <div data-field-span="1">
-                <label>Round length (minutes)</label>
-                <select name="round_length_dropdown" id="round_length_dropdown" placeholder="Select a round length" data-parsley-notDefaultSelection='' data-parsley-group="round-len1">
-                    <option></option>
-                    <option value="60">60 minutes</option>
-                    <option value="75">75 minutes</option>
-                    <option value="90">90 minutes</option>
-                </select>
+                <label>Round length</label>
+                <input type="text" name="round_length_userdef" id="round_length_userdef" value="{{ tourney.round_length }}"  data-parsley-type="integer" data-parsley-group="round-len2" data-parsley-notDefaultSelection='' />
             </div>
-            <div data-field-span="1">
-                <label>Or add your own round length</label>
-                <input type="text" name="round_length_userdef" id="round_length_userdef" data-parsley-type="integer" data-parsley-group="round-len2" data-parsley-notDefaultSelection='' />
-            </div>
-
             <div data-field-span="1">
                 <label>Number of participants</label>
-                <input type="text" name="participant_count" id="participant_count" data-parsley-type="integer"  required/>
-            </div>
-        </div>
-        <div data-row-span="1">
-            <div data-field-span="1">
-                <label>Valid/legal sets used in tourney</label>
-                <select multiple id="sets" name="sets[]" required>
-                    {% for set in sets %}
-                    <option value="{{ set }}">{{ set }}</option>
-                    {% endfor %}
-                </select>
+                <input type="text" name="participant_count" id="participant_count" data-parsley-type="integer" value="{{ tourney.participant_count }}"  required/>
             </div>
         </div>
         <div data-row-span="4">
             <div data-field-span="1">
                 <label>Country</label>
-                <select id="country" name="country" required></select><br>
+                <select id="country" name="country"  required></select><br>
             </div>
             <div data-field-span="1">
                 <label>State/Provence</label>
-                <select id="state" name="state" required></select><br>
+                <select id="state" name="state" selected="{{ tourney.venue.state }}" required></select><br>
             </div>
             <div data-field-span="1">
                 <label>City</label>
-                <input type="text" name="city" required/>
+                <input type="text" name="city" value="{{ tourney.venue.city }}" required/>
             </div>
             <div data-field-span="1">
                 <label>Venue name</label>
-                <input type="text" name="venue" required/>
+                <input type="text" name="venue" value="{{  tourney.venue.venue }}"required/>
             </div>
-        </div>
-         <legend>Tourney results</legend>
-        <div data-row-span="1">
-            <div data-field-span="1">
-                <label>Leave blank if you didn't use Cryodex.<br>Else, in Cryodex go to Export->Export X-Wing List Juggler Data; this will create a file called 'XWingTournament.json' in the folder where your Cryodex.jar file lives.<br>Note, if you don't have this option in Cryodex, you need to upgrade to the latest version of Cryodex!</label>
-                <input type="file" name="tourney_report" accepts="json" >
-            </div>
-
         </div>
     </fieldset>
-
-
+    <input type="hidden" name="tourney_id" value="{{ tourney_id }}" />
     <div class="invalid-form-error-message"></div>
     <input type="submit" class="btn btn-info validate" />
 </form>
@@ -148,8 +119,10 @@ function tourney_format_custom_valid(formInstance)
 
 
 $(document).ready(function(){
-    var tourney_format_default = {{ format_default | tojson | safe }}
-    $('#tourney_format_dropdown').val(tourney_format_default);
+
+    var tourney_type     = {{ tourney.tourney_type | tojson | safe }}
+    var country          = {{ tourney.venue.country | tojson | safe }}
+    var state            = {{ tourney.venue.state | tojson | safe }}
 
     document.getElementById('tourney_format_custom').addEventListener('keydown', function(e) {
         $('#tourney_format_dropdown').select2( 'val', '' );
@@ -166,11 +139,12 @@ $(document).ready(function(){
 
     window.ParsleyValidator.addValidator('validRoundLength', function(value, requirement) {
             return value === parseInt( data, 10 )},32 );
-    populateCountries("country", "state");
+    populateCountries("country", "state")
+    setCountryAndStateValue( "country", country, "state", state);
     $('#country').select2();
     $("#datepicker").datepicker({ startDate:'01/01/2012' } ); // first selectable date is 1st Jan 2000 });
     $('#form').parsley();
-    $('#tourney_type').select2();
+    $('#tourney_type').select2().val = tourney_type;
     $('#round_length_dropdown').select2();
     $('#tourney_format_dropdown').select2();
     $('#sets').select2();
@@ -200,14 +174,7 @@ $(document).ready(function(){
         }
 
         formInstance.submitEvent.preventDefault();
-        if ( round_len1_valid(formInstance) == false && round_len2_valid(formInstance) == false ) {
-            // and display a gentle message
-            $('.invalid-form-error-message')
-                    .html("You must correctly fill the fields of at least one of the round length blocks!")
-                    .addClass("filled");
-
-        }
-        else if ( tourney_format_default_valid(formInstance) == false && tourney_format_custom_valid(formInstance) == false ) {
+        if ( tourney_format_default_valid(formInstance) == false && tourney_format_custom_valid(formInstance) == false ) {
             $('.invalid-form-error-message')
                     .html("You must correctly fill the fields of at least one of the tourney format blocks!")
                     .addClass("filled");
