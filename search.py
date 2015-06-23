@@ -155,14 +155,31 @@ class Search:
         seen = {}
         pm = PersistenceManager( myapp.db_connector )
 
+        wins   = 0
+        losses = 0
+        draws  = 0
+        total  = 0
         for rec in self.query:
              list_id = rec[0]
              if not seen.has_key( list_id ):
                  list    = pm.get_tourney_list( list_id )
+                 results = pm.get_round_results_for_list( list_id )
+                 for result in results:
+                     if result.winner_id == list_id:
+                         wins = wins + 1
+                     elif result.loser_id == list.id:
+                         losses = losses + 1
+                     else:
+                         draws = draws + 1
+                     total = total + 1
                  seen[list_id] = 1
                  ret.append( list )
 
-        return ret
+        perc = 0
+        if total > 0:
+            perc = float(wins)/float(total)
+        return { 'lists': ret, 'stats': { 'wins': wins, 'losses': losses, 'draws': draws, 'total': total,
+                                          'perc' :  "{:.2%}".format(perc)  } }
 
 
 

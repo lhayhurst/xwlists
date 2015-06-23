@@ -117,6 +117,11 @@ def about():
 def search():
     return render_template("search.html")
 
+@app.route("/versus")
+def versus():
+    return render_template("versus.html")
+
+
 @app.route("/search_guide")
 def search_guide():
     return render_template("search_guide.html")
@@ -128,7 +133,7 @@ def get_search_results():
         search_text = request.json['search-text']
         s = Search( search_text )
         results = s.search()
-        return render_template( 'search_results.html', results=results), 200
+        return render_template( 'search_results.html', results=results['lists'], stats=results['stats']), 200
     except ValueError, e:
         return render_template( 'search_error.html', errortext=str(e))
 

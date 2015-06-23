@@ -416,12 +416,11 @@ class TourneyRanking(Base):
                 return tourney_list.pretty_print()
         return ""
 
-
-
     def get_player_info(self):
         if self.dropped:
             return self.player.player_name + " (dropped)"
         return self.player.player_name
+
 
 round_result_table = "round_result"
 class RoundResult(Base):
@@ -579,12 +578,19 @@ class PersistenceManager:
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)
 
-
     def get_upgrades(self):
         return self.db_connector.get_session().query(Upgrade).all()
 
     def get_ship_upgrades(self):
         return self.db_connector.get_session().query(ShipUpgrade).all()
+
+    def get_round_results_for_list(self, list_id):
+        ret = self.db_connector.get_session().query(RoundResult).filter(
+            or_(
+                RoundResult.winner_id == list_id,
+                RoundResult.loser_id  == list_id)
+        )
+        return ret.all()
 
 
     def get_faction_rollup(self):

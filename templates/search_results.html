@@ -9,6 +9,14 @@
     }
 </style>
 
+<b>Summary stats</b><br>
+Winning percentage: {{ stats['perc'] }}<br>
+Wins: {{ stats['wins']}}<br>
+Losses: {{ stats['losses'] }}<br>
+Draws: {{ stats['draws'] }}<br>
+Total: {{ stats['total'] }}<br><hr>
+
+
 <table id="lists" class="compact display dataTable" cellspacing="0" width="100%">
   <thead>
       <tr>
@@ -36,11 +44,40 @@
 </table>
 
 <script>
+    function isZeroOrNoneOrNull(val) {
+        if ( val == 0 || val === "" || val == null ) {
+            return true;
+        }
+        return false;
+    }
+    jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+
+    "num-html-pre": function ( a ) {
+        if ( a == 0 ) {
+            a = ''
+        }
+        var x = String(a).replace( /<[\s\S]*?>/g, "" );
+        return parseFloat( x );
+    },
+
+    "num-html-asc": function ( a, b ) {
+        return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+    },
+
+    "num-html-desc": function ( a, b ) {
+        return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+    }
+    } );
+
+
         $(document).ready( function () {
         $('#lists').dataTable( {
                 "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
                 iDisplayLength: -1,
-                "order": [[ 0, "desc" ]]
+                "order":  [[3, "asc"], [4, "asc"]],
+                "columnDefs": [
+                    { "type": "num-html", targets: [3,4] },
+                ]
         });
     } );
 
