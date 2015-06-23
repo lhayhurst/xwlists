@@ -159,6 +159,9 @@ class Search:
         losses = 0
         draws  = 0
         total  = 0
+        points_for = 0
+        points_against = 0
+
         for rec in self.query:
              list_id = rec[0]
              if not seen.has_key( list_id ):
@@ -171,6 +174,13 @@ class Search:
                          losses = losses + 1
                      else:
                          draws = draws + 1
+                     if result.list1_id == list_id:
+                         points_for     = points_for + result.get_list1_score()
+                         points_against = points_against + result.get_list2_score()
+                     elif result.list2_id == list_id:
+                         points_for     = points_for + result.get_list2_score()
+                         points_against = points_against + result.get_list1_score()
+
                      total = total + 1
                  seen[list_id] = 1
                  ret.append( list )
@@ -178,8 +188,12 @@ class Search:
         perc = 0
         if total > 0:
             perc = float(wins)/float(total)
-        return { 'lists': ret, 'stats': { 'wins': wins, 'losses': losses, 'draws': draws, 'total': total,
-                                          'perc' :  "{:.2%}".format(perc)  } }
+        return { 'lists': ret, 'stats': { 'wins': "{:,}".format(wins), 'losses': "{:,}".format(losses),
+                                          'draws': "{:,}".format(draws), 'total': "{:,}".format(total),
+                                          'perc' :  "{:.2%}".format(perc), 'points_for':"{:,}".format(points_for),
+                                          'points_against':"{:,}".format(points_against),
+                                          'points_for_efficiency': "{:.2%}".format(float(points_for)/(total*100.0)),
+                                          'point_against_efficiency':"{:.2%}".format(1.0 - ( float(points_against)/(total*100.0))) } }
 
 
 

@@ -483,6 +483,17 @@ class RoundResult(Base):
             return self.list1_score
         return self.list2_score
 
+    def get_list1_score(self):
+        if self.list1_score is None:
+            return 0
+        return self.list1_score
+
+    def get_list2_score(self):
+        if self.list2_score is None:
+            return 0
+        return self.list2_score
+
+
     def get_winner_list_url(self):
         url = url_for( 'display_list', tourney_list_id=self.winner.id )
         return url
