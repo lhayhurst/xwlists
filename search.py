@@ -162,6 +162,9 @@ class Search:
                  seen[list_id] = 1
                  ret.append( list )
 
+        return ret
+
+
 
 class SearchTest(unittest.TestCase):
 

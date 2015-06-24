@@ -114,9 +114,9 @@ def mail_error(errortext):
 def about():
     return render_template('about.html')
 
-@app.route("/versus")
+@app.route("/search")
 def versus():
-    return render_template("versus.html")
+    return render_template("search.html")
 
 
 @app.route("/search_guide")
@@ -130,7 +130,7 @@ def get_search_results():
         search_text = request.json['search-text']
         s = Search( search_text )
         results = s.search()
-        return render_template( 'search_results.html', results=results['lists'], stats=results['stats']), 200
+        return render_template( 'search_results.html', results=results), 200
     except ValueError, e:
         return render_template( 'search_error.html', errortext=str(e))
 
