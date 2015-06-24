@@ -4,7 +4,7 @@ from markupsafe import Markup
 from sqlalchemy.dialects import mysql
 from sqlalchemy.sql.operators import ColumnOperators
 from decoder import decode
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, BigInteger
 
 REGIONAL = 'Regional'
 
@@ -338,6 +338,7 @@ class TourneyList(Base):
     player_id        = Column(Integer, ForeignKey('{0}.id'.format(tourney_player_table)))
     image            = Column(String(128))
     name             = Column(String(128))
+    hashkey          = Column(BigInteger)
     faction          = Column(Faction.db_type())
     points           = Column(Integer)
     player           = relationship( TourneyPlayer.__name__, uselist=False)
@@ -345,7 +346,7 @@ class TourneyList(Base):
     ships            = relationship(Ship.__name__, cascade="all,delete,delete-orphan")
 
 
-    def pretty_print(self):
+    def pretty_print(self, manage_list=1):
         if len(self.ships) == 0: #no list
             if self.tourney.locked == False:
                 ret = '<a rel="nofollow" href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
@@ -362,8 +363,40 @@ class TourneyList(Base):
                 ret = ret + '<br>'
             i = i + 1
         if not self.tourney.locked:
-            ret = ret + '<br><a href="' + url_for('display_list', tourney_list_id=self.id, ) + '"rel="nofollow">Manage list</a>'
+            ret = ret + '<br><a href="' + url_for('display_list', tourney_list_id=self.id, )
+            if manage_list:
+                ret = ret + '"rel="nofollow">Manage list</a>'
         return Markup( ret )
+
+    def generate_hash_key(self):
+        liststring = ""
+        ships = []
+        pilots = []
+        upgrades = []
+        for ship in self.ships:
+            sp = ship.ship_pilot
+            ships.append( str( sp.ship_type ))
+            pilots.append( sp.pilot.canon_name )
+            for supgrade in ship.upgrades:
+                if supgrade.upgrade is not None:
+                    upgrades.append( supgrade.upgrade.canon_name )
+        key = None
+        liststring = ""
+        for s in sorted(ships):
+            liststring = liststring + s
+        for p in sorted(pilots):
+            liststring = liststring + p
+        for u in sorted(upgrades):
+            liststring = liststring + u
+
+        if len(liststring) == 0:
+            key = 0
+        else:
+            key = hash(liststring)
+
+        self.hashkey = key
+
+
 
 tourney_round_table = "tourney_round"
 class TourneyRound(Base):
@@ -493,6 +526,15 @@ class RoundResult(Base):
             return 0
         return self.list2_score
 
+    def get_list1_points(self):
+        if self.list1.points is None:
+            return 0
+        return self.list1.points
+
+    def get_list2_points(self):
+        if self.list2.points is None:
+            return 0
+        return self.list2.points
 
     def get_winner_list_url(self):
         url = url_for( 'display_list', tourney_list_id=self.winner.id )
@@ -586,6 +628,9 @@ class PersistenceManager:
     def get_events(self):
         return self.db_connector.get_session().query(Event).order_by( Event.id)
 
+    def get_all_lists(self):
+        return self.db_connector.get_session().query(TourneyList).all()
+
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)
 
@@ -625,6 +670,85 @@ class PersistenceManager:
 
     def get_tourney_by_id(self,tourney_id):
         return self.db_connector.get_session().query(Tourney).filter_by(id=tourney_id).first()
+
+    def get_list_ranks(self):
+        hashheys = self.db_connector.get_session().\
+            query(TourneyList.hashkey, func.count(TourneyList.hashkey)).\
+            group_by(TourneyList.hashkey).\
+            order_by( desc(func.count(TourneyList.hashkey))).all()
+
+        summary = []
+        for item in hashheys:
+            hashkey = item[0]
+            count   = item[1]
+            if hashkey == 0:
+                continue
+
+            lists = self.db_connector.get_session().query(TourneyList).filter( TourneyList.hashkey == hashkey)
+
+            wins   = 0
+            losses = 0
+            draws  = 0
+            total  = 0
+            points_for = 0
+            points_against = 0
+            points_for_total = 0
+            points_against_total = 0
+            pretty_print = None
+
+            for list in lists:
+                if pretty_print is None:
+                    pretty_print = list.pretty_print(manage_list=0)
+                list_id = list.id
+                results = self.get_round_results_for_list( list_id )
+                for result in results:
+                    total = total + 1
+                    if result.winner_id == list_id:
+                         wins = wins + 1
+                    elif result.loser_id == list.id:
+                         losses = losses + 1
+                    else:
+                         draws = draws + 1
+                    if result.list1_id == list_id:
+                         points_for       = points_for + result.get_list1_score()
+                         points_for_total = points_for_total + result.get_list1_points()
+                         points_against = points_against + result.get_list2_score()
+                         points_against_total = points_against_total + result.get_list2_points()
+                    elif result.list2_id == list_id:
+                         points_for     = points_for + result.get_list2_score()
+                         points_for_total = points_for_total + result.get_list2_points()
+                         points_against = points_against + result.get_list1_score()
+                         points_against_total = points_against_total + result.get_list1_points()
+
+            perc = 0
+            points_for_eff = 0
+            points_against_eff = 0
+
+            if total > 0:
+                perc = float(wins)/float(total)
+
+            if points_for_total > 0:
+                points_for_eff = float(points_for)/(points_for_total)
+
+            if points_against_total > 0:
+                points_against_eff = float(points_against)/(points_against_total)
+
+
+            summary.append( { 'hashkey' : hashkey,
+                               'num_lists' : count,
+                               'pretty_print': pretty_print,
+                               'wins': "{:,}".format(wins),
+                               'losses': "{:,}".format(losses),
+                               'draws': "{:,}".format(draws),
+                               'total': "{:,}".format(total),
+                               'perc' :  "{:.2%}".format(perc),
+                               'points_for':"{:,}".format(points_for) + "/" + "{:,}".format(points_for_total),
+                               'points_against':"{:,}".format(points_against)  + "/" + "{:,}".format(points_against_total),
+                               'points_for_efficiency': "{:.2%}".format(points_for_eff),
+                               'point_against_efficiency':"{:.2%}".format(1.0 - points_against_eff ) } )
+
+        return summary
+
 
 
     def delete_tourney(self, tourney_name):

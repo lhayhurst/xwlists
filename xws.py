@@ -127,3 +127,4 @@ class XWSToJuggler:
                         ship.upgrades.append( ship_upgrade )
 
         tourney_list.points = points
+        tourney_list.generate_hash_key()

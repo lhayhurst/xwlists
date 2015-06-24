@@ -1,0 +1,52 @@
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+
+<table id="ranked-lists" class="compact display dataTable" cellspacing="0" width="100%">
+  <thead>
+      <tr>
+        <th>List</th>
+        <th>Number of lists</th>
+        <th>Win Percentage</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Draws</th>
+        <th>Total matches</th>
+        <th>Points destroyed</th>
+        <th>Efficiency</th>
+        <th>Points survived</th>
+        <th>Efficiency</th>
+      </tr>
+  </thead>
+    {% for r in ranks %}
+      <tr>
+          <td>{{ r['pretty_print'] }}</td>
+          <td>{{ r['num_lists'] }}</td>
+          <td>{{ r['perc'] }}</td>
+          <td>{{ r['wins'] }}</td>
+          <td>{{ r['losses'] }}</td>
+          <td>{{ r['draws'] }}</td>
+          <td>{{ r['total'] }}</td>
+          <td>{{ r['points_for'] }}</td>
+          <td>{{ r['points_for_efficiency'] }}</td>
+          <td>{{ r['points_against'] }}</td>
+          <td>{{ r['point_against_efficiency'] }}</td>
+      </tr>
+
+    {% endfor %}
+
+</table>
+
+<script>
+    $(document).ready( function () {
+        $('#ranked-lists').dataTable( {
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+            "order": [[ 1, "desc" ]]
+
+        });
+    } );
+</script>
+

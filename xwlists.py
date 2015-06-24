@@ -20,6 +20,7 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event
 from rollup import Rollup
 from search import Search
+from uidgen import ListUIDGen
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
 from flask.ext import restful
@@ -112,10 +113,6 @@ def mail_error(errortext):
 @app.route("/about")
 def about():
     return render_template('about.html')
-
-@app.route("/search")
-def search():
-    return render_template("search.html")
 
 @app.route("/versus")
 def versus():
@@ -898,10 +895,33 @@ def add_squad():
                  ship.upgrades.append( ship_upgrade )
              ships.append( ship )
 
+         tourney_list.generate_hash_key()
          pm.db_connector.get_session().add_all( ships )
          pm.db_connector.get_session().commit()
 
          return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list.id)
+
+
+@app.route( "/listrank")
+def list_rank():
+    return render_template("listrank.html")
+
+@app.route("/listrank_generate_cache", methods=['POST'])
+def list_rank_generate_cache():
+
+    list_ranks = simple_cache.get('list-ranks')
+    if list_ranks is None:
+        pm = PersistenceManager(myapp.db_connector)
+        list_ranks = pm.get_list_ranks()
+        simple_cache.set( 'list-ranks', list_ranks, timeout=60*60)
+    return render_template("listrank_impl.html", ranks=list_ranks)
+
+@app.route("/generate_hash_keys")
+def generate_hash_keys():
+    pm = PersistenceManager( myapp.db_connector )
+    gen = ListUIDGen(pm)
+    gen.generate()
+    return redirect(url_for('tourneys') )
 
 @app.route('/display_list')
 def display_list():
