@@ -163,10 +163,8 @@ def get_tourney_results():
 
 @app.route('/show_results')
 def show_results():
-    sample_list_id = request.args.get('tourney_list_id')
+    hashkey = request.args.get('hashkey')
     pm   = PersistenceManager(myapp.db_connector)
-    sample_list = pm.get_tourney_list(sample_list_id)
-    hashkey = sample_list.hashkey
     lists = pm.get_lists_for_hashkey(hashkey)
     results = []
     ret     = {}

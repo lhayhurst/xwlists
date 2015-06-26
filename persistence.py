@@ -378,7 +378,7 @@ class TourneyList(Base):
             ret = ret + '<br><a href="' + url_for('display_list', tourney_list_id=self.id, )
             ret = ret + '"rel="nofollow">Manage list</a>'
         if show_results:
-            ret = ret + '<br><a href="' +  url_for('show_results', tourney_list_id=self.id, )
+            ret = ret + '<br><a href="' +  url_for('show_results', hashkey=self.hashkey, )
             ret = ret + '">Show results</a>'
 
         return Markup( ret )
@@ -728,7 +728,7 @@ class PersistenceManager:
         for item in hashheys:
             hashkey = item[0]
             count   = item[1]
-            if hashkey == 0:
+            if hashkey == 0 or hashkey is None:
                 continue
 
             lists = self.db_connector.get_session().query(TourneyList).filter( TourneyList.hashkey == hashkey).all()
