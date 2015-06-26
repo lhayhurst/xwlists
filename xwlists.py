@@ -161,6 +161,35 @@ def get_tourney_results():
     tourney_id   = request.args.get('tourney_id')
     return redirect(url_for('get_tourney_details', tourney_id=tourney_id))
 
+@app.route('/show_results')
+def show_results():
+    sample_list_id = request.args.get('tourney_list_id')
+    pm   = PersistenceManager(myapp.db_connector)
+    sample_list = pm.get_tourney_list(sample_list_id)
+    hashkey = sample_list.hashkey
+    lists = pm.get_lists_for_hashkey(hashkey)
+    results = []
+    ret     = {}
+    ret[ 'pretty_print'] = lists[0].pretty_print( manage_list=0, show_results=0)
+    ret['hashkey'] = lists[0].hashkey
+    for list in lists:
+        res = pm.get_round_results_for_list(list.id)
+        for r in res:
+            results.append(r)
+    ret[ "results"] = results
+    return render_template("show_results.html", data=ret)
+
+
+
+@app.route("/correct_list_points")
+def correct_list_points():
+
+    pm                = PersistenceManager(myapp.db_connector)
+    lists             = pm.get_all_lists()
+    for list in lists:
+        if list.points == 0 and len(list.ships) > 0:
+            print "list %d is a problem" % list.id
+    return redirect(url_for('tourneys') )
 
 @app.route("/edit_tourney_details")
 def edit_tourney_details():

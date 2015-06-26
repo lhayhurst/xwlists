@@ -224,6 +224,14 @@ class Tourney(Base):
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
     venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
 
+    def is_standard_format(self):
+        return self.format == 'Standard - 100 Point Dogfight'
+
+    def get_tourney_name_as_url(self):
+
+        ret = '<a href="' + url_for('get_tourney_details', tourney_id=self.id, ) +  '">' + self.get_tourney_name() + "</a>"
+        return Markup(ret)
+
     def reset_rounds(self, session ):
         goners = []
         for round in self.rounds:
@@ -346,9 +354,9 @@ class TourneyList(Base):
     ships            = relationship(Ship.__name__, cascade="all,delete,delete-orphan")
 
 
-    def pretty_print(self, manage_list=1):
+    def pretty_print(self, manage_list=1, show_results=0, enter_list=1):
         if len(self.ships) == 0: #no list
-            if self.tourney.locked == False:
+            if self.tourney.locked == False and enter_list:
                 ret = '<a rel="nofollow" href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
                 return Markup(ret)
         ret = ""
@@ -362,11 +370,19 @@ class TourneyList(Base):
             if i < len(self.ships):
                 ret = ret + '<br>'
             i = i + 1
-        if not self.tourney.locked:
+        points = 0
+        if self.points is not None:
+            points = self.points
+        ret = ret + "(%d)" % ( points )
+        if not self.tourney.locked and manage_list:
             ret = ret + '<br><a href="' + url_for('display_list', tourney_list_id=self.id, )
-            if manage_list:
-                ret = ret + '"rel="nofollow">Manage list</a>'
+            ret = ret + '"rel="nofollow">Manage list</a>'
+        if show_results:
+            ret = ret + '<br><a href="' +  url_for('show_results', tourney_list_id=self.id, )
+            ret = ret + '">Show results</a>'
+
         return Markup( ret )
+
 
     def generate_hash_key(self):
         liststring = ""
@@ -443,10 +459,10 @@ class TourneyRanking(Base):
     tourney            = relationship( Tourney.__name__, back_populates="rankings")
     player             = relationship( TourneyPlayer.__name__, uselist=False)
 
-    def pretty_print(self):
+    def pretty_print(self, manage_lists=1):
         for tourney_list in self.tourney.tourney_lists:
             if tourney_list.player.id == self.player_id:
-                return tourney_list.pretty_print()
+                return tourney_list.pretty_print(manage_lists)
         return ""
 
     def get_player_info(self):
@@ -476,6 +492,33 @@ class RoundResult(Base):
     winner        = relationship( TourneyList.__name__, foreign_keys='RoundResult.winner_id', uselist=False)
     loser         = relationship( TourneyList.__name__, foreign_keys='RoundResult.loser_id',  uselist=False)
 
+    def versus(self, hashkey):
+        if self.list1.hashkey == hashkey:
+            return self.list2.pretty_print(manage_list=0, enter_list=0)
+        return self.list1.pretty_print(manage_list=0, enter_list=0)
+
+    def get_result_and_score_for_hashkey(self, hashkey):
+        return self.get_result_for_hashkey(hashkey) + " " + self.get_score_for_hashkey(hashkey)
+
+    def get_result_for_hashkey(self,hashkey):
+        list_id = None
+        if self.list1.hashkey == hashkey:
+            list_id = self.list1.id
+        else:
+            list_id = self.list2.id
+
+        if self.draw is not None and self.draw==True:
+            return "drew"
+
+        if self.winner_id == list_id:
+            return "won"
+        return "lost"
+
+    def get_score_for_hashkey(self, hashkey):
+        if self.list1.hashkey == hashkey:
+            return "%d-%d" % ( self.list1_score, self.list2_score)
+        return "%d-%d" % ( self.list2_score, self.list1_score)
+
 
     def get_result(self):
         if self.bye is not None and self.bye==True:
@@ -501,10 +544,10 @@ class RoundResult(Base):
             return ""
         return decode(self.list2.player.player_name)
 
-    def list2_pretty_print(self):
+    def list2_pretty_print(self, manage_lists=1):
         if self.list2 is None:
             return ""
-        return self.list2.pretty_print()
+        return self.list2.pretty_print(manage_lists)
 
     def winning_score(self):
         if self.winner.id == self.list1.id:
@@ -528,12 +571,12 @@ class RoundResult(Base):
 
     def get_list1_points(self):
         if self.list1.points is None:
-            return 0
+            return 100
         return self.list1.points
 
     def get_list2_points(self):
         if self.list2.points is None:
-            return 0
+            return 100
         return self.list2.points
 
     def get_winner_list_url(self):
@@ -671,6 +714,10 @@ class PersistenceManager:
     def get_tourney_by_id(self,tourney_id):
         return self.db_connector.get_session().query(Tourney).filter_by(id=tourney_id).first()
 
+    def get_lists_for_hashkey(self, hashkey):
+        return self.db_connector.get_session().query(TourneyList).filter_by(hashkey=hashkey).all()
+
+
     def get_list_ranks(self):
         hashheys = self.db_connector.get_session().\
             query(TourneyList.hashkey, func.count(TourneyList.hashkey)).\
@@ -684,41 +731,57 @@ class PersistenceManager:
             if hashkey == 0:
                 continue
 
-            lists = self.db_connector.get_session().query(TourneyList).filter( TourneyList.hashkey == hashkey)
+            lists = self.db_connector.get_session().query(TourneyList).filter( TourneyList.hashkey == hashkey).all()
 
             wins   = 0
             losses = 0
             draws  = 0
             total  = 0
-            points_for = 0
-            points_against = 0
-            points_for_total = 0
-            points_against_total = 0
+            points_killed = 0
+            points_lost = 0
+            points_killable = 0
+            points_losable = 0
             pretty_print = None
 
+
             for list in lists:
+                if not list.tourney.is_standard_format():
+                    continue
                 if pretty_print is None:
-                    pretty_print = list.pretty_print(manage_list=0)
+                    pretty_print = list.pretty_print(manage_list=0,show_results=1)
                 list_id = list.id
                 results = self.get_round_results_for_list( list_id )
                 for result in results:
                     total = total + 1
-                    if result.winner_id == list_id:
+                    if result.draw:
+                        draws = draws+1
+                    elif result.winner_id == list_id:
                          wins = wins + 1
                     elif result.loser_id == list.id:
                          losses = losses + 1
-                    else:
-                         draws = draws + 1
+
                     if result.list1_id == list_id:
-                         points_for       = points_for + result.get_list1_score()
-                         points_for_total = points_for_total + result.get_list1_points()
-                         points_against = points_against + result.get_list2_score()
-                         points_against_total = points_against_total + result.get_list2_points()
+                         points_killed       = points_killed + result.get_list1_score()
+                         pk = result.get_list2_points()
+                         if  pk == 0:
+                             pk = 100 #assume default -- missing the other list
+
+                         points_killable     = points_killable + pk
+                         points_lost         = points_lost + result.get_list2_score()
+                         points_losable      = points_losable + result.list1.points
+
                     elif result.list2_id == list_id:
-                         points_for     = points_for + result.get_list2_score()
-                         points_for_total = points_for_total + result.get_list2_points()
-                         points_against = points_against + result.get_list1_score()
-                         points_against_total = points_against_total + result.get_list1_points()
+                         points_killed       = points_killed + result.get_list2_score()
+
+                         pk = result.get_list1_points()
+                         if  pk == 0:
+                             pk = 100 #assume default -- missing the other list
+                         points_killable     = points_killable + pk
+                         points_losable      = points_losable + result.list2.points
+                         points_lost         = points_lost + result.get_list1_score()
+
+            if total == 0:
+                continue
 
             perc = 0
             points_for_eff = 0
@@ -727,12 +790,14 @@ class PersistenceManager:
             if total > 0:
                 perc = float(wins)/float(total)
 
-            if points_for_total > 0:
-                points_for_eff = float(points_for)/(points_for_total)
+            if points_killable > 0:
+                points_for_eff = float(points_killed)/(points_killable)
 
-            if points_against_total > 0:
-                points_against_eff = float(points_against)/(points_against_total)
 
+            if points_losable > 0:
+                points_against_eff = float(points_losable - points_lost)/float(points_losable)
+                if points_against_eff < 0:
+                    points_against_eff = 0
 
             summary.append( { 'hashkey' : hashkey,
                                'num_lists' : count,
@@ -742,10 +807,10 @@ class PersistenceManager:
                                'draws': "{:,}".format(draws),
                                'total': "{:,}".format(total),
                                'perc' :  "{:.2%}".format(perc),
-                               'points_for':"{:,}".format(points_for) + "/" + "{:,}".format(points_for_total),
-                               'points_against':"{:,}".format(points_against)  + "/" + "{:,}".format(points_against_total),
+                               'points_for':"{:,}".format(points_killed) + "/" + "{:,}".format(points_killable),
+                               'points_against':"{:,}".format(points_losable-points_lost)  + "/" + "{:,}".format(points_losable),
                                'points_for_efficiency': "{:.2%}".format(points_for_eff),
-                               'point_against_efficiency':"{:.2%}".format(1.0 - points_against_eff ) } )
+                               'point_against_efficiency':"{:.2%}".format(points_against_eff ) } )
 
         return summary
 
@@ -982,8 +1047,6 @@ class PersistenceManager:
             filter( and_(*filters)).\
             group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).\
             statement.compile(dialect=mysql.dialect())
-
-        print "faction ship rollup upgrade sql: " + upgrade_rollup_sql.string
 
         upgrade_rollup = connection.execute( upgrade_rollup_sql )
         connection.close()
