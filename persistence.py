@@ -747,6 +747,8 @@ class PersistenceManager:
             for list in lists:
                 if not list.tourney.is_standard_format():
                     continue
+                if list.points is None:
+                    continue
                 if pretty_print is None:
                     pretty_print = list.pretty_print(manage_list=0,show_results=1)
                 list_id = list.id
