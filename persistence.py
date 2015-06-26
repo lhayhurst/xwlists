@@ -768,7 +768,6 @@ class PersistenceManager:
 
                          points_killable     = points_killable + pk
                          points_lost         = points_lost + result.get_list2_score()
-                         points_losable      = points_losable + result.list1.points
 
                     elif result.list2_id == list_id:
                          points_killed       = points_killed + result.get_list2_score()
@@ -777,8 +776,9 @@ class PersistenceManager:
                          if  pk == 0:
                              pk = 100 #assume default -- missing the other list
                          points_killable     = points_killable + pk
-                         points_losable      = points_losable + result.list2.points
                          points_lost         = points_lost + result.get_list1_score()
+
+                    points_losable = points_losable + list.points
 
             if total == 0:
                 continue
