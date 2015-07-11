@@ -340,7 +340,7 @@ def get_tourney_lists_as_text(tourney, make_header=True ):
         rows.append( header )
 
     tourney_date = "%d/%d/%d" % ( tourney.tourney_date.month, tourney.tourney_date.day, tourney.tourney_date.year )
-    row_defaults = [ tourney.tourney_name, tourney.tourney_type, tourney_date ]
+    row_defaults = [ tourney.tourney_name.replace(',',' '), tourney.tourney_type, tourney_date ]
 
     for tourney_list in tourney.tourney_lists:
         if tourney_list.ships is None or len(tourney_list.ships) == 0:
@@ -353,7 +353,7 @@ def get_tourney_lists_as_text(tourney, make_header=True ):
             for ship in tourney_list.ships:
                 new_row = []
                 new_row.extend( row_defaults )
-                new_row.extend( [ tourney_list.player.player_name,
+                new_row.extend( [ tourney_list.player.player_name.replace(',',' '),
                                   tourney_list.faction.description,
                                   str(tourney_list.points),
                                   str(tourney_list.player.result.rank),
