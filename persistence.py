@@ -120,6 +120,10 @@ class ShipType(DeclEnum):
     STARVIPER = xwingmetadata.STAR_VIPER_CANON, xwingmetadata.STAR_VIPER
     AGGRESSOR = xwingmetadata.AGGRESSOR_CANON, xwingmetadata.AGGRESSOR
     M3_A_INTERCEPTOR = xwingmetadata.M3_A_INTERCEPTOR_CANON, xwingmetadata.M3_A_INTERCEPTOR
+    YV_666 = xwingmetadata.YV_666_FREIGHTER_CANON_NAME, xwingmetadata.YV_666_FREIGHTER
+    TIE_PUNISHER = xwingmetadata.TIE_PUNISHER_CANON_NAME, xwingmetadata.TIE_PUNISHER
+    KWING = xwingmetadata.K_WING_CANON_NAME, xwingmetadata.K_WING
+    KIHRAXZ_FIGHTER = xwingmetadata.KIHRAXZ_FIGHTER_CANON_NAME, xwingmetadata.KIHRAXZ_FIGHTER
 
 class Event(Base):
     __tablename__ = event_table
@@ -141,6 +145,7 @@ class Pilot(Base):
     name = Column(String(128), unique=True)
     canon_name = Column(String(128), unique=True)
     cost = Column(Integer)
+    pilot_skill = Column(Integer)
 
 class ShipPilot(Base):
     __tablename__ = ship_pilot_table
@@ -862,6 +867,12 @@ class PersistenceManager:
 
     def get_players(self, tourney_id):
         return self.db_connector.get_session().query(TourneyPlayer).filter_by(tourney_id=tourney_id).all()
+
+    def get_ship_type(self, ship_type):
+            query = self.db_connector.get_session().query(ShipPilot).filter_by(ship_type=ShipType.from_string(ship_type))
+            if query.first() is None:
+                return None
+            return query.first()[0]
 
     def get_canonical_ship_pilot(self, ship_type, pilot):
             query = self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_string(ship_type)). \
