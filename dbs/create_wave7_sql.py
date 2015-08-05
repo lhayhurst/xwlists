@@ -69,11 +69,11 @@ if __name__ == "__main__":
             sql = "insert into ship_pilot ( ship_type, pilot_id) select '%s', id from pilot where canon_name='%s';" %\
                   ( ship, pilot['canon_name'])
 
-            #print sql
+            print sql
 
     for upgrade_type in upgrades.keys():
         for upgrade in upgrades[upgrade_type]:
             sql = "insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( '%s', '%s', '%s', '%d');" %\
             ( upgrade_type, upgrade['name'], upgrade['canon_name'], upgrade['cost']  )
-            print sql
+            #print sql
 

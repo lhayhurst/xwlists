@@ -1,0 +1,16 @@
+insert into ship_pilot ( ship_type, pilot_id) select 'yv666', id from pilot where canon_name='bossk';
+insert into ship_pilot ( ship_type, pilot_id) select 'yv666', id from pilot where canon_name='moraloeval';
+insert into ship_pilot ( ship_type, pilot_id) select 'yv666', id from pilot where canon_name='lattsrazzi';
+insert into ship_pilot ( ship_type, pilot_id) select 'yv666', id from pilot where canon_name='trandoshanslaver';
+insert into ship_pilot ( ship_type, pilot_id) select 'kihraxzfighter', id from pilot where canon_name='talonbanecobra';
+insert into ship_pilot ( ship_type, pilot_id) select 'kihraxzfighter', id from pilot where canon_name='grazthehunter';
+insert into ship_pilot ( ship_type, pilot_id) select 'kihraxzfighter', id from pilot where canon_name='blacksunace';
+insert into ship_pilot ( ship_type, pilot_id) select 'kihraxzfighter', id from pilot where canon_name='cartelmarauder';
+insert into ship_pilot ( ship_type, pilot_id) select 'kwing', id from pilot where canon_name='mirandadoni';
+insert into ship_pilot ( ship_type, pilot_id) select 'kwing', id from pilot where canon_name='esegetuketu';
+insert into ship_pilot ( ship_type, pilot_id) select 'kwing', id from pilot where canon_name='guardiansquadronpilot';
+insert into ship_pilot ( ship_type, pilot_id) select 'kwing', id from pilot where canon_name='wardensquadronpilot';
+insert into ship_pilot ( ship_type, pilot_id) select 'tiepunisher', id from pilot where canon_name='redline';
+insert into ship_pilot ( ship_type, pilot_id) select 'tiepunisher', id from pilot where canon_name='Deathrain';
+insert into ship_pilot ( ship_type, pilot_id) select 'tiepunisher', id from pilot where canon_name='blackeightsqpilot';
+insert into ship_pilot ( ship_type, pilot_id) select 'tiepunisher', id from pilot where canon_name='cutlasssquadronpilot';
