@@ -5,8 +5,8 @@ CHANGE COLUMN `ship_type` `ship_type` ENUM('ewing','hwk290','yt2400freighter','x
 'm3ascykinterceptor', 'm3ainterceptor', 'yv666', 'kihraxzfighter', 'kwing', 'tiepunisher') NULL DEFAULT NULL ;
 
 ALTER TABLE `sozin$lists`.`pilot`
-CHANGE COLUMN `canon_name` `canon_name` VARCHAR(128) NOT NULL COMMENT '' ,
-ADD UNIQUE INDEX `CANON` (`canon_name` ASC)  COMMENT '';
+CHANGE COLUMN `canon_name` `canon_name` VARCHAR(128) NOT NULL ,
+ADD UNIQUE INDEX `CANON` (`canon_name` ASC);
 
 insert into pilot ( name, canon_name, cost, pilot_skill  ) values ( 'Bossk','bossk', '35', '7' );
 insert into pilot ( name, canon_name, cost, pilot_skill  ) values ( 'Moralo Eval','moraloeval', '34', '6' );
