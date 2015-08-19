@@ -563,16 +563,16 @@ ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Ant
                          'upgrades': (MISSILE, MOD, TITLE)},
 
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Commander Alozen', 'cost': 25,
-                         'upgrades': (MISSILE, MOD, TITLE)},
+                         'upgrades': (EPT, MISSILE, MOD, TITLE)},
 
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Juno Eclipse', 'cost': 28,
-                         'upgrades': (MISSILE, MOD, TITLE)},
+                         'upgrades': (EPT, MISSILE, MOD, TITLE)},
 
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Lieutenant Colzet', 'cost': 23,
                          'upgrades': (MISSILE, MOD, TITLE)},
 
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Zertik Strom', 'cost': 26,
-                         'upgrades': (MISSILE, MOD, TITLE)},
+                         'upgrades': (EPT, MISSILE, MOD, TITLE)},
 
          ),
 
