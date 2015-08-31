@@ -11,6 +11,72 @@ EDIT   = "edit"
 REMOVE = "remove"
 DATA   = "data"
 
+class RoundResultsEditor:
+    def __init__(self, pm, tourney, pre_elim=False):
+        self.pm = pm
+        self.tourney = tourney
+        self.pre_elim=pre_elim
+
+    def create_result_record(self, result, round_num, row):
+        row['result_id'] = result.id
+        row['round'] = round_num
+        row['player1_id'] = result.player1_name()
+        row['result'] = result.get_result()
+        row['player2_id'] = result.player2_name()
+        row['player1_points_scored'] = result.get_list1_score()
+        row['player2_points_scored'] = result.get_list2_score()
+        row['player1_list'] = result.list1.pretty_print()
+        row['player2_list'] = result.list2_pretty_print()
+
+    def valid_score(self, score):
+        return score >= 0 and score <= 100
+
+    def get_and_set_json(self, request):
+        #get the result
+        result = self.pm.get_result_by_id( request.values['data[result_id]'])
+
+        #and edit it
+        round   = request.values['data[round]']
+        result_val   = request.values['data[result]']
+        p1_score     = request.values['data[player1_points_scored]']
+        p2_score     = request.values['data[player2_points_scored]']
+
+        result.edit( p1_score, p2_score, result_val)
+        self.pm.db_connector.get_session().add(result)
+        self.pm.db_connector.get_session().commit()
+
+        row = {}
+        self.create_result_record( result,round, row )
+        return json.dumps(  { "row" : row  }  )
+
+
+
+
+
+    def get_json(self):
+        rounds = self.tourney.rounds
+        filtered_rounds = []
+        ret = {}
+        rows = []
+        ret[DATA] = rows
+
+        for round in rounds:
+            if self.pre_elim and round.is_pre_elim():
+                filtered_rounds.append( round )
+            elif not self.pre_elim and round.is_elim():
+                filtered_rounds.append( round )
+
+        for round in filtered_rounds:
+            for result in round.results:
+                row = {}
+                self.create_result_record(result, round.round_num, row)
+                rows.append( row )
+
+        return json.dumps( ret  )
+
+
+
+
 class RankingEditor:
     def __init__(self, pm, tourney):
         self.pm = pm

@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI
 
 from cryodex import Cryodex
-from dataeditor import RankingEditor
+from dataeditor import RankingEditor, RoundResultsEditor
 from decoder import decode
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
@@ -296,7 +296,23 @@ def get_tourney_data():
     de = RankingEditor( pm, tourney )
     return de.get_json()
 
+@app.route("/get_pre_elim_results")
+def get_pre_elim_results():
+    tourney_id = request.args['tourney_id']
+    pm                = PersistenceManager(myapp.db_connector)
+    tourney           = pm.get_tourney_by_id(tourney_id)
+    er = RoundResultsEditor(pm, tourney, pre_elim=True)
+    json_ret = er.get_json()
+    return json_ret
 
+@app.route("/get_elim_results")
+def get_elim_results():
+    tourney_id = request.args['tourney_id']
+    pm                = PersistenceManager(myapp.db_connector)
+    tourney           = pm.get_tourney_by_id(tourney_id)
+    er = RoundResultsEditor(pm, tourney, pre_elim=False)
+    json_ret = er.get_json()
+    return json_ret
 
 @app.route("/edit_rankings",methods=['POST'])
 def edit_ranking_row():
@@ -319,6 +335,27 @@ def edit_ranking_row():
     pm.db_connector.get_session().add(event)
     pm.db_connector.get_session().commit()
     return ret
+
+
+def edit_results( request, pre_elim=True):
+    #see https://editor.datatables.net/manual/server
+    tourney_id        = request.args['tourney_id']
+    pm                = PersistenceManager(myapp.db_connector)
+    tourney           = pm.get_tourney_by_id(tourney_id)
+
+    rre = RoundResultsEditor(pm, tourney, pre_elim)
+    ret = rre.get_and_set_json( request )
+    return ret
+
+@app.route("/edit_pre_elim_results", methods=['POST'])
+def edit_pre_elim_results():
+    return edit_results( request, True )
+
+@app.route("/edit_elim_results", methods=['POST'])
+def edit_elim_results():
+    #see https://editor.datatables.net/manual/server
+    return edit_results( request, True )
+
 
 @app.route("/new")
 def new():

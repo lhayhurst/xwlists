@@ -342,7 +342,12 @@ class TourneyPlayer(Base):
 
     def get_player_name(self):
         return decode(self.player_name)
-
+#
+# archtype_list_table = "archtype_list"
+#
+# class ArchtypeList(Base):
+#     __tablename__ = archtype_list_table
+#     id               = Column( Integer, primary_key=True)
 
 class TourneyList(Base):
     __tablename__    = tourney_list_table
@@ -357,7 +362,7 @@ class TourneyList(Base):
     player           = relationship( TourneyPlayer.__name__, uselist=False)
     tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
     ships            = relationship(Ship.__name__, cascade="all,delete,delete-orphan")
-
+    #archtype_list    = relationship(ArchtypeList.__name__,uselist=False)
 
     def pretty_print(self, manage_list=1, show_results=0, enter_list=1):
         if len(self.ships) == 0: #no list
@@ -436,6 +441,13 @@ class TourneyRound(Base):
             return ELIMINATION
         return None
 
+    def is_pre_elim(self):
+        return self.round_type == RoundType.PRE_ELIMINATION
+
+    def is_elim(self):
+        return self.round_type == RoundType.ELIMINATION
+
+
     def get_win_or_draw_result(self, winner, loser, was_draw):
         for result in self.results:
             if was_draw == result.draw and result.winner.id == winner.id and result.loser.id == loser.id:
@@ -496,6 +508,25 @@ class RoundResult(Base):
     list2         = relationship( TourneyList.__name__, foreign_keys='RoundResult.list2_id',  uselist=False)
     winner        = relationship( TourneyList.__name__, foreign_keys='RoundResult.winner_id', uselist=False)
     loser         = relationship( TourneyList.__name__, foreign_keys='RoundResult.loser_id',  uselist=False)
+
+    def edit(self, player1_score, player2_score, result):
+        self.list1_score = player1_score
+        self.list2_score = player2_score
+        if result == "beat":
+            #player 1 beat player 2
+            self.winner = self.list1
+            self.loser  = self.list2
+            self.draw   = False
+            self.bye    = False
+        elif result == "lost to":
+            self.winner = self.list2
+            self.loser  = self.list1
+            self.draw   = False
+            self.bye    = False
+        elif result == "drew":
+            self.draw = True
+            self.bye  = False
+
 
     def versus(self, hashkey):
         if self.list1.hashkey == hashkey:
@@ -722,6 +753,8 @@ class PersistenceManager:
     def get_lists_for_hashkey(self, hashkey):
         return self.db_connector.get_session().query(TourneyList).filter_by(hashkey=hashkey).all()
 
+    def get_result_by_id(self, result_id):
+        return self.db_connector.get_session().query(RoundResult).filter_by(id=result_id).first()
 
     def get_list_ranks(self):
         hashheys = self.db_connector.get_session().\

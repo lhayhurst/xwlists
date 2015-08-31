@@ -26,6 +26,257 @@
 
 <script>
 
+
+    pre_elim_editor = null
+    elim_editor = null
+
+    $.fn.dataTable.Editor.fieldTypes.lookup = $.extend( true, {}, $.fn.dataTable.Editor.models.fieldType, {
+        "create": function ( conf ) {
+            var that = this;
+
+            var options = "";
+            $.each(conf.options, function(key, option) {
+                options += '<option value="'+ option.value +'">'+ option.label +'</option>';
+            });
+
+            conf._input = $('<select/>')
+                .attr( $.extend( {
+                    id: conf.id,
+                    'class': ''
+                }, conf.attr || {} ) )
+                .html(options);
+
+            return conf._input[0];
+        },
+
+        "get": function ( conf ) {
+            return conf._input.val();
+        },
+
+        "set": function ( conf, val ) {
+            $.each(conf.options, function(key, option) {
+                if (option.label == val) {
+                    conf._input.val( option.value );
+                    return false;
+                }
+            });
+        },
+
+        inst: function ( conf ) {
+            return conf._input;
+        }
+    } );
+
+    function setupLock(){
+        lock = $('#lock');
+        img  = lock.find('img');
+        createButton = $('#ToolTables_rankings_0');
+        editButton = $('#ToolTables_rankings_1')
+        if ( locked ) {
+            img.attr( "src", lockImg);
+            createButton.hide();
+            editButton.hide();
+        }
+        else {
+            img.attr( "src", unlockImg)
+        }
+    }
+
+    function keyCheck()
+    {
+        k = document.getElementById('keytext').value;
+        log = document.getElementById('key-check-status');
+        edit_br = document.getElementById('edit_tourney_details_div')
+        log.innerHTML = "trying to unlock..."
+        var action;
+        url = "/unlock_tourney?key="+k+"&tourney_id="+tourney_id;
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: url,
+            success: function (data) {
+                if ( data.result == "fail" ) {
+                    log.innerHTML = "wrong email address!";
+                }
+                else {
+                    createButton = $('#ToolTables_rankings_0');
+                    editButton =   $('#ToolTables_rankings_1')
+
+                    if (locked) {
+                        locked = false;
+                        img.attr( "src", unlockImg);
+                        edit_br.innerHTML = '<a href="edit_tourney_details?tourney_id=' + tourney_id + '">Edit tourney details</a>'
+                        createButton.show();
+                        editButton.show();
+                        if (pre_elim_editor == null && elim_editor == null ) {
+                            createRoundEditors(true);
+                        }
+                        else {
+                            activateInlineForEditor('#pre_elim_rounds' );
+                            activateInlineForEditor('#elim_rounds' );
+                        }
+                    }
+                    else {
+                        locked = true;
+                        img.attr("src", lockImg);
+                        edit_br.innerHTML = ""
+                        createButton.hide();
+                        editButton.hide();
+                        pre_elim_editor = null;
+                        elim_editor = null;
+                        deactivateInlineEditing('#pre_elim_rounds');
+                        deactivateInlineEditing('#elim_rounds');
+
+                    }
+                    $('#lock-email-div').hide();
+                    log.innerHTML = "";
+                    $('#rankings').DataTable().ajax.reload();
+
+                }
+            },
+            error: function (data) {
+                log.innerHTML = "something went wrong, got response '" + data.responseJSON.message;
+            },
+            dataType: "json"
+        });
+
+    }
+
+
+    function lockClick(setup){
+        lock = $('#lock');
+        img  = lock.find('img');
+        $('#lock-email-div').show()
+    }
+
+    function createRoundEditor( ajaxUrl, tableName) {
+        return new $.fn.dataTable.Editor({
+            ajax: ajaxUrl + tourney_id,
+            table: tableName,
+            fields: [
+             {
+                 label: "Result ID",
+                 name: "result_id",
+                 type: "hidden"
+             },
+             {
+                label: "Round",
+                name: "round",
+             },
+             {
+                label: "Player 1",
+                name: "player1_id",
+             },
+             {
+                label: "Result",
+                name: "result",
+                type: "lookup",
+                options: [ {value: 'beat', label:'beat'}, {value:'lost to', label:'lost to'}, {value:'drew', label:'drew'} ]
+             },
+             {
+                label: "Player 2",
+                name: "player2_id",
+             },
+             {
+                label: "Player 1 Points Scored",
+                name: "player1_points_scored",
+             },
+             {
+                label: "Player 2 Points Scored",
+                name: "player2_points_scored",
+             },
+             {
+                label: "Player 1 List",
+                name: "player1_list",
+             },
+             {
+                label: "Player 2 List",
+                name: "player2_list",
+             }
+
+            ],
+    });
+    }
+
+    function activateInlineForEditor( tableId, editor ) {
+         $(tableId).on( 'click', 'tbody td:nth-child(3),tbody td:nth-child(5),tbody td:nth-child(6)', function (e) {
+            editor.inline( this, {
+                buttons: { label: '&gt;', fn: function () { this.submit(); } }
+            } );
+        } );
+    }
+
+    function deactivateInlineEditing( tableId, editor ) {
+       $(tableId).off( 'click',  'tbody td:nth-child(3),tbody td:nth-child(5),tbody td:nth-child(6)');
+    }
+
+    function createRoundDataTable( tableId, ajaxUrl) {
+        $(tableId).DataTable( {
+        "dom" : "Trftip",
+        "ajax": {
+            "url": ajaxUrl + tourney_id,
+            "type": "GET"
+        },
+        order: [[0, "asc"]],
+        "columns" : [
+            { "data": "round",class:"dt-center compact"},
+            { "data": "player1_id", class:"dt-center compact" },
+            { "data": "result", class:"dt-center compact"  },
+            { "data": "player2_id", class:"dt-center compact"  },
+            { "data": "player1_points_scored", class:"dt-center compact"  },
+            { "data": "player2_points_scored", class:"dt-center compact"  },
+            { "data": "player1_list", class:"dt-center compact"  },
+            { "data": "player2_list", class:"dt-center compact" }
+        ],
+        lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+        iDisplayLength: -1,
+        tableTools: {
+            sRowSelect: "os",
+            sRowSelector: 'td:first-child',
+            aButtons: [
+                              ]
+        },
+
+    });
+
+    }
+
+    function aNumber(v)
+    {
+        return  /^[0-9]+$/.test(''+v);
+    }
+
+    function isBlank(str) {
+        return (!str || !str.length);
+    }
+
+    function blankOrNotANumber( v ) {
+        if ( isBlank(v)) {
+            return true;
+        }
+        if ( ! aNumber(v )) {
+            return true;
+        }
+        return false;
+    }
+
+    function isBoolean(b)
+    {
+        return /^true|false/.test(b);
+    }
+
+    function createRoundEditors(doActivate) {
+        pre_elim_editor = createRoundEditor( "/edit_pre_elim_results?tourney_id=", "#pre_elim_rounds" )
+
+        elim_editor = createRoundEditor( "/edit_elim_results?tourney_id=", "#elim_rounds" )
+        if ( doActivate ) {
+            activateInlineForEditor('#pre_elim_rounds',pre_elim_editor );
+            activateInlineForEditor('#elim_rounds',elim_editor );
+
+        }
+    }
+
+
     var tourney_id = {{ tourney_id }}
     function isZeroOrNoneOrNull(val) {
         if ( val == 0 || val === "" || val == null ) {
@@ -57,7 +308,15 @@
     } );
     $(document).ready(function() {
 
-        editor = new $.fn.dataTable.Editor({
+        lockButtonEl = $('#lock');
+        keyCheckerEL = $('#key-check')
+        lockButtonEl.click(lockClick);
+        keyCheckerEL.click(keyCheck);
+        setupLock();
+
+
+
+        rankingEditor = new $.fn.dataTable.Editor({
             ajax: "/edit_rankings?tourney_id=" + tourney_id,
             table: "#rankings",
             fields: [
@@ -101,31 +360,7 @@
             ]
         });
 
-        function aNumber(v)
-        {
-            return  /^[0-9]+$/.test(''+v);
-        }
-
-        function isBlank(str) {
-            return (!str || !str.length);
-        }
-
-        function blankOrNotANumber( v ) {
-            if ( isBlank(v)) {
-                return true;
-            }
-            if ( ! aNumber(v )) {
-                return true;
-            }
-            return false;
-        }
-
-        function isBoolean(b)
-        {
-            return /^true|false/.test(b);
-        }
-
-        editor.on( 'preSubmit', function ( e, o, action ) {
+        rankingEditor.on( 'preSubmit', function ( e, o, action ) {
                 if ( action !== 'remove' ) {
                     if ( isBlank(o.data.player_name) ) {
                         this.error('player_name', 'A player name must be given');
@@ -200,12 +435,21 @@
                 sRowSelect: "os",
                 sRowSelector: 'td:first-child',
                 aButtons: [
-                    { sExtends: "editor_create", editor: editor },
-                    { sExtends: "editor_edit",   editor: editor }                ]
+                    { sExtends: "editor_create", editor: rankingEditor },
+                    { sExtends: "editor_edit",   editor: rankingEditor }                ]
             },
             lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
             iDisplayLength: -1
         } );
+
+        if ( ! locked ) {
+            createRoundEditors(true)
+        }
+        createRoundDataTable('#pre_elim_rounds',  "/get_pre_elim_results?tourney_id=" );
+        createRoundDataTable('#elim_rounds',  "/get_elim_results?tourney_id=" );
+
+
+
     } );
 </script>
 
@@ -253,170 +497,38 @@
         <br>
         <b>Elimination Rounds</b>
         <hr>
-        {% for round in tourney.get_descending_elim_rounds() %}
-            <br>
-            <b>Top {{ round.round_num }}</b>
-
-
-            <table class="compact display dataTable" role="grid" style="width:100%;">
-                <thead>
-                    <th>Player 1</th>
-                    <th>Result</th>
-                    <th>Player 2</th>
-                    <th>Player 1 Points Scored</th>
-                    <th>Points 2 Points Scored</th>
-                    <th>Player 1 List</th>
-                    <th>Player 2 List</th>
-                </thead>
-                {%  for result in round.results %}
-                    <tr>
-                        <td >{{ result.player1_name() }}</td>
-                        <td >{{ result.get_result() }}
-                        {% if result.bye %}
-                            <td></td>
-                            <td ></td>
-                            <td ></td>
-                            <td >{{ result.list1.pretty_print() }}</td>
-                            <td ></td>
-                        {% else %}
-                            <td >{{ result.player2_name() }}</td>
-                            <td >{{ result.list1_score}}</td>
-                            <td >{{ result.list2_score}}</td>
-                            <td >{{ result.list1.pretty_print() }}</td>
-                            <td >{{ result.list2_pretty_print() }}</td>
-                        {% endif %}
-                    </tr>
-             {% endfor %}
-            </table>
-          {% endfor %}
-
+        To edit: unlock the tourney, click on the result, player 1 score, or player 2 score, and press the submit button next to the field.
+        <table id="elim_rounds" class="compact display dataTable" role="grid" style="width:100%;">
+            <thead>
+                <th>Top</th>
+                <th>Player 1</th>
+                <th>Result</th>
+                <th>Player 2</th>
+                <th>Player 1 Points Scored</th>
+                <th>Points 2 Points Scored</th>
+                <th>Player 1 List</th>
+                <th>Player 2 List</th>
+            </thead>
+        </table>
         <br>
         <b>Pre-elimination Rounds</b>
         <hr>
-        {% for round in tourney.get_pre_elimination_rounds() %}
-            <br>
-            <b>Round {{ round.round_num }}</b>
-
-
-            <table class="compact display dataTable" style="width:100%;">
-                <thead>
-                    <th>Player 1</th>
-                    <th>Result</th>
-                    <th>Player 2</th>
-                    <th>Player 1 Points Scored</th>
-                    <th>Points 2 Points Scored</th>
-                    <th>Player 1 List</th>
-                    <th>Player 2 List</th>
-                </thead>
-                {%  for result in round.results %}
-                    <tr>
-                        <td >{{ result.player1_name() }}</td>
-                        <td >{{ result.get_result() }}
-                        {% if result.bye %}
-                            <td></td>
-                            <td ></td>
-                            <td ></td>
-                            <td >{{ result.list1.pretty_print() }}</td>
-                            <td ></td>
-                        {% else %}
-                            <td >{{ result.player2_name() }}</td>
-                            <td >{{ result.list1_score}}</td>
-                            <td >{{ result.list2_score}}</td>
-                            <td >{{ result.list1.pretty_print() }}</td>
-                            <td >{{ result.list2_pretty_print() }}</td>
-                        {% endif %}
-                    </tr>
-             {% endfor %}
-            </table>
-          {% endfor %}
+        To edit: unlock hte tourney, click on the result, player 1 score, or player 2 score, and press the submit button next to the field.
+        <table id="pre_elim_rounds" class="compact display dataTable" style="width:100%;">
+            <thead>
+                <th>Round</th>
+                <th>Player 1</th>
+                <th>Result</th>
+                <th>Player 2</th>
+                <th>Player 1 Points Scored</th>
+                <th>Points 2 Points Scored</th>
+                <th>Player 1 List</th>
+                <th>Player 2 List</th>
+            </thead>
+        </table>
     </div>
  </div>
 
-
-
-
- <script>
-    $(document).ready(function() {
-
-        lockButtonEl = $('#lock');
-        keyCheckerEL = $('#key-check')
-        lockButtonEl.click(lockClick);
-        keyCheckerEL.click(keyCheck);
-        setupLock();
-    } );
-
-
-    function setupLock(){
-        lock = $('#lock');
-        img  = lock.find('img');
-        createButton = $('#ToolTables_rankings_0');
-        editButton = $('#ToolTables_rankings_1')
-        if ( locked ) {
-            img.attr( "src", lockImg);
-            createButton.hide();
-            editButton.hide();
-        }
-        else {
-            img.attr( "src", unlockImg)
-        }
-    }
-
-    function keyCheck()
-    {
-        k = document.getElementById('keytext').value;
-        log = document.getElementById('key-check-status');
-        edit_br = document.getElementById('edit_tourney_details_div')
-        log.innerHTML = "trying to unlock..."
-        var action;
-        url = "/unlock_tourney?key="+k+"&tourney_id="+tourney_id;
-        $.ajax({
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            url: url,
-            success: function (data) {
-                if ( data.result == "fail" ) {
-                    log.innerHTML = "wrong email address!";
-                }
-                else {
-                    createButton = $('#ToolTables_rankings_0');
-                    editButton =   $('#ToolTables_rankings_1')
-
-                    if (locked) {
-                        locked = false;
-                        img.attr( "src", unlockImg);
-                        edit_br.innerHTML = '<a href="edit_tourney_details?tourney_id=' + tourney_id + '">Edit tourney details</a>'
-                        createButton.show();
-                        editButton.show();
-                    }
-                    else {
-                        locked = true;
-                        img.attr("src", lockImg);
-                        edit_br.innerHTML = ""
-                        createButton.hide();
-                        editButton.hide();
-
-                    }
-                    $('#lock-email-div').hide();
-                    log.innerHTML = "";
-                    $('#rankings').DataTable().ajax.reload();
-
-                }
-            },
-            error: function (data) {
-                log.innerHTML = "something went wrong, got response '" + data.responseJSON.message;
-            },
-            dataType: "json"
-        });
-
-    }
-
-
-    function lockClick(setup){
-        lock = $('#lock');
-        img  = lock.find('img');
-        $('#lock-email-div').show()
-    }
-</script>
 <br>
 <br>
 <hr>
