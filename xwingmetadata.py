@@ -39,6 +39,10 @@ Y_WING = 'Y-Wing'
 Y_WING_CANON = 'ywing'
 X_WING = 'X-Wing'
 X_WING_CANON = 'xwing'
+T_70 = 'T-70 X-Wing'
+T_70_CANON_NAME = 't70xwing'
+TIE_FO_FIGHTER = 'Tie/fo Fighter'
+TIE_FO_FIGHTER_CANON_NAME = 'tiefofighter'
 
 #WAVE 6
 STAR_VIPER_CANON = 'starviper'
@@ -85,6 +89,8 @@ SALVAGED_ASTROMECH_DROID = 'Salvaged Astromech Droid'
 SALVAGED_ASTROMECH_DROID_CANON = 'samd'
 ILLICIT = 'Illicit'
 ILLICIT_CANON = 'illicit'
+TECH = 'Tech'
+TECH_CANON = 'tech'
 
 SHIP_SIZE = 'SHIP_SIZE'
 SHIP_TYPE = 'SHIP_TYPE'
@@ -105,7 +111,7 @@ def header():
              CREW + ".1", CREW + ".2", CREW + ".3", \
              DROID, SYSTEM, MOD + ".1", MOD + ".2", \
              CANNON, MISSILE + ".1", MISSILE + ".2",
-             TORPEDO + ".1", TORPEDO + ".2", BOMB, TURRET ]
+             TORPEDO + ".1", TORPEDO + ".2", BOMB, TURRET, TECH ]
 
 
 
@@ -121,7 +127,8 @@ sets_and_expansions = {  'Core Set' : [],
                          'Rebel Aces Expansion' : [],
                          'Wave 5': ['YT-2400 Expansion', 'VT-49 Decimator Expansion'],
                          'Wave 6': ['Most Wanted Expansion', 'StarViper Expansion', 'IG-2000 Expanson', 'M3-A Interceptor Expansion' ],
-                         'Wave 7': ['K-Wing Expansion Pack', 'Kiharxz Fighter Expansion Pack', 'Tie Punisher Expansion Pack', 'Hound\'s Tooth Expansion Pack']
+                         'Wave 7': ['K-Wing Expansion Pack', 'Kiharxz Fighter Expansion Pack', 'Tie Punisher Expansion Pack', 'Hound\'s Tooth Expansion Pack'],
+                         'Force Awakens Core Set': []
 }
 
 formats = { 'Standard - 100 Point Dogfight', 'Epic Play - 300 points', 'Escalation'}
@@ -191,7 +198,9 @@ upgrades = {
         {'name': 'R7-T1', 'cost': 3, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )},
         {'name': 'R2-D6', 'cost': 1, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
          'action':[ {'type': 'ADD_UPGRADE', 'value': EPT} ] },
-        {'name': 'R2-D2', 'cost': 4, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )}
+        {'name': 'R2-D2', 'cost': 4, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )},
+        {'name': 'BB-8', 'cost': 2, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )},
+        {'name': 'R5-X3', 'cost': 1, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )}
     ),
     TITLE: (
         {'name': 'Slave 1', 'cost': 0,
@@ -335,7 +344,7 @@ upgrades = {
           {'name': 'Calculation', 'cost': 1},
           {'name': 'Crack Shot', 'canon_name': 'crackshot', 'cost': 1},
           {'name': 'Lightning Reflexes', 'canon_name': 'lightningreflexes', 'cost': 1},
-
+          {'name': 'Wired', 'cost': 1},
         ),
     SALVAGED_ASTROMECH_DROID: (
         {'name': 'Genius', 'canon_name' : 'genius', 'cost': 0},
@@ -352,10 +361,59 @@ upgrades = {
        {'name': 'Feedback Array', 'canon_name' : 'feedbackarray', 'cost': 2},
        {'name': 'Inertial Dampeners', 'canon_name' : 'inertialdampeners', 'cost': 1},
        {'name': 'Glitterstim', 'canon_name': 'glitterstim', 'cost': 2},
+    ),
+    TECH: (
+        {'name': 'Weapons Guidance', 'canon_name': 'weaponsguidance', 'cost': 2},
     )
 }
 
-ships = {X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Antilles', 'cost': 29,
+ships = {   T_70:
+            (
+                {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Novice',
+                 'cost': 24, 'pilot_skill': 2, 'canon_name': 'bluesquadronnovice',
+                                   'upgrades': (DROID, TORPEDO, MOD, TECH)},
+                {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Red Squadron Veteran', 'cost': 26,
+                 'cost': 26, 'pilot_skill': 4, 'canon_name': 'redsquadronveteran',
+                                   'upgrades': (DROID, TORPEDO, MOD, TECH, EPT)},
+                {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Blue Ace', 'cost': 27,
+                 'cost': 27, 'pilot_skill': 5, 'canon_name': 'blueace',
+                                   'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
+                                   'upgrades': (DROID, TORPEDO, MOD, TECH)},
+                {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Poe Dameron', 'cost': 31,
+                                   'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
+                 'cost': 31, 'pilot_skill': 8, 'canon_name': 'poedameron',
+                                   'upgrades': (DROID, TORPEDO, MOD, EPT, TECH)},
+            ),
+
+            TIE_FO_FIGHTER:
+            (
+                {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Epsilon Squadron Pilot', 'cost': 15,
+                                   'pilot_skill': 1, 'canon_name': 'Epsilonsquadronpilot',
+                                   'constraints': (),
+                                   'upgrades': (MOD, TECH)},
+                {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Zeta Squadron Pilot', 'cost': 16,
+                                   'constraints': (),
+                                   'pilot_skill': 3, 'canon_name': 'zetasquadronpilot',
+                                   'upgrades': (MOD, TECH)},
+                {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Omega Squadron Pilot', 'cost': 17,
+                                   'pilot_skill': 4, 'canon_name': 'omegasquadronpilot',
+                                   'constraints': (),
+                                   'upgrades': (EPT, MOD, TECH)},
+                {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Zeta Ace', 'cost': 18,
+                                   'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT),
+                                   'pilot_skill': 5, 'canon_name': 'zetaace',
+                                   'upgrades': (EPT, MOD, TECH)},
+                {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Epsilon Leader', 'cost': 19,
+                                   'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT),
+                                   'pilot_skill': 6, 'canon_name': 'epsilonleader',
+                                   'upgrades': (MOD, TECH)},
+                {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Omega Ace', 'cost': 20,
+                                   'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT),
+                                   'pilot_skill': 7, 'canon_name': 'omegaace',
+                                   'upgrades': (EPT, MOD, TECH)}
+            ),
+
+            X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Antilles', 'cost': 29,
                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                    'upgrades': (DROID, TORPEDO, MOD, EPT)},
                   {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Luke Skywalker', 'cost': 28,
@@ -867,6 +925,9 @@ class XWingMetaData:
 
     def turrets(self):
         return self.upgrades()(TURRET)
+
+    def tech(self):
+        return self.upgrades()(TECH)
 
 
 
