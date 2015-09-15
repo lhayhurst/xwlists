@@ -79,8 +79,8 @@ class RoundType(DeclEnum):
     PRE_ELIMINATION = 'Pre-Elimination', 'Pre-Elimination'
 
 class Faction(DeclEnum):
-    IMPERIAL = "empire", "Galactic Empire"
-    REBEL    = "rebels", "Rebel Alliance"
+    IMPERIAL = "imperial", "Galactic Empire"
+    REBEL    = "rebel", "Rebel Alliance"
     SCUM     = "scum", "Scum and Villainy"
 
 class UpgradeType(DeclEnum):
