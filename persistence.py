@@ -79,8 +79,8 @@ class RoundType(DeclEnum):
     PRE_ELIMINATION = 'Pre-Elimination', 'Pre-Elimination'
 
 class Faction(DeclEnum):
-    IMPERIAL = "empire", "Galactic Empire"
-    REBEL    = "rebels", "Rebel Alliance"
+    IMPERIAL = "imperial", "Galactic Empire"
+    REBEL    = "rebel", "Rebel Alliance"
     SCUM     = "scum", "Scum and Villainy"
 
 class UpgradeType(DeclEnum):
@@ -97,6 +97,7 @@ class UpgradeType(DeclEnum):
     MISSILE = xwingmetadata.MISSILE_CANON, xwingmetadata.MISSILE
     SALVAGED_ASTROMECH_DROID = xwingmetadata.SALVAGED_ASTROMECH_DROID_CANON, xwingmetadata.SALVAGED_ASTROMECH_DROID
     ILLICIT = xwingmetadata.ILLICIT_CANON, xwingmetadata.ILLICIT
+    TECH = xwingmetadata.TECH_CANON, xwingmetadata.TECH
 
 class ShipType(DeclEnum):
     XWING =  xwingmetadata.X_WING_CANON, xwingmetadata.X_WING
@@ -124,7 +125,9 @@ class ShipType(DeclEnum):
     TIE_PUNISHER = xwingmetadata.TIE_PUNISHER_CANON_NAME, xwingmetadata.TIE_PUNISHER
     KWING = xwingmetadata.K_WING_CANON_NAME, xwingmetadata.K_WING
     KIHRAXZ_FIGHTER = xwingmetadata.KIHRAXZ_FIGHTER_CANON_NAME, xwingmetadata.KIHRAXZ_FIGHTER
-
+    T_70 = xwingmetadata.T_70_CANON_NAME, xwingmetadata.T_70
+    TIE_FO_FIGHTER = xwingmetadata.TIE_FO_FIGHTER_CANON_NAME, xwingmetadata.TIE_FO_FIGHTER
+    
 class Event(Base):
     __tablename__ = event_table
     id = Column( Integer, primary_key=True)
