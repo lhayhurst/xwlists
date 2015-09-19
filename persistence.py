@@ -77,6 +77,7 @@ class RoundType(DeclEnum):
     ELIMINATION     = "Elimination", "Elimination"
     PRE_ELIMINATION = 'Pre-Elimination', 'Pre-Elimination'
 
+#factions changed in 0.3.0 of the xws spec.
 class Faction(DeclEnum):
     IMPERIAL = "imperial", "Galactic Empire"
     REBEL    = "rebel", "Rebel Alliance"
