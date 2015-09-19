@@ -134,6 +134,10 @@ class XWSToJuggler:
                         ship_upgrade = ShipUpgrade( ship=ship, upgrade=upgrade )
                         ship.upgrades.append( ship_upgrade )
 
+        hashkey = ArchtypeList.generate_hash_key(ships)
+
+        archtype = pm.get_archtype(hashkey)
+
         if archtype is None:
             #ding ding!
             #we've never seen this list before!
@@ -145,11 +149,7 @@ class XWSToJuggler:
             for ship in ships:
                 ship.archtype = archtype
                 pm.db_connector.get_session().add(ship)
-            #TODO: temporary hack
-            if faction == "rebel":
-                faction = "rebels"
-            if faction == "imperial":
-                faction = "empire"
+
             archtype.faction = Faction.from_string( faction )
             archtype.points = points
             pm.db_connector.get_session().commit()

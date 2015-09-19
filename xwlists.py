@@ -77,11 +77,6 @@ api.add_resource(TournamentSearchAPI, '/api/v1/search/tournaments')
 api.add_resource(TournamentTokenAPI, '/api/v1/tournament/<int:tourney_id>/token')
 
 
-@app.before_request
-def check_for_maintenance():
-    if is_maintenance_mode and request.path != url_for('down'):
-        return redirect(url_for('down'))
-
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     session.remove()
@@ -110,9 +105,9 @@ def mail_error(errortext):
         #mail.send(msg)
 
 
-@app.before_request
-def check_for_maintenance():
-    return render_template('maintenance.html')
+#@app.before_request
+#def check_for_maintenance():
+#    return render_template('maintenance.html')
 
 @app.route("/about")
 def about():
