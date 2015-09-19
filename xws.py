@@ -80,6 +80,12 @@ class XWSToJuggler:
         pilots  = xws['pilots']
 
         tourney_list.name = name
+        #TODO: temporary hack
+        if faction == "rebels":
+            faction = "rebel"
+        if faction == "empire":
+            faction = "imperial"
+
         tourney_list.faction = Faction.from_string(faction)
 
 

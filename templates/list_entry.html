@@ -174,9 +174,9 @@
             <legend>Or enter the list manually: select a faction to begin</legend>
             <div data-row-span="1">
                 <div class="choose-faction" data-field-span="1">
-                    <button class="faction-choice">empire</button>
+                    <button class="faction-choice">imperial</button>
                     or
-                  <button class="faction-choice">rebels</button>
+                  <button class="faction-choice">rebel</button>
                     or
                   <button class="faction-choice">scum</button>
                 </div>
@@ -247,11 +247,11 @@
             $('.faction-label').hide();
             $('.total').show();
             $('.squad').show();
-            if ( $('.faction-label').text() == "empire" ) {
+            if ( $('.faction-label').text() == "imperial" ) {
                 $('.submit-squad').text("Submit to the Emperor!");
             }
             else if ( $('.faction-label').text() == "scum" ) {
-                $('.submit-squad').text("Yarrr, submit!");
+                $('.submit-squad').text("Yarrr, submit, you scum!");
             }
             else
             {
