@@ -25,11 +25,11 @@
             <div>
                 <b>Tourney:</b>  {{ tourney.get_tourney_name() }}<br>
                 <b>Player name:</b>  {{ tourney_list.player.get_player_name() }}<br>
-                <b>Player faction:</b> {{  tourney_list.faction.description }}<br>
-                <b>List total:</b> <p class="alignright sub-total">{{ tourney_list.points }}</p>
+                <b>Player faction:</b> {{  tourney_list.faction().description }}<br>
+                <b>List total:</b> <p class="alignright sub-total">{{ tourney_list.points() }}</p>
             </div>
             <br>
-            {% for ship in tourney_list.ships %}
+            {% for ship in tourney_list.ships() %}
                 <b>{{ ship.ship_pilot.ship_type.description }} -- {{  ship.ship_pilot.pilot.name }}</b><p class="alignright">{{ ship.ship_pilot.pilot.cost }}</p>
                 <br>
                 {% for ship_upgrade in ship.upgrades %}
@@ -37,7 +37,7 @@
                 {% endfor %}
             {%  endfor %}
         <br>
-        <i>Thanks for entering this list?  What next?</i>
+        <i>Thanks for entering this list!  What next?</i>
         <button type="button" onclick="deleteAndStartOver()">Oops, its wrong, let me try that again</button><br>
         <br><button type="button" onclick="doAnotherList()">Looks good, give another random list to enter!</button><br>
         <br>

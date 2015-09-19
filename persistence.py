@@ -1,14 +1,12 @@
-from collections import OrderedDict
 from flask import url_for
 from markupsafe import Markup
 from sqlalchemy.dialects import mysql
-from sqlalchemy.sql.operators import ColumnOperators
+from sqlalchemy import or_, BigInteger
 from decoder import decode
-from sqlalchemy import and_, or_, BigInteger
 
 REGIONAL = 'Regional'
-
 STORE_CHAMPIONSHIP = 'Store championship'
+NATIONAL_CHAMPIONSHIP = 'Nationals'
 
 ELIMINATION = 'elimination'
 
@@ -71,6 +69,7 @@ tlist_table = 'tlist'
 tourney_round = "tourney_round"
 tourney_result = "tourney_result"
 event_table = "event"
+archtype_list_table = "list_archtype"
 
 Base = db_connector.get_base()
 
@@ -152,9 +151,9 @@ class Pilot(Base):
 
 class ShipPilot(Base):
     __tablename__ = ship_pilot_table
-    id = Column(Integer, primary_key=True)
-    ship_type = Column(ShipType.db_type())
-    pilot_id = Column(Integer, ForeignKey('{0}.id'.format(pilot_table)))
+    id            = Column(Integer, primary_key=True)
+    ship_type     = Column(ShipType.db_type())
+    pilot_id      = Column(Integer, ForeignKey('{0}.id'.format(pilot_table)))
     pilot = relationship(Pilot.__name__, uselist=False)
 
 class Upgrade(Base):
@@ -166,14 +165,18 @@ class Upgrade(Base):
     cost = Column(Integer, unique=True)
 
 
+
 class Ship(Base):
     __tablename__ = ship_table
     id = Column(Integer, primary_key=True)
     ship_pilot_id = Column(Integer, ForeignKey('{0}.id'.format(ship_pilot_table)))
-    tlist_id = Column(Integer, ForeignKey('{0}.id'.format(tourney_list_table)))  #parent
+    archtype_id = Column( Integer, ForeignKey('{0}.id'.format(archtype_list_table)))
+    #tlist_id = Column(Integer, ForeignKey('{0}.id'.format(tourney_list_table)))  #parent
     ship_pilot = relationship(ShipPilot.__name__, uselist=False)
     upgrades = relationship( "ShipUpgrade", back_populates="ship")
-    tlist    = relationship("TourneyList", uselist=False)
+    #tlist    = relationship("TourneyList", uselist=False)
+    archtype = relationship("ArchtypeList", uselist=False)
+
 
     def get_upgrade(self, upgrade_name ):
 
@@ -274,7 +277,7 @@ class Tourney(Base):
     def num_entered_lists(self):
         count = 0
         for list in self.tourney_lists:
-            if list.points > 0:
+            if list.points() > 0:
                 count = count + 1
         return count
 
@@ -345,77 +348,41 @@ class TourneyPlayer(Base):
 
     def get_player_name(self):
         return decode(self.player_name)
-#
-# archtype_list_table = "archtype_list"
-#
-# class ArchtypeList(Base):
-#     __tablename__ = archtype_list_table
-#     id               = Column( Integer, primary_key=True)
-
-class TourneyList(Base):
-    __tablename__    = tourney_list_table
-    id               = Column( Integer, primary_key=True)
-    tourney_id       = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
-    player_id        = Column(Integer, ForeignKey('{0}.id'.format(tourney_player_table)))
-    image            = Column(String(128))
-    name             = Column(String(128))
-    hashkey          = Column(BigInteger)
-    faction          = Column(Faction.db_type())
-    points           = Column(Integer)
-    player           = relationship( TourneyPlayer.__name__, uselist=False)
-    tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
-    ships            = relationship(Ship.__name__, cascade="all,delete,delete-orphan")
-    #archtype_list    = relationship(ArchtypeList.__name__,uselist=False)
-
-    def pretty_print(self, manage_list=1, show_results=0, enter_list=1):
-        if len(self.ships) == 0: #no list
-            if self.tourney.locked == False and enter_list:
-                ret = '<a rel="nofollow" href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
-                return Markup(ret)
-        ret = ""
-        for ship in self.ships:
-            ret = ret + ship.ship_pilot.pilot.name
-            i = 1
-            if ship.upgrades is not None:
-                for ship_upgrade in ship.upgrades:
-                    if ship_upgrade.upgrade is not None:
-                        ret = ret + " + " + ship_upgrade.upgrade.name
-            if i < len(self.ships):
-                ret = ret + '<br>'
-            i = i + 1
-        points = 0
-        if self.points is not None:
-            points = self.points
-        ret = ret + "(%d)" % ( points )
-        if not self.tourney.locked and manage_list:
-            ret = ret + '<br><a href="' + url_for('display_list', tourney_list_id=self.id, )
-            ret = ret + '"rel="nofollow">Manage list</a>'
-        if show_results:
-            ret = ret + '<br><a href="' +  url_for('show_results', hashkey=self.hashkey, )
-            ret = ret + '">Show results</a>'
-
-        return Markup( ret )
 
 
-    def generate_hash_key(self):
+
+
+class ArchtypeList(Base):
+     __tablename__    = archtype_list_table
+     id               = Column( Integer, primary_key=True)
+     name             = Column(String(128))
+     faction          = Column(Faction.db_type())
+     points           = Column(Integer)
+     hashkey          = Column(BigInteger)
+     ships            = relationship(Ship.__name__,uselist=True)
+     tourney_lists    = relationship("TourneyList", uselist=True)
+
+
+     @staticmethod
+     def generate_hash_key(ships):
         liststring = ""
-        ships = []
-        pilots = []
-        upgrades = []
-        for ship in self.ships:
+        ship_strings    = []
+        pilot_strings   = []
+        upgrade_strings = []
+        for ship in ships:
             sp = ship.ship_pilot
-            ships.append( str( sp.ship_type ))
-            pilots.append( sp.pilot.canon_name )
+            ship_strings.append( str( sp.ship_type ))
+            pilot_strings.append( sp.pilot.canon_name )
             for supgrade in ship.upgrades:
                 if supgrade.upgrade is not None:
-                    upgrades.append( supgrade.upgrade.canon_name )
+                    upgrade_strings.append( supgrade.upgrade.canon_name )
         key = None
         liststring = ""
-        for s in sorted(ships):
+        for s in sorted(ship_strings):
             liststring = liststring + s
-        for p in sorted(pilots):
+        for p in sorted(pilot_strings):
             liststring = liststring + p
-        for u in sorted(upgrades):
+        for u in sorted(upgrade_strings):
             liststring = liststring + u
 
         if len(liststring) == 0:
@@ -423,7 +390,83 @@ class TourneyList(Base):
         else:
             key = hash(liststring)
 
-        self.hashkey = key
+        return key
+
+class TourneyList(Base):
+    __tablename__    = tourney_list_table
+    id               = Column( Integer, primary_key=True)
+    tourney_id       = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
+    archtype_id      = Column(Integer, ForeignKey('{0}.id'.format(archtype_list_table)))
+    player_id        = Column(Integer, ForeignKey('{0}.id'.format(tourney_player_table)))
+    image            = Column(String(128))
+    #name             = Column(String(128))
+    #hashkey          = Column(BigInteger)
+    #faction          = Column(Faction.db_type())
+    #points           = Column(Integer)
+    player           = relationship( TourneyPlayer.__name__, uselist=False)
+    tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
+    #ships            = relationship(Ship.__name__, cascade="all,delete,delete-orphan")
+    archtype_list    = relationship(ArchtypeList.__name__, back_populates="tourney_lists")
+
+    def hashkey(self):
+        if self.archtype_list is not None:
+            return self.archtype_list.hashkey
+
+    def points(self):
+        if self.archtype_list is not None:
+            return self.archtype_list.points
+        return 0
+
+    def faction(self):
+        if self.archtype_list is not None:
+            return self.archtype_list.faction
+        return None
+
+    def set_points(self, points):
+        self.archtype_list.points = points
+
+    def set_faction(self, faction):
+        self.archtype_list.faction = faction
+
+    def name(self):
+        if self.archtype_list is not None:
+            return self.archtype_list.name
+        return None
+
+    def ships(self):
+        if self.archtype_list is not None:
+            return self.archtype_list.ships
+        return []
+
+    def pretty_print(self, manage_list=1, show_results=0, enter_list=1):
+
+        if len(self.ships()) == 0: #no list
+            if self.tourney.locked == False and enter_list:
+                ret = '<a rel="nofollow" href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
+                return Markup(ret)
+        ret = ""
+        for ship in self.ships():
+            ret = ret + ship.ship_pilot.pilot.name
+            i = 1
+            if ship.upgrades is not None:
+                for ship_upgrade in ship.upgrades:
+                    if ship_upgrade.upgrade is not None:
+                        ret = ret + " + " + ship_upgrade.upgrade.name
+            if i < len(self.ships()):
+                ret = ret + '<br>'
+            i = i + 1
+        points = 0
+        if self.points() is not None:
+            points = self.points()
+        ret = ret + "(%d)" % ( points )
+        if not self.tourney.locked and manage_list:
+            ret = ret + '<br><a href="' + url_for('display_list', tourney_list_id=self.id, )
+            ret = ret + '"rel="nofollow">Manage list</a>'
+        if show_results:
+            ret = ret + '<br><a href="' +  url_for('show_results', hashkey=self.hashkey(), )
+            ret = ret + '">Show results</a>'
+
+        return Markup( ret )
 
 
 
@@ -609,14 +652,14 @@ class RoundResult(Base):
         return self.list2_score
 
     def get_list1_points(self):
-        if self.list1.points is None:
+        if self.list1.points() is None:
             return 100
-        return self.list1.points
+        return self.list1.points()
 
     def get_list2_points(self):
-        if self.list2.points is None:
+        if self.list2.points() is None:
             return 100
-        return self.list2.points
+        return self.list2.points()
 
     def get_winner_list_url(self):
         url = url_for( 'display_list', tourney_list_id=self.winner.id )
@@ -692,16 +735,40 @@ class PersistenceManager:
         session.commit()
 
     def get_summaries(self):
-        num_tourneys      = self.db_connector.get_session().query(func.count(Tourney.id)).first()[0]
-        num_lists         = self.db_connector.get_session().query(func.count(TourneyList.id)).filter(TourneyList.points >0).first()[0]
-        num_ships         = self.db_connector.get_session().query(func.count(Ship.id)).first()[0]
-        num_upgrades      = self.db_connector.get_session().query(func.count(ShipUpgrade.id)).first()[0]
-        points_spent      = self.db_connector.get_session().query(func.sum(TourneyList.points)).first()[0]
+
+        session           = self.db_connector.get_session()
+        num_tourneys      = session.query(func.count(Tourney.id)).first()[0]
+        num_lists         = session.query(func.count(TourneyList.id)).\
+            filter(and_( ArchtypeList.id == TourneyList.archtype_id, ArchtypeList.points >0 ) ).first()[0]
+
+        archtypes         = self.get_all_archtypes()
+        num_total_ships = 0
+        num_total_upgrades = 0
+        total_points_spent = 0
+
+        # for a in archtypes:
+        #     num_archtype_ships    = 0
+        #     num_archtype_lists    = 0
+        #     num_archtype_upgrades = 0
+        #     if a.ships is not None:
+        #         num_archtype_ships = len(a.ships)
+        #         for ship in a.ships:
+        #             if len(ship.upgrades) > 0:
+        #                 num_archtype_upgrades = num_archtype_upgrades + len(ship.upgrades)
+        #
+        #     if a.tourney_lists is not None:
+        #         num_archtype_lists = len(a.tourney_lists)
+        #         total_points_spent = total_points_spent + num_archtype_lists * a.points
+        #         num_total_upgrades = num_total_upgrades + num_archtype_lists * num_archtype_upgrades
+        #
+        #     if num_archtype_ships > 0 and num_archtype_lists > 0:
+        #         num_total_ships = num_total_ships + num_archtype_ships*num_archtype_lists
+
         return { "tourneys": num_tourneys,
                  "lists": num_lists,
-                 "ships": num_ships,
-                 "upgrades": num_upgrades,
-                 "points_spent" : int(points_spent) }
+                 "ships": num_total_ships,
+                 "upgrades": num_total_upgrades,
+                 "points_spent" :  total_points_spent }
 
 
     def get_tourney_ids(self):
@@ -754,25 +821,34 @@ class PersistenceManager:
         return self.db_connector.get_session().query(Tourney).filter_by(id=tourney_id).first()
 
     def get_lists_for_hashkey(self, hashkey):
-        return self.db_connector.get_session().query(TourneyList).filter_by(hashkey=hashkey).all()
+        return self.db_connector.get_session().query(TourneyList, ArchtypeList).\
+            filter(TourneyList.archtype_id == ArchtypeList.id).\
+            filter(ArchtypeList.hashkey==hashkey).all()
 
     def get_result_by_id(self, result_id):
         return self.db_connector.get_session().query(RoundResult).filter_by(id=result_id).first()
 
+    def get_all_hashkeys(self):
+         return self.db_connector.get_session().\
+            query(TourneyList.hashkey).all()
+
+    def get_all_archtypes(self):
+        return self.db_connector.get_session().query(ArchtypeList).all()
+
+    def get_archtype(self, hashkey):
+        return self.db_connector.get_session().query(ArchtypeList).filter_by(hashkey=hashkey).first()
+
     def get_list_ranks(self):
-        hashheys = self.db_connector.get_session().\
-            query(TourneyList.hashkey, func.count(TourneyList.hashkey)).\
-            group_by(TourneyList.hashkey).\
-            order_by( desc(func.count(TourneyList.hashkey))).all()
 
+        archtypes = self.get_all_archtypes()
         summary = []
-        for item in hashheys:
-            hashkey = item[0]
-            count   = item[1]
-            if hashkey == 0 or hashkey is None:
-                continue
-
-            lists = self.db_connector.get_session().query(TourneyList).filter( TourneyList.hashkey == hashkey).all()
+        i = 0
+        print "runnning all archtypes"
+        for a in archtypes:
+            i = i + 1
+            if i % 100 == 0:
+                print "processed %d archtypes" % ( i )
+            lists = a.tourney_lists
 
             wins   = 0
             losses = 0
@@ -784,11 +860,10 @@ class PersistenceManager:
             points_losable = 0
             pretty_print = None
 
-
             for list in lists:
                 if not list.tourney.is_standard_format():
                     continue
-                if list.points is None:
+                if list.points() is None or list.points() == 0:
                     continue
                 if pretty_print is None:
                     pretty_print = list.pretty_print(manage_list=0,show_results=1)
@@ -821,7 +896,7 @@ class PersistenceManager:
                          points_killable     = points_killable + pk
                          points_lost         = points_lost + result.get_list1_score()
 
-                    points_losable = points_losable + list.points
+                    points_losable = points_losable + list.points()
 
             if total == 0:
                 continue
@@ -842,8 +917,8 @@ class PersistenceManager:
                 if points_against_eff < 0:
                     points_against_eff = 0
 
-            summary.append( { 'hashkey' : hashkey,
-                               'num_lists' : count,
+            summary.append( { 'hashkey' : a.hashkey,
+                               'num_lists' : len(a.tourney_lists),
                                'pretty_print': pretty_print,
                                'wins': "{:,}".format(wins),
                                'losses': "{:,}".format(losses),
@@ -856,8 +931,6 @@ class PersistenceManager:
                                'point_against_efficiency':"{:.2%}".format(points_against_eff ) } )
 
         return summary
-
-
 
     def delete_tourney(self, tourney_name):
         tourney = self.get_tourney( tourney_name)
@@ -875,18 +948,12 @@ class PersistenceManager:
         self.db_connector.get_session().delete(tourney)
         self.db_connector.get_session().commit()
 
-
     def delete_tourney_list_details(self, tourney_list):
 
-        for ship in tourney_list.ships:
-            for su in ship.upgrades:
-                self.db_connector.get_session().delete(su)
-            self.db_connector.get_session().delete(ship)
-        tourney_list.faction = None
-        tourney_list.points  = None
-        tourney_list.shiops  = None
+        #unlink the relationship between this tourney list and its archtype
+        tourney_list.archtype_list = None
+        tourney_list.archtype_id = None
         self.db_connector.get_session().commit()
-
 
     def get_upgrade_canonical(self, upgrade_type, upgrade_name):
         ret = self.db_connector.get_session().query(Upgrade).filter_by(upgrade_type=UpgradeType.from_string(upgrade_type)).\
@@ -931,8 +998,6 @@ class PersistenceManager:
             else:
                 return None
 
-
-
     def get_random_tourney_list(self, tourney):
         session = self.db_connector.get_session()
         query = session.query(Tourney, TourneyList).\
@@ -945,29 +1010,33 @@ class PersistenceManager:
             return None
         return randomRow[1]
 
-    def get_ship_pilot_rollup(self, elimination_only, storeChampionshipsOnly=False, regionalChampionshipsOnly=False):
+    def get_ship_pilot_rollup(self, elimination=True,
+                              storeChampionships=True,
+                              regionalChampionships=True,
+                              nationalChampionships=True):
         session = self.db_connector.get_session()
 
         filters = [
             TourneyList.tourney_id == Tourney.id ,
-            Ship.tlist_id == TourneyList.id ,
+            ArchtypeList.id == TourneyList.archtype_id,
+            Ship.archtype_id == ArchtypeList.id ,
             Ship.ship_pilot_id == ShipPilot.id ,
             ShipPilot.pilot_id == Pilot.id
         ]
 
-        if elimination_only:
+        if elimination:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
+        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
 
 
-        ship_pilot_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
+        ship_pilot_rollup_sql = session.query( ArchtypeList.faction, ShipPilot.ship_type, Pilot.name,
                              func.count( Pilot.id).label("num_pilots"),
                              func.sum( Pilot.cost).label("cost_pilots")).\
                              filter( and_(*filters)).\
-            group_by( rollup( TourneyList.faction, ShipPilot.ship_type, Pilot.name) ).\
+            group_by( rollup( ArchtypeList.faction, ShipPilot.ship_type, Pilot.name) ).\
             statement.compile(dialect=mysql.dialect())
 
         connection = self.db_connector.get_engine().connect()
@@ -977,25 +1046,26 @@ class PersistenceManager:
 
         filters = [
             TourneyList.tourney_id == Tourney.id ,
-            Ship.tlist_id == TourneyList.id ,
+            ArchtypeList.id == TourneyList.archtype_id,
+            Ship.archtype_id == ArchtypeList.id ,
             Ship.ship_pilot_id == ShipPilot.id ,
             ShipPilot.pilot_id == Pilot.id ,
             ShipUpgrade.ship_id == Ship.id ,
             Upgrade.id == ShipUpgrade.upgrade_id,
         ]
 
-        if elimination_only:
+        if elimination:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
+        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
 
-        upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type, Pilot.name,
+        upgrade_rollup_sql = session.query( ArchtypeList.faction, ShipPilot.ship_type, Pilot.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
                                         func.sum( Upgrade.cost).label("cost_upgrades") ).\
                             filter( and_(*filters)).\
-            group_by( rollup( TourneyList.faction, ShipPilot.ship_type, Pilot.name) ).\
+            group_by( rollup( ArchtypeList.faction, ShipPilot.ship_type, Pilot.name) ).\
             statement.compile(dialect=mysql.dialect())
 
         #print "ship pilot upgrade rollup sql: " + upgrade_rollup_sql.string
@@ -1006,13 +1076,17 @@ class PersistenceManager:
         connection.close()
         return ret
 
-    def get_upgrade_rollups(self, elimination_only, storeChampionshipsOnly=False, regionalChampionshipsOnly=False):
+    def get_upgrade_rollups(self, elimination_only,
+                            storeChampionships=True,
+                            regionalChampionships=True,
+                            nationalChampionships=True):
 
         session = self.db_connector.get_session()
 
         filters = [
             TourneyList.tourney_id == Tourney.id,
-            Ship.tlist_id == TourneyList.id ,
+            ArchtypeList.id == TourneyList.archtype_id,
+            Ship.archtype_id == ArchtypeList.id ,
             Ship.ship_pilot_id == ShipPilot.id ,
             ShipPilot.pilot_id == Pilot.id ,
             ShipUpgrade.ship_id == Ship.id,
@@ -1024,7 +1098,7 @@ class PersistenceManager:
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
+        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
 
         upgrade_rollup_sql = session.query( Upgrade.upgrade_type, Upgrade.name,
                                         func.count( Upgrade.id).label("num_upgrades"),
@@ -1039,36 +1113,42 @@ class PersistenceManager:
         ret = connection.execute(upgrade_rollup_sql)
         return ret
 
-    def apply_tourney_type_filter(self, filters, regionalChampionshipsOnly, storeChampionshipsOnly):
-        if storeChampionshipsOnly == True and regionalChampionshipsOnly == True:
-            filters.append(or_(Tourney.tourney_type == ('%s' % STORE_CHAMPIONSHIP),
-                               Tourney.tourney_type == ('%s' % REGIONAL)))
-        elif storeChampionshipsOnly == True and regionalChampionshipsOnly == False:
-            filters.append(Tourney.tourney_type == STORE_CHAMPIONSHIP)
-        elif storeChampionshipsOnly == False and regionalChampionshipsOnly == True:
-            filters.append(Tourney.tourney_type == REGIONAL)
+    def apply_tourney_type_filter(self, filters, nationalChampionships, regionalChampionships, storeChampionships):
 
-    def get_ship_faction_rollups(self, elimination_only, storeChampionshipsOnly=False, regionalChampionshipsOnly=False):
+        ors = []
+        if nationalChampionships:
+            ors.append( Tourney.tourney_type == ('%s' % NATIONAL_CHAMPIONSHIP) )
+        if regionalChampionships:
+            ors.append( Tourney.tourney_type == ('%s' % REGIONAL) )
+        if storeChampionships:
+            ors.append(  Tourney.tourney_type == ('%s' % STORE_CHAMPIONSHIP) )
+        filters.append( or_( *ors ))
+
+    def get_ship_faction_rollups(self, elimination,
+                                 storeChampionships=True,
+                                 regionalChampionships=True,
+                                 nationalChampionships=True):
         session = self.db_connector.get_session()
 
         filters = [TourneyList.tourney_id == Tourney.id ,
-                        Ship.tlist_id == TourneyList.id,
-                        Ship.ship_pilot_id == ShipPilot.id,
-                        ShipPilot.pilot_id == Pilot.id ]
+            ArchtypeList.id == TourneyList.archtype_id,
+            Ship.archtype_id == ArchtypeList.id ,
+            Ship.ship_pilot_id == ShipPilot.id,
+            ShipPilot.pilot_id == Pilot.id ]
 
-        if elimination_only:
+        if elimination:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
+        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
 
 
-        faction_ship_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
+        faction_ship_rollup_sql = session.query( ArchtypeList.faction, ShipPilot.ship_type,
                              func.count( Pilot.id).label("num_pilots"),
                              func.sum( Pilot.cost).label("cost_pilots")).\
                              filter( and_(*filters)).\
-                             group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).statement.compile(dialect=mysql.dialect())
+                             group_by( rollup( ArchtypeList.faction, ShipPilot.ship_type) ).statement.compile(dialect=mysql.dialect())
 
         #print "faction ship rollup sql: " + faction_ship_rollup_sql.string
 
@@ -1076,25 +1156,27 @@ class PersistenceManager:
         faction_ship_rollup = connection.execute(faction_ship_rollup_sql)
 
 
-        filters = [ TourneyList.tourney_id == Tourney.id,
-             Ship.tlist_id == TourneyList.id,
-             Ship.ship_pilot_id == ShipPilot.id,
+        filters = [
+            TourneyList.tourney_id == Tourney.id,
+            ArchtypeList.id == TourneyList.archtype_id,
+            Ship.archtype_id == ArchtypeList.id ,
+            Ship.ship_pilot_id == ShipPilot.id,
             ShipPilot.pilot_id == Pilot.id ,
-             ShipUpgrade.ship_id == Ship.id,
+            ShipUpgrade.ship_id == Ship.id,
             Upgrade.id == ShipUpgrade.upgrade_id ]
 
-        if elimination_only:
+        if elimination:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        self.apply_tourney_type_filter(filters, regionalChampionshipsOnly, storeChampionshipsOnly)
+        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
 
-        upgrade_rollup_sql = session.query( TourneyList.faction, ShipPilot.ship_type,
+        upgrade_rollup_sql = session.query( ArchtypeList.faction, ShipPilot.ship_type,
                                         func.count( Upgrade.id).label("num_upgrades"),
                                         func.sum( Upgrade.cost).label("cost_upgrades") ).\
             filter( and_(*filters)).\
-            group_by( rollup( TourneyList.faction, ShipPilot.ship_type) ).\
+            group_by( rollup( ArchtypeList.faction, ShipPilot.ship_type) ).\
             statement.compile(dialect=mysql.dialect())
 
         upgrade_rollup = connection.execute( upgrade_rollup_sql )
@@ -1102,3 +1184,5 @@ class PersistenceManager:
 
         ret = faction_ship_rollup.fetchall() + upgrade_rollup.fetchall()
         return ret
+
+

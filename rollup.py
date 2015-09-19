@@ -9,11 +9,16 @@ class Rollup:
 
 
 
-    def __init__(self,pm, request_type, eliminationOnly, storeChampionshipsOnly=False, regionalChampionshipsOnly=False):
+    def __init__(self,pm, request_type,
+                 eliminationOnly,
+                 storeChampionshipsOnly=False,
+                 regionalChampionshipsOnly=False,
+                 nationalChampionshipsOnly=False,):
         self.pm = pm
         self.top32only = eliminationOnly
         self.storeChampionshipsOnly = storeChampionshipsOnly
         self.regionalChampionshipsOnly = regionalChampionshipsOnly
+        self.nationalChampionshipsOnly = nationalChampionshipsOnly
 
         self.chart_request_type = request_type
 
@@ -47,19 +52,22 @@ class Rollup:
         if self.chart_request_type == 'faction-ship-points' or self.chart_request_type == 'faction-ship-count':
             ret = self._rollup( self.pm.get_ship_faction_rollups(self.top32only,
                                                                  self.storeChampionshipsOnly,
-                                                                 self.regionalChampionshipsOnly), has_pilot=False)
+                                                                 self.regionalChampionshipsOnly,
+                                                                 self.nationalChampionshipsOnly), has_pilot=False)
             sorted_ret = sorted( ret, key=lambda record: record['faction'])
 
         elif self.chart_request_type.startswith( 'ship-pilot'):
             ret = self._rollup( self.pm.get_ship_pilot_rollup(self.top32only,
                                                               self.storeChampionshipsOnly,
-                                                              self.regionalChampionshipsOnly), has_pilot=True)
+                                                              self.regionalChampionshipsOnly,
+                                                              self.nationalChampionshipsOnly), has_pilot=True)
             sorted_ret = sorted( ret, key=lambda record: record['faction'])
 
         elif self.chart_request_type.startswith('upgrade_type-upgrade'):
             ret = self._rollup_upgrades( self.pm.get_upgrade_rollups(self.top32only,
                                                                      self.storeChampionshipsOnly,
-                                                                     self.regionalChampionshipsOnly))
+                                                                     self.regionalChampionshipsOnly,
+                                                                     self.nationalChampionshipsOnly))
             sorted_ret = ret
 
         return sorted_ret

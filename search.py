@@ -7,7 +7,7 @@ from whoosh.query import Term
 
 import myapp
 from persistence import TourneyList, Ship, ShipPilot, Pilot, ShipUpgrade, \
-    Upgrade, PersistenceManager, Tourney, TourneyVenue
+    Upgrade, PersistenceManager, Tourney, TourneyVenue, ArchtypeList
 
 
 def wildcard(term):
@@ -123,6 +123,7 @@ class Search:
                               func.group_concat( func.concat( Upgrade.name, " ", Upgrade.canon_name ) ).label("upgrade_name") ). \
             join(Tourney).\
             join(TourneyVenue).\
+            join(ArchtypeList).\
             join(Ship). \
             join(ShipPilot). \
             join(Pilot). \

@@ -1,12 +1,13 @@
 import json
 import urllib2
 from BeautifulSoup import BeautifulSoup
-from persistence import TourneyList, Faction, Ship, ShipUpgrade
+from persistence import TourneyList, Faction, Ship, ShipUpgrade, ArchtypeList
+
 
 class XWSListConverter:
     def __init__(self, list):
         self.data = {}
-        self.data['faction'] = str(list.faction.value)
+        self.data['faction'] = str(list.faction().value)
         pilots = []
         self.data['pilots'] = pilots
         self.data['version'] = "0.2.1"
@@ -79,11 +80,12 @@ class XWSToJuggler:
         faction = xws['faction']
         pilots  = xws['pilots']
 
-        tourney_list.name = name
-        tourney_list.faction = Faction.from_string(faction)
+        #tourney_list.name = name
+        #tourney_list.set_faction( Faction.from_string(faction) )
 
 
         points = 0
+        ships = []
 
         for ship_pilot in pilots:
             ship = ship_pilot['ship']
@@ -92,8 +94,8 @@ class XWSToJuggler:
             if sp is None:
                 raise Exception("xws lookup failed for ship " + ship + ", pilot " + pilot )
             points      = points + sp.pilot.cost
-            ship        = Ship( ship_pilot_id=sp.id, tlist_id=tourney_list.id)
-            tourney_list.ships.append( ship )
+            ship        = Ship( ship_pilot=sp)
+            ships.append(ship)
 
             if ship_pilot.has_key('upgrades'):
                 upgrades = ship_pilot['upgrades']
@@ -123,8 +125,34 @@ class XWSToJuggler:
                             points  = points + cost
                         else:
                             points  = points + upgrade.cost
-                        ship_upgrade = ShipUpgrade( ship_id=ship.id, upgrade=upgrade )
+                        ship_upgrade = ShipUpgrade( ship=ship, upgrade=upgrade )
                         ship.upgrades.append( ship_upgrade )
 
-        tourney_list.points = points
-        tourney_list.generate_hash_key()
+        hashkey = ArchtypeList.generate_hash_key(ships)
+
+        archtype = pm.get_archtype(hashkey)
+
+        if archtype is None:
+            #ding ding!
+            #we've never seen this list before!
+            #note that this quote is a dupe of the add_squads method in xwlists.py
+            #refactor it if we get a third way of adding archtypes
+            archtype = ArchtypeList()
+            pm.db_connector.get_session().add(archtype)
+            archtype.ships = ships
+            for ship in ships:
+                ship.archtype = archtype
+                pm.db_connector.get_session().add(ship)
+            #TODO: temporary hack
+            if faction == "rebel":
+                faction = "rebels"
+            if faction == "imperial":
+                faction = "empire"
+            archtype.faction = Faction.from_string( faction )
+            archtype.points = points
+            pm.db_connector.get_session().commit()
+
+        tourney_list.archtype = archtype
+        tourney_list.archtype_id = archtype.id
+        pm.db_connector.get_session().add(tourney_list)
+        pm.db_connector.get_session().commit()

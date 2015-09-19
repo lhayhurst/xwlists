@@ -271,11 +271,11 @@ class TestIntegrity(DatabaseTestCase):
         first_tourney_list   = tourney.tourney_lists[ 0 ]
         num_ships_in_tourney = self.get_num_ships( tourney )
         self.assertTrue(num_ships_in_tourney > 0 )
-        num_ships_in_list = len( first_tourney_list.ships )
-        self.assertTrue( first_tourney_list.faction is not None )
-        self.assertTrue( first_tourney_list.points is not None )
-        self.assertTrue( first_tourney_list.ships is not None )
-        self.assertTrue( len(first_tourney_list.ships) >  0 )
+        num_ships_in_list = len( first_tourney_list.ships() )
+        self.assertTrue( first_tourney_list.faction() is not None )
+        self.assertTrue( first_tourney_list.points() is not None )
+        self.assertTrue( first_tourney_list.ships() is not None )
+        self.assertTrue( len(first_tourney_list.ships()) >  0 )
 
         self.pm.delete_tourney_list_details( first_tourney_list )
 
@@ -327,7 +327,7 @@ class TestIntegrity(DatabaseTestCase):
                 self.assertTrue( tl.image is not None )
 #                self.assertTrue( tl.tourney_elim_standing is None )
 #                self.assertTrue( tl.tourney_standing > 0 )
-                self.assertTrue( tl.points > 0 )
+                self.assertTrue( tl.points() > 0 )
                 for ship in tl.ships:
                     sp = ship.ship_pilot
                     self.assertTrue( sp is not None )

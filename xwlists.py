@@ -17,7 +17,7 @@ from dataeditor import RankingEditor, RoundResultsEditor
 from decoder import decode
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
-    TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event
+    TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event, ArchtypeList
 from rollup import Rollup
 from search import Search
 from uidgen import ListUIDGen
@@ -98,7 +98,7 @@ def mail_message(subject, message):
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
     with app.app_context():
         print("sending msg ")
-        mail.send(msg)
+        #mail.send(msg)
 
 
 def mail_error(errortext):
@@ -107,7 +107,7 @@ def mail_error(errortext):
     msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
         print("sending msg ")
-        mail.send(msg)
+        #mail.send(msg)
 
 
 @app.route("/about")
@@ -168,9 +168,10 @@ def show_results():
     lists = pm.get_lists_for_hashkey(hashkey)
     results = []
     ret     = {}
-    ret[ 'pretty_print'] = lists[0].pretty_print( manage_list=0, show_results=0)
-    ret['hashkey'] = lists[0].hashkey
-    for list in lists:
+    ret[ 'pretty_print'] = lists[0][0].pretty_print( manage_list=0, show_results=0)
+    ret['hashkey'] = lists[0][1].hashkey
+    for listpair in lists:
+        list = listpair[0]
         res = pm.get_round_results_for_list(list.id)
         for r in res:
             results.append(r)
@@ -185,7 +186,7 @@ def correct_list_points():
     pm                = PersistenceManager(myapp.db_connector)
     lists             = pm.get_all_lists()
     for list in lists:
-        if list.points == 0 and len(list.ships) > 0:
+        if list.points() == 0 and len(list.ships()) > 0:
             print "list %d is a problem" % list.id
     return redirect(url_for('tourneys') )
 
@@ -380,19 +381,19 @@ def get_tourney_lists_as_text(tourney, make_header=True ):
     row_defaults = [ tourney.tourney_name.replace(',',' '), tourney.tourney_type, tourney_date ]
 
     for tourney_list in tourney.tourney_lists:
-        if tourney_list.ships is None or len(tourney_list.ships) == 0:
+        if tourney_list.ships() is None or len(tourney_list.ships()) == 0:
             new_row = []
             new_row.extend ( row_defaults )
             for i in range (len(new_row), len(header)):
                 new_row.append('')
             rows.append(new_row)
         else:
-            for ship in tourney_list.ships:
+            for ship in tourney_list.ships():
                 new_row = []
                 new_row.extend( row_defaults )
                 new_row.extend( [ tourney_list.player.player_name.replace(',',' '),
-                                  tourney_list.faction.description,
-                                  str(tourney_list.points),
+                                  tourney_list.faction().description,
+                                  str(tourney_list.points()),
                                   str(tourney_list.player.result.rank),
                                   str(tourney_list.player.result.elim_rank),
                                   str(tourney_list.id),
@@ -837,25 +838,6 @@ def mysql():
     print "trying to fetch prod.sql from mysqldb endpoint"
     return url_for( 'static', filename='prod.sql')
 
-
-
-#endpoints = { VOIDSTATE : 'http://xwing-builder.co.uk/import',
-#              YASB:  'https://yasb-xws.herokuapp.com'  }
-# @app.route( "/export_xws")
-# def export_xws():
-#     tourney_list_id  = request.args.get('tourney_list_id')
-#     destination = request.args.get('destination')
-#     pm = PersistenceManager(myapp.db_connector)
-#     tourney_list = pm.get_tourney_list(tourney_list_id)
-#     converter = XWSListConverter( tourney_list )
-#     endpoint =  endpoints[destination]
-#
-#     response = post( endpoint,  data=json.dumps(converter.data ) )
-#     print response
-#     return response.text
-
-
-
 @app.route("/get_from_yasb", methods=['POST'])
 def get_from_yasb():
     try:
@@ -943,15 +925,14 @@ def add_squad():
          tourney_list_id = request.args.get('tourney_list_id')
 
          pm = PersistenceManager(myapp.db_connector)
-         tourney_list = pm.get_tourney_list(tourney_list_id)
-         tourney_list.faction = Faction.from_string( faction )
-         tourney_list.points  = points
+
+         #if an existing archtype already exists, use it it
+         #otherwise create a new archtype
 
          ships = []
          for squad_member in data:
              ship_pilot = pm.get_ship_pilot( squad_member['ship'], squad_member['pilot'] )
-             ship       = Ship( ship_pilot_id=ship_pilot.id, tlist_id=tourney_list.id)
-             tourney_list.ships.append( ship )
+             ship       = Ship( ship_pilot_id=ship_pilot.id, ship_pilot=ship_pilot )
              for upgrade in squad_member['upgrades']:
                  upgrade = pm.get_upgrade(upgrade['type'], upgrade['name'])
                  ship_upgrade = ShipUpgrade( ship_id=ship.id,
@@ -959,8 +940,27 @@ def add_squad():
                  ship.upgrades.append( ship_upgrade )
              ships.append( ship )
 
-         tourney_list.generate_hash_key()
-         pm.db_connector.get_session().add_all( ships )
+         hashkey = ArchtypeList.generate_hash_key(ships)
+
+         archtype = pm.get_archtype(hashkey)
+
+         if archtype is None:
+             #ding ding!
+             #we've never seen this list before!
+             archtype = ArchtypeList()
+             pm.db_connector.get_session().add(archtype)
+             archtype.ships = ships
+             for ship in ships:
+                 ship.archtype = archtype
+                 pm.db_connector.get_session().add(ship)
+             archtype.faction = Faction.from_string( faction )
+             archtype.points = points
+             pm.db_connector.get_session().commit()
+
+         tourney_list = pm.get_tourney_list(tourney_list_id)
+         tourney_list.archtype = archtype
+         tourney_list.archtype_id = archtype.id
+         pm.db_connector.get_session().add(tourney_list)
          pm.db_connector.get_session().commit()
 
          return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list.id)
@@ -1026,7 +1026,8 @@ def get_chart_data():
                            data['value'],
                            data['eliminationOnly'],
                            data['storeChampionshipsOnly'],
-                           data['regionalChampionshipsOnly'])
+                           data['regionalChampionshipsOnly'],
+                           data['nationalChampionshipsOnly'])
     chart_data   = rollup.rollup()
     return jsonify(data=chart_data,
                    title=data['value'] + rollup.title(),

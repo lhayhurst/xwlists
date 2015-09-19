@@ -12,9 +12,10 @@
     <div class="templates">
         <div class="doughnut-graph" style="width: 665px; height: 400px; margin: 8 auto"></div>
     </div>
-    <input type="checkbox" class="elimination-filter" id="elimination-filter" value="elimination-filter">elimination round lists only
-    <input type="checkbox" class="store-champ-filter" id="store-champ-filter" value="store-champ-filter">store championship lists
-    <input type="checkbox" class="regional-champ-filter" id="regional-champ-filter" value="regional-champ-filter">regional championship lists
+    <input type="checkbox" class="elimination-filter" id="elimination-filter" value="elimination-filter">elimination round lists
+    <input type="checkbox" class="store-champ-filter" id="store-champ-filter" value="store-champ-filter" checked="checked">store championship lists
+    <input type="checkbox" class="regional-champ-filter" id="regional-champ-filter" value="regional-champ-filter" checked="checked">regional championship lists
+    <input type="checkbox" class="national-champ-filter" id="national-champ-filter" value="national-champ-filter" checked="checked">national championship lists
 
 
     <div id="doughnuts" class="charts">
@@ -70,17 +71,18 @@ function init() {
 
 }
 
-var eliminationOnly = false;
-var storeChampionshipsOnly = false;
-var regionalChampionshipsOnly = false;
+var elimination = false;
+var storeChampionships = true;
+var regionalChampionships = true;
+var nationalChampionships = true;
 
 $('.elimination-filter').change(function() {
     var $this = $(this);
     if ($this.is(':checked')) {
-        eliminationOnly=true;
+        elimination=true;
     }
     else {
-        eliminationOnly=false;
+        elimination=false;
     }
     $('#doughnuts #faction-ship').empty();
     $('#doughnuts #ship-pilot').empty();
@@ -92,10 +94,10 @@ $('.elimination-filter').change(function() {
 $('.store-champ-filter').change(function() {
     var $this = $(this);
     if ($this.is(':checked')) {
-        storeChampionshipsOnly=true;
+        storeChampionships=true;
     }
     else {
-        storeChampionshipsOnly=false;
+        storeChampionships=false;
     }
     $('#doughnuts #faction-ship').empty();
     $('#doughnuts #ship-pilot').empty();
@@ -107,10 +109,25 @@ $('.store-champ-filter').change(function() {
 $('.regional-champ-filter').change(function() {
     var $this = $(this);
     if ($this.is(':checked')) {
-        regionalChampionshipsOnly=true;
+        regionalChampionships=true;
     }
     else {
-        regionalChampionshipsOnly=false;
+        regionalChampionships=false;
+    }
+    $('#doughnuts #faction-ship').empty();
+    $('#doughnuts #ship-pilot').empty();
+    $('#doughnuts #upgrade_type-upgrade').empty();
+
+    init();
+});
+
+$('.national-champ-filter').change(function() {
+    var $this = $(this);
+    if ($this.is(':checked')) {
+        nationalChampionships=true;
+    }
+    else {
+        nationalChampionships=false;
     }
     $('#doughnuts #faction-ship').empty();
     $('#doughnuts #ship-pilot').empty();
@@ -146,7 +163,13 @@ $('.faction-ship-count-checkbox, .faction-ship-points-checkbox, .ship-pilot-coun
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
                     url: url,
-                    data: JSON.stringify({ data: { 'checked' : this.checked, 'value' : this.value, 'name': this.name, 'eliminationOnly' : eliminationOnly, 'storeChampionshipsOnly': storeChampionshipsOnly, 'regionalChampionshipsOnly' : regionalChampionshipsOnly }  } ),
+                    data: JSON.stringify({ data: { 'checked' : this.checked,
+                                                    'value' : this.value,
+                                                    'name': this.name,
+                                                    'eliminationOnly' : elimination,
+                                                    'storeChampionshipsOnly': storeChampionships,
+                                                    'regionalChampionshipsOnly' : regionalChampionships,
+                                                    'nationalChampionshipsOnly' : nationalChampionships,}  } ),
                     success: function (data) {
                         var donutData = data['data'];
                         console.log("got response");
