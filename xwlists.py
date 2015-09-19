@@ -110,6 +110,10 @@ def mail_error(errortext):
         mail.send(msg)
 
 
+@app.before_request
+def check_for_maintenance():
+    return render_template('maintenance.html')
+
 @app.route("/about")
 def about():
     return render_template('about.html')
