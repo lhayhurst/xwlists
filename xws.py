@@ -80,8 +80,14 @@ class XWSToJuggler:
         faction = xws['faction']
         pilots  = xws['pilots']
 
-        #tourney_list.name = name
-        #tourney_list.set_faction( Faction.from_string(faction) )
+        tourney_list.name = name
+        #TODO: temporary hack
+        if faction == "rebels":
+            faction = "rebel"
+        if faction == "empire":
+            faction = "imperial"
+
+        tourney_list.faction = Faction.from_string(faction)
 
 
         points = 0
@@ -127,10 +133,6 @@ class XWSToJuggler:
                             points  = points + upgrade.cost
                         ship_upgrade = ShipUpgrade( ship=ship, upgrade=upgrade )
                         ship.upgrades.append( ship_upgrade )
-
-        hashkey = ArchtypeList.generate_hash_key(ships)
-
-        archtype = pm.get_archtype(hashkey)
 
         if archtype is None:
             #ding ding!
