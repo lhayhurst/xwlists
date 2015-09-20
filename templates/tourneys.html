@@ -23,9 +23,6 @@
     <th >Date Played</th>
     <th >Round Length</th>
     <th >Venue/City/State/Country</th>
-    <th >Total Lists</th>
-    <th >Lists Entered</th>
-    <th >Lists Not Entered</th>
     <th >Export Lists</th>
 
     {% if admin %}
@@ -36,8 +33,6 @@
   </tr>
       {% for tourney in tourneys %}
       <tr>
-         {% set num_entered_lists = tourney.num_entered_lists() %}
-         {% set total_list_count  = tourney.total_list_count() %}
          <th>{{ tourney.id }}</th>
          <td >{{ tourney.get_tourney_name() }}</td>
          <td ><a href="{{ url_for( 'get_tourney_details', tourney_id=tourney.id ) }}">Browse/edit results</a></td>
@@ -45,9 +40,6 @@
          <td >{{ tourney.tourney_date }}</td>
          <td >{{ tourney.round_length }}</td>
          <td >{{ tourney.venue_string() }}</td>
-         <td >{{ total_list_count  }}</td>
-         <td >{{ num_entered_lists }} </td>
-         <td >{{ total_list_count - num_entered_lists }}</td>
          <td ><a type="text/csv" rel="nofollow" href="{{ url_for( 'export_tourney_lists', tourney_id=tourney.id) }}">Export to csv</a></td>
       </tr>
       {% endfor %}
@@ -75,7 +67,7 @@
         $.fn.dataTable.moment( 'YYYY-MM-DD' );
         $('#tourneys').dataTable( {
                 "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
-                iDisplayLength: 10,
+                iDisplayLength: 25,
                 "order": [[ 0, "desc" ]]
         });
     } );
