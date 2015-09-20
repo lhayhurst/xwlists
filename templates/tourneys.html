@@ -18,6 +18,7 @@
   <tr>
     <th>Id</th>
     <th >Name</th>
+    <th>Num. Players</th>
     <th >Results</th>
     <th >Type</th>
     <th >Date Played</th>
@@ -35,6 +36,7 @@
       <tr>
          <th>{{ tourney.id }}</th>
          <td >{{ tourney.get_tourney_name() }}</td>
+         <td>{{ tourney.participant_count }}</td>
          <td ><a href="{{ url_for( 'get_tourney_details', tourney_id=tourney.id ) }}">Browse/edit results</a></td>
          <td >{{ tourney.tourney_type }}</td>
          <td >{{ tourney.tourney_date }}</td>
