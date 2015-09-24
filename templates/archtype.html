@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <style>
+        td {
+            text-align:center;
+            vertical-align:middle;
+        }
+    </style>
+
+    <table id="performance" class="compact display" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>List</th>
+        <th>Number of lists</th>
+        <th>Win Percentage</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Draws</th>
+        <th>Total matches</th>
+        <th>Points destroyed</th>
+        <th>Efficiency</th>
+        <th>Points survived</th>
+        <th>Efficiency</th>
+      </tr>
+  </thead>
+    <tr>
+          <td>{{ stats['pretty_print'] }}</td>
+          <td>{{ archtype.num_lists() }}</td>
+          <td>{{ stats['perc'] }}</td>
+          <td>{{ stats['wins'] }}</td>
+          <td>{{ stats['losses'] }}</td>
+          <td>{{ stats['draws'] }}</td>
+          <td>{{ stats['total'] }}</td>
+          <td>{{ stats['points_for'] }}</td>
+          <td>{{ stats['points_for_efficiency'] }}</td>
+          <td>{{ stats['points_against'] }}</td>
+          <td>{{ stats['point_against_efficiency'] }}</td>
+    </tr>
+</table>
+
+    <div class="input textarea clearfix example1">
+    </div>
+
+{% endblock %}

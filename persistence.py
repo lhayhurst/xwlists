@@ -202,9 +202,6 @@ class Ship(Base):
             return ""
         return ret[ num_upgrades - 1  ]
 
-
-
-
 class ShipUpgrade(Base):
     __tablename__ = ship_upgrade_table
     id = Column(Integer, primary_key=True)
@@ -341,7 +338,6 @@ class TourneyPlayer(Base):
     tourney_lists    = relationship( "TourneyList", back_populates='player')
     result           = relationship("TourneyRanking", back_populates='player', uselist=False )
 
-
     def get_first_tourney_list(self):
         if self.tourney_lists:
             return self.tourney_lists[0]
@@ -363,6 +359,92 @@ class ArchtypeList(Base):
      ships            = relationship(Ship.__name__,uselist=True)
      tourney_lists    = relationship("TourneyList", uselist=True)
 
+     def num_lists(self):
+         return len(self.tourney_lists)
+
+     def get_performance_stats(self, pm):
+         summary = []
+         wins = 0
+         losses = 0
+         draws = 0
+         total = 0
+         points_killed = 0
+         points_lost = 0
+         points_killable = 0
+         points_losable = 0
+         pretty_print = None
+
+         for list in self.tourney_lists:
+             if not list.tourney.is_standard_format():
+                 continue
+             if list.points() is None or list.points() == 0:
+                 continue
+             list_id = list.id
+             results = pm.get_round_results_for_list(list_id)
+             for result in results:
+                 total = total + 1
+                 if result.draw:
+                     draws = draws + 1
+                 elif result.winner_id == list_id:
+                     wins = wins + 1
+                 elif result.loser_id == list.id:
+                     losses = losses + 1
+
+                 if result.list1_id == list_id:
+                     points_killed = points_killed + result.get_list1_score()
+                     pk = result.get_list2_points()
+                     if pk == 0:
+                         pk = 100  # assume default -- missing the other list
+
+                     points_killable = points_killable + pk
+                     points_lost = points_lost + result.get_list2_score()
+
+                 elif result.list2_id == list_id:
+                     points_killed = points_killed + result.get_list2_score()
+
+                     pk = result.get_list1_points()
+                     if pk == 0:
+                         pk = 100  # assume default -- missing the other list
+                     points_killable = points_killable + pk
+                     points_lost = points_lost + result.get_list1_score()
+
+                 points_losable = points_losable + list.points()
+
+         if total == 0:
+             return {}
+
+         perc = 0
+         points_for_eff = 0
+         points_against_eff = 0
+
+         if total > 0:
+             perc = float(wins) / float(total)
+
+         if points_killable > 0:
+             points_for_eff = float(points_killed) / (points_killable)
+
+         if points_losable > 0:
+             points_against_eff = float(points_losable - points_lost) / float(points_losable)
+             if points_against_eff < 0:
+                 points_against_eff = 0
+
+         return {'pretty_print' : self.pretty_print(manage_list=0, manage_archtype=0),
+                 'total' :"{:,}".format(total),
+                 'wins': "{:,}".format(wins),
+                 'losses': "{:,}".format(losses),
+                 'draws': "{:,}".format(draws),
+                 'total': "{:,}".format(total),
+                 'perc': "{:.2%}".format(perc),
+                 'points_for': "{:,}".format(points_killed) + "/" + "{:,}".format(points_killable),
+                 'points_against': "{:,}".format(points_losable - points_lost) + "/" + "{:,}".format(
+                     points_losable),
+                 'points_for_efficiency': "{:.2%}".format(points_for_eff),
+                 'point_against_efficiency': "{:.2%}".format(points_against_eff)}
+
+
+
+     def pretty_print(self,manage_list=0,manage_archtype=1):
+        return self.tourney_lists[0].pretty_print(manage_archtype=manage_archtype,manage_list=manage_list)
 
      @staticmethod
      def generate_hash_key(ships):
@@ -439,7 +521,7 @@ class TourneyList(Base):
             return self.archtype_list.ships
         return []
 
-    def pretty_print(self, manage_list=1, show_results=0, enter_list=1):
+    def pretty_print(self, manage_list=1, show_results=0, enter_list=1, manage_archtype=0):
 
         if len(self.ships()) == 0: #no list
             if self.tourney.locked == False and enter_list:
@@ -466,6 +548,9 @@ class TourneyList(Base):
         if show_results:
             ret = ret + '<br><a href="' +  url_for('show_results', hashkey=self.hashkey(), )
             ret = ret + '">Show results</a>'
+        if manage_archtype:
+            ret = ret + '<br><a href="' +  url_for('archtype', hashkey=self.hashkey(), )
+            ret = ret + '">Manage archtype</a>'
 
         return Markup( ret )
 
@@ -833,105 +918,21 @@ class PersistenceManager:
          return self.db_connector.get_session().\
             query(TourneyList.hashkey).all()
 
-    def get_all_archtypes(self):
-        return self.db_connector.get_session().query(ArchtypeList).all()
 
     def get_archtype(self, hashkey):
         return self.db_connector.get_session().query(ArchtypeList).filter_by(hashkey=hashkey).first()
 
-    def get_list_ranks(self):
 
-        archtypes = self.get_all_archtypes()
-        summary = []
-        i = 0
-        print "runnning all archtypes"
-        for a in archtypes:
-            i = i + 1
-            if i % 100 == 0:
-                print "processed %d archtypes" % ( i )
-            lists = a.tourney_lists
+    def get_all_archtypes(self):
+        return self.db_connector.get_session().query(ArchtypeList).all()
 
-            wins   = 0
-            losses = 0
-            draws  = 0
-            total  = 0
-            points_killed = 0
-            points_lost = 0
-            points_killable = 0
-            points_losable = 0
-            pretty_print = None
+    def get_ranked_archtypes(self):
 
-            for list in lists:
-                if not list.tourney.is_standard_format():
-                    continue
-                if list.points() is None or list.points() == 0:
-                    continue
-                if pretty_print is None:
-                    pretty_print = list.pretty_print(manage_list=0,show_results=1)
-                list_id = list.id
-                results = self.get_round_results_for_list( list_id )
-                for result in results:
-                    total = total + 1
-                    if result.draw:
-                        draws = draws+1
-                    elif result.winner_id == list_id:
-                         wins = wins + 1
-                    elif result.loser_id == list.id:
-                         losses = losses + 1
-
-                    if result.list1_id == list_id:
-                         points_killed       = points_killed + result.get_list1_score()
-                         pk = result.get_list2_points()
-                         if  pk == 0:
-                             pk = 100 #assume default -- missing the other list
-
-                         points_killable     = points_killable + pk
-                         points_lost         = points_lost + result.get_list2_score()
-
-                    elif result.list2_id == list_id:
-                         points_killed       = points_killed + result.get_list2_score()
-
-                         pk = result.get_list1_points()
-                         if  pk == 0:
-                             pk = 100 #assume default -- missing the other list
-                         points_killable     = points_killable + pk
-                         points_lost         = points_lost + result.get_list1_score()
-
-                    points_losable = points_losable + list.points()
-
-            if total == 0:
-                continue
-
-            perc = 0
-            points_for_eff = 0
-            points_against_eff = 0
-
-            if total > 0:
-                perc = float(wins)/float(total)
-
-            if points_killable > 0:
-                points_for_eff = float(points_killed)/(points_killable)
-
-
-            if points_losable > 0:
-                points_against_eff = float(points_losable - points_lost)/float(points_losable)
-                if points_against_eff < 0:
-                    points_against_eff = 0
-
-            summary.append( { 'hashkey' : a.hashkey,
-                               'num_lists' : len(a.tourney_lists),
-                               'pretty_print': pretty_print,
-                               'wins': "{:,}".format(wins),
-                               'losses': "{:,}".format(losses),
-                               'draws': "{:,}".format(draws),
-                               'total': "{:,}".format(total),
-                               'perc' :  "{:.2%}".format(perc),
-                               'points_for':"{:,}".format(points_killed) + "/" + "{:,}".format(points_killable),
-                               'points_against':"{:,}".format(points_losable-points_lost)  + "/" + "{:,}".format(points_losable),
-                               'points_for_efficiency': "{:.2%}".format(points_for_eff),
-                               'point_against_efficiency':"{:.2%}".format(points_against_eff ) } )
-
-        return summary
+        count = func.count('*').label("cnt")
+        ret = self.db_connector.get_session().query(ArchtypeList, count).\
+            join(TourneyList).\
+            group_by(ArchtypeList.id).order_by(count.desc())
+        return ret.all()
 
     def delete_tourney(self, tourney_name):
         tourney = self.get_tourney( tourney_name)

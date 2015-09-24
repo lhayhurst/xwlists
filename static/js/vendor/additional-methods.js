@@ -8,7 +8,7 @@
  */
 (function( factory ) {
 	if ( typeof define === "function" && define.amd ) {
-		define( ["jquery", "./jquery.validate"], factory );
+		define( ["jquery.dataTables.js", "./jquery.validate"], factory );
 	} else {
 		factory( jQuery );
 	}

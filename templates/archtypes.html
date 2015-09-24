@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+<table id="ranked-lists" class="compact display dataTable" cellspacing="0" width="100%">
+  <thead>
+      <tr>
+        <th>List</th>
+        <th>Number of lists</th>
+        <th>Tags</th>
+      </tr>
+  </thead>
+
+    {% for a in archtypes %}
+        <tr>
+            <td>{{ a[0].pretty_print() }}</td>
+            <td>{{ a[1] }}</td>
+            <td></td>
+            <td></td>
+        </tr>
+    {% endfor %}
+</table>
+
+<script>
+    $(document).ready( function () {
+        $('#ranked-lists').dataTable( {
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+            "order": [[ 1, "desc" ]]
+
+        });
+    } );
+</script>
+
+{% endblock %}

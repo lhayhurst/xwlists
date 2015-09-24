@@ -177,18 +177,21 @@ def show_results():
     ret[ "results"] = results
     return render_template("show_results.html", data=ret)
 
+@app.route("/archtypes")
+def archtypes():
+    pm = PersistenceManager(myapp.db_connector)
+    print "getting archtypes"
+    archtypes = pm.get_ranked_archtypes()
+    print "rendering archtypes template"
+    return render_template("archtypes.html", archtypes=archtypes)
 
-
-@app.route("/correct_list_points")
-def correct_list_points():
-
-    pm                = PersistenceManager(myapp.db_connector)
-    lists             = pm.get_all_lists()
-    for list in lists:
-        if list.points() == 0 and len(list.ships()) > 0:
-            print "list %d is a problem" % list.id
-    return redirect(url_for('tourneys') )
-
+@app.route("/archtype")
+def archtype():
+    hashkey = request.args.get('hashkey')
+    pm   = PersistenceManager(myapp.db_connector)
+    archtype = pm.get_archtype(hashkey)
+    stats = archtype.get_performance_stats(pm)
+    return render_template("archtype.html", stats=stats,archtype=archtype)
 @app.route("/edit_tourney_details")
 def edit_tourney_details():
     tourney_id   = request.args.get('tourney_id')
@@ -998,7 +1001,7 @@ def display_list():
         image_src=urllib.quote(tourney_list.image)
     else:
         rand = randint(1,18)
-        image_src=url_for( 'static', filename="imgs/" + str(rand) + ".jpg")
+        image_src=url_for( 'static', filename="img/" + str(rand) + ".jpg")
 
     return render_template('list_display.html',
                            meta=m,
