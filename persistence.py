@@ -507,7 +507,7 @@ class ArchtypeList(Base):
      def pretty_print_tags(self):
          ret = ""
          for t in self.tags:
-             ret = ret + t.tag.tagtext + " "
+             ret = ret + t.tag.tagtext + " ,"
          return ret
 
      def get_tags(self):
