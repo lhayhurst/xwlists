@@ -12,10 +12,11 @@ REMOVE = "remove"
 DATA   = "data"
 
 class RoundResultsEditor:
-    def __init__(self, pm, tourney, pre_elim=False):
+    def __init__(self, pm, tourney, url_root, pre_elim=False):
         self.pm = pm
         self.tourney = tourney
         self.pre_elim=pre_elim
+        self.url_root = url_root
 
     def create_result_record(self, result, round_num, row):
         row['result_id'] = result.id
@@ -25,8 +26,8 @@ class RoundResultsEditor:
         row['player2_id'] = result.player2_name()
         row['player1_points_scored'] = result.get_list1_score()
         row['player2_points_scored'] = result.get_list2_score()
-        row['player1_list'] = result.list1.pretty_print()
-        row['player2_list'] = result.list2_pretty_print()
+        row['player1_list'] = result.list1.pretty_print(self.url_root)
+        row['player2_list'] = result.list2_pretty_print(self.url_root)
 
     def valid_score(self, score):
         return score >= 0 and score <= 100
@@ -78,9 +79,10 @@ class RoundResultsEditor:
 
 
 class RankingEditor:
-    def __init__(self, pm, tourney):
+    def __init__(self, pm, tourney, url_root):
         self.pm = pm
         self.tourney = tourney
+        self.url_root = url_root
 
     def get_json(self):
         tourney_id = self.tourney.id
@@ -124,7 +126,7 @@ class RankingEditor:
             row['championship_rank'] = ranking.elim_rank
             row['mov'] = ranking.mov
             row['sos'] = ranking.sos
-            row['list'] = ranking.pretty_print()
+            row['list'] = ranking.pretty_print(url_root=self.url_root)
             data.append(row)
 
         return json.dumps(ret)
@@ -202,4 +204,4 @@ class RankingEditor:
         return json.dumps( { "row" : { "player_id": player.id, "player_name": player.get_player_name(),
                                        "score": ranking.score, "swiss_rank" : ranking.rank,
                                        "championship_rank": ranking.elim_rank, "mov": ranking.mov,
-                                       "sos": ranking.sos, "dropped": ranking.dropped, "list":ranking.pretty_print()}} )
+                                       "sos": ranking.sos, "dropped": ranking.dropped, "list":ranking.pretty_print(self.url_root)}} )

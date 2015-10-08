@@ -1,6 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-<table id="ranked-lists" class="compact display dataTable" cellspacing="0" width="100%">
+    <style>
+        td {
+            text-align:center;
+            vertical-align:middle;
+        }
+    </style>
+
+  <table id="archtypes" class="display" cellspacing="0" width="100%">
   <thead>
       <tr>
         <th>List</th>
@@ -8,25 +15,31 @@
         <th>Tags</th>
       </tr>
   </thead>
-
+  <tbody>
     {% for a in archtypes %}
         <tr>
-            <td>{{ a[0].pretty_print() }}</td>
-            <td>{{ a[1] }}</td>
-            <td></td>
-            <td></td>
+            <td>{{ a[1] | safe }}</td>
+            <td>{{ a[2] }}</td>
+            <td>{{ a[3] }}</td>
         </tr>
     {% endfor %}
+    </tbody>
 </table>
 
 <script>
     $(document).ready( function () {
-        $('#ranked-lists').dataTable( {
-            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
-            "order": [[ 1, "desc" ]]
-
+        $('#archtypes').dataTable( {
+                "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+                iDisplayLength: 25,
+                "order": [[ 1, "desc" ]],
+                "columns": [
+                    { "width": "50%"},
+                    { "width": "5%"},
+                    { "width": "45%"}
+                ]
         });
     } );
+
 </script>
 
 {% endblock %}

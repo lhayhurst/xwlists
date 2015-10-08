@@ -115,7 +115,7 @@ def about():
 
 @app.route("/search")
 def versus():
-    return render_template("search.html")
+    return render_template("search.html", url_root=request.url_root)
 
 
 @app.route("/search_guide")
@@ -129,7 +129,7 @@ def get_search_results():
         search_text = request.json['search-text']
         s = Search( search_text )
         results = s.search()
-        return render_template( 'search_results.html', results=results), 200
+        return render_template( 'search_results.html', results=results, url_root=request.url_root), 200
     except ValueError, e:
         return render_template( 'search_error.html', errortext=str(e))
 
@@ -162,9 +162,9 @@ def get_tourney_results():
 
 @app.route('/show_results')
 def show_results():
-    hashkey = request.args.get('hashkey')
+    id = request.args.get('id')
     pm   = PersistenceManager(myapp.db_connector)
-    lists = pm.get_lists_for_hashkey(hashkey)
+    lists = pm.get_lists_for_archtype(id)
     results = []
     ret     = {}
     ret[ 'pretty_print'] = lists[0][0].pretty_print( manage_list=0, show_results=0)
@@ -177,21 +177,70 @@ def show_results():
     ret[ "results"] = results
     return render_template("show_results.html", data=ret)
 
+
 @app.route("/archtypes")
 def archtypes():
-    pm = PersistenceManager(myapp.db_connector)
     print "getting archtypes"
-    archtypes = pm.get_ranked_archtypes()
-    print "rendering archtypes template"
+    archtypes = simple_cache.get('archtypes')
+    if archtypes is None:
+        pm = PersistenceManager(myapp.db_connector)
+        archtypes = pm.get_ranked_archtypes(request.url_root)
+        simple_cache.set('archtypes', archtypes, timeout=60*60*12)
     return render_template("archtypes.html", archtypes=archtypes)
 
 @app.route("/archtype")
 def archtype():
-    hashkey = request.args.get('hashkey')
+    archtype_id = request.args.get('id')
     pm   = PersistenceManager(myapp.db_connector)
-    archtype = pm.get_archtype(hashkey)
-    stats = archtype.get_performance_stats(pm)
-    return render_template("archtype.html", stats=stats,archtype=archtype)
+    archtype = pm.get_archtype(archtype_id)
+    stats = archtype.get_performance_stats(pm, request.url_root)
+    all_tags = pm.get_all_tags()
+    if all_tags is None:
+        all_tags = []
+    return render_template("archtype.html", stats=stats,archtype=archtype,archtype_id=archtype.id,all_tags=all_tags)
+
+
+@app.route("/add_tag",methods=['POST'])
+def add_tag():
+    data         = request.json['data']
+    archtype_id  = data['archtype_id']
+    tag_text     = data['tag']
+
+    pm           = PersistenceManager(myapp.db_connector)
+    archtype     = pm.get_archtype(archtype_id)
+    pm.add_tag(archtype, tag_text)
+
+    update_archtypes_cache(archtype)
+    return jsonify({"success":1})
+
+
+def update_archtypes_cache(archtype):
+    archtypes = simple_cache.get('archtypes')
+    if archtypes is None:
+        pm = PersistenceManager(myapp.db_connector)
+        archtypes = pm.get_ranked_archtypes(request.url_root)
+    i = 0
+    for a in archtypes:
+        if a[0] == archtype.id:
+            a[3] = archtype.pretty_print_tags()
+            archtypes[i] = a
+            simple_cache.set('archtypes', archtypes, timeout=60 * 60 * 12)
+            break
+        i = i + 1
+
+
+@app.route("/remove_tag", methods=['POST'])
+def remove_tag():
+    data         = request.json['data']
+    archtype_id  = data['archtype_id']
+    tag_text     = data['tag']
+
+    pm           = PersistenceManager(myapp.db_connector)
+    archtype     = pm.get_archtype(archtype_id)
+    pm.remove_tag(archtype, tag_text)
+    update_archtypes_cache(archtype)
+    return jsonify({"success":1})
+
 @app.route("/edit_tourney_details")
 def edit_tourney_details():
     tourney_id   = request.args.get('tourney_id')
@@ -296,7 +345,7 @@ def get_tourney_data():
     pm                = PersistenceManager(myapp.db_connector)
     tourney           = pm.get_tourney_by_id(tourney_id)
 
-    de = RankingEditor( pm, tourney )
+    de = RankingEditor( pm, tourney,url_root=request.url_root )
     return de.get_json()
 
 @app.route("/get_pre_elim_results")
@@ -304,7 +353,7 @@ def get_pre_elim_results():
     tourney_id = request.args['tourney_id']
     pm                = PersistenceManager(myapp.db_connector)
     tourney           = pm.get_tourney_by_id(tourney_id)
-    er = RoundResultsEditor(pm, tourney, pre_elim=True)
+    er = RoundResultsEditor(pm, tourney, pre_elim=True,url_root=request.url_root)
     json_ret = er.get_json()
     return json_ret
 
@@ -313,7 +362,7 @@ def get_elim_results():
     tourney_id = request.args['tourney_id']
     pm                = PersistenceManager(myapp.db_connector)
     tourney           = pm.get_tourney_by_id(tourney_id)
-    er = RoundResultsEditor(pm, tourney, pre_elim=False)
+    er = RoundResultsEditor(pm, tourney, pre_elim=False,url_root=request.url_root)
     json_ret = er.get_json()
     return json_ret
 
@@ -325,7 +374,7 @@ def edit_ranking_row():
     pm                = PersistenceManager(myapp.db_connector)
     tourney           = pm.get_tourney_by_id(tourney_id)
 
-    de = RankingEditor(pm, tourney)
+    de = RankingEditor(pm, tourney,url_root=request.url_root)
 
     event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
@@ -346,7 +395,7 @@ def edit_results( request, pre_elim=True):
     pm                = PersistenceManager(myapp.db_connector)
     tourney           = pm.get_tourney_by_id(tourney_id)
 
-    rre = RoundResultsEditor(pm, tourney, pre_elim)
+    rre = RoundResultsEditor(pm, tourney, pre_elim,url_root=request.url_root)
     ret = rre.get_and_set_json( request )
     return ret
 
@@ -944,7 +993,7 @@ def add_squad():
 
          hashkey = ArchtypeList.generate_hash_key(ships)
 
-         archtype = pm.get_archtype(hashkey)
+         archtype = pm.get_archtype_by_hashkey(hashkey)
 
          if archtype is None:
              #ding ding!
@@ -957,6 +1006,7 @@ def add_squad():
                  pm.db_connector.get_session().add(ship)
              archtype.faction = Faction.from_string( faction )
              archtype.points = points
+             archtype.pretty  = archtype.pretty_print_list()
              pm.db_connector.get_session().commit()
 
          tourney_list = pm.get_tourney_list(tourney_list_id)
@@ -967,20 +1017,6 @@ def add_squad():
 
          return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list.id)
 
-
-@app.route( "/listrank")
-def list_rank():
-    return render_template("listrank.html")
-
-@app.route("/listrank_generate_cache", methods=['POST'])
-def list_rank_generate_cache():
-
-    list_ranks = simple_cache.get('list-ranks')
-    if list_ranks is None:
-        pm = PersistenceManager(myapp.db_connector)
-        list_ranks = pm.get_list_ranks()
-        simple_cache.set( 'list-ranks', list_ranks, timeout=60*60)
-    return render_template("listrank_impl.html", ranks=list_ranks)
 
 @app.route("/generate_hash_keys")
 def generate_hash_keys():
@@ -1020,6 +1056,17 @@ def down():
 def index():
     return redirect(url_for('tourneys') )
 
+@app.route("/pretty_print")
+def pretty_print():
+    pm = PersistenceManager(myapp.db_connector)
+    archtypes = pm.get_all_archtypes()
+    for a in archtypes:
+        pp = a.pretty_print_list()
+        a.pretty = pp
+        pm.db_connector.get_session().add(a)
+    pm.db_connector.get_session().commit()
+    return redirect(url_for('archtypes') )
+
 
 @app.route("/get_chart_data", methods=['POST'])
 def get_chart_data():
@@ -1056,4 +1103,4 @@ if __name__ == '__main__':
             app.debug = False
     else:
         app.debug = False
-    app.run()
+    app.run(port=5002)

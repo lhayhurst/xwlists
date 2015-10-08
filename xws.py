@@ -151,7 +151,8 @@ class XWSToJuggler:
                 pm.db_connector.get_session().add(ship)
 
             archtype.faction = Faction.from_string( faction )
-            archtype.points = points
+            archtype.points  = points
+            archtype.pretty  = archtype.pretty_print_list()
             pm.db_connector.get_session().commit()
 
         tourney_list.archtype = archtype

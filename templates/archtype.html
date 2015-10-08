@@ -25,7 +25,7 @@
       </tr>
   </thead>
     <tr>
-          <td>{{ stats['pretty_print'] }}</td>
+          <td>{{ stats['pretty_print'] | safe }}</td>
           <td>{{ archtype.num_lists() }}</td>
           <td>{{ stats['perc'] }}</td>
           <td>{{ stats['wins'] }}</td>
@@ -38,8 +38,54 @@
           <td>{{ stats['point_against_efficiency'] }}</td>
     </tr>
 </table>
-
-    <div class="input textarea clearfix example1">
+    <br>
+    Tags for this Archtype
+    <div class="input textarea clearfix" id="tags">
     </div>
+
+    All tags ever submitted
+    <div class="textarea clearfix" id="alltags" readonly>
+    </div>
+
+    <script>
+        var archtype_id = {{ archtype_id  | safe }}
+        var tags        = {{ archtype.get_tags() | tojson | safe }}
+        var alltags     = {{ all_tags | tojson |safe }}
+
+        new Taggle("alltags", { tags : alltags})
+
+        new Taggle("tags", {
+            tags : tags,
+            duplicateTagClass: 'bounce',
+            onTagAdd: function(event, tag) {
+                var dataContent =  JSON.stringify( { data: { 'tag': tag , 'archtype_id': archtype_id } } );
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json",
+                    url: "/add_tag",
+                    dataType: "json",
+                    data: dataContent,
+                    success: function (data) {
+                    },
+                    error: function (data) {
+                    },
+                });
+            },
+            onTagRemove: function(event, tag) {
+                var dataContent =  JSON.stringify( { data: { 'tag': tag , 'archtype_id': archtype_id } } );
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json",
+                    url: "/remove_tag",
+                    dataType: "json",
+                    data: dataContent,
+                    success: function (data) {
+                    },
+                    error: function (data) {
+                    },
+                });
+            }
+        });
+    </script>
 
 {% endblock %}

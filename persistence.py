@@ -70,8 +70,11 @@ tourney_round = "tourney_round"
 tourney_result = "tourney_result"
 event_table = "event"
 archtype_list_table = "list_archtype"
+tag_table = "tag"
+tag_to_archtype_table = "archtype_tag"
 
 Base = db_connector.get_base()
+
 
 class RoundType(DeclEnum):
     ELIMINATION     = "Elimination", "Elimination"
@@ -355,14 +358,40 @@ class ArchtypeList(Base):
      name             = Column(String(128))
      faction          = Column(Faction.db_type())
      points           = Column(Integer)
+     pretty           = Column(String(1024))
      hashkey          = Column(BigInteger)
      ships            = relationship(Ship.__name__,uselist=True)
      tourney_lists    = relationship("TourneyList", uselist=True)
+     tags             = relationship("ArchtypeTag", uselist=True)
+
+     def pretty_print(self,url_root,manage_list=0,manage_archtype=1):
+        return self.pretty
+#        return self.tourney_lists[0].pretty_print(url_root, manage_archtype=manage_archtype,manage_list=manage_list)
+
+
+     def pretty_print_list(self):
+
+        ret = ""
+        for ship in self.ships:
+            ret = ret + ship.ship_pilot.pilot.name
+            i = 1
+            if ship.upgrades is not None:
+                for ship_upgrade in ship.upgrades:
+                    if ship_upgrade.upgrade is not None:
+                        ret = ret + " + " + ship_upgrade.upgrade.name
+            if i < len(self.ships):
+                ret = ret + '<br>'
+            i = i + 1
+        points = 0
+        if self.points is not None:
+            points = self.points
+        ret = ret + "(%d)" % ( points )
+        return ret
 
      def num_lists(self):
          return len(self.tourney_lists)
 
-     def get_performance_stats(self, pm):
+     def get_performance_stats(self, pm, url_root):
          summary = []
          wins = 0
          losses = 0
@@ -428,7 +457,7 @@ class ArchtypeList(Base):
              if points_against_eff < 0:
                  points_against_eff = 0
 
-         return {'pretty_print' : self.pretty_print(manage_list=0, manage_archtype=0),
+         return {'pretty_print' : self.pretty_print(manage_list=0, manage_archtype=0, url_root=url_root),
                  'total' :"{:,}".format(total),
                  'wins': "{:,}".format(wins),
                  'losses': "{:,}".format(losses),
@@ -443,8 +472,8 @@ class ArchtypeList(Base):
 
 
 
-     def pretty_print(self,manage_list=0,manage_archtype=1):
-        return self.tourney_lists[0].pretty_print(manage_archtype=manage_archtype,manage_list=manage_list)
+     def pretty_print(self,url_root, manage_list=0,manage_archtype=1):
+        return self.tourney_lists[0].pretty_print(url_root, manage_archtype=manage_archtype,manage_list=manage_list)
 
      @staticmethod
      def generate_hash_key(ships):
@@ -474,6 +503,32 @@ class ArchtypeList(Base):
             key = hash(liststring)
 
         return key
+
+     def pretty_print_tags(self):
+         ret = ""
+         for t in self.tags:
+             ret = ret + t.tag.tagtext + " "
+         return ret
+
+     def get_tags(self):
+         ret = []
+         for t in self.tags:
+             ret.append(t.tag.tagtext)
+         return ret
+
+class Tag(Base):
+    __tablename__ = tag_table
+    id = Column(Integer, primary_key=True)
+    tagtext = Column(String(128))
+
+class ArchtypeTag(Base):
+    __tablename__ = tag_to_archtype_table
+    id               = Column(Integer, primary_key=True)
+    archtype_id      = Column(Integer, ForeignKey('{0}.id'.format(archtype_list_table)))
+    tag_id           = Column(Integer, ForeignKey('{0}.id'.format(tag_table)))
+    archtype         = relationship(ArchtypeList.__name__, uselist=False, back_populates="tags")
+    tag              = relationship(Tag.__name__, uselist=False)
+
 
 class TourneyList(Base):
     __tablename__    = tourney_list_table
@@ -521,39 +576,40 @@ class TourneyList(Base):
             return self.archtype_list.ships
         return []
 
-    def pretty_print(self, manage_list=1, show_results=0, enter_list=1, manage_archtype=0):
+    @staticmethod
+    def fast_url_for(url_root, endpoint, **values):
+        url = url_root + endpoint + "?"
+        kvp = ""
+        lv = len(values)
+        i  = 1
+        for v in values:
+            kvp = kvp + v + "=" + str(values[v])
+            if i < lv:
+                kvp = kvp + "?"
+            i += 1
+        return url + kvp
 
+    def pretty_print(self, url_root, manage_list=1, show_results=0, enter_list=1, manage_archtype=0):
         if len(self.ships()) == 0: #no list
             if self.tourney.locked == False and enter_list:
-                ret = '<a rel="nofollow" href="' + url_for('enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
-                return Markup(ret)
-        ret = ""
-        for ship in self.ships():
-            ret = ret + ship.ship_pilot.pilot.name
-            i = 1
-            if ship.upgrades is not None:
-                for ship_upgrade in ship.upgrades:
-                    if ship_upgrade.upgrade is not None:
-                        ret = ret + " + " + ship_upgrade.upgrade.name
-            if i < len(self.ships()):
-                ret = ret + '<br>'
-            i = i + 1
-        points = 0
-        if self.points() is not None:
-            points = self.points()
-        ret = ret + "(%d)" % ( points )
+                ret = '<a rel="nofollow" href="' + TourneyList.fast_url_for(url_root, 'enter_list', tourney_id=self.tourney_id, tourney_list_id=self.id) + '">Enter list</a>'
+                return ret
+            else:
+                return ""
+        ret = self.archtype_list.pretty
+        urls = ""
+        #url for is simply too slow :-(
         if not self.tourney.locked and manage_list:
-            ret = ret + '<br><a href="' + url_for('display_list', tourney_list_id=self.id, )
-            ret = ret + '"rel="nofollow">Manage list</a>'
+            urls = urls + '<br><a href="' + TourneyList.fast_url_for( url_root, 'display_list', tourney_list_id=str(self.archtype_id), )
+            urls = urls + '"rel="nofollow">Manage list</a>'
         if show_results:
-            ret = ret + '<br><a href="' +  url_for('show_results', hashkey=self.hashkey(), )
-            ret = ret + '">Show results</a>'
+            urls = urls + '<br><a href="' +  TourneyList.fast_url_for(url_root,'show_results', id=str(self.archtype_id ))
+            urls = urls + '">Show results</a>'
         if manage_archtype:
-            ret = ret + '<br><a href="' +  url_for('archtype', hashkey=self.hashkey(), )
-            ret = ret + '">Manage archtype</a>'
+            urls = urls + '<br><a href="' +  TourneyList.fast_url_for(url_root,'archtype', id=str(self.archtype_id ))
+            urls = urls + '">Manage archtype</a>'
 
-        return Markup( ret )
-
+        return ret + urls
 
 
 tourney_round_table = "tourney_round"
@@ -608,10 +664,10 @@ class TourneyRanking(Base):
     tourney            = relationship( Tourney.__name__, back_populates="rankings")
     player             = relationship( TourneyPlayer.__name__, uselist=False)
 
-    def pretty_print(self, manage_lists=1):
+    def pretty_print(self, url_root, manage_list=1):
         for tourney_list in self.tourney.tourney_lists:
             if tourney_list.player.id == self.player_id:
-                return tourney_list.pretty_print(manage_lists)
+                return tourney_list.pretty_print(url_root=url_root, manage_list=manage_list)
         return ""
 
     def get_player_info(self):
@@ -857,6 +913,26 @@ class PersistenceManager:
                  "points_spent" :  total_points_spent }
 
 
+    def add_tag(self, archtype, tag_text):
+         tag = Tag(tagtext=tag_text)
+         self.db_connector.get_session().add( tag )
+         archtype_tag = ArchtypeTag( archtype=archtype, tag=tag)
+         self.db_connector.get_session().add(archtype_tag)
+         self.db_connector.get_session().commit()
+
+    def remove_tag(self, archtype, tag_text):
+        for at in archtype.tags:
+            if at.tag.tagtext == tag_text:
+                archtype.tags.remove( at )
+                self.db_connector.get_session().commit()
+                break
+
+    def get_all_tags(self):
+        all_tags = self.db_connector.get_session().query(Tag).all()
+        ret = []
+        for t in all_tags:
+            ret.append( t.tagtext )
+        return ret
     def get_tourney_ids(self):
         return self.db_connector.get_session().query(Tourney.id).all()
 
@@ -906,10 +982,10 @@ class PersistenceManager:
     def get_tourney_by_id(self,tourney_id):
         return self.db_connector.get_session().query(Tourney).filter_by(id=tourney_id).first()
 
-    def get_lists_for_hashkey(self, hashkey):
+    def get_lists_for_archtype(self, archtype_id):
         return self.db_connector.get_session().query(TourneyList, ArchtypeList).\
             filter(TourneyList.archtype_id == ArchtypeList.id).\
-            filter(ArchtypeList.hashkey==hashkey).all()
+            filter(ArchtypeList.id==archtype_id).all()
 
     def get_result_by_id(self, result_id):
         return self.db_connector.get_session().query(RoundResult).filter_by(id=result_id).first()
@@ -918,21 +994,28 @@ class PersistenceManager:
          return self.db_connector.get_session().\
             query(TourneyList.hashkey).all()
 
+    def get_archtype(self, id):
+        return self.db_connector.get_session().query(ArchtypeList).filter_by(id=id).first()
 
-    def get_archtype(self, hashkey):
+
+    def get_archtype_by_hashkey(self, hashkey):
         return self.db_connector.get_session().query(ArchtypeList).filter_by(hashkey=hashkey).first()
 
 
     def get_all_archtypes(self):
         return self.db_connector.get_session().query(ArchtypeList).all()
 
-    def get_ranked_archtypes(self):
+    def get_ranked_archtypes(self, url_root):
 
         count = func.count('*').label("cnt")
         ret = self.db_connector.get_session().query(ArchtypeList, count).\
             join(TourneyList).\
             group_by(ArchtypeList.id).order_by(count.desc())
-        return ret.all()
+        archtypes = ret.all()
+        ret = []
+        for tuple in archtypes:
+            ret.append( [ tuple[0].id, tuple[0].pretty_print( url_root=url_root), tuple[1], tuple[0].pretty_print_tags()])
+        return ret
 
     def delete_tourney(self, tourney_name):
         tourney = self.get_tourney( tourney_name)

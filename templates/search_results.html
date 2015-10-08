@@ -28,7 +28,7 @@
       <td>{{ list.player.get_player_name() }}</td>
       <td>{{ list.player.result.rank }}</td>
       <td>{{ list.player.result.elim_rank }}</td>
-      <td>{{ list.pretty_print() }}</td>
+      <td>{{ list.pretty_print(url_root=url_root) | safe     }}</td>
 
   </tr>
   {% endfor %}
