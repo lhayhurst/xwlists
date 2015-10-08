@@ -133,8 +133,6 @@ def get_search_results():
     except ValueError, e:
         return render_template( 'search_error.html', errortext=str(e))
 
-
-
 @app.route("/events")
 def events():
     events = PersistenceManager(myapp.db_connector).get_events()
@@ -1016,7 +1014,6 @@ def add_squad():
          pm.db_connector.get_session().commit()
 
          return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list.id)
-
 
 @app.route("/generate_hash_keys")
 def generate_hash_keys():
