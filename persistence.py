@@ -600,7 +600,7 @@ class TourneyList(Base):
         urls = ""
         #url for is simply too slow :-(
         if not self.tourney.locked and manage_list:
-            urls = urls + '<br><a href="' + TourneyList.fast_url_for( url_root, 'display_list', tourney_list_id=str(self.archtype_id), )
+            urls = urls + '<br><a href="' + TourneyList.fast_url_for( url_root, 'display_list', tourney_list_id=str(self.tourney_id), )
             urls = urls + '"rel="nofollow">Manage list</a>'
         if show_results:
             urls = urls + '<br><a href="' +  TourneyList.fast_url_for(url_root,'show_results', id=str(self.archtype_id ))
