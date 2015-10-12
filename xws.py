@@ -132,7 +132,7 @@ class XWSToJuggler:
                         else:
                             points  = points + upgrade.cost
                         ship_upgrade = ShipUpgrade( ship=ship, upgrade=upgrade )
-                        ship.upgrades.append( ship_upgrade )
+                        #ship.upgrades.append( ship_upgrade )
 
         hashkey = ArchtypeList.generate_hash_key(ships)
 

@@ -364,11 +364,6 @@ class ArchtypeList(Base):
      tourney_lists    = relationship("TourneyList", uselist=True)
      tags             = relationship("ArchtypeTag", uselist=True)
 
-     def pretty_print(self,url_root,manage_list=0,manage_archtype=1):
-        return self.pretty
-#        return self.tourney_lists[0].pretty_print(url_root, manage_archtype=manage_archtype,manage_list=manage_list)
-
-
      def pretty_print_list(self):
 
         ret = ""
