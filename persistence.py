@@ -924,10 +924,10 @@ class PersistenceManager:
 
     def get_all_tags(self):
         all_tags = self.db_connector.get_session().query(Tag).all()
-        ret = []
+        ret = {}
         for t in all_tags:
-            ret.append( t.tagtext )
-        return ret
+            ret[ t.tagtext ] = 1
+        return ret.keys()
     def get_tourney_ids(self):
         return self.db_connector.get_session().query(Tourney.id).all()
 
