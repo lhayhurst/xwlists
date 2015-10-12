@@ -7,7 +7,6 @@ import uuid
 from flask import render_template, request, url_for, redirect, jsonify, Response, send_from_directory
 from flask.ext.mail import Mail, Message
 import sys
-import requests
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI
@@ -807,7 +806,7 @@ def success():
 
 @app.route("/enter_list")
 def enter_list():
-    tourney_id    = request.args.get('tourney')
+    tourney_id    = request.args.get('tourney_id')
     tourney_list_id = request.args.get('tourney_list_id')
 
     pm = PersistenceManager(myapp.db_connector)

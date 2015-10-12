@@ -585,7 +585,7 @@ class TourneyList(Base):
         for v in values:
             kvp = kvp + v + "=" + str(values[v])
             if i < lv:
-                kvp = kvp + "?"
+                kvp = kvp + "&"
             i += 1
         return url + kvp
 
