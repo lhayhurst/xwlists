@@ -1002,7 +1002,7 @@ def add_squad():
                  ship.archtype = archtype
                  pm.db_connector.get_session().add(ship)
              archtype.faction = Faction.from_string( faction )
-             archtype.points = points
+             archtype.points = int(points)
              archtype.pretty  = archtype.pretty_print_list()
              pm.db_connector.get_session().commit()
 
