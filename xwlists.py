@@ -875,7 +875,7 @@ def get_from_fab():
         pm.db_connector.get_session().commit()
         return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list_id)
     except Exception, e:
-         mail_error( "Unable to fetch from fab for url " + fab + ", reason: " + str(e))
+         mail_error( "Unable to fetch list for tourney " + str(tourney_id) + " from fab for url " + fab + ", reason: " + str(e))
          response = jsonify(message=str(e))
          response.status_code = (500)
          return response
@@ -903,7 +903,7 @@ def get_from_yasb():
         pm.db_connector.get_session().commit()
         return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list_id)
     except Exception, e:
-         mail_error( "Unable to fetch from yasb for id " + yasb + ", reason: " + str(e))
+         mail_error( "Unable to fetch from yasb for tourney " + str(tourney_id) + " for id " + yasb + ", reason: " + str(e))
          response = jsonify(message=str(e))
          response.status_code = (500)
          return response
@@ -925,7 +925,7 @@ def add_from_voidstate():
          pm.db_connector.get_session().commit()
          return jsonify(tourney_id=tourney_id, tourney_list_id=tourney_list.id)
      except Exception, e:
-         mail_error( "Unable to fetch from voidstate for id " + voidstate_id + ", reason: " + str(e))
+         mail_error( "Unable to fetch for tourney " + str(tourney_id) + " from voidstate for id " + voidstate_id + ", reason: " + str(e))
          response = jsonify(message=str(e))
          response.status_code = (500)
          return response
