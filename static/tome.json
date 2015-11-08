@@ -1,0 +1,1531 @@
+{
+  "tempKeys": [],
+  "entityGroupMap": {
+    "Tournament:#": {
+      "entities": [
+        {
+          "pk": -115,
+          "name": "the cut",
+          "round_length": 75,
+          "current_round": 2,
+          "settings_pk": -114,
+          "format_pk": 2,
+          "parent_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -34,
+          "name": "list juggler test data set",
+          "round_length": 75,
+          "current_round": 3,
+          "cut_size": 4,
+          "settings_pk": -35,
+          "format_pk": 1,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        }
+      ]
+    },
+    "GameSettings:#": {
+      "entities": [
+        {
+          "pk": -2,
+          "name": "Star Wars: X-wing Miniatures Game",
+          "original_name": "Star Wars: X-wing Miniatures Game",
+          "min_players": 2,
+          "max_players": 2,
+          "win_points": 5,
+          "win_mov": 0,
+          "draw_points": 1,
+          "bye_points": 5,
+          "bye_mov": 150,
+          "pod_size": 8,
+          "bye_strategy": "lowest",
+          "resolution_strategy": "grant_byes",
+          "logo": "img/swx01_logo.jpg",
+          "number_of_roles": 1,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -23,
+          "name": "Star Wars: X-wing Miniatures Game",
+          "original_name": "Star Wars: X-wing Miniatures Game",
+          "min_players": 2,
+          "max_players": 2,
+          "win_points": 5,
+          "win_mov": 0,
+          "draw_points": 1,
+          "bye_points": 5,
+          "bye_mov": 150,
+          "pod_size": 8,
+          "bye_strategy": "lowest",
+          "resolution_strategy": "grant_byes",
+          "logo": "img/swx01_logo.jpg",
+          "number_of_roles": 1,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -35,
+          "name": "Star Wars: X-wing Miniatures Game",
+          "original_name": "Star Wars: X-wing Miniatures Game",
+          "min_players": 2,
+          "max_players": 2,
+          "win_points": 5,
+          "win_mov": 0,
+          "draw_points": 1,
+          "bye_points": 5,
+          "bye_mov": 150,
+          "pod_size": 8,
+          "bye_strategy": "lowest",
+          "resolution_strategy": "grant_byes",
+          "logo": "img/swx01_logo.jpg",
+          "number_of_roles": 1,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -114,
+          "name": "Star Wars: X-wing Miniatures Game",
+          "original_name": "Star Wars: X-wing Miniatures Game",
+          "min_players": 2,
+          "max_players": 2,
+          "win_points": 5,
+          "win_mov": 0,
+          "draw_points": 1,
+          "bye_points": 5,
+          "bye_mov": 150,
+          "pod_size": 8,
+          "bye_strategy": "lowest",
+          "resolution_strategy": "grant_byes",
+          "logo": "img/swx01_logo.jpg",
+          "number_of_roles": 1,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        }
+      ]
+    },
+    "Tiebreaker:#": {
+      "entities": [
+        {
+          "pk": -3,
+          "name": "margin_of_victory",
+          "pretty_name": "Margin of Victory",
+          "order_index": 2,
+          "settings_pk": -2,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -4,
+          "name": "str_of_sched",
+          "pretty_name": "Strength of Schedule",
+          "order_index": 3,
+          "settings_pk": -2,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -5,
+          "name": "ext_str_of_sched",
+          "pretty_name": "Extended Strength of Schedule",
+          "order_index": 4,
+          "settings_pk": -2,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -6,
+          "name": "random",
+          "pretty_name": "Random",
+          "order_index": 5,
+          "settings_pk": -2,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -25,
+          "name": "margin_of_victory",
+          "pretty_name": "Margin of Victory",
+          "order_index": 2,
+          "settings_pk": -23,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -26,
+          "name": "str_of_sched",
+          "pretty_name": "Strength of Schedule",
+          "order_index": 3,
+          "settings_pk": -23,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -27,
+          "name": "ext_str_of_sched",
+          "pretty_name": "Extended Strength of Schedule",
+          "order_index": 4,
+          "settings_pk": -23,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -28,
+          "name": "random",
+          "pretty_name": "Random",
+          "order_index": 5,
+          "settings_pk": -23,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -36,
+          "name": "margin_of_victory",
+          "pretty_name": "Margin of Victory",
+          "order_index": 2,
+          "settings_pk": -35,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -37,
+          "name": "str_of_sched",
+          "pretty_name": "Strength of Schedule",
+          "order_index": 3,
+          "settings_pk": -35,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -38,
+          "name": "ext_str_of_sched",
+          "pretty_name": "Extended Strength of Schedule",
+          "order_index": 4,
+          "settings_pk": -35,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -39,
+          "name": "random",
+          "pretty_name": "Random",
+          "order_index": 5,
+          "settings_pk": -35,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -116,
+          "name": "margin_of_victory",
+          "pretty_name": "Margin of Victory",
+          "order_index": 2,
+          "settings_pk": -114,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -117,
+          "name": "str_of_sched",
+          "pretty_name": "Strength of Schedule",
+          "order_index": 3,
+          "settings_pk": -114,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -118,
+          "name": "ext_str_of_sched",
+          "pretty_name": "Extended Strength of Schedule",
+          "order_index": 4,
+          "settings_pk": -114,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -119,
+          "name": "random",
+          "pretty_name": "Random",
+          "order_index": 5,
+          "settings_pk": -114,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        }
+      ]
+    },
+    "Participant:#": {
+      "entities": [
+        {
+          "pk": -121,
+          "first_name": "Darth",
+          "last_name": "Vader",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 2,
+          "pod": -1,
+          "tournament_pk": -115,
+          "base_points": 15,
+          "base_margin_of_victory": 518,
+          "tiebreaker": 0.5818792334757745,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -120,
+          "first_name": "Leia",
+          "last_name": "Organa",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 1,
+          "pod": -1,
+          "tournament_pk": -115,
+          "base_points": 15,
+          "base_margin_of_victory": 575,
+          "tiebreaker": 0.06131156603805721,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -9,
+          "first_name": "Han",
+          "last_name": "Solo",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 1,
+          "pod": -1,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.008831198560073972,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -10,
+          "first_name": "Chew",
+          "last_name": "Bacca",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 4,
+          "pod": -1,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.02617289125919342,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -122,
+          "first_name": "Luke",
+          "last_name": "Skywalker",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 3,
+          "pod": -1,
+          "tournament_pk": -115,
+          "base_points": 10,
+          "base_margin_of_victory": 424,
+          "tiebreaker": 0.2891444624401629,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -30,
+          "first_name": "Han",
+          "last_name": "Solo",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 2,
+          "pod": -1,
+          "base_points": 5,
+          "base_margin_of_victory": 250,
+          "tiebreaker": 0.43948912364430726,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -40,
+          "first_name": "Luke",
+          "last_name": "Skywalker",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 13,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.9622161854058504,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -41,
+          "first_name": "Han",
+          "last_name": "Solo",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 3,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.6586562336888164,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -42,
+          "first_name": "Leia",
+          "last_name": "Organa",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 7,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.6454216993879527,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -43,
+          "first_name": "Chew",
+          "last_name": "Bacca",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": true,
+          "seed": 2,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.03636949276551604,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -44,
+          "first_name": "C",
+          "last_name": "3PO",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": true,
+          "seed": 8,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.7789190562907606,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -45,
+          "first_name": "R2",
+          "last_name": "D2",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 6,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.8547664561774582,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -46,
+          "first_name": "Darth",
+          "last_name": "Vader",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 1,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.38539721723645926,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -47,
+          "first_name": "Emperor",
+          "last_name": "Palpatine",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": true,
+          "seed": 10,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.8391336475033313,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -48,
+          "first_name": "Howl",
+          "last_name": "Runner",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 4,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.5583895803429186,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -49,
+          "first_name": "Soontir",
+          "last_name": "Fel",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 5,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.824553488753736,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -50,
+          "first_name": "Boba",
+          "last_name": "Fett",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 9,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.595116127980873,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -51,
+          "first_name": "Jango",
+          "last_name": "Fett",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 1,
+          "has_received_bye": true,
+          "seed": 12,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.6711818759795278,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -52,
+          "first_name": "Wedge",
+          "last_name": "Antillis",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 1,
+          "has_received_bye": true,
+          "seed": 11,
+          "pod": -1,
+          "tournament_pk": -34,
+          "base_points": 0,
+          "base_margin_of_victory": 0,
+          "tiebreaker": 0.4573832454625517,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -123,
+          "first_name": "Chew",
+          "last_name": "Bacca",
+          "email": "",
+          "is_active": true,
+          "swiss_id": 0,
+          "reward_byes": 0,
+          "has_received_bye": false,
+          "seed": 4,
+          "pod": -1,
+          "tournament_pk": -115,
+          "base_points": 10,
+          "base_margin_of_victory": 351,
+          "tiebreaker": 0.3325447482056916,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        }
+      ]
+    },
+    "Match:#": {
+      "entities": [
+        {
+          "pk": -76,
+          "round": 2,
+          "order_index": 0,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -14,
+          "round": 1,
+          "order_index": 1,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -74,
+          "round": 2,
+          "order_index": -1,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -20,
+          "round": 2,
+          "order_index": 1,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -53,
+          "round": 1,
+          "order_index": -1,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -55,
+          "round": 1,
+          "order_index": -1,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -57,
+          "round": 1,
+          "order_index": -1,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -59,
+          "round": 1,
+          "order_index": 0,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -62,
+          "round": 1,
+          "order_index": 1,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -65,
+          "round": 1,
+          "order_index": 2,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -68,
+          "round": 1,
+          "order_index": 3,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -71,
+          "round": 1,
+          "order_index": 4,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -79,
+          "round": 2,
+          "order_index": 1,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -82,
+          "round": 2,
+          "order_index": 2,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -85,
+          "round": 2,
+          "order_index": 3,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -88,
+          "round": 2,
+          "order_index": 4,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -91,
+          "round": 2,
+          "order_index": 5,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -94,
+          "round": 3,
+          "order_index": -1,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -96,
+          "round": 3,
+          "order_index": 0,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -99,
+          "round": 3,
+          "order_index": 1,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -102,
+          "round": 3,
+          "order_index": 2,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -105,
+          "round": 3,
+          "order_index": 3,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -108,
+          "round": 3,
+          "order_index": 4,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -111,
+          "round": 3,
+          "order_index": 5,
+          "tournament_pk": -34,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -124,
+          "round": 1,
+          "order_index": 0,
+          "tournament_pk": -115,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -127,
+          "round": 1,
+          "order_index": 1,
+          "tournament_pk": -115,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -130,
+          "round": 2,
+          "order_index": 0,
+          "tournament_pk": -115,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        }
+      ]
+    },
+    "MatchParticipant:#": {
+      "entities": [
+        {
+          "pk": -77,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 125,
+          "match_pk": -76,
+          "participant_pk": -50,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -13,
+          "role": 0,
+          "raw_score": 50,
+          "points_earned": 0,
+          "margin_of_victory": 50,
+          "participant_pk": -9,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -15,
+          "role": 0,
+          "raw_score": 25,
+          "points_earned": 0,
+          "margin_of_victory": 25,
+          "match_pk": -14,
+          "participant_pk": -10,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -16,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 175,
+          "match_pk": -14,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -75,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 5,
+          "margin_of_victory": 150,
+          "match_pk": -74,
+          "participant_pk": -47,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -19,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -21,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -20,
+          "participant_pk": -10,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -22,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -20,
+          "participant_pk": -9,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -54,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 5,
+          "margin_of_victory": 150,
+          "match_pk": -53,
+          "participant_pk": -52,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -33,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "participant_pk": -30,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -56,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 5,
+          "margin_of_victory": 150,
+          "match_pk": -55,
+          "participant_pk": -51,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -58,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 5,
+          "margin_of_victory": 150,
+          "match_pk": -57,
+          "participant_pk": -43,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -60,
+          "role": 0,
+          "raw_score": 40,
+          "points_earned": 0,
+          "margin_of_victory": 40,
+          "match_pk": -59,
+          "participant_pk": -40,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -61,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 160,
+          "match_pk": -59,
+          "participant_pk": -46,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -63,
+          "role": 0,
+          "raw_score": 50,
+          "points_earned": 1,
+          "margin_of_victory": 100,
+          "match_pk": -62,
+          "participant_pk": -45,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -64,
+          "role": 0,
+          "raw_score": 50,
+          "points_earned": 1,
+          "margin_of_victory": 100,
+          "match_pk": -62,
+          "participant_pk": -48,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -66,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -65,
+          "participant_pk": -47,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -67,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -65,
+          "participant_pk": -42,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -69,
+          "role": 0,
+          "raw_score": 24,
+          "points_earned": 0,
+          "margin_of_victory": 24,
+          "match_pk": -68,
+          "participant_pk": -49,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -70,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 176,
+          "match_pk": -68,
+          "participant_pk": -41,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -72,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -71,
+          "participant_pk": -50,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -73,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -71,
+          "participant_pk": -44,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -78,
+          "role": 0,
+          "raw_score": 75,
+          "points_earned": 0,
+          "margin_of_victory": 75,
+          "match_pk": -76,
+          "participant_pk": -41,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -80,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 158,
+          "match_pk": -79,
+          "participant_pk": -46,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -81,
+          "role": 0,
+          "raw_score": 42,
+          "points_earned": 0,
+          "margin_of_victory": 42,
+          "match_pk": -79,
+          "participant_pk": -52,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -83,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 175,
+          "match_pk": -82,
+          "participant_pk": -42,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -84,
+          "role": 0,
+          "raw_score": 25,
+          "points_earned": 0,
+          "margin_of_victory": 25,
+          "match_pk": -82,
+          "participant_pk": -43,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -86,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -85,
+          "participant_pk": -48,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -87,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -85,
+          "participant_pk": -51,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -89,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 184,
+          "match_pk": -88,
+          "participant_pk": -40,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -90,
+          "role": 0,
+          "raw_score": 16,
+          "points_earned": 0,
+          "margin_of_victory": 16,
+          "match_pk": -88,
+          "participant_pk": -44,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -92,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 188,
+          "match_pk": -91,
+          "participant_pk": -49,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -93,
+          "role": 0,
+          "raw_score": 12,
+          "points_earned": 0,
+          "margin_of_victory": 12,
+          "match_pk": -91,
+          "participant_pk": -45,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -95,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 5,
+          "margin_of_victory": 150,
+          "match_pk": -94,
+          "participant_pk": -44,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -97,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -96,
+          "participant_pk": -42,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -98,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -96,
+          "participant_pk": -51,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -100,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -99,
+          "participant_pk": -50,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -101,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -99,
+          "participant_pk": -46,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -103,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 176,
+          "match_pk": -102,
+          "participant_pk": -43,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -104,
+          "role": 0,
+          "raw_score": 24,
+          "points_earned": 0,
+          "margin_of_victory": 24,
+          "match_pk": -102,
+          "participant_pk": -48,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -106,
+          "role": 0,
+          "raw_score": 50,
+          "points_earned": 1,
+          "margin_of_victory": 100,
+          "match_pk": -105,
+          "participant_pk": -41,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -107,
+          "role": 0,
+          "raw_score": 50,
+          "points_earned": 1,
+          "margin_of_victory": 100,
+          "match_pk": -105,
+          "participant_pk": -52,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -109,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -108,
+          "participant_pk": -49,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -110,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -108,
+          "participant_pk": -47,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -112,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -111,
+          "participant_pk": -45,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -113,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -111,
+          "participant_pk": -40,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -125,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -124,
+          "participant_pk": -120,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -126,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -124,
+          "participant_pk": -123,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -128,
+          "role": 0,
+          "raw_score": 0,
+          "points_earned": 0,
+          "margin_of_victory": 0,
+          "match_pk": -127,
+          "participant_pk": -122,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -129,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 200,
+          "match_pk": -127,
+          "participant_pk": -121,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -131,
+          "role": 0,
+          "raw_score": 100,
+          "points_earned": 5,
+          "margin_of_victory": 125,
+          "match_pk": -130,
+          "participant_pk": -120,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        },
+        {
+          "pk": -132,
+          "role": 0,
+          "raw_score": 75,
+          "points_earned": 0,
+          "margin_of_victory": 75,
+          "match_pk": -130,
+          "participant_pk": -121,
+          "entityAspect": {
+            "entityState": "Unchanged"
+          }
+        }
+      ]
+    }
+  },
+  "metadataVersion": "1.0.5"
+}
