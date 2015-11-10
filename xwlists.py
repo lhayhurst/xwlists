@@ -392,7 +392,7 @@ def edit_results( request, pre_elim=True):
     pm                = PersistenceManager(myapp.db_connector)
     tourney           = pm.get_tourney_by_id(tourney_id)
 
-    rre = RoundResultsEditor(pm, tourney, pre_elim,url_root=request.url_root)
+    rre = RoundResultsEditor(pm, tourney, request.url_root, pre_elim)
     ret = rre.get_and_set_json( request )
     return ret
 
