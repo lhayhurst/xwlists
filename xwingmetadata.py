@@ -816,7 +816,7 @@ ships = {   T_70:
                         'upgrades': ( MISSILE, ILLICIT, MOD  )},
             {'ship_size': SMALL_SHIP, 'faction': SCUM,'name': 'Black Sun Ace', 'canon_name': 'blacksunace', 'pilot_skill': 5, 'cost' : 23,
                         'constraints': ( SCUM_FACTION_CONSTRAINT ),
-                        'upgrades': (MISSILE, ILLICIT, MOD    )},
+                        'upgrades': (EPT, MISSILE, ILLICIT, MOD    )},
             {'ship_size': SMALL_SHIP, 'faction': SCUM,'name': 'Cartel Marauder', 'canon_name': 'cartelmarauder', 'pilot_skill': 2, 'cost' : 20,
                         'constraints': ( SCUM_FACTION_CONSTRAINT ),
                         'upgrades': ( MISSILE, ILLICIT, MOD    )},
