@@ -424,7 +424,23 @@ ships = {   T_70:
                 {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Omega Ace', 'cost': 20,
                                    'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT),
                                    'pilot_skill': 7, 'canon_name': 'omegaace',
-                                   'upgrades': (EPT, MOD, TECH)}
+                                   'upgrades': (EPT, MOD, TECH)
+                 },
+                {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Epsilon Ace', 'cost': 17,
+                                   'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT),
+                                   'pilot_skill': 4, 'canon_name': 'epsilonace',
+                                   'upgrades': (MOD, TECH)
+                 },
+                {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Omega Leader', 'cost': 21,
+                                   'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT),
+                                   'pilot_skill': 8, 'canon_name': 'omegaleader',
+                                   'upgrades': (EPT, MOD, TECH)
+                 },
+                {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Zeta Leader', 'cost': 20,
+                                   'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT),
+                                   'pilot_skill': 8, 'canon_name': 'zetaleader',
+                                   'upgrades': (EPT, MOD, TECH)
+                 },
             ),
 
             X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Antilles', 'cost': 29,
