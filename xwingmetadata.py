@@ -140,6 +140,8 @@ PER_SQUAD_UNIQUE_CONSTRAINT = {'type': PER_SQUAD, 'value': UNIQUE}
 REBEL_FACTION_CONSTRAINT = {'type': FACTION, 'value': REBEL}
 IMPERIAL_FACTION_CONSTRAINT = {'type': FACTION, 'value': IMPERIAL}
 SCUM_FACTION_CONSTRAINT = {'type': FACTION, 'value': SCUM}
+XWING_CONSTRAINT = { 'type': SHIP_TYPE, 'value': X_WING}
+T70_CONSTRAINT = { 'type': SHIP_TYPE, 'value': T_70}
 
 #all the x-wing upgrades.
 upgrades = {
@@ -314,7 +316,8 @@ upgrades = {
         {'name': 'Advanced SLAM', 'canon_name': 'advancedslam', 'cost': 2},
         {'name': 'Twin Ion Engine Mk. II', 'canon_name': 'twinionenginemkii', 'cost': 1 },
         {'name': 'Maneuvering Fins', 'canon_name': 'maneuveringfins', 'cost': 1,'constraints': ( {'type': SHIP_TYPE, 'value': YV_666_FREIGHTER} ) },
-        {'name': 'Ion Projector', 'canon_name': 'ionprojector', 'cost': 2,'constraints': ( {'type': SHIP_SIZE, 'value': LARGE_SHIP} )}
+        {'name': 'Ion Projector', 'canon_name': 'ionprojector', 'cost': 2,'constraints': ( {'type': SHIP_SIZE, 'value': LARGE_SHIP} )},
+        {'name': 'Integrated Astromech', 'canon_name': 'integratedastromech', 'cost': 0 },
     ),
 
     EPT:
@@ -379,12 +382,23 @@ ships = {   T_70:
                  'cost': 27, 'pilot_skill': 5, 'canon_name': 'blueace',
                                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                                    'upgrades': (DROID, TORPEDO, MOD, TECH)},
-                {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Poe Dameron', 'cost': 31,
+                {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Red Ace', 'cost': 29,
+                                   'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
+                 'pilot_skill': 6, 'canon_name': 'redace',
+                                   'upgrades': (DROID, TORPEDO, MOD, TECH)},
+
+                {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Ello Asty', 'cost': 30,
+                                   'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
+                 'pilot_skill': 7, 'canon_name': 'elloasty',
+                                   'upgrades': (DROID, TORPEDO, MOD, EPT, TECH)},
+
+                {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Poe Dameron',
                                    'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
                  'cost': 31, 'pilot_skill': 8, 'canon_name': 'poedameron',
                                    'upgrades': (DROID, TORPEDO, MOD, EPT, TECH)},
             ),
 
+            #TODO: Zeta Leader, Episilon Ace,
             TIE_FO_FIGHTER:
             (
                 {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Epsilon Squadron Pilot', 'cost': 15,
