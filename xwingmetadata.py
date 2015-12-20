@@ -202,7 +202,9 @@ upgrades = {
          'action':[ {'type': 'ADD_UPGRADE', 'value': EPT} ] },
         {'name': 'R2-D2', 'cost': 4, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )},
         {'name': 'BB-8', 'cost': 2, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )},
-        {'name': 'R5-X3', 'cost': 1, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )}
+        {'name': 'R5-X3', 'cost': 1, 'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, )},
+        {'name': 'Targetting Astromech', 'cost': 2},
+
     ),
     TITLE: (
         {'name': 'Slave 1', 'cost': 0,
@@ -241,6 +243,17 @@ upgrades = {
          'constraints': ( {'type': SHIP_TYPE, 'value': M3_A_INTERCEPTOR } ) },
          {'name': 'Hound\'s Tooth', 'canon_name': 'houndstooth', 'cost': 6,
          'constraints': ( {'type': SHIP_TYPE, 'value': YV_666_FREIGHTER } ) },
+
+         {'name': 'TIE/x7', 'canon_name': 'tiex7', 'cost': -2,
+         'constraints': ( {'type': SHIP_TYPE, 'value': TIE_DEFENDER } ) },
+
+         {'name': 'TIE/D', 'canon_name': 'tied', 'cost': 0,
+         'constraints': ( {'type': SHIP_TYPE, 'value': TIE_DEFENDER } ) },
+
+         {'name': 'TIE Shuttle', 'canon_name': 'tieshuttle', 'cost': 0,
+          'constraints': ( {'type': SHIP_TYPE, 'value': TIE_BOMBER } ),
+          'action': [ { 'type': 'ADD_UPGRADE', 'value': CREW },{ 'type': 'ADD_UPGRADE', 'value': CREW }  ]},
+
 
     ),
     SYSTEM: (
@@ -283,6 +296,7 @@ upgrades = {
         {'name': 'Heavy Laser Cannon', 'cost': 7},
         {'name': 'Mangler Cannon', 'cost': 4},
         {'name': 'Flechette Cannon', 'cost': 2},
+        {'name': 'Tractor Beam', 'cost': 1 }
 
     ),
     MISSILE: (
@@ -348,6 +362,9 @@ upgrades = {
           {'name': 'Crack Shot', 'canon_name': 'crackshot', 'cost': 1},
           {'name': 'Lightning Reflexes', 'canon_name': 'lightningreflexes', 'cost': 1},
           {'name': 'Wired', 'cost': 1},
+          {'name': 'Cool Hand', 'cost': 1},
+          {'name': 'Juke', 'cost': 2},
+
         ),
     SALVAGED_ASTROMECH_DROID: (
         {'name': 'Genius', 'canon_name' : 'genius', 'cost': 0},
@@ -367,6 +384,8 @@ upgrades = {
     ),
     TECH: (
         {'name': 'Weapons Guidance', 'canon_name': 'weaponsguidance', 'cost': 2},
+        {'name': 'Comm Relay', 'canon_name': 'commrelay', 'cost': 2},
+
     )
 }
 
@@ -733,25 +752,25 @@ ships = {   T_70:
          TIE_BOMBER: (
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Major Rhymer', 'cost': 26,
               'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
-              'upgrades': (TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD, EPT)},
+              'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD, EPT)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Captain Jonus', 'cost': 22,
               'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
-              'upgrades': (TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD, EPT)},
+              'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD, EPT)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Gamma Squadron Pilot', 'cost': 18,
-              'upgrades': (TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD)},
+              'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Scimitar Squadron Pilot', 'cost': 16,
-              'upgrades': (TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD)} ),
+              'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD)} ),
 
          TIE_DEFENDER: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Rexler Brath', 'cost': 37,
                          'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
-                         'upgrades': (MISSILE, CANNON, MOD, EPT)},
+                         'upgrades': (TITLE, MISSILE, CANNON, MOD, EPT)},
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Colonel Vessery', 'cost': 35,
                          'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
-                         'upgrades': (MISSILE, CANNON, MOD, EPT)},
+                         'upgrades': (TITLE, MISSILE, CANNON, MOD, EPT)},
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Onyx Squadron Pilot', 'cost': 32,
-                         'upgrades': (MISSILE, CANNON, MOD)},
+                         'upgrades': (TITLE, MISSILE, CANNON, MOD)},
                         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Delta Squadron Pilot', 'cost': 30,
-                         'upgrades': (MISSILE, CANNON, MOD)} ),
+                         'upgrades': (TITLE, MISSILE, CANNON, MOD)} ),
 
          TIE_PHANTOM: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Whisper', 'cost': 32,
                         'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ),
