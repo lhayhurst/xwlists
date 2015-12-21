@@ -56,36 +56,9 @@ class CryodexRank:
 
 
 class CryodexRankings:
-    def parseHtml(self, data):
-        firstRow = True
-        for rec in data:
-            if firstRow:
-                firstRow = False
-            else:
-                rank = rec[0]
-                name = rec[1]
-
-                #some names look like this:
-                #(D#3)Douglas Brito
-                #so strip it off it is there
-
-                score = rec[2]
-                mov = rec[3]
-                sos = rec[4]
-
-                cr = CryodexRank( name, rank, None , score, mov, sos)
-
-                match = re.match(r'^\(D#\d\)', name)
-                if match:
-                    print "player with a bye:" + name
-                    cr.player_name = re.sub(r'^\(D#\d\)', '', name)
-                    print "stripped to:" + cr.player_name
-
-                    cr.dropped = True
-
-                self.rankings.append(cr)
 
     def fromJson(self, data):
+        self.rankings = []
         for rank in data:
             name  = rank['name']
             name = name.strip()
@@ -108,12 +81,8 @@ class CryodexRankings:
             cr = CryodexRank( name, swiss, elim, score, mov, sos, dropped, list_id )
             self.rankings.append(cr)
 
-    def __init__(self, data, ishtml):
-        self.rankings = []
-        if ishtml:
-            self.parseHtml(data)
-        else:
-            self.fromJson(data)
+    def __init__(self, data):
+        self.fromJson(data)
 
     def apply_elimination_results(self, rounds):
         if not rounds.has_key( RoundType.ELIMINATION ):
@@ -155,114 +124,6 @@ class Cryodex:
             return { 'type': round_type, 'num': round_num }
         return None
 
-    def parse_rankings(self, table):
-        data = []
-        rows = table.find_all('tr')
-
-        for row in rows:
-            cols = row.find_all('td')
-            cols = [ele.text.strip() for ele in cols]
-            data.append([ele for ele in cols if ele]) # Get rid of empty values
-        self.ranking = CryodexRankings( data, ishtml=True )
-
-    def parseHtml(self, data):
-        soup = BeautifulSoup(data)
-        rounds = collections.OrderedDict()
-        for section in soup.findAll(H3):
-            if section.text == RANKINGS:
-                self.parse_rankings(section.parent.find_all('table')[0])
-                continue
-            round_text = self.parse_round_text(section.text)
-            if round_text:
-                rounds[section.text] = []
-            nextNode = section
-            while True:
-                nextNode = nextNode.nextSibling
-                try:
-                    tag_name = nextNode.name
-                except AttributeError:
-                    tag_name = ""
-                if tag_name == DIV:
-                    rounds[section.text].append(nextNode.string)
-                else:
-                    round_text = self.parse_round_text(section.text)
-                    break
-        for round_name in rounds:
-            round_results = rounds[round_name]
-            round_info = round_name.split()
-            round_type = round_info[0]
-            round_number = round_info[1]
-
-            cr = CryodexRound(round_type, round_number)
-            if not self.rounds.has_key(cr.get_round_type()):
-                self.rounds[cr.get_round_type()] = []
-            self.rounds[cr.get_round_type()].append(cr)
-
-            for result in round_results:
-                match = re.match(r'^(?:\d+:)?\s*(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+(.*?)\s+is\s+the\s+winner',
-                                 result)
-                if match:
-                    player1 = match.group(1)
-                    player2 = match.group(2)
-                    winner = match.group(3)
-
-                    player1_score = 0
-                    player2_score = 0
-                    match = re.match(
-                        r'^(?:\d+:)?.*?\s+VS\s+.*?\s+-\s+Match\s+Results:\s+.*?\s+is\s+the\s+winner\s+(\d+)\s+to\s+(\d+)',
-                        result)
-
-                    if match:
-                        player1_score = match.group(1)
-                        player2_score = match.group(2)
-                    else:
-                        if winner == player1:
-                            player1_score = 100
-                            player2_score = 0
-                        else:
-                            player1_score = 0
-                            player2_score = 100
-
-                    self.players[player1] = player1.strip()
-                    self.players[player2] = player2.strip()
-
-                    cr.add_result(player1, player2, winner, int(player1_score), int(player2_score), bye=False,
-                                  draw=False)
-                else:
-                    #player got a bye?
-                    #Emmanuel Valadares has a BYE
-                    #or, the most awful case:
-                    #1: 48K has a BYE
-                    match = re.match(r'^(?:\d+:)?\s*(.*?)\s+has\s+a\s+BYE\s*$', result)
-                    if match:
-                        player1 = match.group(1)
-                        player2 = None
-                        winner = None
-                        player1_score = None
-                        player2_score = None
-
-                        self.players[player1] = player1
-                        cr.add_result(player1, player2, winner, player1_score, player2_score, bye=True, draw=False)
-                    else:
-                        #draw
-                        #Kirlian Silvestre VS Joao Henrique - Match Results: Draw
-                        match = re.match(r'^(?:\d+:)?\s*(.*?)\s+VS\s+(.*?)\s+-\s+Match\s+Results:\s+Draw', result)
-                        if match:
-                            player1 = match.group(1)
-                            player2 = match.group(2)
-                            winner = None
-                            player1_score = None
-                            player2_score = None
-
-                            self.players[player1] = player1
-                            self.players[player2] = player2
-                            cr.add_result(player1, player2, winner, player1_score, player2_score, bye=False, draw=True)
-
-                        else:
-                            #ok, give up
-                            raise Exception(
-                                "Cryodex parsing error, received a row that I don't know what to do with! Row is " + result)
-
     def processJson(self, data):
         json_data = json.loads(data)
         if json_data is None:
@@ -277,7 +138,7 @@ class Cryodex:
             self.players[player['name'].strip()] = player['name'].strip()
 
         #and the ranking member
-        self.ranking = CryodexRankings( players, ishtml=False)
+        self.ranking = CryodexRankings( players )
 
         #and finally the rounds member
         rounds = json_data['rounds']
@@ -321,10 +182,6 @@ class Cryodex:
 
         if filename.endswith("json"):
             self.processJson(data)
-        elif filename.endswith("html"):
-            self.parseHtml(data)
-            if self.ranking is not None:
-                self.ranking.apply_elimination_results(self.rounds)
         else:
             raise Exception("Unable to parse cryodex filename " + filename + ", reason: unknown file type (expecting .html or .json)" )
 
