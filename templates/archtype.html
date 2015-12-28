@@ -48,6 +48,32 @@
     <div class="textarea clearfix" id="alltags" readonly>
     </div>
 
+    <div>
+    Tournament Results:
+    <br>
+    <hr>
+        <table id=results class="compact display dataTable" role="grid" style="width:100%;">
+            <thead>
+                <th>Tourney</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Result</th>
+                <th>Versus</th>
+            </thead>
+            {%  for result in archtype_match_results['results'] %}
+                {% if result.both_lists_recorded() %}
+                <tr>
+                    <td>{{ result.list1.tourney.get_tourney_name_as_url() }}</td>
+                    <td>{{ result.list1.tourney.tourney_date }}</td>
+                    <td>{{ result.list1.tourney.tourney_type }}</td>
+                    <td>{{ result.get_result_and_score_for_archtype(archtype_id) }}</td>
+                    <td>{{ result.versus(archtype_id, url_root) | safe }}</td>
+                </tr>
+                {% endif %}
+         {% endfor %}
+        </table>
+    </div>
+
     <script>
         var archtype_id = {{ archtype_id  | safe }}
         var tags        = {{ archtype.get_tags() | tojson | safe }}
@@ -88,5 +114,15 @@
             }
         });
     </script>
+
+    <script>
+    $(document).ready( function () {
+        $('#results').dataTable( {
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+            "order": [[ 1, "desc" ]]
+
+        });
+    } );
+</script>
 
 {% endblock %}

@@ -103,11 +103,6 @@ def mail_error(errortext):
         print("sending msg ")
         mail.send(msg)
 
-
-#@app.before_request
-#def check_for_maintenance():
-#    return render_template('maintenance.html')
-
 @app.route("/about")
 def about():
     return render_template('about.html')
@@ -157,24 +152,6 @@ def get_tourney_results():
     tourney_id   = request.args.get('tourney_id')
     return redirect(url_for('get_tourney_details', tourney_id=tourney_id))
 
-@app.route('/show_results')
-def show_results():
-    id = request.args.get('id')
-    pm   = PersistenceManager(myapp.db_connector)
-    lists = pm.get_lists_for_archtype(id)
-    results = []
-    ret     = {}
-    ret[ 'pretty_print'] = lists[0][0].pretty_print( manage_list=0, show_results=0)
-    ret['hashkey'] = lists[0][1].hashkey
-    for listpair in lists:
-        list = listpair[0]
-        res = pm.get_round_results_for_list(list.id)
-        for r in res:
-            results.append(r)
-    ret[ "results"] = results
-    return render_template("show_results.html", data=ret)
-
-
 @app.route("/archtypes")
 def archtypes():
     print "getting archtypes"
@@ -185,6 +162,20 @@ def archtypes():
         simple_cache.set('archtypes', archtypes, timeout=60*60*12)
     return render_template("archtypes.html", archtypes=archtypes)
 
+def get_results_for_archtype(pm,archtype_id):
+    lists = pm.get_lists_for_archtype(archtype_id)
+    results = []
+    ret     = {}
+    ret[ 'pretty_print'] = lists[0][0].pretty_print( manage_list=0, show_results=0, manage_archtype=0,url_root=request.url_root)
+    for listpair in lists:
+        list = listpair[0]
+        res = pm.get_round_results_for_list(list.id)
+        for r in res:
+            results.append(r)
+    ret[ "results"] = results
+    return ret
+
+
 @app.route("/archtype")
 def archtype():
     archtype_id = request.args.get('id')
@@ -194,7 +185,15 @@ def archtype():
     all_tags = pm.get_all_tags()
     if all_tags is None:
         all_tags = []
-    return render_template("archtype.html", stats=stats,archtype=archtype,archtype_id=archtype.id,all_tags=all_tags)
+
+    archtype_match_results = get_results_for_archtype(pm,archtype_id)
+    return render_template("archtype.html",
+                           stats=stats,
+                           archtype=archtype,
+                           archtype_id=archtype.id,
+                           all_tags=all_tags,
+                           archtype_match_results=archtype_match_results,
+                           url_root=request.url_root)
 
 
 @app.route("/add_tag",methods=['POST'])

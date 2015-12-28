@@ -532,13 +532,8 @@ class TourneyList(Base):
     archtype_id      = Column(Integer, ForeignKey('{0}.id'.format(archtype_list_table)))
     player_id        = Column(Integer, ForeignKey('{0}.id'.format(tourney_player_table)))
     image            = Column(String(128))
-    #name             = Column(String(128))
-    #hashkey          = Column(BigInteger)
-    #faction          = Column(Faction.db_type())
-    #points           = Column(Integer)
     player           = relationship( TourneyPlayer.__name__, uselist=False)
     tourney          = relationship( Tourney.__name__, back_populates="tourney_lists")
-    #ships            = relationship(Ship.__name__, cascade="all,delete,delete-orphan")
     archtype_list    = relationship(ArchtypeList.__name__, back_populates="tourney_lists")
 
     def hashkey(self):
@@ -711,17 +706,20 @@ class RoundResult(Base):
             self.bye  = False
 
 
-    def versus(self, hashkey):
-        if self.list1.hashkey == hashkey:
-            return self.list2.pretty_print(manage_list=0, enter_list=0)
-        return self.list1.pretty_print(manage_list=0, enter_list=0)
+    def versus(self, archtype_id, url_root):
+        if self.list1.archtype_list.id == archtype_id:
+            return self.list2.pretty_print(manage_list=0, enter_list=0, url_root=url_root)
+        return self.list1.pretty_print(manage_list=0, enter_list=0, url_root=url_root)
 
-    def get_result_and_score_for_hashkey(self, hashkey):
-        return self.get_result_for_hashkey(hashkey) + " " + self.get_score_for_hashkey(hashkey)
+    def both_lists_recorded(self):
+        return self.list1.archtype_list is not None and self.list2.archtype_list is not None
 
-    def get_result_for_hashkey(self,hashkey):
+    def get_result_and_score_for_archtype(self, archtype_id):
+        return self.get_result_for_archtype(archtype_id) + " " + self.get_score_for_archtype(archtype_id)
+
+    def get_result_for_archtype(self,archtype_id):
         list_id = None
-        if self.list1.hashkey == hashkey:
+        if self.list1.archtype_list.id == archtype_id:
             list_id = self.list1.id
         else:
             list_id = self.list2.id
@@ -733,8 +731,8 @@ class RoundResult(Base):
             return "won"
         return "lost"
 
-    def get_score_for_hashkey(self, hashkey):
-        if self.list1.hashkey == hashkey:
+    def get_score_for_archtype(self, archtype_id):
+        if self.list1.archtype_list.id == archtype_id:
             return "%d-%d" % ( self.list1_score, self.list2_score)
         return "%d-%d" % ( self.list2_score, self.list1_score)
 
