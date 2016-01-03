@@ -656,7 +656,13 @@ ships = {   T_70:
               'upgrades': (EPT, MOD)},
              {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Obsidian Squadron Pilot', 'cost': 13,
               'upgrades': (MOD,)},
-             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Academy Pilot', 'cost': 12, 'upgrades': (MOD,) }
+             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Academy Pilot', 'cost': 12, 'upgrades': (MOD,) },
+
+             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Scourge', 'ps': 7, 'cost': 17,  'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (MOD,EPT) },
+             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Wampa', 'ps':4, 'cost': 14,  'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (MOD,) },
+             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Youngster', 'ps': 6, 'cost': 15,  'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (MOD,EPT) },
+             {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Chaser', 'ps': 3, 'cost': 14,  'constraints': ( PER_SQUAD_UNIQUE_CONSTRAINT, ), 'upgrades': (MOD,) }
+
          ),
 
          TIE_ADVANCED: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Darth Vader', 'cost': 29,
