@@ -176,6 +176,7 @@ upgrades = {
         {'name': 'Fleet Officer', 'cost': 3,
          'constraints': ( IMPERIAL_FACTION_CONSTRAINT  ),},
         {'name': 'Mara Jade', 'cost': 3, 'constraints': ( IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT ),},
+        {'name': 'Agent Kallus', 'cost': 2, 'constraints': ( IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT ),},
         {'name': 'Ysanne Isard', 'cost': 4,
          'constraints': ( IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT ),},
         {'name': 'K4 Security Droid', 'cost': 3, 'constraints': ( SCUM_FACTION_CONSTRAINT )},
