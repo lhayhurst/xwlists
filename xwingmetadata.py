@@ -385,7 +385,7 @@ upgrades = {
     ),
     TECH: (
         {'name': 'Weapons Guidance', 'canon_name': 'weaponsguidance', 'cost': 2},
-        {'name': 'Comm Relay', 'canon_name': 'commrelay', 'cost': 2},
+        {'name': 'Comm Relay', 'canon_name': 'commrelay', 'cost': 3},
 
     )
 }
