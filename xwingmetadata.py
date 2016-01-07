@@ -111,7 +111,7 @@ def header():
             CREW + ".1", CREW + ".2", CREW + ".3", \
             DROID, SYSTEM, MOD + ".1", MOD + ".2", \
             CANNON, MISSILE + ".1", MISSILE + ".2",
-            TORPEDO + ".1", TORPEDO + ".2", BOMB, TURRET, TECH, SALVAGED_ASTROMECH_DROID]
+            TORPEDO + ".1", TORPEDO + ".2", BOMB, TURRET, TECH, SALVAGED_ASTROMECH_DROID, ILLICIT]
 
 
 sets_and_expansions = {'Core Set': [],
