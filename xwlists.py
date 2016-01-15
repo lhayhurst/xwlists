@@ -498,14 +498,14 @@ def export_tourney_lists():
 
 @app.route("/delete_tourney")
 def delete_tourney():
-    tourney_name = request.args.get('tourney')
+    tourney_id = request.args.get('tourney')
     pm = PersistenceManager(myapp.db_connector)
-    pm.delete_tourney(tourney_name)
+    pm.delete_tourney_by_id(tourney_id)
 
     event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
                   event="delete tourney",
-                  event_details="deleted tourney %s" % ( tourney_name ))
+                  event_details="deleted tourney %s" % ( tourney_id))
     pm.db_connector.get_session().add(event)
     pm.db_connector.get_session().commit()
 

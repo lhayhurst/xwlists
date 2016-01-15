@@ -19,7 +19,7 @@
          <td >{{ tourney.id }}</td>
          <td>{{  tourney.email }}</td>
          <td>{{  tourney.entry_date }}</td>
-         <td ><a href="{{ url_for( 'delete_tourney', tourney=tourney.tourney_name) }}">delete tourney</a></td>
+         <td ><a href="{{ url_for( 'delete_tourney', tourney=tourney.id) }}">delete tourney</a></td>
       </tr>
       {% endfor %}
   </tbody>

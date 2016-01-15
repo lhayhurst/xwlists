@@ -1010,14 +1010,6 @@ class PersistenceManager:
             ret.append( [ tuple[0].id, tuple[0].pretty_print( url_root=url_root), tuple[1], tuple[0].pretty_print_tags()])
         return ret
 
-    def delete_tourney(self, tourney_name):
-        tourney = self.get_tourney( tourney_name)
-        if tourney is None:
-            return
-
-        self.db_connector.get_session().delete(tourney)
-        self.db_connector.get_session().commit()
-
     def delete_tourney_by_id(self, tourney_id):
         tourney = self.get_tourney_by_id(tourney_id)
         if tourney is None:
