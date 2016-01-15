@@ -130,7 +130,11 @@ class ShipType(DeclEnum):
     KIHRAXZ_FIGHTER = xwingmetadata.KIHRAXZ_FIGHTER_CANON_NAME, xwingmetadata.KIHRAXZ_FIGHTER
     T_70 = xwingmetadata.T_70_CANON_NAME, xwingmetadata.T_70
     TIE_FO_FIGHTER = xwingmetadata.TIE_FO_FIGHTER_CANON_NAME, xwingmetadata.TIE_FO_FIGHTER
-    
+    TIE_ADVANCED_PROTOTYPE = xwingmetadata.TIE_ADVANCED_PROTOTYPE_CANON_NAME, xwingmetadata.TIE_ADVANCED_PROTOTYPE
+    G1A_STARFIGHTER = xwingmetadata.G1A_STARFIGHTER_CANON_NAME, xwingmetadata.G1A_STARFIGHTER
+    ATTACK_SHUTTLE = xwingmetadata.ATTACK_SHUTTLE_CANON_NAME, xwingmetadata.ATTACK_SHUTTLE
+    VCX100 = xwingmetadata.VCX100_CANON_NAME, xwingmetadata.VCX100_CANON_NAME
+
 class Event(Base):
     __tablename__ = event_table
     id = Column( Integer, primary_key=True)

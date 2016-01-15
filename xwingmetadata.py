@@ -62,6 +62,16 @@ YV_666_FREIGHTER_CANON_NAME = 'yv666'
 K_WING = 'K-Wing'
 K_WING_CANON_NAME = 'kwing'
 
+#unreleased/vassal only
+VCX100 = 'VCX-100'
+VCX100_CANON_NAME = 'vcx100'
+ATTACK_SHUTTLE = 'Attack Shuttle'
+ATTACK_SHUTTLE_CANON_NAME = 'attackshuttle'
+TIE_ADVANCED_PROTOTYPE = 'TIE Adv. Prototype'
+TIE_ADVANCED_PROTOTYPE_CANON_NAME = 'tieadvprototype'
+G1A_STARFIGHTER = 'G-1A Starfighter'
+G1A_STARFIGHTER_CANON_NAME = 'g1astarfighter'
+
 EPT = "Elite Pilot Talent"
 EPT_CANON = 'ept'
 TITLE = "Title"
@@ -151,6 +161,18 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 # all the x-wing upgrades.
 upgrades = {
     CREW: (
+
+        {'name': '4-Lom', 'canon_name': '4lom', 'cost': 1, 'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Zuckuss', 'canon_name': 'zuckuss', 'cost': 1, 'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Chopper', 'canon_name': 'chopper', 'cost': 0, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Hera Syndulla', 'canon_name': 'herasyndulla', 'cost': 1, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Zeb Orellios', 'canon_name': 'zeborellios', 'cost': 1, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Sabine Wren', 'canon_name': 'sabinewren', 'cost': 2, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Zeb Orellios', 'canon_name': 'zeborellios', 'cost': 1, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Ezra Bridger', 'canon_name': 'ezrabridger', 'cost': 3, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Kanan Jarrus', 'canon_name': 'kananjarrus', 'cost': 3, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+
+
         {'name': 'Intelligence Agent', 'cost': 1},
         {'name': 'Mercenary Copilot', 'cost': 2},
         {'name': 'Saboteur', 'cost': 2},
@@ -215,6 +237,22 @@ upgrades = {
 
     ),
     TITLE: (
+
+
+
+        {'name': 'Mist Hunter', 'cost': 0, 'canon_name' : 'misthunter',
+         'action': [{'type': 'ADD_UPGRADE', 'value': TORPEDO}],
+         'constraints': ({'type': SHIP_TYPE, 'value': G1A_STARFIGHTER})},
+
+        {'name': 'Ghost', 'cost': 0, 'canon_name' : 'ghost',
+         'constraints': ({'type': SHIP_TYPE, 'value': VCX100})},
+
+        {'name': 'Phantom', 'cost': 0, 'canon_name' : 'phantom',
+         'constraints': ({'type': SHIP_TYPE, 'value': ATTACK_SHUTTLE})},
+
+        {'name': 'Tie/v1', 'cost': 1, 'canon_name' : 'tiev1',
+         'constraints': ({'type': SHIP_TYPE, 'value': TIE_ADVANCED_PROTOTYPE} ) },
+
         {'name': 'Slave 1', 'cost': 0,
          'action': [{'type': 'ADD_UPGRADE', 'value': TORPEDO}],
          'constraints': ({'type': SHIP_TYPE, 'value': FIRESPRAY_31})},
@@ -266,6 +304,7 @@ upgrades = {
 
     ),
     SYSTEM: (
+        {'name': 'Electronic Baffle', 'canon_name': 'electronicbaffle', 'cost': 1},
         {'name': 'Enhanced Scopes', 'cost': 1},
         {'name': 'Fire-Control System', 'cost': 2},
         {'name': 'Advanced Sensors', 'cost': 3},
@@ -319,6 +358,9 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
+
+        {'name': 'Guidance Chips', 'canon_name': 'guidancechips', 'cost': 0},
+        {'name': 'Long-Range Scanners', 'canon_name': 'longrangescanners', 'cost': 0},
         {'name': 'Munitions Failsafe', 'cost': 1},
         {'name': 'Tactical Jammer', 'cost': 1, 'constraints': ({'type': SHIP_SIZE, 'value': LARGE_SHIP})},
         {'name': 'Targeting Computer', 'cost': 2},
@@ -346,7 +388,9 @@ upgrades = {
     ),
 
     EPT:
-        ({'name': 'Adrenaline Rush', 'cost': 1},
+        (
+         {'name': 'Adaptability', 'cost': 0, 'canon_name':'adaptability'},
+         {'name': 'Adrenaline Rush', 'cost': 1},
          {'name': 'Deadeye', 'cost': 1},
          {'name': 'Determination', 'cost': 1},
          {'name': 'Draw Their Fire', 'cost': 1},
@@ -400,7 +444,84 @@ upgrades = {
     )
 }
 
-ships = {T_70:
+ships = {
+
+    G1A_STARFIGHTER : (
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': '4-LOM', 'cost': 27, 'canon_name':'4lom',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, CREW, SYSTEM, ILLICIT, TITLE, MOD ),
+         'pilot_skill' : 6,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Zuckuss', 'cost': 28, 'canon_name':'zuckuss',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, CREW, SYSTEM, ILLICIT, TITLE, MOD ),
+         'pilot_skill' : 7,
+        },
+    ),
+
+    TIE_ADVANCED_PROTOTYPE : (
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Seinar Test Pilot', 'cost': 16, 'canon_name':'seinartestpilot',
+         #'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (MISSILE, TITLE, MOD ),
+         'pilot_skill' : 2,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Valen Rudor', 'cost': 22, 'canon_name':'valenrudor',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, MISSILE, TITLE, MOD ),
+         'pilot_skill' : 6,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'The Inquisitor', 'cost': 25, 'canon_name':'theinquisitor',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, MISSILE, TITLE, MOD ),
+         'pilot_skill' : 8,
+        },
+    ),
+
+
+    ATTACK_SHUTTLE: (
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Zeb Orrelios', 'cost': 18, 'canon_name':'zeborrelios',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (TURRET, CREW, TITLE, MOD ),
+         'pilot_skill' : 3,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Ezra Bridger', 'cost': 20, 'canon_name':'ezrabridger',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, TURRET, CREW, TITLE, MOD ),
+         'pilot_skill' : 4,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Sabine Wren', 'cost': 21, 'canon_name':'sabinewren',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, TURRET, CREW, TITLE, MOD ),
+         'pilot_skill' : 5,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Hera Syndulla', 'cost': 22, 'canon_name':'herasyndulla',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, TURRET, CREW, TITLE, MOD ),
+         'pilot_skill' : 7,
+        },
+    ),
+
+
+    VCX100: (
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Chopper', 'cost': 37, 'canon_name':'chopper',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (SYSTEM, TURRET, TORPEDO, TORPEDO, CREW, CREW, TITLE, MOD ),
+         'pilot_skill' : 4,
+        },
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Kanan Jarrus', 'cost': 38, 'canon_name':'kananjarrus',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (SYSTEM, TURRET, TORPEDO, TORPEDO, CREW, CREW, TITLE, MOD ),
+         'pilot_skill' : 5,
+        },
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Hera Syndulla', 'cost': 40, 'canon_name':'herasyndulla',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (SYSTEM, TURRET, TORPEDO, TORPEDO, CREW, CREW, TITLE, MOD ),
+         'pilot_skill' : 7,
+        },
+
+    ),
+
+    T_70:
     (
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Novice',
          'cost': 24, 'pilot_skill': 2, 'canon_name': 'bluesquadronnovice',
@@ -773,6 +894,20 @@ ships = {T_70:
                       'upgrades': (SYSTEM, CANNON, CREW, CREW, TITLE, MOD)}),
 
     TIE_BOMBER: (
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Gamma Squadron Veteran', 'cost': 19,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 5,
+         'canon_name': 'gammasquadronveteran',
+         'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD, EPT)},
+
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Tomax Bren', 'cost': 24,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 8,
+         'canon_name': 'tomaxbren',
+         'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD, EPT)},
+
+
+
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Major Rhymer', 'cost': 26,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD, EPT)},
