@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+<br>
+<div><b>{{ league.get_name() }}</b>
+<a href="/league_matches">Click here for all league matchups!</a></div>
+<br>
+<b>Pod Racing</b>
+<hr>
+<table id="divisions" class="display" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Pod</th>
+        <th>Completed</th>
+        <th>Of Total</th>
+        <th>Progress</th>
+        <th>Matches Left</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in league_stats.values() %}
+      <tr>
+         <td ><a href="http://challonge.com/{{ d['name'] }}">{{ d['name'] }}</a></td>
+         <td>{{ d['complete'] }}</td>
+         <td>{{ d['total'] }}</td>
+          <td>{{'%0.2f'| format(d['complete'] / d['total']* 100|float)}}%</td>
+         <td>{{ d['total'] - d['complete'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
+<br>
+<b>Player Rankings</b>
+<hr>
+<table id="players" class="display" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Pod</th>
+        <th>MoV</th>
+        <th>Points</th>
+        <th>Total Played</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Draws</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      {% for p in player_stats.values() %}
+      <tr>
+         <td >{{ p['player'] }}</td>
+         <td>{{ p['division'] }}</td>
+         <td>{{ p['MoV']}}</td>
+         <td>{{ p['points']}}</td>
+         <td>{{ p['total'] }}</td>
+         <td>{{ p['wins']}}</td>
+         <td>{{ p['losses']}}</td>
+         <td>{{ p['draws']}}</td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
+
+
+
+<script>
+    $(document).ready( function () {
+        $('#divisions').dataTable({
+            "order": [[1, "desc"]],
+            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
+
+        });
+        $('#players').dataTable({
+            "order": [[2, "desc"]],
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        });
+    });
+</script>
+{% endblock %}

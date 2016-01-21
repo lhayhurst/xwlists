@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+<br>
+<table id="matches" class="display" cellspacing="0" width="100%">
+  <thead>
+  <tr>
+    <th>Player 1</th>
+    <th>Division</th>
+    <th>Player 2</th>
+    <th>Division</th>
+    <th>Match State</th>
+    <th>Player 1 Score</th>
+    <th>Player 2 Score</th>
+    <th>Escrow lists</th>
+  </thead>
+  <tbody>
+  </tr>
+      {% for m in league.matches %}
+      <tr>
+         <td>{{  m.player1.get_name()}}</td>
+         <td>{{  m.player1.division.get_name()}}</td>
+         <td>{{  m.player2.get_name()}}</td>
+         <td>{{  m.player2.division.get_name()}}</td>
+         <td>{{  m.state }}</td>
+         <td>{{  m.player1_score }}</td>
+         <td>{{  m.player2_score }}</td>
+         <td >Stay tuned!</td>
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+<script>
+    $(document).ready( function () {
+        $('#matches').dataTable({
+            "order": [[ 1, "asc" ]],
+            lengthMenu: [ [10, 50, -1], [10, 50, "All"] ],
+            iDisplayLength: -1,
+});
+    } );
+</script>
+{% endblock %}

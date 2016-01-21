@@ -51,7 +51,9 @@ class MyDatabaseConnector(object):
         self.Session.remove()
 
 
-db_connector = MyDatabaseConnector()
+db_connector   = MyDatabaseConnector()
+challonge_user = os.getenv('CHALLONGE_USER')
+challonge_key  = os.getenv('CHALLONGE_API_KEY')
 
 
 def create_app():

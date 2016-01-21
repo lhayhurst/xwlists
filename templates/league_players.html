@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+
+<div>{{ league.get_name() }}</div>
+<br>
+<table id="players" class="display" cellspacing="0" width="100%">
+  <thead>
+  <tr>
+    <th>Tier</th>
+    <th>Division</th>
+    <th>Player</th>
+    <th>Checked In</th>
+    <th>Matches Played</th>
+  </thead>
+  <tbody>
+  </tr>
+      {% for p in players %}
+      <tr>
+         <td>{{ p.division.tier.get_name() }}</td>
+         <td ><a href="http://challonge.com/{{ p.division.get_name() }}">{{ p.division.get_name() }}</a></td>
+         <td>{{ p.get_name() }}</td>
+         <td>{{ p.checked_in }}</td>
+         <td>{{ p.num_matches_played() }}</td>
+
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+<script>
+    $(document).ready( function () {
+        $('#players').dataTable({
+            "order": [[ 1, "desc" ]],
+            lengthMenu: [ [10, 50, -1], [10, 50, "All"] ],
+            iDisplayLength: -1,
+});
+    } );
+</script>
+{% endblock %}

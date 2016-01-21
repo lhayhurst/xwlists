@@ -212,12 +212,89 @@ class Ship(Base):
 class ShipUpgrade(Base):
     __tablename__ = ship_upgrade_table
     id = Column(Integer, primary_key=True)
-    ship_id = Column(Integer, ForeignKey('{0}.id'.format(ship_table))) #todo: change to ship id
+    ship_id = Column(Integer, ForeignKey('{0}.id'.format(ship_table)))
     upgrade_id = Column(Integer, ForeignKey('{0}.id'.format(upgrade_table) ) )
     upgrade = relationship( Upgrade.__name__, uselist=False)
     ship    = relationship( Ship.__name__, back_populates="upgrades")
 
+league_table = "league"
+class League(Base):
+    __tablename__ = league_table
+    id            = Column(Integer, primary_key=True)
+    name          = Column(String(128))
+    def get_name(self):
+        return decode( self.name )
+    tiers         = relationship( "Tier", back_populates="league", cascade="all,delete,delete-orphan")
+    matches       = relationship( "LeagueMatch", back_populates="league", cascade="all,delete,delete-orphan")
 
+
+tier_table = "league_tier"
+class Tier(Base):
+    __tablename__    = tier_table
+    id               = Column(Integer, primary_key=True)
+    league_id        = Column(Integer, ForeignKey( '{0}.id'.format(league_table) ) )
+    name             = Column(String(128))
+    def get_name(self):
+        return decode( self.name )
+    league           = relationship( League.__name__, back_populates="tiers")
+    divisions        = relationship( "Division", back_populates="tier", cascade="all,delete,delete-orphan")
+
+league_player_table = "league_player"
+division_table = "league_division"
+class LeaguePlayer(Base):
+    __tablename__ = league_player_table
+    id                = Column(Integer, primary_key=True)
+    challonge_id      = Column(Integer)
+    division_id       = Column(Integer, ForeignKey( '{0}.id'.format(division_table) ) )
+    division          = relationship( "Division", uselist=False)
+    name              = Column(String(128))
+    def get_name(self):
+        if self.name is None:
+            return ""
+        return decode( self.name )
+    checked_in        = Column(Boolean)
+    matches           = relationship("LeagueMatch", foreign_keys='LeagueMatch.player1_id')
+    def num_matches_played(self):
+        if self.matches is None:
+            return 0
+        num_completed = 0
+        for m in self.matches:
+            #print m.state
+            if m.state == 'complete':
+                num_completed += 1
+        return num_completed
+
+class Division(Base):
+    __tablename__     = division_table
+    id                = Column(Integer, primary_key=True)
+    tier_id           = Column(Integer, ForeignKey( '{0}.id'.format(tier_table) ) )
+    name              = Column(String(128))
+    def get_name(self):
+        return decode( self.name )
+    tier              = relationship( Tier.__name__, back_populates="divisions")
+    players           = relationship( LeaguePlayer.__name__, back_populates="division", cascade="all,delete,delete-orphan")
+
+
+league_match_table = "league_match"
+class LeagueMatch(Base):
+    __tablename__       = league_match_table
+    id                  = Column(Integer, primary_key=True)
+    player1_id          = Column(Integer, ForeignKey( '{0}.id'.format(league_player_table) ) )
+    player2_id          = Column(Integer, ForeignKey( '{0}.id'.format(league_player_table) ) )
+    league_id           = Column(Integer, ForeignKey( '{0}.id'.format(league_table) ) )
+    challonge_attachment_id = Column(Integer)
+    challonge_match_id  = Column(Integer)
+    player1_score       = Column(Integer)
+    player2_score       = Column(Integer)
+    state               = Column(String(45))
+
+    league             = relationship( League.__name__, uselist=False)
+    player1             = relationship( LeaguePlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player1_id')
+    player2             = relationship( LeaguePlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player2_id')
+    player1_list_id     = Column(Integer, ForeignKey( '{0}.id'.format(archtype_list_table) ) )
+    player2_list_id     = Column(Integer, ForeignKey( '{0}.id'.format(archtype_list_table) ) )
+    player1_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
+    player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
 
 class Tourney(Base):
     __tablename__ = tourney_table
@@ -352,9 +429,6 @@ class TourneyPlayer(Base):
 
     def get_player_name(self):
         return decode(self.player_name)
-
-
-
 
 class ArchtypeList(Base):
      __tablename__    = archtype_list_table
@@ -527,7 +601,6 @@ class ArchtypeTag(Base):
     tag_id           = Column(Integer, ForeignKey('{0}.id'.format(tag_table)))
     archtype         = relationship(ArchtypeList.__name__, uselist=False, back_populates="tags")
     tag              = relationship(Tag.__name__, uselist=False)
-
 
 class TourneyList(Base):
     __tablename__    = tourney_list_table
@@ -930,6 +1003,7 @@ class PersistenceManager:
         for t in all_tags:
             ret[ t.tagtext ] = 1
         return ret.keys()
+
     def get_tourney_ids(self):
         return self.db_connector.get_session().query(Tourney.id).all()
 
@@ -938,6 +1012,19 @@ class PersistenceManager:
 
     def get_all_lists(self):
         return self.db_connector.get_session().query(TourneyList).all()
+
+    def get_league(self, league_name):
+        return self.db_connector.get_session().query(League).filter(League.name == league_name).first()
+
+    def get_division(self, division_name):
+        return self.db_connector.get_session().query(Division).filter(Division.league_division_name == division_name).first()
+
+    def get_league_player(self, challonge_player_id):
+        return self.db_connector.get_session().query(LeaguePlayer).filter(LeaguePlayer.challonge_id == challonge_player_id).first()
+
+    def get_match_result(self, match_result_id):
+        return self.db_connector.get_session().query(LeagueMatch).\
+            filter(LeagueMatch.challonge_match_id == match_result_id ).first()
 
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)
@@ -1063,7 +1150,8 @@ class PersistenceManager:
         if ship_type == None and pilot == None:
             return self.db_connector.get_session().query(ShipPilot, Pilot).all()
         else:
-            query = self.db_connector.get_session().query(ShipPilot, Pilot).filter_by(ship_type=ShipType.from_description(ship_type)). \
+            query = self.db_connector.get_session().query(ShipPilot, Pilot).\
+                filter_by(ship_type=ShipType.from_description(ship_type)). \
                 filter(ShipPilot.pilot_id == Pilot.id). \
                 filter(pilot == Pilot.name)
             result_set = query.first()
@@ -1149,6 +1237,9 @@ class PersistenceManager:
         ret = ship_pilot_rollup.fetchall() + upgrade_rollup.fetchall()
         connection.close()
         return ret
+
+    def commit(self):
+        self.db_connector.get_session().commit()
 
     def get_upgrade_rollups(self, elimination_only,
                             storeChampionships=True,
