@@ -145,7 +145,6 @@ def bootstrap_league_players(c, league, pm):
                 if league_player.checked_in == False and lp['invitation-pending'] == False:
                     league_player.checked_in = True
                     changed = True
-
                 if changed:
                     #print "status change detected, set checked in to %s" % ( league_player.checked_in )
                     myapp.db_connector.get_session().add(league_player)
@@ -198,24 +197,26 @@ def create_default_match_result(match_result, league, pm):
 def update_match_result(match_result,dbmr,pm):
     #things that can change: score...thats it for now
     scores_csv = match_result['scores-csv']
+    if dbmr.player1.get_name() == 'sozin' and dbmr.player2.get_name() == 'MegaSilver_':
+        print "foo"
     p1_score = None
     p2_score = None
     changed  = False
     if scores_csv is not None:
         scores = str.split(scores_csv, '-')
-        p1_score = scores[0]
-        p2_score = scores[1]
+        p1_score = int(scores[0])
+        p2_score = int(scores[1])
         if p1_score != dbmr.player1_score:
             changed = True
-            dbmr.p1_score = p1_score
+            dbmr.player1_score = p1_score
         if p2_score != dbmr.player2_score:
             changed = True
-            dbmr.p2_score = p2_score
+            dbmr.player2_score = p2_score
 
     state = match_result['state']
     if state is not None and dbmr.state != state:
         dbmr.state = state
-        changed = False
+        changed = True
 
     return changed
 
@@ -233,7 +234,7 @@ def cache_league_results():
         print "fetching match results for division %s" % ( d.name )
         match_results_for_division = c.match_index(d.name)
         for match_result in match_results_for_division:
-            dbmr = pm.get_match_result( match_result['id'])
+            dbmr = pm.get_match_by_challonge_id( match_result['id'])
             if dbmr is None:
                 dbmr = create_default_match_result(match_result, league, pm)
                 myapp.db_connector.get_session().add( dbmr )
@@ -241,9 +242,7 @@ def cache_league_results():
                 changed = update_match_result(match_result,dbmr,pm)
                 if changed:
                     myapp.db_connector.get_session().add( dbmr )
-    print "commiting"
-    myapp.db_connector.get_session().commit()
-    print "committed"
+        myapp.db_connector.get_session().commit()
     return redirect(url_for('league_matches', league_id=league.id))
 
 @app.route("/league_matches")
@@ -310,29 +309,19 @@ def league_divisions():
     return render_template("league.html", league=league, league_stats=league_stats, player_stats=player_stats)
 
 
-@app.route("/list_escrow")
-def list_escrow():
-    p1id = request.args.get('p1id')
-    p2id = request.args.get('p2id')
-    players = simple_cache.get('challonge-players')
-    if players is None:
-        players = cache_xwvl_players()
-    p1 = players[int(p1id)]
-    p2 = players[int(p2id)]
-
-    #check to see if an entry exists
+@app.route("/escrow")
+def escrow():
+    match_id = request.args.get("match_id")
     pm = PersistenceManager(myapp.db_connector)
-    match_result = pm.get_match_result(p1['name'],p2['name'])
-    if match_result is None:
-        match_result = LeagueMatch()
-        match_result.player1 = p1['name']
-        match_result.player2 = p2['name']
-        match_result.player1_division = p1['division']
-        match_result.player2_division = p2['division']
-        pm.db_connector.get_session().add(match_result)
-        pm.db_connector.get_session().commit()
-    return render_template('league_escrow.html', match_result=match_result)
+    match = pm.get_match(match_id)
+    return render_template("league_escrow.html", match=match)
 
+@app.route("/escrow_list_url", methods=['POST'])
+def escrow_list_url():
+    player1listurl = request.args.get("playerlisturl")
+    player_id      = request.args.get("player_id")
+    match_id       = request.args.get("match_id")
+    print "foo"
 
 @app.route("/search")
 def versus():

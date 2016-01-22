@@ -296,6 +296,9 @@ class LeagueMatch(Base):
     player1_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
     player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
 
+    def needs_escrow(self):
+        return self.player1_list is None or self.player2_list is None
+
 class Tourney(Base):
     __tablename__ = tourney_table
     id = Column(Integer, primary_key=True)
@@ -1022,7 +1025,13 @@ class PersistenceManager:
     def get_league_player(self, challonge_player_id):
         return self.db_connector.get_session().query(LeaguePlayer).filter(LeaguePlayer.challonge_id == challonge_player_id).first()
 
-    def get_match_result(self, match_result_id):
+
+    def get_match(self, match_id):
+        return self.db_connector.get_session().query(LeagueMatch).\
+            filter(LeagueMatch.id == match_id ).first()
+
+
+    def get_match_by_challonge_id(self, match_result_id):
         return self.db_connector.get_session().query(LeagueMatch).\
             filter(LeagueMatch.challonge_match_id == match_result_id ).first()
 

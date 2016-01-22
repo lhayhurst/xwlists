@@ -19,7 +19,7 @@
     <th>Match State</th>
     <th>Player 1 Score</th>
     <th>Player 2 Score</th>
-    <th>Escrow lists</th>
+    <th>Lists</th>
   </thead>
   <tbody>
   </tr>
@@ -32,7 +32,11 @@
          <td>{{  m.state }}</td>
          <td>{{  m.player1_score }}</td>
          <td>{{  m.player2_score }}</td>
-         <td >Stay tuned!</td>
+         {% if m.needs_escrow() %}
+        <td ><a href="{{ url_for( 'escrow', match_id=m.id) }}">Setup escrow</a></td>
+         {% else %}
+        <td ><a href="{{ url_for( 'escrow', match_id=m.id) }}">View escrow</a></td>
+         {% endif %}
       </tr>
       {% endfor %}
   </tbody>

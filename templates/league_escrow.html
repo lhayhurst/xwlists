@@ -1,5 +1,71 @@
 {% extends "layout.html" %}
 {% block content %}
-Player1: {{ match_result.player1 }}
-Player2: {{ match_result.player2 }}
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('update_tourney_details') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data"
+      data-parsley-validate >
+    <fieldset>
+        <legend>Escrow your list!</legend>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Player 1</label>
+                <input type="text" name="player1" value="{{ match.player1.get_name() }}"  required/>
+            </div>
+            <div data-field-span="1">
+                <label>Player 2</label>
+                <input type="text" name="player2" value="{{ match.player2.get_name() }}" required/>
+            </div>
+        </div>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Player 1: Paste link to YASB, Voidstate, or Fabs list directly below</label>
+                <input type="text" id="player1_url" name="player1_url"  data-parsley-type="url" />
+            </div>
+            <div data-field-span="1">
+                <label>Player 2: Paste YASB, Voidstate, or Fabs directly list</label>
+                <input type="text" id="player2_url" name="player2_url"  data-parsley-type="url" />
+            </div>
+        <div>
+    </fieldset>
+
+</form>
+
+<script>
+
+var match_id   = {{ match.id }}
+var player1_id   = {{ match.player1.id }}
+var player1_id   = {{ match.player2.id }}
+
+$("#player1_url").keyup(function (e) {
+    if (e.keyCode == 13) { //enter pressed
+        var playerurl = document.getElementById('player1_url').value;
+        console.log("got url " + playerurl);
+        var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
+        var regex = new RegExp(expression);
+        if (playerurl.match(regex) )
+        {
+            var url = "/escrow_list_url?match_id=" + match_id + "&playerlisturl=" + encodeURIComponent(playerurl);
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: url,
+                success: function (data) {
+                    alert("got reply back");
+                },
+                error: function (data) {
+                    alert("something went wrong -- got response '" + data.responseJSON.message);
+                },
+                dataType: "json"
+            });
+         } else {
+           alert("invalid url, please provide something like 'https://geordanr.github.io/xwing/?f=Galactic%20Empire&d=v3!s!70:98,23,-1:-1:-1:;78:27,36,46:-1:9:;15::-1:-1:'");
+        }
+    }
+});
+</script>
+
 {% endblock %}
