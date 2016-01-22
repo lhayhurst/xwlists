@@ -197,8 +197,6 @@ def create_default_match_result(match_result, league, pm):
 def update_match_result(match_result,dbmr,pm):
     #things that can change: score...thats it for now
     scores_csv = match_result['scores-csv']
-    if dbmr.player1.get_name() == 'sozin' and dbmr.player2.get_name() == 'MegaSilver_':
-        print "foo"
     p1_score = None
     p2_score = None
     changed  = False
