@@ -257,19 +257,32 @@ def get_league_stats(league):
     # Division  |  Percent Complete  | Completed | Open
     for match_result in league.matches:
         p1division = match_result.player1.division
-        division_name = p1division.get_name()
-        if not league_stats.has_key(division_name):
-            league_stats[division_name] = { 'name': division_name, 'total' : 0, 'complete': 0, 'open' : 0}
-        ls = league_stats[division_name]
+        p2division = match_result.player2.division
+        player1_division_name = p1division.get_name()
+        player2_division_name = p2division.get_name()
+
+        if not league_stats.has_key(player1_division_name):
+            league_stats[player1_division_name] = { 'name': player1_division_name, 'total' : 0, 'complete': 0, 'open' : 0}
+
+        if not league_stats.has_key(player2_division_name):
+            league_stats[player2_division_name] = { 'name': player2_division_name, 'total' : 0, 'complete': 0, 'open' : 0}
+
+        ls = league_stats[player1_division_name]
+        ls[match_result.state] +=1
+        ls['total'] +=1
+
+        ls = league_stats[player2_division_name]
         ls[match_result.state] +=1
         ls['total'] +=1
 
 
       # Player    | Division  |  Wins   | Losses | Draws | MoV  | SoS
-        player_name = match_result.player1.get_name()
-        if not player_stats.has_key(player_name):
-            player_stats[player_name] = { 'division' : division_name,
-                                          'player': player_name,
+        player1_name = match_result.player1.get_name()
+        player2_name = match_result.player2.get_name()
+
+        if not player_stats.has_key(player1_name):
+            player_stats[player1_name] = { 'division' : player1_division_name,
+                                          'player': player1_name,
                                           'total': 0,
                                           'wins': 0,
                                           'losses': 0,
@@ -278,24 +291,59 @@ def get_league_stats(league):
                                           'SoS': 0,
                                           'points':0}
 
+        if not player_stats.has_key(player2_name):
+            player_stats[player2_name] = { 'division' : player2_division_name,
+                                          'player': player2_name,
+                                          'total': 0,
+                                          'wins': 0,
+                                          'losses': 0,
+                                          'draws' : 0,
+                                          'MoV': 0,
+                                          'SoS': 0,
+                                          'points':0}
+
+
         if match_result.state == 'complete':
-            ps = player_stats[player_name]
-            ps['total'] += 1
+            ps1 = player_stats[player1_name]
+            ps1['total'] += 1
+            ps2 = player_stats[player2_name]
+            ps2['total'] += 1
+
             if match_result.player1_score > match_result.player2_score: #I won!
-                ps['wins'] += 1
+                ps1['wins'] += 1
                 diff = 100+ match_result.player1_score - match_result.player2_score
                 if diff >= 12:
-                    ps['points'] +=5
+                    ps1['points'] +=5
                 else:
-                    ps['points'] += 3
-                ps['MoV'] += diff
+                    ps1['points'] += 3
+                ps1['MoV'] += diff
+
+                #and calculate the other side it for player2
+                diff = 100 - match_result.player1_score + match_result.player2_score
+                ps2['losses'] +=1
+                ps2['MoV'] += diff
+
             elif match_result.player1_score == match_result.player2_score: #I drew!
-                ps['draws'] +=1 #and no change to MoV
-                ps['points'] +=1
+                ps1['draws'] +=1 #and no change to MoV
+                ps1['points'] +=1
+                ps2['draws'] +=1 #and no change to MoV
+                ps2['points'] +=1
+
             else: #I lost!
-                ps['losses'] +=1
+                ps1['losses'] +=1
                 diff = 100 - match_result.player2_score + match_result.player1_score
-                ps['MoV'] += diff
+                ps1['MoV'] += diff
+
+                ps2['wins'] += 1
+                diff = 100 + match_result.player2_score - match_result.player1_score
+                if diff >= 12:
+                    ps2['points'] +=5
+                else:
+                    ps2['points'] += 3
+                ps2['MoV'] += diff
+
+
+
 
     return league_stats, player_stats
 
