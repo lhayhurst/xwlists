@@ -70,7 +70,14 @@ var needs_escrow = {{ needs_escrow  }}
 var my_list_text;
 var my_player;
 var timer;
+
+messages = [ ".", "..", "...", "....", "....."]
+message_hi = 4
+message_lo = 0
+current_message = 0
+
 $(document).ready(function() {
+
 
     (function pollForEscrow() {
         $.ajax({
@@ -80,18 +87,25 @@ $(document).ready(function() {
             success: function (data) {
                 player1List = document.getElementById('player1List');
                 player2List = document.getElementById('player2List');
+                console.log(data);
 
                 if (my_player == data.player1_id) {
                     player1List.innerHTML = my_list_text;
                 }
                 else {
-                    player1List.innerHTML = data.player1_list;
+                    player1List.innerHTML = messages[current_message]
                 }
                 if (my_player == data.player2_id) {
                    player2List.innerHTML = my_list_text;
                 }
                 else {
-                    player2List.innerHTML = data.player2_list;
+                    player2List.innerHTML = messages[current_message]
+                }
+                if ( current_message == 4 ) {
+                    current_message = 0;
+                }
+                else {
+                    current_message += 1;
                 }
                 if (!data.escrow_complete) {
                     setTimeout(pollForEscrow, 1500);
@@ -156,7 +170,9 @@ function onEnterPressed(player_id, urlElementId, textAreaId, statsSpanId) {
                 }
                 summaryTable += "Times taken in tournaments: " + data.archtype_tourney_count + "<br>"
                 summaryTable += "Times taken in league play: " + data.archtype_league_count + "<br>"
-                summaryTable += '<a href="' + data.archtype_url + '">More archtype info</a>'
+                if ( parseInt(data.archtype_tourney_count) > 0) {
+                    summaryTable += '<a href="' + data.archtype_url + '">More archtype info</a>'
+                }
                 statsSpan.innerHTML = summaryTable
             },
             error: function (data) {
