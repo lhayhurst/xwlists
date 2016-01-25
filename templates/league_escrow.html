@@ -93,13 +93,17 @@ $(document).ready(function() {
                     player1List.innerHTML = my_list_text;
                 }
                 else {
-                    player1List.innerHTML = messages[current_message]
+                    if ( my_player != null ) {
+                        player1List.innerHTML = messages[current_message]
+                    }
                 }
                 if (my_player == data.player2_id) {
                    player2List.innerHTML = my_list_text;
                 }
                 else {
-                    player2List.innerHTML = messages[current_message]
+                    if ( my_player != null ) {
+                        player2List.innerHTML = messages[current_message]
+                    }
                 }
                 if ( current_message == 4 ) {
                     current_message = 0;
