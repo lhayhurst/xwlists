@@ -33,10 +33,10 @@ class XWSListConverter:
 
 class GeneralXWSFetcher:
     fab_root        = "http://x-wing.fabpsb.net/"
-    voidstate_root  = "http://xwing-builder.co.uk/xws/"
+    voidstate_root  = "http://xwing-builder.co.uk/"
     yasb_root       = "https://geordanr.github.io/xwing/"
 
-    voidstate_regex = re.compile( r'' + voidstate_root + r'(\d+)' )
+    voidstate_regex = re.compile( r'' + voidstate_root + r'.*?(\d+)' )
 
     def fetch(self, url):
         xws = None
