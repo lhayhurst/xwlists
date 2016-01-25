@@ -370,6 +370,8 @@ def escrow():
     needs_escrow = 0
     if match.needs_escrow():
         needs_escrow = 1
+    if player_id is None:
+        player_id = 0
     return render_template("league_escrow.html",
                            match=match,
                            selected_player_id=int(player_id),

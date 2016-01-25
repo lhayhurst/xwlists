@@ -162,8 +162,8 @@ class XWSToJuggler:
         hashkey = ArchtypeList.generate_hash_key(ships)
 
         archtype = pm.get_archtype_by_hashkey(hashkey)
-
         first_time_archtype_seen = False
+
         if archtype is None:
             #ding ding!
             #we've never seen this list before!
@@ -171,7 +171,6 @@ class XWSToJuggler:
             #refactor it if we get a third way of adding archtypes
             first_time_archtype_seen = True
             archtype = ArchtypeList()
-            pm.db_connector.get_session().add(archtype)
             archtype.ships = ships
             for ship in ships:
                 ship.archtype = archtype
@@ -180,6 +179,9 @@ class XWSToJuggler:
             archtype.faction = Faction.from_string( faction )
             archtype.points  = points
             archtype.pretty  = archtype.pretty_print_list()
+            archtype.hashkey = hashkey
+
+            pm.db_connector.get_session().add(archtype)
             pm.db_connector.get_session().commit()
 
         if tourney_list is not None:

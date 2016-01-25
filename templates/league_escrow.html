@@ -146,11 +146,14 @@ function onEnterPressed(player_id, urlElementId, textAreaId, statsSpanId) {
                 statsSpan = document.getElementById(statsSpanId);
                 console.log(data);
                 var newList = "";
-                if ( parseInt(data.total_count) <= 1 ) {
-                    newList = '<br><br><b>Congrats</b>!  A never seen before list!<br>'
-                }
                 summaryTable  = "<br><b>List Trivia</b><br>"
-                summaryTable += newList + "Total times taken: " + data.total_count + "<br>"
+                summaryTable += newList + "Total times taken: " + data.total_count
+                if ( parseInt(data.total_count) == 1 ) {
+                    summaryTable += ' (That is you!  Nice job, James T Kirk!)<br>'
+                }
+                else {
+                    summaryTable += "<br>"
+                }
                 summaryTable += "Times taken in tournaments: " + data.archtype_tourney_count + "<br>"
                 summaryTable += "Times taken in league play: " + data.archtype_league_count + "<br>"
                 summaryTable += '<a href="' + data.archtype_url + '">More archtype info</a>'
