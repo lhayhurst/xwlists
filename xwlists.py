@@ -363,7 +363,8 @@ def league_divisions():
 
 @app.route("/escrow")
 def escrow():
-    match_id = request.args.get("match_id")
+    match_id  = request.args.get("match_id")
+    player_id = request.args.get("player_id")
     pm = PersistenceManager(myapp.db_connector)
     match = pm.get_match(match_id)
     needs_escrow = 0
@@ -371,6 +372,7 @@ def escrow():
         needs_escrow = 1
     return render_template("league_escrow.html",
                            match=match,
+                           selected_player_id=int(player_id),
                            needs_escrow=needs_escrow)
 
 @app.route("/escrow_change")
@@ -427,7 +429,14 @@ def escrow_list_url():
                 list_link = match.get_player_list_url(player_id)
                 list_text = archtype.pretty_print_list()
 
-                return jsonify( was_original=first_time_archtype_seen,
+                archtype_tourney_count = pm.archtype_tourney_count(archtype)
+                archtype_league_count  = pm.archtype_league_count(archtype)
+
+                return jsonify( archtype_tourney_count=archtype_tourney_count,
+                                archtype_league_count=archtype_league_count,
+                                archtype_url=url_for("archtype", id=archtype.id),
+                                total_count=archtype_tourney_count+archtype_league_count,
+                                was_original=first_time_archtype_seen,
                                 list_text=list_text,
                                 list_link=list_link,
                                 player_id=player_id,
@@ -486,7 +495,6 @@ def get_tourney_results():
 
 @app.route("/archtypes")
 def archtypes():
-    print "getting archtypes"
     archtypes = simple_cache.get('archtypes')
     if archtypes is None:
         pm = PersistenceManager(myapp.db_connector)

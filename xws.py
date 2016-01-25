@@ -161,7 +161,7 @@ class XWSToJuggler:
 
         hashkey = ArchtypeList.generate_hash_key(ships)
 
-        archtype = pm.get_archtype(hashkey)
+        archtype = pm.get_archtype_by_hashkey(hashkey)
 
         first_time_archtype_seen = False
         if archtype is None:

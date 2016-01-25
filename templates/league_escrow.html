@@ -1,22 +1,34 @@
 {% extends "layout.html" %}
 {% block content %}
+<style>
+P { text-align: center }
+</style>
 
-Please <a href="https://docs.google.com/document/d/1_6Il-zEbNtnm9q5SZO3Z9mHUT2LpN3LNk6bnpDPME1w/pub">read this guide for help on how to escrow your list!</a>
-<br>
-<br>
+{% if match.player1.id == selected_player_id %}
+    {% set p1autofocus = "autofocus" %}
+    {% set p2autofocus = "" %}
+{% else %}
+    {% set p2autofocus = "autofocus" %}
+    {% set p1autofocus = "" %}
+{% endif %}
+<P>If you need help, please <a href="https://docs.google.com/document/d/1_6Il-zEbNtnm9q5SZO3Z9mHUT2LpN3LNk6bnpDPME1w/pub">see this guide for help on how to escrow your list!</a><br></h2>
+</P>
+<p>After you've pasted in the link to your list, simply wait for your opponent's list to appear on the page!</p>
+<br><br>
 <form id="form"
       class="grid-form"
       action="{{ url_for('update_tourney_details') }}"
       method=POST
       class="add-entry"
-      enctype="multipart/form-data"
-      data-parsley-validate >
+      enctype="multipart/form-data">
     <fieldset>
         <legend>Escrow your list!</legend>
         <div data-row-span="2">
             <div data-field-span="1">
                 <label>Player 1</label>
-                <input type="text" name="player1" value="{{ match.player1.get_name() | safe }}"  required/>
+                <input type="text"
+                       name="player1"
+                       value="{{ match.player1.get_name() | safe }}"/>
             </div>
             <div data-field-span="1">
                 <label>Player 2</label>
@@ -26,11 +38,11 @@ Please <a href="https://docs.google.com/document/d/1_6Il-zEbNtnm9q5SZO3Z9mHUT2Lp
         <div data-row-span="2">
             <div data-field-span="1">
                 <label>Player 1</label>
-                <input type="text" id="player1_url" name="player1_url" placeholder="Insert player1 list URL here and hit the return key"  />
+                <input type="text" id="player1_url" name="player1_url"  placeholder="Insert player1 list URL here and hit the return key" {{ p1autofocus }}/>
             </div>
             <div data-field-span="1">
                 <label>Player 2</label>
-                <input type="text" id="player2_url" name="player2_url"  placeholder="Insert player2 list URL here and hit the return key" />
+                <input type="text" id="player2_url" name="player2_url"  placeholder="Insert player2 list URL here and hit the return key" {{ p2autofocus }}/>
             </div>
         </div>
         <div data-row-span="2">
@@ -42,11 +54,12 @@ Please <a href="https://docs.google.com/document/d/1_6Il-zEbNtnm9q5SZO3Z9mHUT2Lp
                 <label>Player 2 list</label>
                 <span id="player2List">{{ match.get_player2_escrow_text() | safe }} </span>
             </div>
-
         </div>
     </fieldset>
 </form>
-
+<div>
+<span id="player-list-stats"></span>
+</div>
 <script>
 
 
@@ -54,7 +67,6 @@ var match_id     = {{ match.id }}
 var player1_id   = {{ match.player1.id }}
 var player2_id   = {{ match.player2.id }}
 var needs_escrow = {{ needs_escrow  }}
-console.log("needs escrow == " + needs_escrow)
 var my_list_text;
 var my_player;
 var timer;
@@ -68,6 +80,7 @@ $(document).ready(function() {
             success: function (data) {
                 player1List = document.getElementById('player1List');
                 player2List = document.getElementById('player2List');
+
                 if (my_player == data.player1_id) {
                     player1List.innerHTML = my_list_text;
                 }
@@ -81,7 +94,7 @@ $(document).ready(function() {
                     player2List.innerHTML = data.player2_list;
                 }
                 if (!data.escrow_complete) {
-                    setTimeout(pollForEscrow, 1000);
+                    setTimeout(pollForEscrow, 1500);
                 }
                 else {
                     console.log("escrow is complete")
@@ -97,17 +110,17 @@ $(document).ready(function() {
 
 $("#player1_url").keyup(function (e) {
     if (e.keyCode == 13) { //enter pressed
-        onEnterPressed(player1_id, 'player1_url', 'player1List');
+        onEnterPressed(player1_id, 'player1_url', 'player1List', 'player-list-stats');
     }
 });
 
 $("#player2_url").keyup(function (e) {
     if (e.keyCode == 13) { //enter pressed
-        onEnterPressed(player2_id, 'player2_url', 'player2List');
+        onEnterPressed(player2_id, 'player2_url', 'player2List', 'player-list-stats');
     }
 });
 
-function onEnterPressed(player_id, urlElementId, textAreaId) {
+function onEnterPressed(player_id, urlElementId, textAreaId, statsSpanId) {
     var playerurl = document.getElementById(urlElementId).value;
     var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
     var regex = new RegExp(expression);
@@ -130,6 +143,18 @@ function onEnterPressed(player_id, urlElementId, textAreaId) {
                 textSpan = document.getElementById(textAreaId);
                 my_list_text = data.list_link + data.list_text;
                 textSpan.innerHTML = my_list_text;
+                statsSpan = document.getElementById(statsSpanId);
+                console.log(data);
+                var newList = "";
+                if ( data.archtype_count == 0 ) {
+                    newList = "<br><br>Congrats!  A never seen before list!"
+                }
+                summaryTable  = "<br><b>List Trivia</b><br>"
+                summaryTable += newList + "Total times taken: " + data.total_count + "<br>"
+                summaryTable += "Times taken in tournaments: " + data.archtype_tourney_count + "<br>"
+                summaryTable += "Times taken in league play: " + data.archtype_league_count + "<br>"
+                summaryTable += '<a href="' + data.archtype_url + '">More archtype info</a>'
+                statsSpan.innerHTML = summaryTable
             },
             error: function (data) {
                 textSpan = document.getElementById(textAreaId);

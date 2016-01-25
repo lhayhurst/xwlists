@@ -1189,6 +1189,26 @@ class PersistenceManager:
         self.db_connector.get_session().delete(tourney)
         self.db_connector.get_session().commit()
 
+    def archtype_tourney_count(self, archtype):
+        ret = self.db_connector.get_session().query(TourneyList.id).\
+            filter(TourneyList.archtype_id == ArchtypeList.id).\
+            filter(archtype.id == ArchtypeList.id)
+        lists = ret.all()
+        return len(lists)
+
+    def archtype_league_count(self, archtype):
+        ret = self.db_connector.get_session().query(LeagueMatch.id).\
+            filter(or_(LeagueMatch.player1_list_id == archtype.id,
+                       LeagueMatch.player2_list_id == archtype.id ) )
+        lists = ret.all()
+        return len(lists)
+
+
+        return self.db_connector.get_session().query(func.count(LeagueMatch)).\
+            filter(archtype.id == ArchtypeList.id).\
+            filter(or_( ArchtypeList.id == LeagueMatch.player1_list_id, ArchtypeList.id == LeagueMatch.player2_list_id,) ).\
+            first()[0]
+
     def delete_tourney_list_details(self, tourney_list):
 
         #unlink the relationship between this tourney list and its archtype

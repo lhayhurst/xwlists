@@ -34,8 +34,8 @@
          <td>{{  m.player1_score }}</td>
          <td>{{  m.player2_score }}</td>
          {% if m.needs_escrow() %}
-        <td ><a href="{{ url_for( 'escrow', match_id=m.id) }}">Setup escrow</a></td>
-        <td ><a href="{{ url_for( 'escrow', match_id=m.id) }}">Setup escrow</a></td>
+        <td ><a href="{{ url_for( 'escrow', match_id=m.id, player_id=m.player1.id) }}">Setup escrow</a></td>
+        <td ><a href="{{ url_for( 'escrow', match_id=m.id, player_id=m.player2.id) }}">Setup escrow</a></td>
          {% else %}
         <td >{{ m.get_player1_escrow_text() | safe }}
         <td >{{ m.get_player2_escrow_text() | safe }}
@@ -56,7 +56,18 @@
                 {
                     "type": "num-html", targets: [6,7]
                 }
-            ]
+            ],
+            "columns": [
+                    { "width": "13%"},
+                    { "width": "10%"},
+                    { "width": "13%"},
+                    { "width": "5%"},
+                    { "width": "5%"},
+                    { "width": "2%"},
+                    { "width": "2%"},
+                    { "width": "25%"},
+                    { "width": "25%"},
+            ],
         });
     } );
 </script>
