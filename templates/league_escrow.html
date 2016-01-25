@@ -146,8 +146,8 @@ function onEnterPressed(player_id, urlElementId, textAreaId, statsSpanId) {
                 statsSpan = document.getElementById(statsSpanId);
                 console.log(data);
                 var newList = "";
-                if ( data.archtype_count == 0 ) {
-                    newList = "<br><br>Congrats!  A never seen before list!"
+                if ( parseInt(data.total_count) <= 1 ) {
+                    newList = '<br><br><b>Congrats</b>!  A never seen before list!<br>'
                 }
                 summaryTable  = "<br><b>List Trivia</b><br>"
                 summaryTable += newList + "Total times taken: " + data.total_count + "<br>"
