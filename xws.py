@@ -1,6 +1,8 @@
 import json
 import urllib2
+from urlparse import urlparse
 from BeautifulSoup import BeautifulSoup
+import re
 from persistence import TourneyList, Faction, Ship, ShipUpgrade, ArchtypeList
 
 
@@ -29,6 +31,31 @@ class XWSListConverter:
                     pilot_upgrades[ut] = []
                 pilot_upgrades[ut].append( ship_upgrade.upgrade.canon_name)
 
+class GeneralXWSFetcher:
+    fab_root        = "http://x-wing.fabpsb.net/"
+    voidstate_root  = "http://xwing-builder.co.uk/xws/"
+    yasb_root       = "https://geordanr.github.io/xwing/"
+
+    voidstate_regex = re.compile( r'' + voidstate_root + r'(\d+)' )
+
+    def fetch(self, url):
+        xws = None
+        if url.startswith( GeneralXWSFetcher.fab_root ):
+            xws = FabFetcher().fetch(url)
+        elif url.startswith( GeneralXWSFetcher.voidstate_root ):
+            #pull the list id out of the url
+            #http://xwing-builder.co.uk/xws/127077#view=full
+            match = GeneralXWSFetcher.voidstate_regex.match( url )
+            if match is None:
+                return None
+            xws = VoidStateXWSFetcher().fetch( match.group(1))
+        elif url.startswith( GeneralXWSFetcher.yasb_root):
+            #extract out the uri from the base
+            o = urlparse( url )
+            if o is None:
+                return None
+            xws = YASBFetcher().fetch(o.query)
+        return xws
 
 
 class FabFetcher:
@@ -51,7 +78,7 @@ class YASBFetcher:
 class VoidStateXWSFetcher:
 
     def fetch(self, list_id):
-        url = "http://xwing-builder.co.uk/xws/" + str(list_id) + "#view=full"
+        url = GeneralXWSFetcher.voidstate_root + str(list_id) + "#view=full"
         print "fetching url " + url
         response = urllib2.urlopen(url)
         html = response.read()
@@ -72,7 +99,7 @@ class XWSToJuggler:
     def __init__(self, xws ):
         self.xws = xws
 
-    def convert(self, pm, tourney_list):
+    def convert(self, pm, tourney_list=None):
         xws     = self.xws
         name    = None
         if xws.has_key( name ):
@@ -80,14 +107,12 @@ class XWSToJuggler:
         faction = xws['faction']
         pilots  = xws['pilots']
 
-        tourney_list.name = name
         #TODO: temporary hack
         if faction == "rebels":
             faction = "rebel"
         if faction == "empire":
             faction = "imperial"
 
-        tourney_list.faction = Faction.from_string(faction)
 
 
         points = 0
@@ -138,11 +163,13 @@ class XWSToJuggler:
 
         archtype = pm.get_archtype(hashkey)
 
+        first_time_archtype_seen = False
         if archtype is None:
             #ding ding!
             #we've never seen this list before!
             #note that this quote is a dupe of the add_squads method in xwlists.py
             #refactor it if we get a third way of adding archtypes
+            first_time_archtype_seen = True
             archtype = ArchtypeList()
             pm.db_connector.get_session().add(archtype)
             archtype.ships = ships
@@ -155,7 +182,12 @@ class XWSToJuggler:
             archtype.pretty  = archtype.pretty_print_list()
             pm.db_connector.get_session().commit()
 
-        tourney_list.archtype = archtype
-        tourney_list.archtype_id = archtype.id
-        pm.db_connector.get_session().add(tourney_list)
-        pm.db_connector.get_session().commit()
+        if tourney_list is not None:
+            tourney_list.name = name
+            tourney_list.faction = Faction.from_string(faction)
+            tourney_list.archtype = archtype
+            tourney_list.archtype_id = archtype.id
+            pm.db_connector.get_session().add(tourney_list)
+            pm.db_connector.get_session().commit()
+
+        return archtype, first_time_archtype_seen

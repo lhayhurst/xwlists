@@ -19,7 +19,8 @@
     <th>Match State</th>
     <th>Player 1 Score</th>
     <th>Player 2 Score</th>
-    <th>Lists</th>
+    <th>Player 1 List</th>
+    <th>Player 2 List</th>
   </thead>
   <tbody>
   </tr>
@@ -34,8 +35,10 @@
          <td>{{  m.player2_score }}</td>
          {% if m.needs_escrow() %}
         <td ><a href="{{ url_for( 'escrow', match_id=m.id) }}">Setup escrow</a></td>
+        <td ><a href="{{ url_for( 'escrow', match_id=m.id) }}">Setup escrow</a></td>
          {% else %}
-        <td ><a href="{{ url_for( 'escrow', match_id=m.id) }}">View escrow</a></td>
+        <td >{{ m.get_player1_escrow_text() | safe }}
+        <td >{{ m.get_player2_escrow_text() | safe }}
          {% endif %}
       </tr>
       {% endfor %}
@@ -43,12 +46,18 @@
 </table>
 
 <script>
+
     $(document).ready( function () {
         $('#matches').dataTable({
             "order": [[ 1, "asc" ]],
             lengthMenu: [ [10, 50, -1], [10, 50, "All"] ],
             iDisplayLength: -1,
-});
+            "columnDefs": [
+                {
+                    "type": "num-html", targets: [6,7]
+                }
+            ]
+        });
     } );
 </script>
 {% endblock %}

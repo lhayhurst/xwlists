@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
 
+Please <a href="https://docs.google.com/document/d/1_6Il-zEbNtnm9q5SZO3Z9mHUT2LpN3LNk6bnpDPME1w/pub">read this guide for help on how to escrow your list!</a>
+<br>
+<br>
 <form id="form"
       class="grid-form"
       action="{{ url_for('update_tourney_details') }}"
@@ -13,59 +16,132 @@
         <div data-row-span="2">
             <div data-field-span="1">
                 <label>Player 1</label>
-                <input type="text" name="player1" value="{{ match.player1.get_name() }}"  required/>
+                <input type="text" name="player1" value="{{ match.player1.get_name() | safe }}"  required/>
             </div>
             <div data-field-span="1">
                 <label>Player 2</label>
-                <input type="text" name="player2" value="{{ match.player2.get_name() }}" required/>
+                <input type="text" name="player2" value="{{ match.player2.get_name() | safe }}"  required/>
             </div>
         </div>
         <div data-row-span="2">
             <div data-field-span="1">
-                <label>Player 1: Paste link to YASB, Voidstate, or Fabs list directly below</label>
-                <input type="text" id="player1_url" name="player1_url"  data-parsley-type="url" />
+                <label>Player 1</label>
+                <input type="text" id="player1_url" name="player1_url" placeholder="Insert player1 list URL here and hit the return key"  />
             </div>
             <div data-field-span="1">
-                <label>Player 2: Paste YASB, Voidstate, or Fabs directly list</label>
-                <input type="text" id="player2_url" name="player2_url"  data-parsley-type="url" />
+                <label>Player 2</label>
+                <input type="text" id="player2_url" name="player2_url"  placeholder="Insert player2 list URL here and hit the return key" />
             </div>
-        <div>
-    </fieldset>
+        </div>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Player 1 list</label>
+                <span id="player1List">{{ match.get_player1_escrow_text() | safe  }}</span>
+            </div>
+            <div data-field-span="1">
+                <label>Player 2 list</label>
+                <span id="player2List">{{ match.get_player2_escrow_text() | safe }} </span>
+            </div>
 
+        </div>
+    </fieldset>
 </form>
 
 <script>
 
-var match_id   = {{ match.id }}
+
+var match_id     = {{ match.id }}
 var player1_id   = {{ match.player1.id }}
-var player1_id   = {{ match.player2.id }}
+var player2_id   = {{ match.player2.id }}
+var needs_escrow = {{ needs_escrow  }}
+console.log("needs escrow == " + needs_escrow)
+var my_list_text;
+var my_player;
+var timer;
+$(document).ready(function() {
+
+    (function pollForEscrow() {
+        $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            url: "/escrow_change?match_id=" + match_id,
+            success: function (data) {
+                player1List = document.getElementById('player1List');
+                player2List = document.getElementById('player2List');
+                if (my_player == data.player1_id) {
+                    player1List.innerHTML = my_list_text;
+                }
+                else {
+                    player1List.innerHTML = data.player1_list;
+                }
+                if (my_player == data.player2_id) {
+                   player2List.innerHTML = my_list_text;
+                }
+                else {
+                    player2List.innerHTML = data.player2_list;
+                }
+                if (!data.escrow_complete) {
+                    setTimeout(pollForEscrow, 1000);
+                }
+                else {
+                    console.log("escrow is complete")
+                }
+            },
+            error: function (data) {
+            },
+            dataType: "json"
+        })
+    })()
+} );
+
 
 $("#player1_url").keyup(function (e) {
     if (e.keyCode == 13) { //enter pressed
-        var playerurl = document.getElementById('player1_url').value;
-        console.log("got url " + playerurl);
-        var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
-        var regex = new RegExp(expression);
-        if (playerurl.match(regex) )
-        {
-            var url = "/escrow_list_url?match_id=" + match_id + "&playerlisturl=" + encodeURIComponent(playerurl);
-            $.ajax({
-                type: "POST",
-                contentType: "application/json; charset=utf-8",
-                url: url,
-                success: function (data) {
-                    alert("got reply back");
-                },
-                error: function (data) {
-                    alert("something went wrong -- got response '" + data.responseJSON.message);
-                },
-                dataType: "json"
-            });
-         } else {
-           alert("invalid url, please provide something like 'https://geordanr.github.io/xwing/?f=Galactic%20Empire&d=v3!s!70:98,23,-1:-1:-1:;78:27,36,46:-1:9:;15::-1:-1:'");
-        }
+        onEnterPressed(player1_id, 'player1_url', 'player1List');
     }
 });
+
+$("#player2_url").keyup(function (e) {
+    if (e.keyCode == 13) { //enter pressed
+        onEnterPressed(player2_id, 'player2_url', 'player2List');
+    }
+});
+
+function onEnterPressed(player_id, urlElementId, textAreaId) {
+    var playerurl = document.getElementById(urlElementId).value;
+    var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
+    var regex = new RegExp(expression);
+
+    my_player = player_id;
+
+    if (playerurl.match(regex) )
+    {
+        textSpan = document.getElementById(textAreaId);
+        textSpan.innerHTML = "Looking up your list..."
+
+        var url = "/escrow_list_url?match_id=" + match_id +
+                "&player_id=" + player_id +
+                "&player_list_url=" + encodeURIComponent(playerurl);
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: url,
+            success: function (data) {
+                textSpan = document.getElementById(textAreaId);
+                my_list_text = data.list_link + data.list_text;
+                textSpan.innerHTML = my_list_text;
+            },
+            error: function (data) {
+                textSpan = document.getElementById(textAreaId);
+                textSpan.innerHTML = "something went wrong -- got response '" + data.responseJSON.message;
+            },
+            dataType: "json"
+        });
+     } else {
+        errorMessageSpan.innerHTML = data.responseJSON.message;
+    }
+}
+
 </script>
 
 {% endblock %}

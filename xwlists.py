@@ -7,6 +7,8 @@ import uuid
 from flask import render_template, request, url_for, redirect, jsonify, Response, send_from_directory
 from flask.ext.mail import Mail, Message
 import sys
+import re
+from markupsafe import Markup
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI
@@ -23,7 +25,7 @@ from rollup import Rollup
 from search import Search
 from uidgen import ListUIDGen
 import xwingmetadata
-from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher
+from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher, GeneralXWSFetcher
 from flask.ext import restful
 from flask_cors import CORS
 
@@ -352,7 +354,11 @@ def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
     league = pm.get_league("X-Wing Vassal League Season Zero")
     league_stats, player_stats = get_league_stats(league)
-    return render_template("league.html", league=league, league_stats=league_stats, player_stats=player_stats)
+
+    return render_template("league.html",
+                           league=league,
+                           league_stats=league_stats,
+                           player_stats=player_stats)
 
 
 @app.route("/escrow")
@@ -360,14 +366,78 @@ def escrow():
     match_id = request.args.get("match_id")
     pm = PersistenceManager(myapp.db_connector)
     match = pm.get_match(match_id)
-    return render_template("league_escrow.html", match=match)
+    needs_escrow = 0
+    if match.needs_escrow():
+        needs_escrow = 1
+    return render_template("league_escrow.html",
+                           match=match,
+                           needs_escrow=needs_escrow)
+
+@app.route("/escrow_change")
+def escrow_change():
+    match_id  = request.args.get("match_id")
+    pm        = PersistenceManager(myapp.db_connector)
+    match     = pm.get_match(match_id)
+    escrow_complete = 1
+    if match.needs_escrow():
+        escrow_complete = 0
+
+    response  = jsonify(player1_list=match.get_player1_escrow_text(),
+                        player2_list=match.get_player2_escrow_text(),
+                        player1_id=match.player1_id,
+                        player2_id=match.player2_id,
+                        escrow_complete=escrow_complete)
+    return response
+
+urlregex = re.compile(
+        r'^(?:http|ftp)s?://' # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
+        r'localhost|' #localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+        r'(?::\d+)?' # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
 @app.route("/escrow_list_url", methods=['POST'])
 def escrow_list_url():
-    player1listurl = request.args.get("playerlisturl")
-    player_id      = request.args.get("player_id")
-    match_id       = request.args.get("match_id")
-    print "foo"
+    player_list_url = request.args.get("player_list_url")
+    player_id       = int(request.args.get("player_id"))
+    match_id        = request.args.get("match_id")
+    #try to figure out what sort of url it is
+    match = urlregex.match( player_list_url )
+    if match is None:
+        response = jsonify(message="That is not a url!  Please provide a valid YASB, voidstate, or FABs url")
+        response.status_code = (500)
+        return response
+    else:
+        try:
+            xws = GeneralXWSFetcher().fetch( player_list_url )
+            if xws is None:
+                response = jsonify(message="That is not a valid YASB, voidstate, or FABs url!")
+                response.status_code = (500)
+                return response
+            else:
+                converter = XWSToJuggler(xws)
+                pm  = PersistenceManager(myapp.db_connector)
+                match = pm.get_match(match_id)
+                archtype, first_time_archtype_seen = converter.convert(pm)
+                match.set_archtype(player_id, archtype)
+                match.set_url( player_id, player_list_url  )
+                pm.commit()
+
+                list_link = match.get_player_list_url(player_id)
+                list_text = archtype.pretty_print_list()
+
+                return jsonify( was_original=first_time_archtype_seen,
+                                list_text=list_text,
+                                list_link=list_link,
+                                player_id=player_id,
+                                match_id=match_id )
+        except Exception as err:
+            message = "unable to fetch list, reason: " + str(err)
+            response = jsonify(message=message)
+            response.status_code = (500)
+            return response
+
 
 @app.route("/search")
 def versus():

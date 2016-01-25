@@ -287,6 +287,8 @@ class LeagueMatch(Base):
     player1_score       = Column(Integer)
     player2_score       = Column(Integer)
     state               = Column(String(45))
+    player1_list_url    = Column(String(2048))
+    player2_list_url    = Column(String(2048))
 
     league             = relationship( League.__name__, uselist=False)
     player1             = relationship( LeaguePlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player1_id')
@@ -294,10 +296,79 @@ class LeagueMatch(Base):
     player1_list_id     = Column(Integer, ForeignKey( '{0}.id'.format(archtype_list_table) ) )
     player2_list_id     = Column(Integer, ForeignKey( '{0}.id'.format(archtype_list_table) ) )
     player1_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
-    player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
+    player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player2_list_id')
+
+    def set_archtype(self, player_id, archtype):
+        if player_id == self.player1_id:
+            self.player1_list = archtype
+        elif player_id == self.player2_id:
+            self.player2_list = archtype
+
+    def get_player_escrow_text(self, player_id):
+        #scenarios
+        #neither player has submitted
+        if self.player1_list is None and self.player2_list is None:
+            return "<br>"
+
+        #player 1 has submitted and player 2 hasn't
+        if self.player1_list is not None and self.player2_list is None:
+            if player_id == self.player1_id:
+                return "Waiting for Player2 to submit their list"
+            else:
+                return "<br>"
+
+
+        #player 2 has submitted and player 1 hasn't
+        if self.player1_list is None and self.player2_list is not None:
+            if player_id == self.player1_id:
+                return "<br>"
+            else:
+                return "Waiting for Player1 to submit their list"
+
+        #both lists have been submitted
+        if  player_id == self.player1_id:
+            return self.get_player1_list_url() + self.player1_list_text()
+        else:
+            return self.get_player2_list_url() + self.player2_list_text()
+
+    def get_player1_escrow_text(self):
+        return self.get_player_escrow_text(self.player1_id)
+
+    def get_player2_escrow_text(self):
+        return self.get_player_escrow_text(self.player2_id)
+
+
+    def get_player1_list_url(self):
+        return self.get_player_list_url(self.player1_id)
+
+    def get_player2_list_url(self):
+        return self.get_player_list_url(self.player2_id)
+
+    def get_player_list_url(self, player_id):
+        if self.player1_id == player_id and self.player1_list_url is not None:
+            return '<a href="' + self.player1_list_url + '">Link</a><br>'
+        elif self.player2_id == player_id and self.player2_list_url is not None:
+            return '<a href="' + self.player2_list_url + '">Link</a><br>'
+        return "List not yet submitted"
+
+    def set_url(self, player_id, player_list_url):
+        if self.player1_id == player_id:
+            self.player1_list_url = player_list_url
+        elif self.player2_id == player_id:
+            self.player2_list_url = player_list_url
 
     def needs_escrow(self):
         return self.player1_list is None or self.player2_list is None
+
+    def player1_list_text(self):
+        if self.player1_list is not None:
+            return self.player1_list.pretty_print_list()
+        return "<br>"
+
+    def player2_list_text(self):
+        if self.player2_list is not None:
+            return self.player2_list.pretty_print_list()
+        return "<br>"
 
 class Tourney(Base):
     __tablename__ = tourney_table
