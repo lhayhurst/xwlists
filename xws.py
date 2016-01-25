@@ -78,7 +78,7 @@ class YASBFetcher:
 class VoidStateXWSFetcher:
 
     def fetch(self, list_id):
-        url = GeneralXWSFetcher.voidstate_root + str(list_id) + "#view=full"
+        url = GeneralXWSFetcher.voidstate_root + "xws/" + str(list_id) + "#view=full"
         print "fetching url " + url
         response = urllib2.urlopen(url)
         html = response.read()
