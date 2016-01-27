@@ -87,7 +87,7 @@ function pollForEscrow() {
                 player2List.innerHTML = data.player2_list;
             }
             else if (list_set_from_submit && player_submitted== data.player2_id) {
-                player2List.innerHTML = list_set_from_submit
+                player2List.innerHTML = list_set_from_submit;
                 player1List.innerHTML = data.player1_list;
             }
             else if (!list_set_from_submit && player_submitted) {
@@ -130,7 +130,7 @@ function onEnterPressed(player_id, urlElementId, textAreaId, statsSpanId) {
         contentType: "application/json; charset=utf-8",
         url: url,
         success: function (data) {
-            list_set_from_submit = data.list_link + data.list_text;
+            list_set_from_submit = data.list_link + data.list_text
             textSpan = document.getElementById(textAreaId);
             textSpan.innerHTML = list_set_from_submit;
             player_submitted = player_id;
@@ -150,7 +150,7 @@ function onEnterPressed(player_id, urlElementId, textAreaId, statsSpanId) {
                 summaryTable += '<a href="' + data.archtype_url + '">More archtype info</a>'
             }
             statsSpan.innerHTML = summaryTable;
-            if (! is_complete) { //start polling if the match is open
+            if (is_complete==0) { //start polling if the match is open
                 pollForEscrow();
             }
         },

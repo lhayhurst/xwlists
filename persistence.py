@@ -298,19 +298,32 @@ class LeagueMatch(Base):
     player1_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
     player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player2_list_id')
 
-    def is_complete(self):
-        return self.state is not None and self.state == 'complete'
+    def get_player_list_text_with_link(self, player_id):
+        #both lists have been submitted
+        if  player_id == self.player1_id:
+            return self.get_player1_list_url() + self.player1_list_text()
+        else:
+            return self.get_player2_list_url() + self.player2_list_text()
 
-    def get_vlog_url(self):
-        if self.challonge_attachment_url is not None:
-            return '<a href="http://' + self.challonge_attachment_url + '">Download</a><br>'
-        return "None"
+    def get_player_list_display(self, player_id, player_list_id):
+        if self.is_complete():
+            if player_list_id is not None:
+                return self.get_player_list_text_with_link(player_id)
+            else:
+                url = url_for('escrow', match_id=self.id, player_id=player_id)
+                return '<a href="' + url + '">Enter list</a>'
+        if self.needs_escrow():
+            url = url_for('escrow', match_id=self.id, player_id=player_id)
+            return '<a href="' + url + '">Escrow list</a>'
+        else:
+            return self.get_player_list_text_with_link(player_id)
 
-    def set_archtype(self, player_id, archtype):
-        if player_id == self.player1_id:
-            self.player1_list = archtype
-        elif player_id == self.player2_id:
-            self.player2_list = archtype
+
+    def get_player1_list_display(self):
+        return self.get_player_list_display(self.player1_id, self.player1_list_id)
+
+    def get_player2_list_display(self):
+        return self.get_player_list_display(self.player2_id, self.player2_list_id)
 
     def get_player_escrow_text(self, player_id):
         #scenarios
@@ -324,7 +337,6 @@ class LeagueMatch(Base):
                 return "Waiting for Player2 to submit their list"
             else:
                 return "<br>"
-
 
         #player 2 has submitted and player 1 hasn't
         if self.player1_list is None and self.player2_list is not None:
@@ -344,6 +356,22 @@ class LeagueMatch(Base):
 
     def get_player2_escrow_text(self):
         return self.get_player_escrow_text(self.player2_id)
+
+
+    def is_complete(self):
+        return self.state is not None and self.state == 'complete'
+
+    def get_vlog_url(self):
+        if self.challonge_attachment_url is not None:
+            return '<a href="http://' + self.challonge_attachment_url + '">Download</a><br>'
+        return "None"
+
+    def set_archtype(self, player_id, archtype):
+        if player_id == self.player1_id:
+            self.player1_list = archtype
+        elif player_id == self.player2_id:
+            self.player2_list = archtype
+
 
 
     def get_player1_list_url(self):
