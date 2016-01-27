@@ -234,14 +234,30 @@ def cache_league_results():
         print "fetching match results for division %s" % ( d.name )
         match_results_for_division = c.match_index(d.name)
         for match_result in match_results_for_division:
-            dbmr = pm.get_match_by_challonge_id( match_result['id'])
+            match_id = match_result['id']
+            dbmr = pm.get_match_by_challonge_id(match_id)
+
             if dbmr is None:
                 dbmr = create_default_match_result(match_result, league, pm)
-                myapp.db_connector.get_session().add( dbmr )
+                changed = True
             else: #some sort of update occured
                 changed = update_match_result(match_result,dbmr,pm)
-                if changed:
-                    myapp.db_connector.get_session().add( dbmr )
+
+            #fetch the match attachment url
+            match_attachments = c.attachments_index(d.name, match_id)
+            if len(match_attachments) > 0:
+                match_attachment = match_attachments[0] #there can only be one
+                match_attachment_asset_url = match_attachment['asset-url']
+                if match_attachment_asset_url is not None:
+                    if dbmr.challonge_attachment_url is None or dbmr.challonge_attachment_url != match_attachment_asset_url:
+                        #for some reason challonge is stashing a "//" on front of these urls
+                        #remove it
+                        match_attachment_asset_url = match_attachment_asset_url[match_attachment_asset_url.startswith("//")
+                                                                                and len("//"):]
+                        dbmr.challonge_attachment_url = match_attachment_asset_url
+                        changed = True
+            if changed:
+                myapp.db_connector.get_session().add( dbmr )
         myapp.db_connector.get_session().commit()
     return redirect(url_for('league_matches', league_id=league.id))
 

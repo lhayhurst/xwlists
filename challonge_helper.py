@@ -26,3 +26,6 @@ class ChallongeHelper:
     def match_index(self, tournament):
         return challonge.matches.index(tournament)
 
+    def attachments_index(self, tournament, match_id):
+        url = "tournaments/%s/matches/%s/attachments" % (tournament, match_id)
+        return challonge.api.fetch_and_parse("GET", url)

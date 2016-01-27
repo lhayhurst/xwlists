@@ -17,6 +17,7 @@
     <th>Player 2</th>
     <th>Division</th>
     <th>Match State</th>
+    <th>VLog</th>
     <th>Player 1 Score</th>
     <th>Player 2 Score</th>
     <th>Player 1 List</th>
@@ -31,6 +32,7 @@
          <td>{{  m.player2.get_name()}}</td>
          <td>{{  m.player2.division.get_name()}}</td>
          <td>{{  m.state }}</td>
+         <td>{{  m.get_vlog_url() | safe }}</td>
          <td>{{  m.player1_score }}</td>
          <td>{{  m.player2_score }}</td>
          {% if m.needs_escrow() %}
@@ -58,11 +60,12 @@
                 }
             ],
             "columns": [
-                    { "width": "13%"},
+                    { "width": "10%"},
                     { "width": "10%"},
                     { "width": "13%"},
                     { "width": "5%"},
                     { "width": "5%"},
+                    { "width": "3%"},
                     { "width": "2%"},
                     { "width": "2%"},
                     { "width": "25%"},

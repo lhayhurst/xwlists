@@ -1,6 +1,6 @@
 import unittest
 import myapp
-from persistence import PersistenceManager
+from persistence import PersistenceManager, TourneyList, ArchtypeList
 
 __author__ = 'lhayhurst'
 
@@ -12,13 +12,25 @@ class ListUIDGen:
     def generate(self):
         lists = self.pm.get_all_lists()
         i = 0
-        listhref = {}
+        hkeys = {}
         for list in lists:
-            list.generate_hash_key()
-            if i % 1000 == 0:
-                print "committing %d records " % ( i )
-                self.pm.db_connector.get_session().commit()
-            i = i + 1
+            if list.archtype_list is not None and list.archtype_list.ships is not None:
+                key = ArchtypeList.generate_hash_key(list.archtype_list.ships)
+                if not hkeys.has_key(key):
+                    hkeys[key] = [list]
+                else:
+                    hkeys[key].append(list)
+                if i % 1000 == 0:
+                    print "hashed %d records " % ( i )
+                i = i + 1
+        for key in hkeys:
+            if len(hkeys[key]) > 1:
+                #dupes!
+                lists_to_fix = hkeys[key]
+                #the first one gets to be the survivor
+                survivor = lists_to_fix.pop()
+
+
 
 class ListUIDTest(unittest.TestCase):
     def testGenerate(self):

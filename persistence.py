@@ -282,13 +282,13 @@ class LeagueMatch(Base):
     player1_id          = Column(Integer, ForeignKey( '{0}.id'.format(league_player_table) ) )
     player2_id          = Column(Integer, ForeignKey( '{0}.id'.format(league_player_table) ) )
     league_id           = Column(Integer, ForeignKey( '{0}.id'.format(league_table) ) )
-    challonge_attachment_id = Column(Integer)
     challonge_match_id  = Column(Integer)
     player1_score       = Column(Integer)
     player2_score       = Column(Integer)
     state               = Column(String(45))
     player1_list_url    = Column(String(2048))
     player2_list_url    = Column(String(2048))
+    challonge_attachment_url = Column(String(2048))
 
     league             = relationship( League.__name__, uselist=False)
     player1             = relationship( LeaguePlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player1_id')
@@ -297,6 +297,11 @@ class LeagueMatch(Base):
     player2_list_id     = Column(Integer, ForeignKey( '{0}.id'.format(archtype_list_table) ) )
     player1_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
     player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player2_list_id')
+
+    def get_vlog_url(self):
+        if self.challonge_attachment_url is not None:
+            return '<a href="http://' + self.challonge_attachment_url + '">Download</a><br>'
+        return "None"
 
     def set_archtype(self, player_id, archtype):
         if player_id == self.player1_id:
