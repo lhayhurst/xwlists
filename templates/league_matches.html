@@ -38,6 +38,9 @@
          {% if m.needs_escrow() %}
         <td ><a href="{{ url_for( 'escrow', match_id=m.id, player_id=m.player1.id) }}">Setup escrow</a></td>
         <td ><a href="{{ url_for( 'escrow', match_id=m.id, player_id=m.player2.id) }}">Setup escrow</a></td>
+         {% elif m.is_complete() %}
+        <td ><a href="{{ url_for( 'escrow', match_id=m.id, player_id=m.player1.id) }}">Enter list</a></td>
+        <td ><a href="{{ url_for( 'escrow', match_id=m.id, player_id=m.player2.id) }}">Enter list</a></td>
          {% else %}
         <td >{{ m.get_player1_escrow_text() | safe }}
         <td >{{ m.get_player2_escrow_text() | safe }}

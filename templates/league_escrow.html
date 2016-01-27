@@ -63,70 +63,46 @@ P { text-align: center }
 <script>
 
 
-var match_id     = {{ match.id }}
-var player1_id   = {{ match.player1.id }}
-var player2_id   = {{ match.player2.id }}
-var needs_escrow = {{ needs_escrow  }}
-var is_complete  = {{ match_complete }}
-var my_list_text;
-var my_player;
-var timer;
+var match_id           = {{ match.id }}
+var player1_id         = {{ match.player1.id }}
+var player2_id         = {{ match.player2.id }}
+var selected_player_id = {{ selected_player_id }}
+var needs_escrow       = {{ needs_escrow  }}
+var is_complete        = {{ match_complete }}
+var timer = null;
+var list_set_from_submit = null;
+var player_submitted = null;
 
-messages = [ ".", "..", "...", "....", "....."]
-message_hi = 4
-message_lo = 0
-current_message = 0
+function pollForEscrow() {
+    $.ajax({
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: "/escrow_change?match_id=" + match_id,
+        success: function (data) {
+            player1List = document.getElementById('player1List');
+            player2List = document.getElementById('player2List');
 
-$(document).ready(function() {
-
-    if ( ! is_complete ) {
-        (function pollForEscrow() {
-            $.ajax({
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                url: "/escrow_change?match_id=" + match_id,
-                success: function (data) {
-                    player1List = document.getElementById('player1List');
-                    player2List = document.getElementById('player2List');
-                    console.log(data);
-
-                    if (my_player == data.player1_id) {
-                        player1List.innerHTML = my_list_text;
-                    }
-                    else {
-                        if (my_player != null) {
-                            player1List.innerHTML = messages[current_message]
-                        }
-                    }
-                    if (my_player == data.player2_id) {
-                        player2List.innerHTML = my_list_text;
-                    }
-                    else {
-                        if (my_player != null) {
-                            player2List.innerHTML = messages[current_message]
-                        }
-                    }
-                    if (current_message == 4) {
-                        current_message = 0;
-                    }
-                    else {
-                        current_message += 1;
-                    }
-                    if (!data.escrow_complete) {
-                        setTimeout(pollForEscrow, 1500);
-                    }
-                    else {
-                        console.log("escrow is complete")
-                    }
-                },
-                error: function (data) {
-                },
-                dataType: "json"
-            })
-        })()
-    }
-} );
-
+            if (list_set_from_submit && player_submitted == data.player1_id) {
+                player1List.innerHTML = list_set_from_submit;
+                player2List.innerHTML = data.player2_list;
+            }
+            else if (list_set_from_submit && player_submitted== data.player2_id) {
+                player2List.innerHTML = list_set_from_submit
+                player1List.innerHTML = data.player1_list;
+            }
+            else if (!list_set_from_submit && player_submitted) {
+                player1List.innerHTML = data.player1_list;
+                player2List.innerHTML = data.player2_list;
+            }
+            if (!data.escrow_complete) {
+                setTimeout(pollForEscrow, 1500);
+            }
+        },
+        error: function (data) {
+        },
+        dataType: "json"
+    })
+}
 
 $("#player1_url").keyup(function (e) {
     if (e.keyCode == 13) { //enter pressed
@@ -142,54 +118,48 @@ $("#player2_url").keyup(function (e) {
 
 function onEnterPressed(player_id, urlElementId, textAreaId, statsSpanId) {
     var playerurl = document.getElementById(urlElementId).value;
-    var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
-    var regex = new RegExp(expression);
+    textSpan = document.getElementById(textAreaId);
+    textSpan.innerHTML = "Looking up your list..."
 
-    my_player = player_id;
+    var url = "/escrow_list_url?match_id=" + match_id +
+            "&player_id=" + player_id +
+            "&player_list_url=" + encodeURIComponent(playerurl);
 
-    if (playerurl.match(regex) )
-    {
-        textSpan = document.getElementById(textAreaId);
-        textSpan.innerHTML = "Looking up your list..."
-
-        var url = "/escrow_list_url?match_id=" + match_id +
-                "&player_id=" + player_id +
-                "&player_list_url=" + encodeURIComponent(playerurl);
-        $.ajax({
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            url: url,
-            success: function (data) {
-                textSpan = document.getElementById(textAreaId);
-                my_list_text = data.list_link + data.list_text;
-                textSpan.innerHTML = my_list_text;
-                statsSpan = document.getElementById(statsSpanId);
-                console.log(data);
-                var newList = "";
-                summaryTable  = "<br><b>List Trivia</b><br>"
-                summaryTable += newList + "Total times taken: " + data.total_count
-                if ( parseInt(data.total_count) == 1 ) {
-                    summaryTable += ' (That is you!  Nice job, James T Kirk!)<br>'
-                }
-                else {
-                    summaryTable += "<br>"
-                }
-                summaryTable += "Times taken in tournaments: " + data.archtype_tourney_count + "<br>"
-                summaryTable += "Times taken in league play: " + data.archtype_league_count + "<br>"
-                if ( parseInt(data.archtype_tourney_count) > 0) {
-                    summaryTable += '<a href="' + data.archtype_url + '">More archtype info</a>'
-                }
-                statsSpan.innerHTML = summaryTable
-            },
-            error: function (data) {
-                textSpan = document.getElementById(textAreaId);
-                textSpan.innerHTML = "something went wrong -- got response '" + data.responseJSON.message;
-            },
-            dataType: "json"
-        });
-     } else {
-        errorMessageSpan.innerHTML = data.responseJSON.message;
-    }
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: url,
+        success: function (data) {
+            list_set_from_submit = data.list_link + data.list_text;
+            textSpan = document.getElementById(textAreaId);
+            textSpan.innerHTML = list_set_from_submit;
+            player_submitted = player_id;
+            statsSpan = document.getElementById(statsSpanId);
+            var newList = "";
+            summaryTable  = "<br><b>List Trivia</b><br>"
+            summaryTable += newList + "Total times taken: " + data.total_count
+            if ( parseInt(data.total_count) == 1 ) {
+                summaryTable += ' (That is you!  Nice job, James T Kirk!)<br>'
+            }
+            else {
+                summaryTable += "<br>"
+            }
+            summaryTable += "Times taken in tournaments: " + data.archtype_tourney_count + "<br>"
+            summaryTable += "Times taken in league play: " + data.archtype_league_count + "<br>"
+            if ( parseInt(data.archtype_tourney_count) > 0) {
+                summaryTable += '<a href="' + data.archtype_url + '">More archtype info</a>'
+            }
+            statsSpan.innerHTML = summaryTable;
+            if (! is_complete) { //start polling if the match is open
+                pollForEscrow();
+            }
+        },
+        error: function (data) {
+            textSpan = document.getElementById(textAreaId);
+            textSpan.innerHTML = "something went wrong -- got response '" + data.responseJSON.message;
+        },
+        dataType: "json"
+    });
 }
 
 </script>

@@ -400,6 +400,7 @@ def escrow():
 @app.route("/escrow_change")
 def escrow_change():
     match_id  = request.args.get("match_id")
+    player_id = request.args.get("player_id")
     pm        = PersistenceManager(myapp.db_connector)
     match     = pm.get_match(match_id)
     escrow_complete = 1
@@ -410,8 +411,8 @@ def escrow_change():
                         player2_list=match.get_player2_escrow_text(),
                         player1_id=match.player1_id,
                         player2_id=match.player2_id,
-                        escrow_complete=escrow_complete,
-                        match_complete=match.is_complete())
+                        player_id=player_id,
+                        escrow_complete=escrow_complete)
     return response
 
 urlregex = re.compile(
