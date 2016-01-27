@@ -32,24 +32,24 @@ class XWSListConverter:
                 pilot_upgrades[ut].append( ship_upgrade.upgrade.canon_name)
 
 class GeneralXWSFetcher:
-    fab_root        = "http://x-wing.fabpsb.net/"
-    voidstate_root  = "http://xwing-builder.co.uk/"
-    yasb_root       = "https://geordanr.github.io/xwing/"
+    fab_root        = "x-wing.fabpsb.net/"
+    voidstate_root  = "xwing-builder.co.uk/"
+    yasb_root       = "geordanr.github.io/xwing/"
 
     voidstate_regex = re.compile( r'' + voidstate_root + r'.*?(\d+)' )
 
     def fetch(self, url):
         xws = None
-        if url.startswith( GeneralXWSFetcher.fab_root ):
+        if GeneralXWSFetcher.fab_root in url:
             xws = FabFetcher().fetch(url)
-        elif url.startswith( GeneralXWSFetcher.voidstate_root ):
+        elif GeneralXWSFetcher.voidstate_root in url:
             #pull the list id out of the url
             #http://xwing-builder.co.uk/xws/127077#view=full
             match = GeneralXWSFetcher.voidstate_regex.match( url )
             if match is None:
                 return None
             xws = VoidStateXWSFetcher().fetch( match.group(1))
-        elif url.startswith( GeneralXWSFetcher.yasb_root):
+        elif GeneralXWSFetcher.yasb_root in url:
             #extract out the uri from the base
             o = urlparse( url )
             if o is None:

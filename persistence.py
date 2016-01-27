@@ -298,6 +298,9 @@ class LeagueMatch(Base):
     player1_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
     player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player2_list_id')
 
+    def is_complete(self):
+        return self.state is not None and self.state == 'complete'
+
     def get_vlog_url(self):
         if self.challonge_attachment_url is not None:
             return '<a href="http://' + self.challonge_attachment_url + '">Download</a><br>'

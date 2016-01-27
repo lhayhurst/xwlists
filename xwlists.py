@@ -384,14 +384,18 @@ def escrow():
     pm = PersistenceManager(myapp.db_connector)
     match = pm.get_match(match_id)
     needs_escrow = 0
+    match_complete = 0
     if match.needs_escrow():
         needs_escrow = 1
+    if match.is_complete():
+        match_complete = 1
     if player_id is None:
         player_id = 0
     return render_template("league_escrow.html",
                            match=match,
                            selected_player_id=int(player_id),
-                           needs_escrow=needs_escrow)
+                           needs_escrow=needs_escrow,
+                           match_complete=match_complete)
 
 @app.route("/escrow_change")
 def escrow_change():
@@ -406,7 +410,8 @@ def escrow_change():
                         player2_list=match.get_player2_escrow_text(),
                         player1_id=match.player1_id,
                         player2_id=match.player2_id,
-                        escrow_complete=escrow_complete)
+                        escrow_complete=escrow_complete,
+                        match_complete=match.is_complete())
     return response
 
 urlregex = re.compile(

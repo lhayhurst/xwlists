@@ -67,6 +67,7 @@ var match_id     = {{ match.id }}
 var player1_id   = {{ match.player1.id }}
 var player2_id   = {{ match.player2.id }}
 var needs_escrow = {{ needs_escrow  }}
+var is_complete  = {{ match_complete }}
 var my_list_text;
 var my_player;
 var timer;
@@ -78,51 +79,52 @@ current_message = 0
 
 $(document).ready(function() {
 
+    if ( ! is_complete ) {
+        (function pollForEscrow() {
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: "/escrow_change?match_id=" + match_id,
+                success: function (data) {
+                    player1List = document.getElementById('player1List');
+                    player2List = document.getElementById('player2List');
+                    console.log(data);
 
-    (function pollForEscrow() {
-        $.ajax({
-            type: "GET",
-            contentType: "application/json; charset=utf-8",
-            url: "/escrow_change?match_id=" + match_id,
-            success: function (data) {
-                player1List = document.getElementById('player1List');
-                player2List = document.getElementById('player2List');
-                console.log(data);
-
-                if (my_player == data.player1_id) {
-                    player1List.innerHTML = my_list_text;
-                }
-                else {
-                    if ( my_player != null ) {
-                        player1List.innerHTML = messages[current_message]
+                    if (my_player == data.player1_id) {
+                        player1List.innerHTML = my_list_text;
                     }
-                }
-                if (my_player == data.player2_id) {
-                   player2List.innerHTML = my_list_text;
-                }
-                else {
-                    if ( my_player != null ) {
-                        player2List.innerHTML = messages[current_message]
+                    else {
+                        if (my_player != null) {
+                            player1List.innerHTML = messages[current_message]
+                        }
                     }
-                }
-                if ( current_message == 4 ) {
-                    current_message = 0;
-                }
-                else {
-                    current_message += 1;
-                }
-                if (!data.escrow_complete) {
-                    setTimeout(pollForEscrow, 1500);
-                }
-                else {
-                    console.log("escrow is complete")
-                }
-            },
-            error: function (data) {
-            },
-            dataType: "json"
-        })
-    })()
+                    if (my_player == data.player2_id) {
+                        player2List.innerHTML = my_list_text;
+                    }
+                    else {
+                        if (my_player != null) {
+                            player2List.innerHTML = messages[current_message]
+                        }
+                    }
+                    if (current_message == 4) {
+                        current_message = 0;
+                    }
+                    else {
+                        current_message += 1;
+                    }
+                    if (!data.escrow_complete) {
+                        setTimeout(pollForEscrow, 1500);
+                    }
+                    else {
+                        console.log("escrow is complete")
+                    }
+                },
+                error: function (data) {
+                },
+                dataType: "json"
+            })
+        })()
+    }
 } );
 
 
