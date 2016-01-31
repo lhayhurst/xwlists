@@ -317,6 +317,7 @@ upgrades = {
         {'name': 'Blaster Turret', 'cost': 4},
         {'name': 'Ion Cannon Turret', 'cost': 5},
         {'name': 'Autoblaster Turret', 'cost': 2},
+        {'name': 'Dorsal Turret', 'canon_name': 'dorsalturret', 'cost': 3},
         {'name': 'Twin Laser Turret', 'canon_name': 'twinlaserturret', 'cost': 6},
     ),
     TORPEDO: (
