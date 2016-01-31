@@ -271,9 +271,17 @@ def league_matches():
 def get_league_stats(league):
     league_stats = {}
     player_stats   = {}
+    num_games_completed = 0
+    total_games = 0
+    num_lists_entered = 0
+    total_num_lists = 0
+    num_attachments_uploaded = 0
 
     # Division  |  Percent Complete  | Completed | Open
     for match_result in league.matches:
+        total_games +=1
+        total_num_lists += 2
+
         p1division = match_result.player1.division
         p2division = match_result.player2.division
         player1_division_name = p1division.get_name()
@@ -322,6 +330,15 @@ def get_league_stats(league):
 
 
         if match_result.state == 'complete':
+            num_games_completed += 1
+            if match_result.player1_list:
+                num_lists_entered += 1
+            if match_result.player2_list:
+                num_lists_entered += 1
+
+            if match_result.challonge_attachment_url:
+                num_attachments_uploaded += 1
+
             ps1 = player_stats[player1_name]
             ps1['total'] += 1
             ps2 = player_stats[player2_name]
@@ -360,21 +377,26 @@ def get_league_stats(league):
                     ps2['points'] += 3
                 ps2['MoV'] += diff
 
+    overall_stats = {}
+    overall_stats['num_games_completed'] = num_games_completed
+    overall_stats['total_games'] = total_games
+    overall_stats['num_lists_entered'] = num_lists_entered
+    overall_stats['total_num_lists'] = total_num_lists
+    overall_stats['num_attachments_uploaded'] = num_attachments_uploaded
 
-
-
-    return league_stats, player_stats
+    return overall_stats, league_stats, player_stats
 
 @app.route("/league")
 def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
     league = pm.get_league("X-Wing Vassal League Season Zero")
-    league_stats, player_stats = get_league_stats(league)
+    overall_stats, league_stats, player_stats = get_league_stats(league)
 
     return render_template("league.html",
                            league=league,
                            league_stats=league_stats,
-                           player_stats=player_stats)
+                           player_stats=player_stats,
+                           overall_stats=overall_stats)
 
 
 @app.route("/escrow")

@@ -8,32 +8,18 @@
 </style>
 <br>
 <div><b>{{ league.get_name() }}</b>
-<a href="/league_matches">Click here for all league matchups!</a></div>
 <br>
-<b>Pod Racing</b>
-<hr>
-<table id="divisions" class="display" cellspacing="0" width="100%">
-    <thead>
-      <tr>
-        <th>Pod</th>
-        <th>Completed</th>
-        <th>Of Total</th>
-        <th>Progress</th>
-        <th>Matches Left</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for d in league_stats.values() %}
-      <tr>
-         <td ><a href="http://challonge.com/{{ d['name'] }}">{{ d['name'] }}</a></td>
-         <td>{{ d['complete'] }}</td>
-         <td>{{ d['total'] }}</td>
-          <td>{{'%0.2f'| format(d['complete'] / d['total']* 100|float)}}%</td>
-         <td>{{ d['total'] - d['complete'] }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-</table>
+ <a href="/league_matches">Click here for all league matchups!</a></div>
+<br>
+{{ overall_stats['num_games_completed']}} completed of {{ overall_stats['total_games'] }} total games
+({{'%0.2f'| format(overall_stats['num_games_completed']/overall_stats['total_games']* 100|float)}}%)
+<br>
+{{ overall_stats['num_lists_entered'] }} lists entered of {{ overall_stats['total_num_lists'] }} lists
+({{'%0.2f'| format(overall_stats['num_lists_entered']/overall_stats['total_num_lists']* 100|float)}}%)
+<br>
+{{ overall_stats['num_attachments_uploaded'] }} attachments uploaded of {{ overall_stats['total_games'] }} games
+({{'%0.2f'| format(overall_stats['num_attachments_uploaded']/overall_stats['total_games']* 100|float)}}%)
+<br>
 <br>
 <b>Player Rankings</b>
 <hr>
@@ -67,8 +53,32 @@
       {% endfor %}
     </tbody>
 </table>
-
-
+<br>
+<b>Pod Racing</b>
+<hr>
+<table id="divisions" class="display" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Pod</th>
+        <th>Completed</th>
+        <th>Of Total</th>
+        <th>Progress</th>
+        <th>Matches Left</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in league_stats.values() %}
+      <tr>
+         <td ><a href="http://challonge.com/{{ d['name'] }}">{{ d['name'] }}</a></td>
+         <td>{{ d['complete'] }}</td>
+         <td>{{ d['total'] }}</td>
+          <td>{{'%0.2f'| format(d['complete'] / d['total']* 100|float)}}%</td>
+         <td>{{ d['total'] - d['complete'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
+<br>
 
 <script>
     $(document).ready( function () {
