@@ -369,7 +369,6 @@ upgrades = {
         {'name': 'Stygium Particle Accelerator', 'cost': 2,
          'constraints': ({'type': SHIP_TYPE, 'value': TIE_PHANTOM})},
         {'name': 'Advanced Cloaking Device', 'cost': 4, 'constraints': ({'type': SHIP_TYPE, 'value': TIE_PHANTOM})},
-        {'name': 'Advanced Cloaking Device', 'cost': 4, 'constraints': ({'type': SHIP_TYPE, 'value': TIE_PHANTOM})},
         {'name': 'Experimental Interface', 'cost': 3},
         {'name': 'B-Wing/E2', 'cost': 1,
          'action': [{'type': 'ADD_UPGRADE', 'value': CREW}],
