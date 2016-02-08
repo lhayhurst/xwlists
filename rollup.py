@@ -146,10 +146,14 @@ class ShipTotalHighchartOptions:
         self.options['series'].append(series['total'])
 
 class ShipHighchartOptions:
-    def __init__(self, ship_pilot_time_series_data, ships_by_faction):
+    def __init__(self, ship_pilot_time_series_data, ships_by_faction, show_as_percentage=False):
 
-        hclgo = HighChartLineGraphOptions(title="Ship-by-Ship Total",
-                                          yaxis_label="Ships taken" )
+        hclgo = None
+        if not show_as_percentage:
+            hclgo = HighChartLineGraphOptions(title="Ship-by-Ship Total",
+                                              yaxis_label="Ships taken" )
+        else:
+            hclgo = HighChartAreaGraphOptions(title="Ship-by-Ship Total", yaxis_label="Ships taken")
         self.options = hclgo.get_options()
         series = {}
         for year in ship_pilot_time_series_data.summary.keys():

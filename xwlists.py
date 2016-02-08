@@ -1467,8 +1467,18 @@ def ship_chart():
                            ship_options=ship_options.options,
                            scum=Faction.SCUM.description,
                            rebel=Faction.REBEL.description,
-                           imperial=Faction.IMPERIAL.description
-                          )
+                           imperial=Faction.IMPERIAL.description)
+
+@app.route("/get_ship_time_series",methods=['POST'])
+def get_ship_time_series():
+    data         = request.json['data']
+    show_as_percentage = data['show_ship_as_percentage']
+    pm               = PersistenceManager(myapp.db_connector)
+    pcd              = ShipPilotTimeSeriesData(  pm )
+    ships_by_faction = pm.get_ships_by_faction()
+    ship_options     = ShipHighchartOptions(pcd, ships_by_faction, show_as_percentage)
+    return jsonify( ship_options=ship_options.options)
+
 
 @app.route("/get_faction_time_series",methods=['POST'])
 def get_faction_time_series():
