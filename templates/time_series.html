@@ -45,7 +45,7 @@ $('#faction-percentage-toggle').on('change', function() {
     else {
         show_faction_as_percentage = false;
     }
-    var url = "/get_faction_time_series"
+    var url = "/get_faction_time_series";
     $.ajax({
         type: "POST",
         contentType: "application/json; charset=utf-8",
