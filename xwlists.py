@@ -1450,12 +1450,14 @@ def pretty_print():
     return redirect(url_for('archtypes') )
 
 
+
+
 @app.route("/time_series")
 def ship_chart():
     pm               = PersistenceManager(myapp.db_connector)
     pcd              = ShipPilotTimeSeriesData(  pm )
     total_options    = ShipTotalHighchartOptions(pcd)
-    faction_options  = FactionTotalHighChartOptions(pcd)
+    faction_options  = FactionTotalHighChartOptions(pcd,False)
     ships_by_faction = pm.get_ships_by_faction()
     ship_options     = ShipHighchartOptions(pcd, ships_by_faction)
 
@@ -1467,6 +1469,15 @@ def ship_chart():
                            rebel=Faction.REBEL.description,
                            imperial=Faction.IMPERIAL.description
                           )
+
+@app.route("/get_faction_time_series",methods=['POST'])
+def get_faction_time_series():
+    data         = request.json['data']
+    show_as_percentage = data['show_faction_as_percentage']
+    pm               = PersistenceManager(myapp.db_connector)
+    pcd              = ShipPilotTimeSeriesData(  pm )
+    faction_options  = FactionTotalHighChartOptions(pcd,show_as_percentage)
+    return jsonify( faction_options=faction_options.options)
 
 
 @app.route("/get_chart_data", methods=['POST'])

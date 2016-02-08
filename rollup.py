@@ -8,6 +8,49 @@ COUNT_MEASURE       = 'COUNT_MEASURE'
 POINT_COST_MEASURE  = 'POINT_COST_MEASURE'
 FACTION_SHIP_ROLLUP = 'FACTION_SHIP_ROLLUP'
 
+class HighChartAreaGraphOptions:
+    def __init__(self, title, yaxis_label, subtitle='', chart_type=None, plot_options=None ):
+        self.options = {
+        'chart': {
+            'type': 'area'
+        },
+        'title': {
+            'text': title,
+        },
+        'subtitle': {
+            'text': subtitle
+        },
+        'xAxis': {
+            'categories': [],
+            'tickmarkPlacement': 'on',
+            'title': {
+                'enabled': 'false'
+            }
+        },
+        'yAxis': {
+            'title': {
+                'text': yaxis_label
+            }
+        },
+        'tooltip': {
+            'pointFormat': '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y:,.0f})<br/>',
+            'shared': 'true'
+        },
+        'plotOptions': {
+            'area': {
+                'stacking': 'percent',
+                'lineColor': '#ffffff',
+                'lineWidth': 1,
+                'marker': {
+                    'lineWidth': 1,
+                    'lineColor': '#ffffff'
+                }
+            }
+        }
+    }
+
+    def get_options(self):
+        return self.options
 
 class HighChartLineGraphOptions:
     def __init__(self, title, yaxis_label, subtitle='', chart_type=None, plot_options=None ):
@@ -53,10 +96,14 @@ class HighChartLineGraphOptions:
 
 
 class FactionTotalHighChartOptions:
-    def __init__(self, ship_pilot_time_series_data):
+    def __init__(self, ship_pilot_time_series_data,show_as_percentage):
+        hclgo = None
+        if not show_as_percentage:
+            hclgo = HighChartLineGraphOptions(title="Faction Total",
+                                              yaxis_label="Ships taken" )
+        else:
+            hclgo = HighChartAreaGraphOptions(title="Faction Percentage", yaxis_label="Ships taken")
 
-        hclgo = HighChartLineGraphOptions(title="Faction Total",
-                                          yaxis_label="Ships taken" )
         self.options = hclgo.get_options()
         series = {}
         for year in ship_pilot_time_series_data.summary.keys():
@@ -65,7 +112,6 @@ class FactionTotalHighChartOptions:
                 self.options['xAxis']['categories'].append( year_mo )
                 summary = ship_pilot_time_series_data.summary[year][month]
                 factions = summary['faction']
-
 
                 for faction in factions.keys():
                     if not series.has_key(faction):
