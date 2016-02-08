@@ -18,10 +18,9 @@ import random
 
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.sql import ColumnElement, ClauseElement, literal
-from sqlalchemy.sql.elements import _clause_element_as_expr
+from sqlalchemy.sql import ClauseElement, literal
 
-from myapp import db_connector
+from myapp import db_connector, rollup
 from xwingmetadata import XWingMetaData
 import xwingmetadata
 
@@ -29,15 +28,6 @@ from decl_enum import DeclEnum
 from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean, DateTime
 from sqlalchemy import ForeignKey
 
-#rollup help
-#see https://groups.google.com/forum/#!msg/sqlalchemy/Pj5T8hO_ibQ/LrmBcIBxnNwJ
-class rollup(ColumnElement):
-    def __init__(self, *elements):
-        self.elements = [_clause_element_as_expr(e) for e in elements]
-
-@compiles(rollup, "mysql")
-def _mysql_rollup(element, compiler, **kw):
-    return "%s WITH ROLLUP" % (', '.join([compiler.process(e, **kw) for e in element.elements]))
 
 class Match(ClauseElement):
     def __init__(self, columns, value):
@@ -1178,6 +1168,17 @@ class PersistenceManager:
 
     def get_tourney(self,tourney_name):
         return self.db_connector.get_session().query(Tourney).filter_by(tourney_name=tourney_name).first()
+
+    def get_tourney_types(self):
+        return self.db_connector.get_session().query(Tourney.tourney_type).distinct()
+
+    def get_ships_by_faction(self):
+        filters = [
+            Ship.archtype_id == ArchtypeList.id,
+            ShipPilot.id == Ship.ship_pilot_id
+        ]
+        return self.db_connector.get_session().query(ArchtypeList.faction, ShipPilot.ship_type).\
+            filter( and_(*filters) ).distinct()
 
     def get_tourney_by_id(self,tourney_id):
         return self.db_connector.get_session().query(Tourney).filter_by(id=tourney_id).first()

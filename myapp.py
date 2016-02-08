@@ -1,15 +1,31 @@
 import os
 from flask import Flask
 from sqlalchemy import create_engine
+from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 #see https://www.pythonanywhere.com/wiki/WebAppClientIPAddresses
+from sqlalchemy.sql import ColumnElement
+from sqlalchemy.sql.elements import _clause_element_as_expr
+
+
 def remote_address(request):
     if request.headers.has_key( 'X-Real-IP'):
         return request.headers[ 'X-Real-IP' ]
     else:
         return request.remote_addr
+
+#rollup help
+#see https://groups.google.com/forum/#!msg/sqlalchemy/Pj5T8hO_ibQ/LrmBcIBxnNwJ
+class rollup(ColumnElement):
+    def __init__(self, *elements):
+        self.elements = [_clause_element_as_expr(e) for e in elements]
+
+@compiles(rollup, "mysql")
+def _mysql_rollup(element, compiler, **kw):
+    return "%s WITH ROLLUP" % (', '.join([compiler.process(e, **kw) for e in element.elements]))
+
 
 class MyDatabaseConnector(object):
     engine = None

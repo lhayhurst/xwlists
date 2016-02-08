@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div id="ship_total" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="faction_total" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="ships" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="faction_filters" style="display: none;">
+Faction Filters
+    <input type="checkbox" id="rebel-filter" value="rebel-filter" checked="checked">{{ scum }}
+    <input type="checkbox" id="imperial-filter" value="imperial-filter" checked="checked">{{ rebel }}
+    <input type="checkbox" id="scum-filter" value="scum-filter" checked="checked">{{ imperial }}
+</div>
+<div id="tourney_filters" style="display: none;">
+Tourney Filters
+    <input type="checkbox" id="elimination-filter" value="elimination-filter">Elimination only
+    <input type="checkbox" id="store-filter" value="store-filter" checked="checked">Store champs
+    <input type="checkbox" id="regional-filter" value="regional-filter" checked="checked">Regional champs
+    <input type="checkbox" id="national-filter" value="national-filter" checked="checked">National champs
+    <input type="checkbox" id="world-filter" value="world-filter" checked="checked">World champs
+    <input type="checkbox" id="vassal-filter" value="vassal-filter" checked="checked">Vassal play
+    <input type="checkbox" id="other-filter" value="other-filter" checked="checked">Other
+</div>
+
+
+</div>
+<script>
+var ship_total_options = {{ ship_total_options | safe }};
+var faction_options = {{ faction_options | safe }};
+var ship_options = {{ ship_options | safe }}
+console.log(ship_options);
+$('#ship_total').highcharts( ship_total_options );
+$('#faction_total').highcharts( faction_options );
+$('#ships').highcharts( ship_options );
+
+</script>
+{% endblock %}

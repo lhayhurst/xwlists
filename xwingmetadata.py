@@ -369,7 +369,6 @@ upgrades = {
         {'name': 'Stygium Particle Accelerator', 'cost': 2,
          'constraints': ({'type': SHIP_TYPE, 'value': TIE_PHANTOM})},
         {'name': 'Advanced Cloaking Device', 'cost': 4, 'constraints': ({'type': SHIP_TYPE, 'value': TIE_PHANTOM})},
-        {'name': 'Cloaking Device', 'cost': 2, 'constraints': ({'type': SHIP_SIZE, 'value': SMALL_SHIP})},
         {'name': 'Advanced Cloaking Device', 'cost': 4, 'constraints': ({'type': SHIP_TYPE, 'value': TIE_PHANTOM})},
         {'name': 'Experimental Interface', 'cost': 3},
         {'name': 'B-Wing/E2', 'cost': 1,
@@ -439,6 +438,8 @@ upgrades = {
         {'name': 'Feedback Array', 'canon_name': 'feedbackarray', 'cost': 2},
         {'name': 'Inertial Dampeners', 'canon_name': 'inertialdampeners', 'cost': 1},
         {'name': 'Glitterstim', 'canon_name': 'glitterstim', 'cost': 2},
+        {'name': 'Cloaking Device', 'cost': 2, 'constraints': ({'type': SHIP_SIZE, 'value': SMALL_SHIP})},
+
     ),
     TECH: (
         {'name': 'Weapons Guidance', 'canon_name': 'weaponsguidance', 'cost': 2},

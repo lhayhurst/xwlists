@@ -21,7 +21,8 @@ import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event, ArchtypeList, LeagueMatch, \
     LeaguePlayer
-from rollup import Rollup
+from rollup import Rollup, ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTotalHighChartOptions, \
+    ShipHighchartOptions
 from search import Search
 from uidgen import ListUIDGen
 import xwingmetadata
@@ -1447,6 +1448,25 @@ def pretty_print():
         pm.db_connector.get_session().add(a)
     pm.db_connector.get_session().commit()
     return redirect(url_for('archtypes') )
+
+
+@app.route("/time_series")
+def ship_chart():
+    pm               = PersistenceManager(myapp.db_connector)
+    pcd              = ShipPilotTimeSeriesData(  pm )
+    total_options    = ShipTotalHighchartOptions(pcd)
+    faction_options  = FactionTotalHighChartOptions(pcd)
+    ships_by_faction = pm.get_ships_by_faction()
+    ship_options     = ShipHighchartOptions(pcd, ships_by_faction)
+
+    return render_template("time_series.html",
+                           ship_total_options=total_options.options,
+                           faction_options=faction_options.options,
+                           ship_options=ship_options.options,
+                           scum=Faction.SCUM.description,
+                           rebel=Faction.REBEL.description,
+                           imperial=Faction.IMPERIAL.description
+                          )
 
 
 @app.route("/get_chart_data", methods=['POST'])

@@ -1,13 +1,209 @@
-from persistence import Faction
-import xwingmetadata
+import collections
+from sqlalchemy import and_, func
+import sqlalchemy
+from sqlalchemy.dialects import mysql
+from persistence import Faction, ArchtypeList, ShipPilot, Pilot, Tourney, TourneyList, Ship
 
 COUNT_MEASURE       = 'COUNT_MEASURE'
 POINT_COST_MEASURE  = 'POINT_COST_MEASURE'
 FACTION_SHIP_ROLLUP = 'FACTION_SHIP_ROLLUP'
 
+
+class HighChartLineGraphOptions:
+    def __init__(self, title, yaxis_label, subtitle='', chart_type=None, plot_options=None ):
+        self.options = {
+            'title': {
+                'text': title,
+                'x': -20 #center
+            },
+            'subtitle': {
+                'text': subtitle,
+                'x': -20
+            },
+            'yAxis': {
+                'title': {
+                    'text': yaxis_label,
+                },
+                'plotLines': [
+                    {
+                        'value': 0,
+                        'width': 1,
+                        'color': '#808080'
+                    }
+                ]
+            },
+           'tooltip': {
+                'valueSuffix': ''
+            },
+
+            'xAxis': {
+                'categories' : [],
+                'tickerPlacement' :'on',
+                'title' : { 'enabled': "false" }
+            }
+        }
+        if plot_options:
+            self.options['plot_options']=plot_options
+
+        if chart_type is not None:
+            self.options['chart'] = chart_type
+
+    def get_options(self):
+        return self.options
+
+
+class FactionTotalHighChartOptions:
+    def __init__(self, ship_pilot_time_series_data):
+
+        hclgo = HighChartLineGraphOptions(title="Faction Total",
+                                          yaxis_label="Ships taken" )
+        self.options = hclgo.get_options()
+        series = {}
+        for year in ship_pilot_time_series_data.summary.keys():
+            for month in ship_pilot_time_series_data.summary[year].keys():
+                year_mo = str(year) + "-" + str(month)
+                self.options['xAxis']['categories'].append( year_mo )
+                summary = ship_pilot_time_series_data.summary[year][month]
+                factions = summary['faction']
+
+
+                for faction in factions.keys():
+                    if not series.has_key(faction):
+                        series[faction] = { 'name': faction, 'data':[] }
+                    series[faction]['data'].append( factions[faction])
+
+                #if data is missing for the faction (which happend pre-scum release,
+                #add it in
+
+                if not factions.has_key(Faction.SCUM.description):
+                    if not series.has_key(Faction.SCUM.description):
+                        series[Faction.SCUM.description] = { 'name': Faction.SCUM.description, 'data':[] }
+                    series[Faction.SCUM.description]['data'].append( 0 )
+        self.options['series'] = []
+        for faction in series.keys():
+            self.options['series'].append(series[faction])
+
+class ShipTotalHighchartOptions:
+
+    def __init__(self, ship_pilot_time_series_data):
+        hclgo = HighChartLineGraphOptions(title="Ship Total", yaxis_label="Ships taken")
+        self.options = hclgo.get_options()
+        series = {}
+        series['total'] = { 'type': 'area', 'name': 'Total', 'data':[]}
+        for year in ship_pilot_time_series_data.summary.keys():
+            for month in ship_pilot_time_series_data.summary[year].keys():
+                year_mo = str(year) + "-" + str(month)
+                self.options['xAxis']['categories'].append( year_mo )
+                summary = ship_pilot_time_series_data.summary[year][month]
+                series['total']['data'].append(summary['total'])
+        self.options['series'] = []
+        self.options['series'].append(series['total'])
+
+class ShipHighchartOptions:
+    def __init__(self, ship_pilot_time_series_data, ships_by_faction):
+
+        hclgo = HighChartLineGraphOptions(title="Ship-by-Ship Total",
+                                          yaxis_label="Ships taken" )
+        self.options = hclgo.get_options()
+        series = {}
+        for year in ship_pilot_time_series_data.summary.keys():
+            for month in ship_pilot_time_series_data.summary[year].keys():
+                year_mo = str(year) + "-" + str(month)
+                self.options['xAxis']['categories'].append( year_mo )
+                summary = ship_pilot_time_series_data.summary[year][month]
+                ships = summary['ships']
+
+                for ship in ships.keys():
+                    if not series.has_key(ship):
+                        series[ship] = { 'name': ship, 'data':[] }
+                    series[ship]['data'].append( ships[ship])
+
+                #backfill data if its missing
+                for rec in ships_by_faction:
+                    faction = rec[0]
+                    sname   = rec[1].description
+                    if not series.has_key(sname):
+                        series[sname] = {'name': sname, 'data': []}
+                    if not ships.has_key(sname):
+                        series[sname]['data'].append(0)
+
+        self.options['series'] = []
+        for ship in series.keys():
+            self.options['series'].append(series[ship])
+
+class ShipPilotTimeSeriesData:
+    def __init__(self, pm):
+        self.pm = pm
+        session = self.pm.db_connector.get_session()
+
+        filters = [
+            TourneyList.tourney_id == Tourney.id ,
+            ArchtypeList.id == TourneyList.archtype_id,
+            Ship.archtype_id == ArchtypeList.id ,
+            Ship.ship_pilot_id == ShipPilot.id ,
+            ShipPilot.pilot_id == Pilot.id
+        ]
+
+        sql = session.query(
+            sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
+            sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+            sqlalchemy.extract('day', Tourney.tourney_date).label("day"),
+            Tourney.tourney_type,
+            ArchtypeList.faction,
+            ShipPilot.ship_type,
+            Pilot.name.label('pilot'),
+            func.count(TourneyList.id).label("count")).\
+            filter( and_(*filters)).\
+            group_by( sqlalchemy.extract('year', Tourney.tourney_date),
+                      sqlalchemy.extract('month', Tourney.tourney_date),
+                      sqlalchemy.extract('day', Tourney.tourney_date),
+                      ArchtypeList.faction,
+                      ShipPilot.ship_type,
+                      Pilot.name).\
+            statement.compile(dialect=mysql.dialect())
+
+        connection = self.pm.db_connector.get_engine().connect()
+        time_series_data = connection.execute(sql)
+
+        summary = collections.OrderedDict()
+        for tsd in time_series_data:
+            year    = int(tsd['year'])
+            month   = int(tsd['month'])
+            ship    = tsd['ship_type'].description
+            pilot   = tsd['pilot']
+            faction = tsd['faction'].description
+            count   = int(tsd['count'])
+
+            if not summary.has_key(year):
+                summary[year] = collections.OrderedDict()
+
+            if not summary[year].has_key(month):
+                summary[year][month] = {}
+
+            s = summary[year][month]
+
+            if not s.has_key('total'):
+                s['total'] = 0
+            s['total'] += count
+
+            if not s.has_key('faction'):
+                s['faction'] = {}
+            if not s['faction'].has_key(faction):
+                s['faction'][faction] = 0
+            s['faction'][faction] += count
+
+            if not s.has_key('ships'):
+                s['ships'] = {}
+
+            if not s['ships'].has_key(ship):
+                s['ships'][ship] = 0
+            s['ships'][ship] += count
+
+        self.summary = summary
+        self.line_items = time_series_data
+
+
 class Rollup:
-
-
 
     def __init__(self,pm, request_type,
                  eliminationOnly,
