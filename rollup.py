@@ -1,4 +1,5 @@
 import collections
+import operator
 from sqlalchemy import and_, func
 import sqlalchemy
 from sqlalchemy.dialects import mysql
@@ -126,6 +127,7 @@ class FactionTotalHighChartOptions:
                         series[Faction.SCUM.description] = { 'name': Faction.SCUM.description, 'data':[] }
                     series[Faction.SCUM.description]['data'].append( 0 )
         self.options['series'] = []
+
         for faction in series.keys():
             self.options['series'].append(series[faction])
 
@@ -211,7 +213,17 @@ class ShipHighchartOptions:
                 data_index +=1
 
         self.options['series'] = []
-        for ship in sorted(series.iterkeys()):
+
+        #sort the series from biggest to smallest based the last months value
+        unsorted = {}
+        for ship in series.keys():
+            ship_series = series[ship]
+            last_value = ship_series['data'][-1]
+            unsorted[ship]=last_value
+
+        sorted_ships = sorted(unsorted.items(), key=operator.itemgetter(1))
+        for ship_last_val in reversed(sorted_ships):
+            ship = ship_last_val[0]
             self.options['series'].append(series[ship])
 
     def disambiguate_ship_by_faction(self, faction, sname):
