@@ -23,7 +23,7 @@ class HighChartAreaGraphOptions:
         },
         'xAxis': {
             'categories': [],
-            #'tickmarkPlacement': 'on',
+            'tickmarkPlacement': 'on',
             'title': {
                 'enabled': 'false'
             }
