@@ -23,7 +23,7 @@ class HighChartAreaGraphOptions:
         },
         'xAxis': {
             'categories': [],
-            'tickmarkPlacement': 'on',
+            #'tickmarkPlacement': 'on',
             'title': {
                 'enabled': 'false'
             }
@@ -97,7 +97,7 @@ class HighChartLineGraphOptions:
 
 
 class FactionTotalHighChartOptions:
-    def __init__(self, ship_pilot_time_series_data,show_as_percentage):
+    def __init__(self, ship_pilot_time_series_data,show_as_percentage=True):
         hclgo = None
         if not show_as_percentage:
             hclgo = HighChartLineGraphOptions(title="Faction Total",
@@ -150,7 +150,7 @@ class ShipTotalHighchartOptions:
 class ShipHighchartOptions:
     def __init__(self, ship_pilot_time_series_data,
                  ships_and_factions,
-                 show_as_percentage=False,
+                 show_as_percentage=True,
                  rebel_checked=True,
                  scum_checked=True,
                  imperial_checked=True):

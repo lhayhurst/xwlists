@@ -1454,7 +1454,7 @@ def ship_chart():
     pm               = PersistenceManager(myapp.db_connector)
     pcd              = ShipPilotTimeSeriesData(  pm )
     total_options    = ShipTotalHighchartOptions(pcd)
-    faction_options  = FactionTotalHighChartOptions(pcd,False)
+    faction_options  = FactionTotalHighChartOptions(pcd,True)
     ships_by_faction = pm.get_ships_by_faction()
     ship_options     = ShipHighchartOptions(pcd, ships_by_faction)
 
