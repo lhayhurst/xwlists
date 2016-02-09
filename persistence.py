@@ -1177,8 +1177,9 @@ class PersistenceManager:
             Ship.archtype_id == ArchtypeList.id,
             ShipPilot.id == Ship.ship_pilot_id
         ]
-        return self.db_connector.get_session().query(ArchtypeList.faction, ShipPilot.ship_type).\
-            filter( and_(*filters) ).distinct()
+        recs = self.db_connector.get_session().query(ArchtypeList.faction, ShipPilot.ship_type).\
+            filter( and_(*filters) ).distinct().all()
+        return recs
 
     def get_tourney_by_id(self,tourney_id):
         return self.db_connector.get_session().query(Tourney).filter_by(id=tourney_id).first()

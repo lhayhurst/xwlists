@@ -13,11 +13,11 @@
 <input type="checkbox" id="ship-percentage-toggle" value="ship-percentage-toggle">Show as percentage
 </div>
 
-<div id="faction_filters" style="display: none;">
+<div id="faction_filters">
 Faction Filters
-    <input type="checkbox" id="rebel-filter" value="rebel-filter" checked="checked">{{ scum }}
-    <input type="checkbox" id="imperial-filter" value="imperial-filter" checked="checked">{{ rebel }}
-    <input type="checkbox" id="scum-filter" value="scum-filter" checked="checked">{{ imperial }}
+    <input type="checkbox" id="ship-rebel-filter" class="{{ rebel }}" checked="checked">{{ rebel }}
+    <input type="checkbox" id="ship-imperial-filter" class="{{ imperial }}" checked="checked">{{ imperial }}
+    <input type="checkbox" id="ship-scum-filter" class="{{ scum }}" checked="checked">{{ scum }}
 </div>
 <div id="tourney_filters" style="display: none;">
 Tourney Filters
@@ -32,31 +32,52 @@ Tourney Filters
 <hr>
 <div id="container" style="min-width: 310px; height: 400px; max-width: 800px; margin: 0 auto"></div>
 <script>
+
+function adjustVisibles(chartOptions)
+{
+    series = chartOptions.series;
+    for ( var i = 0; i < series.length; i++ ) {
+        if ( series[i].visible == 1  ) {
+            series[i].visible = true;
+        }
+        else {
+            series[i].visible = false;
+        }
+    }
+}
+
 var ship_total_options = {{ ship_total_options | safe }};
 var faction_options = {{ faction_options | safe }};
 var ship_options = {{ ship_options | safe }}
-
+adjustVisibles(ship_options);
 $('#ship_total').highcharts( ship_total_options );
 $('#faction_total').highcharts( faction_options );
 $('#ships').highcharts( ship_options );
 
-$('#ship-percentage-toggle').on('change', function() {
-    var $this = $(this);
-    var show_ship_as_percentage;
-    if ($this.is(':checked')) {
-        show_ship_as_percentage = true;
-    }
-    else {
-        show_ship_as_percentage = false;
-    }
+$('#ship-percentage-toggle,#ship-rebel-filter,#ship-imperial-filter,#ship-scum-filter').on('change', function() {
+    var show_ship_as_percentage = $('#ship-percentage-toggle').is(':checked');
+    var rebel_checked = $('#ship-rebel-filter').is(':checked');
+    var imperial_checked = $('#ship-imperial-filter').is(':checked');
+    var scum_checked = $('#ship-scum-filter').is(':checked');
+
     var url = "/get_ship_time_series";
     $.ajax({
         type: "POST",
         contentType: "application/json; charset=utf-8",
         url: url,
-        data: JSON.stringify({ data: { 'show_ship_as_percentage' : show_ship_as_percentage } } ),
+        data: JSON.stringify(
+                {
+                    data: {
+                        'imperial_checked': imperial_checked,
+                        'rebel_checked': rebel_checked,
+                        'scum_checked': scum_checked,
+                        'show_ship_as_percentage' : show_ship_as_percentage,
+                    }
+                }
+        ),
         success: function (data) {
             var ship_options = data['ship_options'];
+            adjustVisibles(ship_options)
             $('#ships').highcharts(ship_options);
         },
         dataType: "json"

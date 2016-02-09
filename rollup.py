@@ -146,7 +146,12 @@ class ShipTotalHighchartOptions:
         self.options['series'].append(series['total'])
 
 class ShipHighchartOptions:
-    def __init__(self, ship_pilot_time_series_data, ships_by_faction, show_as_percentage=False):
+    def __init__(self, ship_pilot_time_series_data,
+                 ships_and_factions,
+                 show_as_percentage=False,
+                 rebel_checked=True,
+                 scum_checked=True,
+                 imperial_checked=True):
 
         hclgo = None
         if not show_as_percentage:
@@ -155,7 +160,39 @@ class ShipHighchartOptions:
         else:
             hclgo = HighChartAreaGraphOptions(title="Ship-by-Ship Total", yaxis_label="Ships taken")
         self.options = hclgo.get_options()
+
         series = {}
+        ships_factions = {}
+        for rec in ships_and_factions:
+            faction = rec[0]
+            sname   = rec[1].description
+            if not ships_factions.has_key(sname):
+                ships_factions[sname] = []
+            ships_factions[sname].append(faction)
+
+        #we're ready to create the series
+        #set some reasonable defaults for the data.
+        default_data_points = []
+        for year in ship_pilot_time_series_data.summary.keys():
+            for month in ship_pilot_time_series_data.summary[year].keys():
+                default_data_points.append(0)
+
+        for sname in ships_factions:
+            factions = ships_factions[sname]
+            if len(factions) == 1:
+                faction = factions[0]
+                series[sname] = { 'name': sname,
+                                  'data': list(default_data_points),
+                                  'visible': self.check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
+            else:
+                for faction in factions:
+                    disambiguated_name = self.disambiguate_ship_by_faction(faction.description, sname)
+                    series[disambiguated_name] = { 'name': disambiguated_name,
+                                                   'data':list(default_data_points),
+                                                   'visible': self.check_visible(faction, imperial_checked, rebel_checked, scum_checked)}
+
+        #now populate the data
+        data_index = 0
         for year in ship_pilot_time_series_data.summary.keys():
             for month in ship_pilot_time_series_data.summary[year].keys():
                 year_mo = str(year) + "-" + str(month)
@@ -163,23 +200,32 @@ class ShipHighchartOptions:
                 summary = ship_pilot_time_series_data.summary[year][month]
                 ships = summary['ships']
 
-                for ship in ships.keys():
-                    if not series.has_key(ship):
-                        series[ship] = { 'name': ship, 'data':[] }
-                    series[ship]['data'].append( ships[ship])
-
-                #backfill data if its missing
-                for rec in ships_by_faction:
-                    faction = rec[0]
-                    sname   = rec[1].description
-                    if not series.has_key(sname):
-                        series[sname] = {'name': sname, 'data': []}
-                    if not ships.has_key(sname):
-                        series[sname]['data'].append(0)
+                for faction in ships.keys():
+                    for ship in ships[faction].keys():
+                        ship_name = ship
+                        if len(ships_factions[ship_name]) > 1:
+                            ship_name = self.disambiguate_ship_by_faction(faction, ship_name)
+                        series_data = series[ship_name]['data']
+                        data_point  = ships[faction][ship]
+                        series_data[data_index] = data_point
+                data_index +=1
 
         self.options['series'] = []
-        for ship in series.keys():
+        for ship in sorted(series.iterkeys()):
             self.options['series'].append(series[ship])
+
+    def disambiguate_ship_by_faction(self, faction, sname):
+        return sname + "( " + faction + " )"
+
+    def check_visible(self, faction, imperial_checked, rebel_checked, scum_checked):
+        if rebel_checked == False and faction == Faction.REBEL:
+            return 0
+        if imperial_checked == False and faction == Faction.IMPERIAL:
+            return 0
+        if scum_checked == False and faction == Faction.SCUM:
+            return 0
+        return 1
+
 
 class ShipPilotTimeSeriesData:
     def __init__(self, pm):
@@ -231,7 +277,6 @@ class ShipPilotTimeSeriesData:
                 summary[year][month] = {}
 
             s = summary[year][month]
-
             if not s.has_key('total'):
                 s['total'] = 0
             s['total'] += count
@@ -244,10 +289,11 @@ class ShipPilotTimeSeriesData:
 
             if not s.has_key('ships'):
                 s['ships'] = {}
-
-            if not s['ships'].has_key(ship):
-                s['ships'][ship] = 0
-            s['ships'][ship] += count
+            if not s['ships'].has_key(faction):
+                s['ships'][faction] = {}
+            if not s['ships'][faction].has_key(ship):
+                s['ships'][faction][ship] = 0
+            s['ships'][faction][ship] += count
 
         self.summary = summary
         self.line_items = time_series_data

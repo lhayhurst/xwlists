@@ -1449,9 +1449,6 @@ def pretty_print():
     pm.db_connector.get_session().commit()
     return redirect(url_for('archtypes') )
 
-
-
-
 @app.route("/time_series")
 def ship_chart():
     pm               = PersistenceManager(myapp.db_connector)
@@ -1471,12 +1468,21 @@ def ship_chart():
 
 @app.route("/get_ship_time_series",methods=['POST'])
 def get_ship_time_series():
-    data         = request.json['data']
+    data               = request.json['data']
     show_as_percentage = data['show_ship_as_percentage']
+    imperial_checked   = data['imperial_checked']
+    rebel_checked      = data['rebel_checked']
+    scum_checked       = data['scum_checked']
+
     pm               = PersistenceManager(myapp.db_connector)
     pcd              = ShipPilotTimeSeriesData(  pm )
     ships_by_faction = pm.get_ships_by_faction()
-    ship_options     = ShipHighchartOptions(pcd, ships_by_faction, show_as_percentage)
+    ship_options     = ShipHighchartOptions(pcd,
+                                            ships_by_faction,
+                                            show_as_percentage,
+                                            rebel_checked=rebel_checked,
+                                            scum_checked=scum_checked,
+                                            imperial_checked=imperial_checked)
     return jsonify( ship_options=ship_options.options)
 
 
