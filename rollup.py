@@ -9,7 +9,47 @@ COUNT_MEASURE       = 'COUNT_MEASURE'
 POINT_COST_MEASURE  = 'POINT_COST_MEASURE'
 FACTION_SHIP_ROLLUP = 'FACTION_SHIP_ROLLUP'
 
-class HighChartAreaGraphOptions:
+releases = {
+    "2012-9" : "Wave 1",
+    "2013-2" : "Wave 2",
+    "2013-9" : "Wave 3",
+    "2014-2" : "Wave 4",
+    "2014-6" : "Wave 5",
+    "2015-2" : "Wave 6",
+    "2015-8" : "Wave 7",
+    "2015-11": "Wave 8 (T-70, Tie/FO)",
+    "2014-3" : "Imperial Aces",
+    "2014-9" : "Rebel Aces",
+    "2014-4" : "Rebel Transport",
+    "2014-5" : "Tantive IV",
+    "2015-6" : "Imperial Raider",
+    "2015-12" : "Imperial Assault Carrier",
+}
+
+class HighChartGraph:
+    def __init__(self):
+        self.options = {}
+
+    def addPlotLine(self,year_mo, position):
+        text = releases[year_mo]
+        xAxis = self.options['xAxis']
+        if releases.has_key(year_mo):
+            xAxis['plotLines'].append(
+                {
+                    'color' : 'red',
+                    'value' : position,
+                    'width' : 2,
+                    'label' : {
+                        'text': text,
+                        'verticalAlign': 'left',
+                        'textAlign': 'top'
+                    }
+                }
+            )
+
+
+class HighChartAreaGraphOptions(HighChartGraph):
+
     def __init__(self, title, yaxis_label, subtitle='', chart_type=None, plot_options=None ):
         self.options = {
         'chart': {
@@ -26,7 +66,8 @@ class HighChartAreaGraphOptions:
             'tickmarkPlacement': 'on',
             'title': {
                 'enabled': 'false'
-            }
+            },
+            'plotLines' : [],
         },
         'yAxis': {
             'title': {
@@ -53,7 +94,7 @@ class HighChartAreaGraphOptions:
     def get_options(self):
         return self.options
 
-class HighChartLineGraphOptions:
+class HighChartLineGraphOptions(HighChartGraph):
     def __init__(self, title, yaxis_label, subtitle='', chart_type=None, plot_options=None ):
         self.options = {
             'title': {
@@ -83,7 +124,8 @@ class HighChartLineGraphOptions:
             'xAxis': {
                 'categories' : [],
                 'tickerPlacement' :'on',
-                'title' : { 'enabled': "false" }
+                'title' : { 'enabled': "false" },
+                'plotLines' : [],
             }
         }
         if plot_options:
@@ -107,10 +149,16 @@ class FactionTotalHighChartOptions:
 
         self.options = hclgo.get_options()
         series = {}
+        position = 0
         for year in ship_pilot_time_series_data.summary.keys():
             for month in ship_pilot_time_series_data.summary[year].keys():
                 year_mo = str(year) + "-" + str(month)
-                self.options['xAxis']['categories'].append( year_mo )
+                xAxis = self.options['xAxis']
+                xAxis['categories'].append( year_mo )
+                if releases.has_key(year_mo):
+                    hclgo.addPlotLine(year_mo, position)
+
+                position +=1
                 summary = ship_pilot_time_series_data.summary[year][month]
                 factions = summary['faction']
 
@@ -138,10 +186,16 @@ class ShipTotalHighchartOptions:
         self.options = hclgo.get_options()
         series = {}
         series['total'] = { 'type': 'area', 'name': 'Total', 'data':[]}
+        position = 0
         for year in ship_pilot_time_series_data.summary.keys():
             for month in ship_pilot_time_series_data.summary[year].keys():
                 year_mo = str(year) + "-" + str(month)
-                self.options['xAxis']['categories'].append( year_mo )
+                xAxis = self.options['xAxis']
+                xAxis['categories'].append( year_mo )
+                if releases.has_key(year_mo):
+                    hclgo.addPlotLine(year_mo, position)
+
+                position +=1
                 summary = ship_pilot_time_series_data.summary[year][month]
                 series['total']['data'].append(summary['total'])
         self.options['series'] = []
@@ -198,7 +252,11 @@ class ShipHighchartOptions:
         for year in ship_pilot_time_series_data.summary.keys():
             for month in ship_pilot_time_series_data.summary[year].keys():
                 year_mo = str(year) + "-" + str(month)
-                self.options['xAxis']['categories'].append( year_mo )
+                xAxis = self.options['xAxis']
+                xAxis['categories'].append( year_mo )
+                if releases.has_key(year_mo):
+                    hclgo.addPlotLine(year_mo, data_index )
+
                 summary = ship_pilot_time_series_data.summary[year][month]
                 ships = summary['ships']
 
