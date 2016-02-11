@@ -1436,7 +1436,7 @@ def down():
 
 @app.route('/')
 def index():
-    return redirect(url_for('tourneys') )
+    return redirect(url_for('time_series') )
 
 @app.route("/pretty_print")
 def pretty_print():
@@ -1450,7 +1450,7 @@ def pretty_print():
     return redirect(url_for('archtypes') )
 
 @app.route("/time_series")
-def ship_chart():
+def time_series():
     pm               = PersistenceManager(myapp.db_connector)
     pcd              = ShipPilotTimeSeriesData(  pm )
     total_options    = ShipTotalHighchartOptions(pcd)
