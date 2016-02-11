@@ -71,6 +71,8 @@ TIE_ADVANCED_PROTOTYPE = 'TIE Adv. Prototype'
 TIE_ADVANCED_PROTOTYPE_CANON_NAME = 'tieadvprototype'
 G1A_STARFIGHTER = 'G-1A Starfighter'
 G1A_STARFIGHTER_CANON_NAME = 'g1astarfighter'
+JUMPMASTER_5000_CANON_NAME = "jumpmaster5000"
+JUMPMASTER_5000_NAME = "JumpMaster 5000"
 
 EPT = "Elite Pilot Talent"
 EPT_CANON = 'ept'
@@ -162,6 +164,14 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 upgrades = {
     CREW: (
 
+        {'name': 'Boba Fett', 'canon_name': 'bobafett', 'cost': 1,
+         'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Gonk', 'canon_name': 'gonk', 'cost': 2,
+         'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+        {'name': 'Dengar', 'canon_name': 'dengar', 'cost': 3,
+         'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
+
+
         {'name': '4-Lom', 'canon_name': '4lom', 'cost': 1, 'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
         {'name': 'Zuckuss', 'canon_name': 'zuckuss', 'cost': 1, 'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
         {'name': 'Chopper', 'canon_name': 'chopper', 'cost': 0, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
@@ -238,7 +248,8 @@ upgrades = {
     ),
     TITLE: (
 
-
+        {'name': 'Punishing One', 'cost': 12, 'canon_name' : 'punishingone',
+         'constraints': ({'type': SHIP_TYPE, 'value': JUMPMASTER_5000_NAME})},
 
         {'name': 'Mist Hunter', 'cost': 0, 'canon_name' : 'misthunter',
          'action': [{'type': 'ADD_UPGRADE', 'value': TORPEDO}],
@@ -390,6 +401,8 @@ upgrades = {
 
     EPT:
         (
+         {'name': 'Attanni Mindlink', 'cost': 1, 'canon_name':'attannimindlink'},
+         {'name': 'Rage', 'cost': 1, 'canon_name':'rage'},
          {'name': 'Adaptability', 'cost': 0, 'canon_name':'adaptability'},
          {'name': 'Adrenaline Rush', 'cost': 1},
          {'name': 'Deadeye', 'cost': 1},
@@ -448,6 +461,33 @@ upgrades = {
 }
 
 ships = {
+
+    JUMPMASTER_5000_NAME : (
+        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Contracted Scout',
+         'cost': 25, 'canon_name':'contractedscout',
+         #'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT ),
+         'pilot_skill' : 3,
+        },
+        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Manaroo',
+         'cost': 27, 'canon_name':'Manaroo',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT ),
+         'pilot_skill' : 4,
+        },
+        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Tel Trevura',
+         'cost': 30, 'canon_name':'Tel Trevura',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT ),
+         'pilot_skill' : 7,
+        },
+        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Dengar',
+         'cost': 33, 'canon_name':'Dengar',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT ),
+         'pilot_skill' : 9,
+        },
+    ),
 
     G1A_STARFIGHTER : (
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': '4-LOM', 'cost': 27, 'canon_name':'4lom',
