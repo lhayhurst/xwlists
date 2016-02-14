@@ -21,7 +21,7 @@ import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event, ArchtypeList, LeagueMatch, \
     LeaguePlayer
-from rollup import Rollup, ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTotalHighChartOptions, \
+from rollup import ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTotalHighChartOptions, \
     ShipHighchartOptions
 from search import Search
 from uidgen import ListUIDGen
@@ -1559,34 +1559,8 @@ def get_ship_time_series():
     return jsonify( ship_options=ship_options.options)
 
 
-
-
-@app.route("/get_chart_data", methods=['POST'])
-def get_chart_data():
-    data         = request.json['data']
-    rollup       = Rollup( PersistenceManager(myapp.db_connector),
-                           data['value'],
-                           data['eliminationOnly'],
-                           data['storeChampionshipsOnly'],
-                           data['regionalChampionshipsOnly'],
-                           data['nationalChampionshipsOnly'])
-    chart_data   = rollup.rollup()
-    return jsonify(data=chart_data,
-                   title=data['value'] + rollup.title(),
-                   firstCategory=rollup.first_category(),
-                   secondCategory=rollup.second_category())
-
-
 def to_float(dec):
     return float("{0:.2f}".format( float(dec) * float(100)))
-
-@app.route("/tableau")
-def tableau():
-    return render_template('tableau.html')
-
-@app.route("/charts")
-def charts():
-    return render_template('charts.html')
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
