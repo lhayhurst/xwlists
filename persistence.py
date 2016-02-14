@@ -1,5 +1,6 @@
 from flask import url_for
 from markupsafe import Markup
+import sqlalchemy
 from sqlalchemy.dialects import mysql
 from sqlalchemy import or_, BigInteger
 from decoder import decode
@@ -296,25 +297,25 @@ class LeagueMatch(Base):
         else:
             return self.get_player2_list_url() + self.player2_list_text()
 
-    def get_player_list_display(self, player_id, player_list_id):
+    def get_player_list_display(self, player_id, player_list_id,player_name):
         if self.is_complete():
             if player_list_id is not None:
                 return self.get_player_list_text_with_link(player_id)
             else:
                 url = url_for('escrow', match_id=self.id, player_id=player_id)
-                return '<a href="' + url + '">Enter list</a>'
+                return '<a href="' + url + '">Enter ' + player_name + '\'s list</a>'
         if self.needs_escrow():
             url = url_for('escrow', match_id=self.id, player_id=player_id)
-            return '<a href="' + url + '">Escrow list</a>'
+            return '<a href="' + url + '">Escrow ' + player_name + '\'s list</a>'
         else:
             return self.get_player_list_text_with_link(player_id)
 
 
     def get_player1_list_display(self):
-        return self.get_player_list_display(self.player1_id, self.player1_list_id)
+        return self.get_player_list_display(self.player1_id, self.player1_list_id, self.player1.get_name())
 
     def get_player2_list_display(self):
-        return self.get_player_list_display(self.player2_id, self.player2_list_id)
+        return self.get_player_list_display(self.player2_id, self.player2_list_id, self.player2.get_name())
 
     def get_player_escrow_text(self, player_id):
         #scenarios
@@ -1200,10 +1201,8 @@ class PersistenceManager:
     def get_archtype(self, id):
         return self.db_connector.get_session().query(ArchtypeList).filter_by(id=id).first()
 
-
     def get_archtype_by_hashkey(self, hashkey):
         return self.db_connector.get_session().query(ArchtypeList).filter_by(hashkey=hashkey).first()
-
 
     def get_all_archtypes(self):
         return self.db_connector.get_session().query(ArchtypeList).all()
@@ -1311,10 +1310,11 @@ class PersistenceManager:
             return None
         return randomRow[1]
 
-    def get_ship_pilot_rollup(self, elimination=True,
-                              storeChampionships=True,
-                              regionalChampionships=True,
-                              nationalChampionships=True):
+    def commit(self):
+        self.db_connector.get_session().commit()
+
+    def get_ship_pilot_rollup(self, tourney_filters,show_the_cut_only):
+
         session = self.db_connector.get_session()
 
         filters = [
@@ -1325,140 +1325,34 @@ class PersistenceManager:
             ShipPilot.pilot_id == Pilot.id
         ]
 
-        if elimination:
+        if show_the_cut_only:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
+        if tourney_filters is not None:
+            self.apply_tourney_type_filter(filters, tourney_filters)
 
-
-        ship_pilot_rollup_sql = session.query( ArchtypeList.faction, ShipPilot.ship_type, Pilot.name,
+        ship_pilot_rollup_sql = session.query(
+            sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
+            sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+            ArchtypeList.faction, ShipPilot.ship_type, Pilot.name,
                              func.count( Pilot.id).label("num_pilots"),
                              func.sum( Pilot.cost).label("cost_pilots")).\
                              filter( and_(*filters)).\
-            group_by( rollup( ArchtypeList.faction, ShipPilot.ship_type, Pilot.name) ).\
+            group_by( rollup(
+                sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
+                sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+                ArchtypeList.faction, ShipPilot.ship_type, Pilot.name) ).\
             statement.compile(dialect=mysql.dialect())
 
         connection = self.db_connector.get_engine().connect()
         ship_pilot_rollup = connection.execute(ship_pilot_rollup_sql)
+        return ship_pilot_rollup
 
-        #print "ship pilot rollup sql: " + ship_pilot_rollup_sql.string
-
-        filters = [
-            TourneyList.tourney_id == Tourney.id ,
-            ArchtypeList.id == TourneyList.archtype_id,
-            Ship.archtype_id == ArchtypeList.id ,
-            Ship.ship_pilot_id == ShipPilot.id ,
-            ShipPilot.pilot_id == Pilot.id ,
-            ShipUpgrade.ship_id == Ship.id ,
-            Upgrade.id == ShipUpgrade.upgrade_id,
-        ]
-
-        if elimination:
-            filters.append( TourneyRanking.tourney_id == Tourney.id)
-            filters.append( TourneyList.player_id == TourneyRanking.player_id)
-            filters.append(TourneyRanking.elim_rank != None)
-
-        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
-
-        upgrade_rollup_sql = session.query( ArchtypeList.faction, ShipPilot.ship_type, Pilot.name,
-                                        func.count( Upgrade.id).label("num_upgrades"),
-                                        func.sum( Upgrade.cost).label("cost_upgrades") ).\
-                            filter( and_(*filters)).\
-            group_by( rollup( ArchtypeList.faction, ShipPilot.ship_type, Pilot.name) ).\
-            statement.compile(dialect=mysql.dialect())
-
-        #print "ship pilot upgrade rollup sql: " + upgrade_rollup_sql.string
-        upgrade_rollup = connection.execute( upgrade_rollup_sql )
-
-
-        ret = ship_pilot_rollup.fetchall() + upgrade_rollup.fetchall()
-        connection.close()
-        return ret
-
-    def commit(self):
-        self.db_connector.get_session().commit()
-
-    def get_upgrade_rollups(self, elimination_only,
-                            storeChampionships=True,
-                            regionalChampionships=True,
-                            nationalChampionships=True):
+    def get_upgrade_rollups(self, tourney_filters, show_the_cut_only):
 
         session = self.db_connector.get_session()
-
-        filters = [
-            TourneyList.tourney_id == Tourney.id,
-            ArchtypeList.id == TourneyList.archtype_id,
-            Ship.archtype_id == ArchtypeList.id ,
-            Ship.ship_pilot_id == ShipPilot.id ,
-            ShipPilot.pilot_id == Pilot.id ,
-            ShipUpgrade.ship_id == Ship.id,
-            Upgrade.id == ShipUpgrade.upgrade_id ,
-        ]
-
-        if elimination_only:
-            filters.append( TourneyRanking.tourney_id == Tourney.id)
-            filters.append( TourneyList.player_id == TourneyRanking.player_id)
-            filters.append(TourneyRanking.elim_rank != None)
-
-        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
-
-        upgrade_rollup_sql = session.query( Upgrade.upgrade_type, Upgrade.name,
-                                        func.count( Upgrade.id).label("num_upgrades"),
-                                        func.sum( Upgrade.cost).label("cost_upgrades") ).\
-            filter( and_(*filters)).\
-            group_by( rollup( Upgrade.upgrade_type, Upgrade.name) ).\
-            statement.compile(dialect=mysql.dialect())
-
-        #print "get_upgrade_rollups: " + upgrade_rollup_sql.string
-
-        connection = self.db_connector.get_engine().connect()
-        ret = connection.execute(upgrade_rollup_sql)
-        return ret
-
-    def apply_tourney_type_filter(self, filters, nationalChampionships, regionalChampionships, storeChampionships):
-
-        ors = []
-        if nationalChampionships:
-            ors.append( Tourney.tourney_type == ('%s' % NATIONAL_CHAMPIONSHIP) )
-        if regionalChampionships:
-            ors.append( Tourney.tourney_type == ('%s' % REGIONAL) )
-        if storeChampionships:
-            ors.append(  Tourney.tourney_type == ('%s' % STORE_CHAMPIONSHIP) )
-        filters.append( or_( *ors ))
-
-    def get_ship_faction_rollups(self, elimination,
-                                 storeChampionships=True,
-                                 regionalChampionships=True,
-                                 nationalChampionships=True):
-        session = self.db_connector.get_session()
-
-        filters = [TourneyList.tourney_id == Tourney.id ,
-            ArchtypeList.id == TourneyList.archtype_id,
-            Ship.archtype_id == ArchtypeList.id ,
-            Ship.ship_pilot_id == ShipPilot.id,
-            ShipPilot.pilot_id == Pilot.id ]
-
-        if elimination:
-            filters.append( TourneyRanking.tourney_id == Tourney.id)
-            filters.append( TourneyList.player_id == TourneyRanking.player_id)
-            filters.append(TourneyRanking.elim_rank != None)
-
-        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
-
-
-        faction_ship_rollup_sql = session.query( ArchtypeList.faction, ShipPilot.ship_type,
-                             func.count( Pilot.id).label("num_pilots"),
-                             func.sum( Pilot.cost).label("cost_pilots")).\
-                             filter( and_(*filters)).\
-                             group_by( rollup( ArchtypeList.faction, ShipPilot.ship_type) ).statement.compile(dialect=mysql.dialect())
-
-        #print "faction ship rollup sql: " + faction_ship_rollup_sql.string
-
-        connection = self.db_connector.get_engine().connect()
-        faction_ship_rollup = connection.execute(faction_ship_rollup_sql)
-
 
         filters = [
             TourneyList.tourney_id == Tourney.id,
@@ -1469,24 +1363,58 @@ class PersistenceManager:
             ShipUpgrade.ship_id == Ship.id,
             Upgrade.id == ShipUpgrade.upgrade_id ]
 
-        if elimination:
+
+        if show_the_cut_only:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        self.apply_tourney_type_filter(filters, nationalChampionships, regionalChampionships, storeChampionships)
+        self.apply_tourney_type_filter(filters, tourney_filters)
 
-        upgrade_rollup_sql = session.query( ArchtypeList.faction, ShipPilot.ship_type,
-                                        func.count( Upgrade.id).label("num_upgrades"),
-                                        func.sum( Upgrade.cost).label("cost_upgrades") ).\
+        upgrade_rollup_sql = session.query(
+                        sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
+                        sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+                        ArchtypeList.faction,
+                        ShipPilot.ship_type,
+                        Pilot.name.label("pilot_name"),
+                        func.count( Upgrade.id).label("num_upgrades"),
+                        func.sum( Upgrade.cost).label("cost_upgrades") ).\
             filter( and_(*filters)).\
-            group_by( rollup( ArchtypeList.faction, ShipPilot.ship_type) ).\
+            group_by(
+                rollup(
+                    sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
+                    sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+                    ArchtypeList.faction,
+                    ShipPilot.ship_type,
+                    Pilot.name
+                )
+            ).\
             statement.compile(dialect=mysql.dialect())
 
-        upgrade_rollup = connection.execute( upgrade_rollup_sql )
+        connection = self.db_connector.get_engine().connect()
+        ret = connection.execute(upgrade_rollup_sql)
         connection.close()
-
-        ret = faction_ship_rollup.fetchall() + upgrade_rollup.fetchall()
         return ret
 
+    def apply_tourney_type_filter(self, filters, tourney_filters):
+
+        #if all the values are set to false, then just append 'None' to the filter
+        if tourney_filters is None:
+            return
+
+        all_false = True
+        for tt in tourney_filters.keys():
+            if tourney_filters[tt] is True:
+                all_false = False
+                break
+
+        if all_false:
+            filters.append( Tourney.tourney_type == 'None')
+            return
+        else:
+            ors = []
+            for tt in tourney_filters.keys():
+                if tourney_filters[tt] is True:
+                    ors.append( Tourney.tourney_type == ('%s' % tt) )
+            filters.append( or_( *ors ))
 

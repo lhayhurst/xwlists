@@ -1,36 +1,204 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<div id="ship_total" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+<div id="total_total" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 <hr>
-<div id="faction_total" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-<div id="faction_total_filters">
-<input type="checkbox" id="faction-percentage-toggle" value="faction-percentage-toggle" checked>Show as percentage
-</div>
-<hr>
-<div id="ships" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-<div id="ship-percentage">
-<input type="checkbox" id="ship-percentage-toggle" value="ship-percentage-toggle" checked>Show as percentage
+<div id="total-filters">
+    <div id="total_total_filters">Total by:
+        <input type="radio" name="total-totals" id="total-points-radio" value="sum" checked>sum of points spent on ships
+        <input type="radio" name="total-totals" id="total-count-radio" value="count" >number of ships
+    </div>
+    <div id="total-tourney-types">Tournament types:
+    {% for tourney_type in tourney_types %}
+        <input type="checkbox" class='total-tourney-types' id="total-tourney-type-{{ loop.counter }}" value="{{ tourney_type }}" checked>{{ tourney_type }}
+    {% endfor %}
+    </div>
+    <div id="total-tournament-results">Player results
+        <input type="radio" name="total-result-types" id="total-all-radio" value="all" checked>All player results
+        <input type="radio" name="total-result-types" id="total-cut-radio" value="cut" >Only results that made "the cut"
+    </div>
 </div>
 
-<div id="faction_filters">
-Faction Filters
-    <input type="checkbox" id="ship-rebel-filter" class="{{ rebel }}" checked="checked">{{ rebel }}
-    <input type="checkbox" id="ship-imperial-filter" class="{{ imperial }}" checked="checked">{{ imperial }}
-    <input type="checkbox" id="ship-scum-filter" class="{{ scum }}" checked="checked">{{ scum }}
-</div>
-<div id="tourney_filters" style="display: none;">
-Tourney Filters
-    <input type="checkbox" id="elimination-filter" value="elimination-filter">Elimination only
-    <input type="checkbox" id="store-filter" value="store-filter" checked="checked">Store champs
-    <input type="checkbox" id="regional-filter" value="regional-filter" checked="checked">Regional champs
-    <input type="checkbox" id="national-filter" value="national-filter" checked="checked">National champs
-    <input type="checkbox" id="world-filter" value="world-filter" checked="checked">World champs
-    <input type="checkbox" id="vassal-filter" value="vassal-filter" checked="checked">Vassal play
-    <input type="checkbox" id="other-filter" value="other-filter" checked="checked">Other
-</div>
+<script>
+    function getRadioBoxValue(radioBoxes) {
+        var ret;
+        for(var i = 0; i < radioBoxes.length; i++){
+            if(radioBoxes[i].checked){
+                ret = radioBoxes[i].value;
+            }
+        }
+        return ret;
+    }
+
+    function get_faction_filter(tourney_types) {
+        var ftt = {}
+        for(var i = 0; i < tourney_types.length;i++) {
+            var filter = tourney_types[i]
+            ftt[filter.value] = $(filter).is(':checked');
+        }
+        return ftt;
+    }
+
+    $('input[type=radio][name=total-totals],input[type=radio][name=total-result-types],.total-tourney-types').on('change', function() {
+        var totalTotals = document.getElementsByName('total-totals');
+        var resultTotals = document.getElementsByName('total-result-types');
+
+        var aggregationType = getRadioBoxValue(totalTotals);
+        var resultsType     = getRadioBoxValue(resultTotals);
+
+        var tourney_types = $('.total-tourney-types');
+        var ftt = get_faction_filter( tourney_types );
+
+        var url = "/get_total_time_series";
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: url,
+            data: JSON.stringify(
+                    {
+                        data: { 'aggregation_type' : aggregationType,
+                                'results_type' : resultsType,
+                                'tourney_filters': ftt }
+                    }
+            ),
+            success: function (data) {
+                var options = data['options'];
+                $('#total_total').highcharts(options);
+            },
+            dataType: "json"
+        });
+    });
+</script>
+
 <hr>
-<div id="container" style="min-width: 310px; height: 400px; max-width: 800px; margin: 0 auto"></div>
+<div id="faction_total" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="faction-filters">
+    <div id="faction_total_filters">
+    <input type="checkbox" id="faction-percentage-toggle" value="faction-percentage-toggle" checked>Show as percentage
+    <div id="faction-totals">Total by:
+            <input type="radio" name="faction-totals" id="faction-points-radio" value="sum" checked>sum of points spent on ships in faction
+            <input type="radio" name="faction-totals" id="faction-count-radio" value="count" >number of ships in faction
+        </div>
+    </div>
+    <div id="faction-tourney-types">Tournament types:
+    {% for tourney_type in tourney_types %}
+        <input type="checkbox" class='faction-tourney-types' id="faction-tourney-type-{{ loop.counter }}" value="{{ tourney_type }}" checked>{{ tourney_type }}
+    {% endfor %}
+    <div id="faction-tournament-results">Player results
+        <input type="radio" name="faction-result-types" id="faction-all-radio" value="all" checked>All player results
+        <input type="radio" name="faction-result-types" id="faction-cut-radio" value="cut" >Only results that made "the cut"
+    </div>
+</div>
+
+<script>
+$('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=radio][name=faction-result-types],.faction-tourney-types').on('change', function() {
+    var show_faction_as_percentage = $('#faction-percentage-toggle').is(':checked');
+    var factionTotals = document.getElementsByName('faction-totals');
+    var resultTotals = document.getElementsByName('faction-result-types');
+
+    var aggregationType = getRadioBoxValue(factionTotals);
+    var resultsType     = getRadioBoxValue(resultTotals);
+
+    var faction_tourney_types = $('.faction-tourney-types');
+    var ftt = get_faction_filter( faction_tourney_types );
+
+    var url = "/get_faction_time_series";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: url,
+        data: JSON.stringify(
+                {
+                    data: { 'show_faction_as_percentage' : show_faction_as_percentage,
+                            'aggregation_type' : aggregationType,
+                            'results_type' : resultsType,
+                            'tourney_filters': ftt }
+                }
+        ),
+        success: function (data) {
+            var faction_options = data['faction_options'];
+            $('#faction_total').highcharts(faction_options);
+        },
+        dataType: "json"
+    });
+});
+</script>
+<hr>
+
+<div id="ships" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="ship-filters">
+    <div id="ship_total_filters">
+    <input type="checkbox" id="ship-percentage-toggle" value="ship-percentage-toggle" checked>Show as percentage
+    <div id="ship-totals-div">Total by:
+            <input type="radio" name="ship-totals" id="ship-points-radio" value="sum" checked>sum of points spent on ships in faction
+            <input type="radio" name="ship-totals" id="ship-count-radio" value="count" >number of ships in faction
+        </div>
+    </div>
+    <div id="ship-factions">Factions
+        <input type="checkbox" id="ship-rebel-filter" value="{{ rebel }}" checked>{{ rebel }}
+        <input type="checkbox" id="ship-imperial-filter" value="{{ imperial }}" checked>{{ imperial }}
+        <input type="checkbox" id="ship-scum-filter" value="{{ scum }}" checked>{{ scum }}
+
+
+    </div>
+    <div id="ship-tourney-types">Tournament types:
+        {% for tourney_type in tourney_types %}
+            <input type="checkbox" class='ship-tourney-types' id="ship-tourney-type-{{ loop.counter }}" value="{{ tourney_type }}" checked>{{ tourney_type }}
+        {% endfor %}
+    </div>
+    <div id="ship-tournament-results">Player results
+        <input type="radio" name="ship-result-types" id="ship-all-radio" value="all" checked>All player results
+        <input type="radio" name="ship-result-types" id="ship-cut-radio" value="cut" >Only results that made "the cut"
+    </div>
+</div>
+
+<script>
+
+    $('.ship-tourney-types,input[type=radio][name=ship-result-types],input[type=radio][name=ship-totals],#ship-percentage-toggle,#ship-rebel-filter,#ship-imperial-filter,#ship-scum-filter').on('change', function() {
+    var show_ship_as_percentage = $('#ship-percentage-toggle').is(':checked');
+    var rebel_checked = $('#ship-rebel-filter').is(':checked');
+    var imperial_checked = $('#ship-imperial-filter').is(':checked');
+    var scum_checked = $('#ship-scum-filter').is(':checked');
+
+    var shipTotals = document.getElementsByName('ship-totals');
+    var resultTotals = document.getElementsByName('ship-result-types');
+
+    var aggregationType = getRadioBoxValue(shipTotals);
+    var resultsType     = getRadioBoxValue(resultTotals);
+
+    var tourney_types = $('.ship-tourney-types');
+    var ftt = get_faction_filter( tourney_types );
+
+    var url = "/get_ship_time_series";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: url,
+        data: JSON.stringify(
+                {
+                    data: {
+                        'imperial_checked': imperial_checked,
+                        'rebel_checked': rebel_checked,
+                        'scum_checked': scum_checked,
+                        'show_ship_as_percentage' : show_ship_as_percentage,
+                        'aggregation_type' : aggregationType,
+                        'results_type' : resultsType,
+                        'tourney_filters': ftt
+                    }
+                }
+        ),
+        success: function (data) {
+            var ship_options = data['ship_options'];
+            adjustVisibles(ship_options)
+            $('#ships').highcharts(ship_options);
+        },
+        dataType: "json"
+    });
+});
+</script>
+<hr>
+
 <script>
 
 function adjustVisibles(chartOptions)
@@ -48,66 +216,12 @@ function adjustVisibles(chartOptions)
 
 var ship_total_options = {{ ship_total_options | safe }};
 var faction_options = {{ faction_options | safe }};
-var ship_options = {{ ship_options | safe }}
+var ship_options = {{ ship_options | safe }};
+
 adjustVisibles(ship_options);
-$('#ship_total').highcharts( ship_total_options );
+$('#total_total').highcharts( ship_total_options );
 $('#faction_total').highcharts( faction_options );
 $('#ships').highcharts( ship_options );
-
-$('#ship-percentage-toggle,#ship-rebel-filter,#ship-imperial-filter,#ship-scum-filter').on('change', function() {
-    var show_ship_as_percentage = $('#ship-percentage-toggle').is(':checked');
-    var rebel_checked = $('#ship-rebel-filter').is(':checked');
-    var imperial_checked = $('#ship-imperial-filter').is(':checked');
-    var scum_checked = $('#ship-scum-filter').is(':checked');
-
-    var url = "/get_ship_time_series";
-    $.ajax({
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        url: url,
-        data: JSON.stringify(
-                {
-                    data: {
-                        'imperial_checked': imperial_checked,
-                        'rebel_checked': rebel_checked,
-                        'scum_checked': scum_checked,
-                        'show_ship_as_percentage' : show_ship_as_percentage,
-                    }
-                }
-        ),
-        success: function (data) {
-            var ship_options = data['ship_options'];
-            adjustVisibles(ship_options)
-            $('#ships').highcharts(ship_options);
-        },
-        dataType: "json"
-    });
-});
-
-
-$('#faction-percentage-toggle').on('change', function() {
-    var $this = $(this);
-    var show_faction_as_percentage;
-    if ($this.is(':checked')) {
-        show_faction_as_percentage = true;
-    }
-    else {
-        show_faction_as_percentage = false;
-    }
-    var url = "/get_faction_time_series";
-    $.ajax({
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        url: url,
-        data: JSON.stringify({ data: { 'show_faction_as_percentage' : show_faction_as_percentage } } ),
-        success: function (data) {
-            var faction_options = data['faction_options'];
-            $('#faction_total').highcharts(faction_options);
-        },
-        dataType: "json"
-    });
-});
-
 
 
 </script>

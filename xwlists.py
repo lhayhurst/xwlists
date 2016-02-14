@@ -1452,19 +1452,78 @@ def pretty_print():
 @app.route("/time_series")
 def time_series():
     pm               = PersistenceManager(myapp.db_connector)
-    pcd              = ShipPilotTimeSeriesData(  pm )
+    pcd              = ShipPilotTimeSeriesData( pm )
+
     total_options    = ShipTotalHighchartOptions(pcd)
-    faction_options  = FactionTotalHighChartOptions(pcd,True)
+    faction_options  = FactionTotalHighChartOptions(pcd)
+
     ships_by_faction = pm.get_ships_by_faction()
     ship_options     = ShipHighchartOptions(pcd, ships_by_faction)
+
+    tourney_types    = pm.get_tourney_types()
+
+    tt = []
+    for tourney_type in tourney_types:
+        tt.append( tourney_type[0])
+
 
     return render_template("time_series.html",
                            ship_total_options=total_options.options,
                            faction_options=faction_options.options,
                            ship_options=ship_options.options,
+                           tourney_types=tt,
                            scum=Faction.SCUM.description,
                            rebel=Faction.REBEL.description,
                            imperial=Faction.IMPERIAL.description)
+
+
+@app.route("/get_total_time_series",methods=['POST'])
+def get_total_time_series():
+    data         = request.json['data']
+    aggregation_type   = data['aggregation_type']
+    results_type       = data['results_type']
+    tourney_filters    = data['tourney_filters']
+
+    show_as_count = True
+    if aggregation_type is not None and aggregation_type == "sum":
+        show_as_count = False
+
+    show_only_the_cut = False
+    if results_type is not None and results_type == "cut":
+        show_only_the_cut = True
+
+
+    pm               = PersistenceManager(myapp.db_connector)
+    pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
+                                                show_as_count=show_as_count,
+                                                show_the_cut_only=show_only_the_cut)
+    total_options    = ShipTotalHighchartOptions(pcd,
+                                                 show_as_count=show_as_count)
+    return jsonify( options=total_options.options)
+
+@app.route("/get_faction_time_series",methods=['POST'])
+def get_faction_time_series():
+    data         = request.json['data']
+    show_as_percentage = data['show_faction_as_percentage']
+    aggregation_type   = data['aggregation_type']
+    tourney_filters    = data['tourney_filters']
+    results_type       = data['results_type']
+
+    show_as_count = True
+    if aggregation_type is not None and aggregation_type == "sum":
+        show_as_count = False
+
+    show_only_the_cut = False
+    if results_type is not None and results_type == "cut":
+        show_only_the_cut = True
+
+    pm               = PersistenceManager(myapp.db_connector)
+    pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
+                                                show_as_count=show_as_count,
+                                                show_the_cut_only=show_only_the_cut)
+    faction_options  = FactionTotalHighChartOptions(pcd,show_as_percentage,show_as_count)
+    return jsonify( faction_options=faction_options.options)
+
 
 @app.route("/get_ship_time_series",methods=['POST'])
 def get_ship_time_series():
@@ -1473,27 +1532,33 @@ def get_ship_time_series():
     imperial_checked   = data['imperial_checked']
     rebel_checked      = data['rebel_checked']
     scum_checked       = data['scum_checked']
+    aggregation_type   = data['aggregation_type']
+    tourney_filters    = data['tourney_filters']
+    results_type       = data['results_type']
+
+    show_as_count = True
+    if aggregation_type is not None and aggregation_type == "sum":
+        show_as_count = False
+
+    show_only_the_cut = False
+    if results_type is not None and results_type == "cut":
+        show_only_the_cut = True
 
     pm               = PersistenceManager(myapp.db_connector)
-    pcd              = ShipPilotTimeSeriesData(  pm )
+    pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
+                                                show_as_count=show_as_count,
+                                                show_the_cut_only=show_only_the_cut)
     ships_by_faction = pm.get_ships_by_faction()
     ship_options     = ShipHighchartOptions(pcd,
                                             ships_by_faction,
-                                            show_as_percentage,
+                                            show_as_count=show_as_count,
+                                            show_as_percentage=show_as_percentage,
                                             rebel_checked=rebel_checked,
                                             scum_checked=scum_checked,
                                             imperial_checked=imperial_checked)
     return jsonify( ship_options=ship_options.options)
 
 
-@app.route("/get_faction_time_series",methods=['POST'])
-def get_faction_time_series():
-    data         = request.json['data']
-    show_as_percentage = data['show_faction_as_percentage']
-    pm               = PersistenceManager(myapp.db_connector)
-    pcd              = ShipPilotTimeSeriesData(  pm )
-    faction_options  = FactionTotalHighChartOptions(pcd,show_as_percentage)
-    return jsonify( faction_options=faction_options.options)
 
 
 @app.route("/get_chart_data", methods=['POST'])
