@@ -1573,6 +1573,7 @@ def get_pilot_time_series():
     aggregation_type   = data['aggregation_type']
     tourney_filters    = data['tourney_filters']
     results_type       = data['results_type']
+    top_10_only        = data['top_10_only']
 
     show_as_count = True
     if aggregation_type is not None and aggregation_type == "sum":
@@ -1593,7 +1594,8 @@ def get_pilot_time_series():
                                             show_as_percentage=show_as_percentage,
                                             rebel_checked=rebel_checked,
                                             scum_checked=scum_checked,
-                                            imperial_checked=imperial_checked)
+                                            imperial_checked=imperial_checked,
+                                            top_10_only=top_10_only)
     return jsonify( pilot_options=pilot_options.options)
 
 def to_float(dec):

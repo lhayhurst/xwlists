@@ -343,7 +343,8 @@ class PilotHighchartOptions:
                  show_as_percentage=True,
                  rebel_checked=True,
                  scum_checked=True,
-                 imperial_checked=True):
+                 imperial_checked=True,
+                 top_10_only=True):
 
         hclgo = None
 
@@ -358,9 +359,9 @@ class PilotHighchartOptions:
             hclgo = HighChartAreaGraphOptions(title="Pilots", yaxis_label=yaxis_label)
         self.options = hclgo.get_options()
         self.highchart = hclgo
-        self.finalize(ship_pilot_time_series_data,pilots_and_factions,imperial_checked,rebel_checked,scum_checked)
+        self.finalize(ship_pilot_time_series_data,pilots_and_factions,imperial_checked,rebel_checked,scum_checked,top_10_only)
 
-    def finalize(self, ship_pilot_time_series_data,pilots_and_factions,imperial_checked, rebel_checked, scum_checked ):
+    def finalize(self, ship_pilot_time_series_data,pilots_and_factions,imperial_checked, rebel_checked, scum_checked,top_10_only):
         #stupid boba fett, why must you exist in two factions? :-)
         pilot_factions = {}
         for rec in pilots_and_factions:
@@ -382,7 +383,7 @@ class PilotHighchartOptions:
                         disambiguated_pilot_name = pilot
                     series = { 'name': disambiguated_pilot_name,
                                'data': [],
-                                'visible': self.check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
+                               'visible': self.check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
                     for year_mo in data[faction][ship][pilot].keys():
                         self.highchart.add_category(year_mo)
                         val = data[faction][ship][pilot][year_mo]
@@ -397,8 +398,17 @@ class PilotHighchartOptions:
             unsorted[pilot]=last_value
 
         sorted_pilots = sorted(unsorted.items(), key=operator.itemgetter(1))
+        i = 0
         for pilot_last_val in reversed(sorted_pilots):
             pilot = pilot_last_val[0]
+            series = all_series[pilot]
+            if i < 10:
+                if top_10_only:
+                    series['visible'] = 1
+            else:
+                if top_10_only:
+                    series['visible'] = 0
+            i += 1
             self.highchart.add_series( all_series[pilot])
 
         self.highchart.finalize()
