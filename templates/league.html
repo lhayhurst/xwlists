@@ -28,8 +28,8 @@
       <tr>
         <th>Name</th>
         <th>Pod</th>
-        <th>MoV</th>
         <th>Points</th>
+        <th>MoV</th>
         <th>Total Played</th>
         <th>Wins</th>
         <th>Losses</th>
@@ -42,8 +42,8 @@
       <tr>
          <td >{{ p['player'] }}</td>
          <td>{{ p['division'] }}</td>
-         <td>{{ p['MoV']}}</td>
          <td>{{ p['points']}}</td>
+         <td>{{ p['MoV']}}</td>
          <td>{{ p['total'] }}</td>
          <td>{{ p['wins']}}</td>
          <td>{{ p['losses']}}</td>
@@ -88,7 +88,7 @@
 
         });
         $('#players').dataTable({
-            "order": [[3, "desc"]],
+            "order": [[2, "desc"],[3, "desc"]],
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
         });
     });

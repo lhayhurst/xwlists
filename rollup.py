@@ -34,7 +34,7 @@ class HighChartGraph:
         return self.options
 
     def num_categories(self):
-        return len(self.categories_lookup.keys())
+        return self.category_index
 
     def add_series(self, series):
         self.options['series'].append(series)
@@ -50,6 +50,13 @@ class HighChartGraph:
                     data.insert(0, 0)
                     fill_count -= 1
 
+        self.options['xAxis']['categories'] = []
+
+        years = sorted(self.categories_lookup.keys())
+        for year in years:
+            months = sorted(self.categories_lookup[year])
+            for month in months:
+                self.options['xAxis']['categories'].append(str(year) + "-" + str(month))
 
     def add_plot_line(self,year_mo, position):
         text = releases[year_mo]
@@ -68,15 +75,19 @@ class HighChartGraph:
                 }
             )
 
-    def add_category(self, year_mo):
-        if not self.categories_lookup.has_key(year_mo):
-            self.categories_lookup[year_mo] = self.category_index
-            self.category_index += 1
-            xAxis = self.options['xAxis']
-            xAxis['categories'].append( year_mo )
-            if releases.has_key(year_mo):
-                self.add_plot_line(year_mo, len(xAxis['categories'])-1)
-        return self.categories_lookup[year_mo]
+    def add_category(self, category_str):
+        (year,mo) = category_str.split("-")
+        year = int(year)
+        mo   = int(mo)
+        if not self.categories_lookup.has_key(year):
+            self.categories_lookup[year] = {}
+        if not self.categories_lookup[year].has_key(mo):
+            self.categories_lookup[year][mo] = 0
+            self.category_index +=1
+            if releases.has_key(category_str):
+                self.add_plot_line(category_str, self.category_index-1)
+
+        self.categories_lookup[year][mo] += 1
 
 class HighChartAreaGraphOptions(HighChartGraph):
 
@@ -214,6 +225,7 @@ class ShipTotalHighchartOptions:
         data = ship_pilot_time_series_data.grand_total_data
         series = { 'name': 'Total', 'type': 'area', 'data': []}
         for year_mo in data.keys():
+            (year,month) = year_mo.split("-")
             self.hclgo.add_category(year_mo)
             series['data'].append( data[year_mo] )
         self.hclgo.add_series(series)
@@ -228,7 +240,7 @@ class FactionTotalHighChartOptions:
         if show_as_count == False:
             yaxis_label = "Points spent on ships"
         if not show_as_percentage:
-            hclgo = HighChartLineGraphOptions(title="Faction Total",
+            hclgo = HighChartLineGraphOptions(title="Factions",
                                               yaxis_label=yaxis_label )
         else:
             hclgo = HighChartAreaGraphOptions(title="Faction Percentage", yaxis_label=yaxis_label)
@@ -262,10 +274,10 @@ class ShipHighchartOptions:
             yaxis_label = "Points spent on ships"
 
         if not show_as_percentage:
-            hclgo = HighChartLineGraphOptions(title="Ship-by-Ship Total",
+            hclgo = HighChartLineGraphOptions(title="Ships",
                                               yaxis_label=yaxis_label)
         else:
-            hclgo = HighChartAreaGraphOptions(title="Ship-by-Ship Total", yaxis_label=yaxis_label)
+            hclgo = HighChartAreaGraphOptions(title="Ships", yaxis_label=yaxis_label)
         self.options = hclgo.get_options()
         self.hlcgo = hclgo
         self.finalize(ship_pilot_time_series_data,ships_and_factions,imperial_checked,rebel_checked,scum_checked)
@@ -324,12 +336,93 @@ class ShipHighchartOptions:
             return 0
         return 1
 
+class PilotHighchartOptions:
+    def __init__(self, ship_pilot_time_series_data,
+                 pilots_and_factions,
+                 show_as_count=False,
+                 show_as_percentage=True,
+                 rebel_checked=True,
+                 scum_checked=True,
+                 imperial_checked=True):
+
+        hclgo = None
+
+        yaxis_label = "Number of pilots taken"
+        if show_as_count == False:
+            yaxis_label = "Points spent on pilots"
+
+        if not show_as_percentage:
+            hclgo = HighChartLineGraphOptions(title="Pilots",
+                                              yaxis_label=yaxis_label)
+        else:
+            hclgo = HighChartAreaGraphOptions(title="Pilots", yaxis_label=yaxis_label)
+        self.options = hclgo.get_options()
+        self.highchart = hclgo
+        self.finalize(ship_pilot_time_series_data,pilots_and_factions,imperial_checked,rebel_checked,scum_checked)
+
+    def finalize(self, ship_pilot_time_series_data,pilots_and_factions,imperial_checked, rebel_checked, scum_checked ):
+        #stupid boba fett, why must you exist in two factions? :-)
+        pilot_factions = {}
+        for rec in pilots_and_factions:
+            faction = rec[0]
+            pilot_name = rec[1]
+            if not pilot_factions.has_key(pilot_name):
+                pilot_factions[pilot_name] = []
+            pilot_factions[pilot_name].append(faction)
+
+        data = ship_pilot_time_series_data.pilot_data
+        all_series = {}
+        for faction in data.keys():
+            for ship in data[faction].keys():
+                for pilot in data[faction][ship].keys():
+                    disambiguated_pilot_name = None
+                    if len(pilot_factions[pilot]) > 1:
+                        disambiguated_pilot_name = self.disambiguate(faction,pilot)
+                    else:
+                        disambiguated_pilot_name = pilot
+                    series = { 'name': disambiguated_pilot_name,
+                               'data': [],
+                                'visible': self.check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
+                    for year_mo in data[faction][ship][pilot].keys():
+                        self.highchart.add_category(year_mo)
+                        val = data[faction][ship][pilot][year_mo]
+                        series['data'].append(val)
+                    all_series[disambiguated_pilot_name] = series
+
+        # #sort the series from biggest to smallest based the last months value
+        unsorted = {}
+        for pilot in all_series.keys():
+            pilot_series = all_series[pilot]
+            last_value = pilot_series['data'][-1]
+            unsorted[pilot]=last_value
+
+        sorted_pilots = sorted(unsorted.items(), key=operator.itemgetter(1))
+        for pilot_last_val in reversed(sorted_pilots):
+            pilot = pilot_last_val[0]
+            self.highchart.add_series( all_series[pilot])
+
+        self.highchart.finalize()
+
+
+    def disambiguate(self, faction, sname):
+        return sname + "( " + faction + " )"
+
+    def check_visible(self, faction, imperial_checked, rebel_checked, scum_checked):
+        if rebel_checked == False and faction == Faction.REBEL.description:
+            return 0
+        if imperial_checked == False and faction == Faction.IMPERIAL.description:
+            return 0
+        if scum_checked == False and faction == Faction.SCUM.description:
+            return 0
+        return 1
+
 class ShipPilotTimeSeriesData:
     def __init__(self, pm,tourney_filters=None,show_as_count=False,show_the_cut_only=False):
         self.pm               = pm
         self.grand_total_data = collections.OrderedDict()
         self.faction_data     = collections.OrderedDict()
         self.ship_data        = collections.OrderedDict()
+        self.pilot_data       = collections.OrderedDict()
 
         self.show_as_count     = show_as_count
         self.show_the_cut_only = show_the_cut_only
@@ -366,6 +459,28 @@ class ShipPilotTimeSeriesData:
         else:
             self.grand_total_data[year_mo] += datapoint
 
+    def visit_pilot_total(self, year, month, faction,ship,pilot,cnt,cost):
+        year_mo = str(year) + "-" + str(month)
+        datapoint = 0
+        if self.show_as_count:
+            datapoint = cnt
+        else:
+            datapoint = cost
+        if not self.pilot_data.has_key(faction):
+            self.pilot_data[faction] = collections.OrderedDict()
+
+        if not self.pilot_data[faction].has_key(ship):
+            self.pilot_data[faction][ship] = collections.OrderedDict()
+
+        if not self.pilot_data[faction][ship].has_key(pilot):
+            self.pilot_data[faction][ship][pilot] = collections.OrderedDict()
+
+        if not self.pilot_data[faction][ship][pilot].has_key(year_mo):
+            self.pilot_data[faction][ship][pilot][year_mo] = 0
+
+        self.pilot_data[faction][ship][pilot][year_mo] += datapoint
+
+
     def visit_ship_total(self, year, month, faction, ship, cnt,cost):
         year_mo = str(year) + "-" + str(month)
         datapoint = 0
@@ -385,8 +500,6 @@ class ShipPilotTimeSeriesData:
 
         self.ship_data[faction][ship][year_mo] += datapoint
 
-    def visit_pilot_total(self, year, month, faction,ship,pilot,cnt,cost):
-        pass
 
     def visit_faction_total(self, year, month, faction,cnt, cost):
         year_mo = str(year) + "-" + str(month)

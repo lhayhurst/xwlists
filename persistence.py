@@ -1183,6 +1183,17 @@ class PersistenceManager:
             filter( and_(*filters) ).distinct().all()
         return recs
 
+    def get_pilots_by_faction(self):
+        filters = [
+            Ship.archtype_id == ArchtypeList.id,
+            ShipPilot.id     == Ship.ship_pilot_id,
+            Pilot.id         == ShipPilot.pilot_id
+        ]
+        recs = self.db_connector.get_session().query(ArchtypeList.faction, Pilot.name).\
+            filter( and_(*filters) ).distinct().all()
+        return recs
+
+
     def get_tourney_by_id(self,tourney_id):
         return self.db_connector.get_session().query(Tourney).filter_by(id=tourney_id).first()
 
@@ -1333,16 +1344,18 @@ class PersistenceManager:
         if tourney_filters is not None:
             self.apply_tourney_type_filter(filters, tourney_filters)
 
+        year  = sqlalchemy.extract('year', Tourney.tourney_date)
+        month = sqlalchemy.extract('month', Tourney.tourney_date)
         ship_pilot_rollup_sql = session.query(
-            sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
-            sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+            year.label("year"),
+            month.label("month"),
             ArchtypeList.faction, ShipPilot.ship_type, Pilot.name,
                              func.count( Pilot.id).label("num_pilots"),
                              func.sum( Pilot.cost).label("cost_pilots")).\
                              filter( and_(*filters)).\
             group_by( rollup(
-                sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
-                sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+                year,
+                month,
                 ArchtypeList.faction, ShipPilot.ship_type, Pilot.name) ).\
             statement.compile(dialect=mysql.dialect())
 

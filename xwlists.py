@@ -22,7 +22,7 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event, ArchtypeList, LeagueMatch, \
     LeaguePlayer
 from rollup import ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTotalHighChartOptions, \
-    ShipHighchartOptions
+    ShipHighchartOptions, PilotHighchartOptions
 from search import Search
 from uidgen import ListUIDGen
 import xwingmetadata
@@ -1460,6 +1460,10 @@ def time_series():
     ships_by_faction = pm.get_ships_by_faction()
     ship_options     = ShipHighchartOptions(pcd, ships_by_faction)
 
+    pilots_by_faction = pm.get_pilots_by_faction()
+    pilot_options     = PilotHighchartOptions(pcd, pilots_by_faction)
+
+
     tourney_types    = pm.get_tourney_types()
 
     tt = []
@@ -1471,6 +1475,7 @@ def time_series():
                            ship_total_options=total_options.options,
                            faction_options=faction_options.options,
                            ship_options=ship_options.options,
+                           pilot_options=pilot_options.options,
                            tourney_types=tt,
                            scum=Faction.SCUM.description,
                            rebel=Faction.REBEL.description,
@@ -1558,6 +1563,38 @@ def get_ship_time_series():
                                             imperial_checked=imperial_checked)
     return jsonify( ship_options=ship_options.options)
 
+@app.route("/get_pilot_time_series",methods=['POST'])
+def get_pilot_time_series():
+    data               = request.json['data']
+    show_as_percentage = data['show_pilot_as_percentage']
+    imperial_checked   = data['imperial_checked']
+    rebel_checked      = data['rebel_checked']
+    scum_checked       = data['scum_checked']
+    aggregation_type   = data['aggregation_type']
+    tourney_filters    = data['tourney_filters']
+    results_type       = data['results_type']
+
+    show_as_count = True
+    if aggregation_type is not None and aggregation_type == "sum":
+        show_as_count = False
+
+    show_only_the_cut = False
+    if results_type is not None and results_type == "cut":
+        show_only_the_cut = True
+
+    pm               = PersistenceManager(myapp.db_connector)
+    pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
+                                                show_as_count=show_as_count,
+                                                show_the_cut_only=show_only_the_cut)
+    pilots_by_faction = pm.get_pilots_by_faction()
+    pilot_options     = PilotHighchartOptions(pcd,
+                                            pilots_by_faction,
+                                            show_as_count=show_as_count,
+                                            show_as_percentage=show_as_percentage,
+                                            rebel_checked=rebel_checked,
+                                            scum_checked=scum_checked,
+                                            imperial_checked=imperial_checked)
+    return jsonify( pilot_options=pilot_options.options)
 
 def to_float(dec):
     return float("{0:.2f}".format( float(dec) * float(100)))

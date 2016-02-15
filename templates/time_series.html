@@ -82,9 +82,10 @@
         </div>
     </div>
     <div id="faction-tourney-types">Tournament types:
-    {% for tourney_type in tourney_types %}
-        <input type="checkbox" class='faction-tourney-types' id="faction-tourney-type-{{ loop.counter }}" value="{{ tourney_type }}" checked>{{ tourney_type }}
-    {% endfor %}
+        {% for tourney_type in tourney_types %}
+            <input type="checkbox" class='faction-tourney-types' id="faction-tourney-type-{{ loop.counter }}" value="{{ tourney_type }}" checked>{{ tourney_type }}
+        {% endfor %}
+    </div>
     <div id="faction-tournament-results">Player results
         <input type="radio" name="faction-result-types" id="faction-all-radio" value="all" checked>All player results
         <input type="radio" name="faction-result-types" id="faction-cut-radio" value="cut" >Only results that made "the cut"
@@ -199,6 +200,80 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
 </script>
 <hr>
 
+<div id="pilots" style="min-width: 310px; height: 600px; margin: 0 auto"></div>
+<div id="pilot-filters">
+    <div id="pilot_total_filters">
+    <input type="checkbox" id="pilot-top-10" value="10" checked>Show top 10, aggregate the rest
+    <input type="checkbox" id="pilot-percentage-toggle" value="pilot-percentage-toggle" checked>Show as percentage
+    <div id="pilot-totals-div">Total by:
+            <input type="radio" name="pilot-totals" id="pilot-points-radio" value="sum" checked>sum of points spent on pilots in faction
+            <input type="radio" name="pilot-totals" id="pilot-count-radio" value="count" >number of ships in faction
+        </div>
+    </div>
+    <div id="pilot-factions">Factions
+        <input type="checkbox" id="pilot-rebel-filter" value="{{ rebel }}" checked>{{ rebel }}
+        <input type="checkbox" id="pilot-imperial-filter" value="{{ imperial }}" checked>{{ imperial }}
+        <input type="checkbox" id="pilot-scum-filter" value="{{ scum }}" checked>{{ scum }}
+
+
+    </div>
+    <div id="pilot-tourney-types">Tournament types:
+        {% for tourney_type in tourney_types %}
+            <input type="checkbox" class='pilot-tourney-types' id="pilot-tourney-type-{{ loop.counter }}" value="{{ tourney_type }}" checked>{{ tourney_type }}
+        {% endfor %}
+    </div>
+    <div id="pilot-tournament-results">Player results
+        <input type="radio" name="pilot-result-types" id="pilot-all-radio" value="all" checked>All player results
+        <input type="radio" name="pilot-result-types" id="pilot-cut-radio" value="cut" >Only results that made "the cut"
+    </div>
+</div>
+
+<script>
+
+    $('.pilot-tourney-types,input[type=radio][name=pilot-result-types],input[type=radio][name=pilot-totals],#pilot-percentage-toggle,#pilot-rebel-filter,#pilot-imperial-filter,#pilot-scum-filter').on('change', function() {
+    var show_pilot_as_percentage = $('#pilot-percentage-toggle').is(':checked');
+    var rebel_checked = $('#pilot-rebel-filter').is(':checked');
+    var imperial_checked = $('#pilot-imperial-filter').is(':checked');
+    var scum_checked = $('#pilot-scum-filter').is(':checked');
+
+    var pilotTotals = document.getElementsByName('pilot-totals');
+    var resultTotals = document.getElementsByName('pilot-result-types');
+
+    var aggregationType = getRadioBoxValue(pilotTotals);
+    var resultsType     = getRadioBoxValue(resultTotals);
+
+    var tourney_types = $('.pilot-tourney-types');
+    var ftt = get_faction_filter( tourney_types );
+
+    var url = "/get_pilot_time_series";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: url,
+        data: JSON.stringify(
+                {
+                    data: {
+                        'imperial_checked': imperial_checked,
+                        'rebel_checked': rebel_checked,
+                        'scum_checked': scum_checked,
+                        'show_pilot_as_percentage' : show_pilot_as_percentage,
+                        'aggregation_type' : aggregationType,
+                        'results_type' : resultsType,
+                        'tourney_filters': ftt
+                    }
+                }
+        ),
+        success: function (data) {
+            var pilot_options = data['pilot_options'];
+            adjustVisibles(pilot_options)
+            $('#pilots').highcharts(pilot_options);
+        },
+        dataType: "json"
+    });
+});
+</script>
+
+
 <script>
 
 function adjustVisibles(chartOptions)
@@ -217,11 +292,14 @@ function adjustVisibles(chartOptions)
 var ship_total_options = {{ ship_total_options | safe }};
 var faction_options = {{ faction_options | safe }};
 var ship_options = {{ ship_options | safe }};
-
+var pilot_options = {{ pilot_options | safe }};
 adjustVisibles(ship_options);
+adjustVisibles(pilot_options);
+
 $('#total_total').highcharts( ship_total_options );
 $('#faction_total').highcharts( faction_options );
 $('#ships').highcharts( ship_options );
+$('#pilots').highcharts( pilot_options );
 
 
 </script>
