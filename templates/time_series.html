@@ -205,7 +205,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
 <hr>
 
 <div id="pilots" style="min-width: 310px; height: 630px; margin: 0 auto"></div>
-<div id="pilot-filters">
+<div>
+    <div id="pilot-filters">
     <div id="pilot_total_filters">
         <input type="checkbox" id="pilot-top-ten" name="pilot-top-ten" value="10" checked>Show top 10 only
         <input type="checkbox" id="pilot-percentage-toggle" value="pilot-percentage-toggle" checked>Show as percentage
@@ -230,6 +231,7 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
         <input type="radio" name="pilot-result-types" id="pilot-cut-radio" value="cut" >Only results that made "the cut"
     </div>
 </div>
+    <hr>
 
 <script>
     $('#pilot-top-ten,.pilot-tourney-types,input[type=radio][name=pilot-result-types],input[type=radio][name=pilot-totals],#pilot-percentage-toggle,#pilot-rebel-filter,#pilot-imperial-filter,#pilot-scum-filter').on('change', function() {

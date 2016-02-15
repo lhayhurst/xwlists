@@ -40,23 +40,34 @@ class HighChartGraph:
         self.options['series'].append(series)
 
     def finalize(self):
-        #backfill any missing data
-        num_categories = self.num_categories()
-        for series in self.options['series']:
-            data    = series['data']
-            if len(data) < num_categories:
-                fill_count = num_categories - len(data)
-                while fill_count > 0:
-                    data.insert(0, 0)
-                    fill_count -= 1
-
+        sorted_categories = []
+        final_data = []
         self.options['xAxis']['categories'] = []
 
         years = sorted(self.categories_lookup.keys())
         for year in years:
             months = sorted(self.categories_lookup[year])
             for month in months:
-                self.options['xAxis']['categories'].append(str(year) + "-" + str(month))
+                sorted_categories.append(str(year) + "-" + str(month))
+                final_data.append(0)
+        self.options['xAxis']['categories'] = sorted_categories
+
+        #now figure out which series is missing which data
+        final_series = {}
+
+        for series in self.options['series']:
+            i = 0
+            data       = series['data']
+            final_data_for_series = list(final_data)
+            for year_mo in sorted_categories:
+                if data.has_key(year_mo):
+                    value = data[year_mo]
+                    final_data_for_series[i] = value
+                i += 1
+            series['data'] = final_data_for_series
+
+
+
 
     def add_plot_line(self,year_mo, position):
         text = releases[year_mo]
@@ -223,11 +234,11 @@ class ShipTotalHighchartOptions:
 
     def finalize(self,ship_pilot_time_series_data):
         data = ship_pilot_time_series_data.grand_total_data
-        series = { 'name': 'Total', 'type': 'area', 'data': []}
+        series = { 'name': 'Total', 'type': 'area', 'data': collections.OrderedDict()}
         for year_mo in data.keys():
             (year,month) = year_mo.split("-")
             self.hclgo.add_category(year_mo)
-            series['data'].append( data[year_mo] )
+            series['data'][year_mo] = data[year_mo]
         self.hclgo.add_series(series)
         self.hclgo.finalize()
 
@@ -251,10 +262,10 @@ class FactionTotalHighChartOptions:
     def finalize(self,ship_pilot_time_series_data):
         data = ship_pilot_time_series_data.faction_data
         for faction in data.keys():
-            series = { 'name': faction, 'data': []}
+            series = { 'name': faction, 'data': collections.OrderedDict()}
             for year_mo in data[faction].keys():
                 self.hclgo.add_category(year_mo)
-                series['data'].append( data[faction][year_mo])
+                series['data'][year_mo] =  data[faction][year_mo]
             self.hclgo.add_series(series)
         self.hclgo.finalize()
 
@@ -302,19 +313,19 @@ class ShipHighchartOptions:
                 else:
                     disambiguated_ship_name = ship
                 series = { 'name': disambiguated_ship_name,
-                           'data': [],
+                           'data': collections.OrderedDict(),
                             'visible': self.check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
                 for year_mo in data[faction][ship].keys():
                     self.hlcgo.add_category(year_mo)
                     val = data[faction][ship][year_mo]
-                    series['data'].append(val)
+                    series['data'][year_mo] = val
                 all_series[disambiguated_ship_name] = series
 
         # #sort the series from biggest to smallest based the last months value
         unsorted = {}
         for ship in all_series.keys():
             ship_series = all_series[ship]
-            last_value = ship_series['data'][-1]
+            last_value = ship_series['data'].values()[-1]
             unsorted[ship]=last_value
 
         sorted_ships = sorted(unsorted.items(), key=operator.itemgetter(1))
@@ -391,19 +402,19 @@ class PilotHighchartOptions:
                     else:
                         disambiguated_pilot_name = pilot
                     series = { 'name': disambiguated_pilot_name,
-                               'data': [],
+                               'data': collections.OrderedDict(),
                                'visible': self.check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
                     for year_mo in data[faction][ship][pilot].keys():
                         self.highchart.add_category(year_mo)
                         val = data[faction][ship][pilot][year_mo]
-                        series['data'].append(val)
+                        series['data'][year_mo] = val
                     all_series[disambiguated_pilot_name] = series
 
         # #sort the series from biggest to smallest based the last months value
         unsorted = {}
         for pilot in all_series.keys():
             pilot_series = all_series[pilot]
-            last_value = pilot_series['data'][-1]
+            last_value = pilot_series['data'].values()[-1]
             unsorted[pilot]=last_value
 
         sorted_pilots = sorted(unsorted.items(), key=operator.itemgetter(1))
