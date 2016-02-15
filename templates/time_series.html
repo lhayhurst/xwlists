@@ -130,7 +130,9 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
 <div id="ships" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 <div id="ship-filters">
     <div id="ship_total_filters">
-    <input type="checkbox" id="ship-percentage-toggle" value="ship-percentage-toggle" checked>Show as percentage
+        <input type="checkbox" id="ship-top-ten" name="pilot-top-ten" value="10" checked>Show top 10 only
+        <input type="checkbox" id="ship-percentage-toggle" value="ship-percentage-toggle" checked>Show as percentage
+    </div>
     <div id="ship-totals-div">Total by:
             <input type="radio" name="ship-totals" id="ship-points-radio" value="sum" checked>sum of points spent on ships in faction
             <input type="radio" name="ship-totals" id="ship-count-radio" value="count" >number of ships in faction
@@ -156,8 +158,9 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
 
 <script>
 
-    $('.ship-tourney-types,input[type=radio][name=ship-result-types],input[type=radio][name=ship-totals],#ship-percentage-toggle,#ship-rebel-filter,#ship-imperial-filter,#ship-scum-filter').on('change', function() {
+    $('#ship-top-ten,.ship-tourney-types,input[type=radio][name=ship-result-types],input[type=radio][name=ship-totals],#ship-percentage-toggle,#ship-rebel-filter,#ship-imperial-filter,#ship-scum-filter').on('change', function() {
     var show_ship_as_percentage = $('#ship-percentage-toggle').is(':checked');
+    var top_10_only = $('#ship-top-ten').is(':checked');
     var rebel_checked = $('#ship-rebel-filter').is(':checked');
     var imperial_checked = $('#ship-imperial-filter').is(':checked');
     var scum_checked = $('#ship-scum-filter').is(':checked');
@@ -185,7 +188,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                         'show_ship_as_percentage' : show_ship_as_percentage,
                         'aggregation_type' : aggregationType,
                         'results_type' : resultsType,
-                        'tourney_filters': ftt
+                        'tourney_filters': ftt,
+                        'top_10_only' : top_10_only
                     }
                 }
         ),

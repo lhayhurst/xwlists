@@ -265,7 +265,8 @@ class ShipHighchartOptions:
                  show_as_percentage=True,
                  rebel_checked=True,
                  scum_checked=True,
-                 imperial_checked=True):
+                 imperial_checked=True,
+                 top_10_only=True):
 
         hclgo = None
 
@@ -280,9 +281,9 @@ class ShipHighchartOptions:
             hclgo = HighChartAreaGraphOptions(title="Ships", yaxis_label=yaxis_label)
         self.options = hclgo.get_options()
         self.hlcgo = hclgo
-        self.finalize(ship_pilot_time_series_data,ships_and_factions,imperial_checked,rebel_checked,scum_checked)
+        self.finalize(ship_pilot_time_series_data,ships_and_factions,imperial_checked,rebel_checked,scum_checked,top_10_only)
 
-    def finalize(self, ship_pilot_time_series_data,ships_and_factions,imperial_checked, rebel_checked, scum_checked ):
+    def finalize(self, ship_pilot_time_series_data,ships_and_factions,imperial_checked, rebel_checked, scum_checked,top_10_only ):
         ships_factions = {}
         for rec in ships_and_factions:
             faction = rec[0]
@@ -317,12 +318,20 @@ class ShipHighchartOptions:
             unsorted[ship]=last_value
 
         sorted_ships = sorted(unsorted.items(), key=operator.itemgetter(1))
+        i = 0
         for ship_last_val in reversed(sorted_ships):
             ship = ship_last_val[0]
+            series = all_series[ship]
+            if i < 10:
+                if top_10_only:
+                    series['visible'] = 1
+            else:
+                if top_10_only:
+                    series['visible'] = 0
+            i += 1
             self.hlcgo.add_series( all_series[ship])
 
         self.hlcgo.finalize()
-
 
     def disambiguate_ship_by_faction(self, faction, sname):
         return sname + "( " + faction + " )"
