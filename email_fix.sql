@@ -1,4 +1,5 @@
 update tourney set email='sozinsky@gmail.com' where id=1;
+update tourney set email='sozinsky@gmail.com' where id=1;
 update tourney set email='sozinsky@gmail.com' where id=2;
 update tourney set email='sozinsky@gmail.com' where id=28;
 update tourney set email='sozinsky@gmail.com' where id=32;
