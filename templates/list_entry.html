@@ -482,7 +482,7 @@
 
         function upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue) {
             var upgradeHref = getUpgradeHref( upgradeType, upgradeValue );
-            if ( 'action' in upgradeHref ) {
+            if ( upgradeHref && 'action' in upgradeHref ) {
                 var action = upgradeHref.action;
                 for ( var i = 0; i < action.length; i++ )
                 {
@@ -510,10 +510,10 @@
             rowEl.find('.row-value .select')
                     .select2({data:items, placeholder:'select a ' + label, allowClear: allowClearValue })
                     .on('change', function(e) {
-                        console.log(e.target.value);
                         if (e.target.value==='TIE/X1') { //this is a little hack, but what can you do
                             //cheapen the cost of all the system upgrades
                             upgrades['System'].map( function  ( u ) {
+                               // console.log("title is tie x1, cheapening by 4");
                                newCost = u.cost - 4;
                                if ( newCost < 0 ) {
                                    u.cost = 0;
