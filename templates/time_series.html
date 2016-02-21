@@ -130,7 +130,6 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
 <div id="ships" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 <div id="ship-filters">
     <div id="ship_total_filters">
-        <input type="checkbox" id="ship-top-ten" name="pilot-top-ten" value="10" checked>Show top 10 only
         <input type="checkbox" id="ship-percentage-toggle" value="ship-percentage-toggle" checked>Show as percentage
     </div>
     <div id="ship-totals-div">Total by:
@@ -158,9 +157,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
 
 <script>
 
-    $('#ship-top-ten,.ship-tourney-types,input[type=radio][name=ship-result-types],input[type=radio][name=ship-totals],#ship-percentage-toggle,#ship-rebel-filter,#ship-imperial-filter,#ship-scum-filter').on('change', function() {
+    $('.ship-tourney-types,input[type=radio][name=ship-result-types],input[type=radio][name=ship-totals],#ship-percentage-toggle,#ship-rebel-filter,#ship-imperial-filter,#ship-scum-filter').on('change', function() {
     var show_ship_as_percentage = $('#ship-percentage-toggle').is(':checked');
-    var top_10_only = $('#ship-top-ten').is(':checked');
     var rebel_checked = $('#ship-rebel-filter').is(':checked');
     var imperial_checked = $('#ship-imperial-filter').is(':checked');
     var scum_checked = $('#ship-scum-filter').is(':checked');
@@ -188,8 +186,7 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                         'show_ship_as_percentage' : show_ship_as_percentage,
                         'aggregation_type' : aggregationType,
                         'results_type' : resultsType,
-                        'tourney_filters': ftt,
-                        'top_10_only' : top_10_only
+                        'tourney_filters': ftt
                     }
                 }
         ),
@@ -208,7 +205,6 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
 <div>
     <div id="pilot-filters">
     <div id="pilot_total_filters">
-        <input type="checkbox" id="pilot-top-ten" name="pilot-top-ten" value="10" checked>Show top 10 only
         <input type="checkbox" id="pilot-percentage-toggle" value="pilot-percentage-toggle" checked>Show as percentage
     </div>
     <div id="pilot-totals-div">Total by:
@@ -234,9 +230,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
     <hr>
 
 <script>
-    $('#pilot-top-ten,.pilot-tourney-types,input[type=radio][name=pilot-result-types],input[type=radio][name=pilot-totals],#pilot-percentage-toggle,#pilot-rebel-filter,#pilot-imperial-filter,#pilot-scum-filter').on('change', function() {
+    $('#pilot-tourney-types,input[type=radio][name=pilot-result-types],input[type=radio][name=pilot-totals],#pilot-percentage-toggle,#pilot-rebel-filter,#pilot-imperial-filter,#pilot-scum-filter').on('change', function() {
         var show_pilot_as_percentage = $('#pilot-percentage-toggle').is(':checked');
-        var top_10_only = $('#pilot-top-ten').is(':checked');
         var rebel_checked = $('#pilot-rebel-filter').is(':checked');
         var imperial_checked = $('#pilot-imperial-filter').is(':checked');
         var scum_checked = $('#pilot-scum-filter').is(':checked');
@@ -258,7 +253,6 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
             data: JSON.stringify(
                     {
                         data: {
-                            'top_10_only' : top_10_only,
                             'imperial_checked': imperial_checked,
                             'rebel_checked': rebel_checked,
                             'scum_checked': scum_checked,
@@ -278,7 +272,107 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
     });
 });
 </script>
+<div id="upgrades" style="min-width: 310px; height: 650px; margin: 0 auto"></div>
+<div>
+    <div id="upgrade-filters">
+    <div id="upgrade_total_filters">
+        <input type="checkbox" id="upgrade-percentage-toggle" value="upgrade-percentage-toggle" checked>Show as percentage
+    </div>
+    <div id="upgrade-totals-div">Total by:
+            <input type="radio" name="upgrade-totals" id="upgrade-points-radio" value="sum" checked>sum of points spent on upgrades
+            <input type="radio" name="upgrade-totals" id="upgrade-count-radio" value="count" >number of upgrades taken
+        </div>
+    </div>
+    <div id="upgrade-tourney-types">Tournament types:
+        {% for tourney_type in tourney_types %}
+            <input type="checkbox" class='upgrade-tourney-types' id="upgrade-tourney-type-{{ loop.counter }}" value="{{ tourney_type }}" checked>{{ tourney_type }}
+        {% endfor %}
+    </div>
+    <div id="upgrade-tournament-results">Player results
+        <input type="radio" name="upgrade-result-types" id="upgrade-all-radio" value="all" checked>All player results
+        <input type="radio" name="upgrade-result-types" id="upgrade-cut-radio" value="cut" >Only results that made "the cut"
+    </div>
+    <div id="upgrade-types">Upgrade types
+        <select style="width:300px" id="upgrade-types-select" class="upgrade-types-select" placeholder="Filter by upgrade type" multiple="multiple">
+            {%  for ut in upgrade_types %}
+                <option value="{{ ut }}">{{ ut }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+<script>
 
+    function applyUpgradeFilter()
+    {
+            var selectedUpgrades = $('#upgrade-types-select').select2("val")
+            chart = $('#upgrades').highcharts()
+            series = chart.series;
+
+            if (selectedUpgrades.length == 0) {
+                for( var i = 0; i  < series.length; i++ ) {
+                    series[i].setVisible(true, false);
+                }
+            }
+
+            else {
+                for (var i = 0; i < series.length; i++) {
+                    var upgradeName = series[i].name;
+                    var makeVisible = false;
+                    for (var j = 0; j < selectedUpgrades.length; j++) {
+                        if (upgrade_name_to_type[upgradeName] == selectedUpgrades[j]) {
+                            makeVisible = true;
+                        }
+                    }
+                    series[i].setVisible(makeVisible, false);
+                }
+            }
+            chart.redraw();
+    }
+
+    $('#upgrade-types-select').on('change', function() {
+        applyUpgradeFilter();
+    });
+    $('#upgrade-tourney-types,input[type=radio][name=upgrade-result-types],input[type=radio][name=upgrade-totals],' +
+            '#upgrade-percentage-toggle').on('change', function() {
+        var show_upgrade_as_percentage = $('#upgrade-percentage-toggle').is(':checked');
+
+        var upgradeTotals = document.getElementsByName('upgrade-totals');
+        var resultTotals = document.getElementsByName('upgrade-result-types');
+
+        var aggregationType = getRadioBoxValue(upgradeTotals);
+        var resultsType = getRadioBoxValue(resultTotals);
+
+        var tourney_types = $('.upgrade-tourney-types');
+        var ftt = get_faction_filter(tourney_types);
+
+        var url = "/get_upgrade_time_series";
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: url,
+            data: JSON.stringify(
+                    {
+                        data: {
+                            'show_upgrade_as_percentage': show_upgrade_as_percentage,
+                            'aggregation_type': aggregationType,
+                            'results_type': resultsType,
+                            'tourney_filters': ftt
+                        }
+                    }
+            ),
+            success: function (data) {
+                var upgrade_options = data['upgrade_options'];
+                console.log(upgrade_options);
+                adjustVisibles(upgrade_options);
+                $('#upgrades').highcharts(upgrade_options);
+                applyUpgradeFilter();
+
+            },
+            dataType: "json"
+        });
+    });
+
+</script>
 
 <script>
 
@@ -299,13 +393,20 @@ var ship_total_options = {{ ship_total_options | safe }};
 var faction_options = {{ faction_options | safe }};
 var ship_options = {{ ship_options | safe }};
 var pilot_options = {{ pilot_options | safe }};
+var upgrade_options = {{ upgrade_options | safe }};
+var upgrade_types = {{ upgrade_types | safe }};
+var upgrade_name_to_type = {{ upgrade_name_to_type | safe }}
 adjustVisibles(ship_options);
 adjustVisibles(pilot_options);
+adjustVisibles(upgrade_options);
+
 
 $('#total_total').highcharts( ship_total_options );
 $('#faction_total').highcharts( faction_options );
 $('#ships').highcharts( ship_options );
 $('#pilots').highcharts( pilot_options );
+$('#upgrades').highcharts( upgrade_options );
+$('.upgrade-types-select').select2();
 
 
 </script>

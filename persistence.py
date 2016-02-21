@@ -1389,6 +1389,55 @@ class PersistenceManager:
                         sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
                         ArchtypeList.faction,
                         ShipPilot.ship_type,
+                        Pilot.name,
+                        Upgrade.upgrade_type,
+                        Upgrade.name,
+                        func.count( Upgrade.id).label("num_upgrades"),
+                        func.sum( Upgrade.cost).label("cost_upgrades") ).\
+            filter( and_(*filters)).\
+            group_by(
+                sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
+                sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+                ArchtypeList.faction,
+                ShipPilot.ship_type,
+                Pilot.name,
+                Upgrade.upgrade_type,
+                Upgrade.name,
+            ).\
+            statement.compile(dialect=mysql.dialect())
+
+        connection = self.db_connector.get_engine().connect()
+        ret = connection.execute(upgrade_rollup_sql)
+        connection.close()
+        return ret
+
+
+    def get_pilot_upgrade_rollups(self, tourney_filters, show_the_cut_only):
+
+        session = self.db_connector.get_session()
+
+        filters = [
+            TourneyList.tourney_id == Tourney.id,
+            ArchtypeList.id == TourneyList.archtype_id,
+            Ship.archtype_id == ArchtypeList.id ,
+            Ship.ship_pilot_id == ShipPilot.id,
+            ShipPilot.pilot_id == Pilot.id ,
+            ShipUpgrade.ship_id == Ship.id,
+            Upgrade.id == ShipUpgrade.upgrade_id ]
+
+
+        if show_the_cut_only:
+            filters.append( TourneyRanking.tourney_id == Tourney.id)
+            filters.append( TourneyList.player_id == TourneyRanking.player_id)
+            filters.append(TourneyRanking.elim_rank != None)
+
+        self.apply_tourney_type_filter(filters, tourney_filters)
+
+        upgrade_rollup_sql = session.query(
+                        sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
+                        sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+                        ArchtypeList.faction,
+                        ShipPilot.ship_type,
                         Pilot.name.label("pilot_name"),
                         func.count( Upgrade.id).label("num_upgrades"),
                         func.sum( Upgrade.cost).label("cost_upgrades") ).\
@@ -1399,7 +1448,7 @@ class PersistenceManager:
                     sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
                     ArchtypeList.faction,
                     ShipPilot.ship_type,
-                    Pilot.name
+                    Pilot.name,
                 )
             ).\
             statement.compile(dialect=mysql.dialect())

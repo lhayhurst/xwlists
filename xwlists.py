@@ -22,7 +22,7 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event, ArchtypeList, LeagueMatch, \
     LeaguePlayer
 from rollup import ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTotalHighChartOptions, \
-    ShipHighchartOptions, PilotHighchartOptions
+    ShipHighchartOptions, PilotHighchartOptions, UpgradeHighChartOptions
 from search import Search
 from uidgen import ListUIDGen
 import xwingmetadata
@@ -1452,7 +1452,7 @@ def pretty_print():
 @app.route("/time_series")
 def time_series():
     pm               = PersistenceManager(myapp.db_connector)
-    pcd              = ShipPilotTimeSeriesData( pm )
+    pcd              = ShipPilotTimeSeriesData( pm, calculate_upgrades=True )
 
     total_options    = ShipTotalHighchartOptions(pcd)
     faction_options  = FactionTotalHighChartOptions(pcd)
@@ -1462,6 +1462,8 @@ def time_series():
 
     pilots_by_faction = pm.get_pilots_by_faction()
     pilot_options     = PilotHighchartOptions(pcd, pilots_by_faction)
+
+    upgrade_options   = UpgradeHighChartOptions(pcd)
 
 
     tourney_types    = pm.get_tourney_types()
@@ -1476,6 +1478,9 @@ def time_series():
                            faction_options=faction_options.options,
                            ship_options=ship_options.options,
                            pilot_options=pilot_options.options,
+                           upgrade_options=upgrade_options.options,
+                           upgrade_types=sorted(pcd.upgrade_types.keys()),
+                           upgrade_name_to_type=pcd.upgrade_name_to_type,
                            tourney_types=tt,
                            scum=Faction.SCUM.description,
                            rebel=Faction.REBEL.description,
@@ -1540,7 +1545,6 @@ def get_ship_time_series():
     aggregation_type   = data['aggregation_type']
     tourney_filters    = data['tourney_filters']
     results_type       = data['results_type']
-    top_10_only        = data['top_10_only']
 
     show_as_count = True
     if aggregation_type is not None and aggregation_type == "sum":
@@ -1562,7 +1566,7 @@ def get_ship_time_series():
                                             rebel_checked=rebel_checked,
                                             scum_checked=scum_checked,
                                             imperial_checked=imperial_checked,
-                                            top_10_only=top_10_only)
+                                            top_10_only=False)
     return jsonify( ship_options=ship_options.options)
 
 @app.route("/get_pilot_time_series",methods=['POST'])
@@ -1575,7 +1579,6 @@ def get_pilot_time_series():
     aggregation_type   = data['aggregation_type']
     tourney_filters    = data['tourney_filters']
     results_type       = data['results_type']
-    top_10_only        = data['top_10_only']
 
     show_as_count = True
     if aggregation_type is not None and aggregation_type == "sum":
@@ -1597,8 +1600,37 @@ def get_pilot_time_series():
                                             rebel_checked=rebel_checked,
                                             scum_checked=scum_checked,
                                             imperial_checked=imperial_checked,
-                                            top_10_only=top_10_only)
+                                            top_10_only=False)
     return jsonify( pilot_options=pilot_options.options)
+
+@app.route("/get_upgrade_time_series",methods=['POST'])
+def get_upgrade_time_series():
+    data               = request.json['data']
+    show_as_percentage = data['show_upgrade_as_percentage']
+    aggregation_type   = data['aggregation_type']
+    tourney_filters    = data['tourney_filters']
+    results_type       = data['results_type']
+
+    show_as_count = True
+    if aggregation_type is not None and aggregation_type == "sum":
+        show_as_count = False
+
+    show_only_the_cut = False
+    if results_type is not None and results_type == "cut":
+        show_only_the_cut = True
+
+    pm               = PersistenceManager(myapp.db_connector)
+    pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
+                                                show_as_count=show_as_count,
+                                                show_the_cut_only=show_only_the_cut,
+                                                calculate_ship_pilot=False,
+                                                calculate_upgrades=True)
+    upgrade_options     = UpgradeHighChartOptions(pcd,
+                                            show_as_count=show_as_count,
+                                            show_as_percentage=show_as_percentage,
+                                            top_10_only=False)
+    return jsonify( upgrade_options=upgrade_options.options)
+
 
 def to_float(dec):
     return float("{0:.2f}".format( float(dec) * float(100)))

@@ -24,6 +24,21 @@ releases = {
     "2015-12" : "Imperial Assault Carrier",
 }
 
+def year_mo_sort(x,y):
+    (x_year,x_mo) = x.split("-")
+    (y_year,y_mo) = y.split("-")
+
+    if x_year == y_year:
+        if x_mo == y_mo:
+            return 0
+        if x_mo < y_mo:
+            return -1
+        return 1
+    elif x_year < y_year:
+        return -1
+    else:
+        return 1
+
 class HighChartGraph:
     def __init__(self):
         self.options = {}
@@ -236,7 +251,6 @@ class ShipTotalHighchartOptions:
         data = ship_pilot_time_series_data.grand_total_data
         series = { 'name': 'Total', 'type': 'area', 'data': collections.OrderedDict()}
         for year_mo in data.keys():
-            (year,month) = year_mo.split("-")
             self.hclgo.add_category(year_mo)
             series['data'][year_mo] = data[year_mo]
         self.hclgo.add_series(series)
@@ -325,7 +339,9 @@ class ShipHighchartOptions:
         unsorted = {}
         for ship in all_series.keys():
             ship_series = all_series[ship]
-            last_value = ship_series['data'].values()[-1]
+            sorted_keys = sorted(ship_series['data'].keys(), cmp=year_mo_sort)
+            latest_year_mo = sorted_keys[-1]
+            last_value = ship_series['data'][latest_year_mo]
             unsorted[ship]=last_value
 
         sorted_ships = sorted(unsorted.items(), key=operator.itemgetter(1))
@@ -355,6 +371,8 @@ class ShipHighchartOptions:
         if scum_checked == False and faction == Faction.SCUM.description:
             return 0
         return 1
+
+
 
 class PilotHighchartOptions:
     def __init__(self, ship_pilot_time_series_data,
@@ -414,7 +432,9 @@ class PilotHighchartOptions:
         unsorted = {}
         for pilot in all_series.keys():
             pilot_series = all_series[pilot]
-            last_value = pilot_series['data'].values()[-1]
+            sorted_keys = sorted(pilot_series['data'].keys(), cmp=year_mo_sort)
+            latest_year_mo = sorted_keys[-1]
+            last_value = pilot_series['data'][latest_year_mo]
             unsorted[pilot]=last_value
 
         sorted_pilots = sorted(unsorted.items(), key=operator.itemgetter(1))
@@ -446,21 +466,110 @@ class PilotHighchartOptions:
             return 0
         return 1
 
+class UpgradeHighChartOptions:
+    def __init__(self, upgrade_time_series_data,
+                 show_as_count=False,
+                 show_as_percentage=True,
+                 top_10_only=True):
+
+        hclgo = None
+
+        yaxis_label = "Number of upgrades taken"
+        if show_as_count == False:
+            yaxis_label = "Points spent on upgrades"
+
+        if not show_as_percentage:
+            hclgo = HighChartLineGraphOptions(title="Upgrades",
+                                              yaxis_label=yaxis_label)
+        else:
+            hclgo = HighChartAreaGraphOptions(title="Upgrades", yaxis_label=yaxis_label)
+        self.options = hclgo.get_options()
+        self.highchart = hclgo
+        self.finalize(upgrade_time_series_data,top_10_only)
+
+    def finalize(self, upgrade_time_series,top_10_only):
+
+        data = upgrade_time_series.upgrade_data
+        all_series = {}
+        for faction in data.keys():
+            for ship in data[faction].keys():
+                for pilot in data[faction][ship].keys():
+                    for upgrade_type in data[faction][ship][pilot].keys():
+                        for upgrade in data[faction][ship][pilot][upgrade_type].keys():
+                            if all_series.has_key( upgrade ):
+                                series = all_series[upgrade ]
+                            else:
+                                series = { 'name': upgrade,
+                                           'data': collections.OrderedDict(),
+                                           'visible': 1 }
+                                all_series[upgrade] = series
+
+
+
+                            for year_mo in data[faction][ship][pilot][upgrade_type][upgrade].keys():
+                                self.highchart.add_category(year_mo)
+                                val = data[faction][ship][pilot][upgrade_type][upgrade][year_mo]
+                                if not series['data'].has_key(year_mo):
+                                    series['data'][year_mo] = 0
+                                series['data'][year_mo] += val
+
+        # #sort the series from biggest to smallest based the last months value
+        unsorted = {}
+        for upgrade in all_series.keys():
+            upgrade_series = all_series[upgrade]
+            sorted_keys = sorted(upgrade_series['data'].keys(), cmp=year_mo_sort)
+            latest_year_mo = sorted_keys[-1]
+            last_value = upgrade_series['data'][latest_year_mo]
+            unsorted[upgrade]=last_value
+
+        sorted_upgrades = sorted(unsorted.items(), key=operator.itemgetter(1))
+        i = 0
+        for upgrade_last_val in reversed(sorted_upgrades):
+            upgrade = upgrade_last_val[0]
+            series = all_series[upgrade]
+            if i < 10:
+                if top_10_only:
+                    series['visible'] = 1
+            else:
+                if top_10_only:
+                    series['visible'] = 0
+            i += 1
+            self.highchart.add_series( series )
+
+        self.highchart.finalize()
+
+
+
 class ShipPilotTimeSeriesData:
-    def __init__(self, pm,tourney_filters=None,show_as_count=False,show_the_cut_only=False):
+    def __init__(self, pm,
+                 tourney_filters=None,
+                 show_as_count=False,
+                 show_the_cut_only=False,
+                 calculate_ship_pilot=True,
+                 calculate_upgrades=False):
         self.pm               = pm
         self.grand_total_data = collections.OrderedDict()
         self.faction_data     = collections.OrderedDict()
         self.ship_data        = collections.OrderedDict()
         self.pilot_data       = collections.OrderedDict()
+        self.upgrade_data     = collections.OrderedDict()
+        self.upgrade_pilots   = {}
+        self.upgrade_ships    = {}
+        self.upgrade_types    = {}
+        self.upgrade_name_to_type = {}
 
         self.show_as_count     = show_as_count
         self.show_the_cut_only = show_the_cut_only
 
-        self.ship_pilot_time_series_data = pm.get_ship_pilot_rollup(tourney_filters,show_the_cut_only)
-        self.upgrade_time_series_data = pm.get_upgrade_rollups( tourney_filters,show_the_cut_only )
-        self.visit_time_series_data( self.ship_pilot_time_series_data)
-        self.visit_time_series_data(self.upgrade_time_series_data)
+        if calculate_ship_pilot:
+            self.ship_pilot_time_series_data = pm.get_ship_pilot_rollup(tourney_filters,show_the_cut_only)
+            self.pilot_upgrade_time_series_data = pm.get_pilot_upgrade_rollups( tourney_filters,show_the_cut_only )
+            self.visit_time_series_data( self.ship_pilot_time_series_data)
+            self.visit_time_series_data(self.pilot_upgrade_time_series_data)
+
+        if calculate_upgrades:
+            self.upgrade_time_series_data = pm.get_upgrade_rollups( tourney_filters, show_the_cut_only)
+            self.visit_upgrade_rollups(self.upgrade_time_series_data )
 
 
     def is_grand_total(self, faction, ship, pilot):
@@ -510,7 +619,6 @@ class ShipPilotTimeSeriesData:
 
         self.pilot_data[faction][ship][pilot][year_mo] += datapoint
 
-
     def visit_ship_total(self, year, month, faction, ship, cnt,cost):
         year_mo = str(year) + "-" + str(month)
         datapoint = 0
@@ -529,7 +637,6 @@ class ShipPilotTimeSeriesData:
             self.ship_data[faction][ship][year_mo] = 0
 
         self.ship_data[faction][ship][year_mo] += datapoint
-
 
     def visit_faction_total(self, year, month, faction,cnt, cost):
         year_mo = str(year) + "-" + str(month)
@@ -552,6 +659,62 @@ class ShipPilotTimeSeriesData:
 
         else:
             data_by_faction[year_mo] += datapoint
+
+    def visit_upgrade_rollups(self, upgrade_time_series_data):
+        for row in upgrade_time_series_data:
+            year    = row[0]
+            month   = row[1]
+            faction = row[2].description
+            ship    = row[3].description
+            pilot   = row[4]
+            upgrade_type = row[5].description
+            upgrade = row[6]
+            cnt     = int(row[7])
+            cost    = int(row[8])
+
+            datapoint = 0
+            if self.show_as_count:
+                datapoint = cnt
+            else:
+                datapoint = cost
+
+            #refit :-)
+            if datapoint < 0:
+                datapoint = 0
+
+            self.upgrade_pilots[pilot] = 1
+            self.upgrade_ships[ship] = 1
+
+            if not self.upgrade_types.has_key(upgrade_type):
+                self.upgrade_types[upgrade_type] = 1
+
+            self.upgrade_name_to_type[upgrade] = upgrade_type
+
+            year_mo = str(year) + "-" + str(month)
+
+            if not self.upgrade_data.has_key(faction):
+                self.upgrade_data[faction] = collections.OrderedDict()
+
+            if not self.upgrade_data[faction].has_key(ship):
+                self.upgrade_data[faction][ship] = collections.OrderedDict()
+
+            if not self.upgrade_data[faction][ship].has_key(pilot):
+                self.upgrade_data[faction][ship][pilot] = collections.OrderedDict()
+
+            if not self.upgrade_data[faction][ship][pilot].has_key(upgrade_type):
+                self.upgrade_data[faction][ship][pilot][upgrade_type] = collections.OrderedDict()
+
+            if not self.upgrade_data[faction][ship][pilot][upgrade_type].has_key(upgrade):
+                self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade] = collections.OrderedDict()
+
+            if not self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade].has_key(year_mo):
+                self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade][year_mo] = collections.OrderedDict()
+
+            if not self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade][year_mo].has_key(year_mo):
+                self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade][year_mo] = 0 #epic
+
+            self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade][year_mo]  += datapoint
+
 
     def visit_time_series_data(self, time_series_data):
         for row in time_series_data:
