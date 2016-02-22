@@ -661,6 +661,7 @@ class ShipPilotTimeSeriesData:
             data_by_faction[year_mo] += datapoint
 
     def visit_upgrade_rollups(self, upgrade_time_series_data):
+
         for row in upgrade_time_series_data:
             year    = row[0]
             month   = row[1]
@@ -686,7 +687,7 @@ class ShipPilotTimeSeriesData:
             self.upgrade_ships[ship] = 1
 
             if not self.upgrade_types.has_key(upgrade_type):
-                self.upgrade_types[upgrade_type] = 1
+                self.upgrade_types[upgrade_type] = { 'id': upgrade_type, 'text': upgrade_type }
 
             self.upgrade_name_to_type[upgrade] = upgrade_type
 

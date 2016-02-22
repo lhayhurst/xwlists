@@ -21,26 +21,8 @@
 </div>
 
 <script>
-    function getRadioBoxValue(radioBoxes) {
-        var ret;
-        for(var i = 0; i < radioBoxes.length; i++){
-            if(radioBoxes[i].checked){
-                ret = radioBoxes[i].value;
-            }
-        }
-        return ret;
-    }
 
-    function get_faction_filter(tourney_types) {
-        var ftt = {}
-        for(var i = 0; i < tourney_types.length;i++) {
-            var filter = tourney_types[i]
-            ftt[filter.value] = $(filter).is(':checked');
-        }
-        return ftt;
-    }
-
-    $('input[type=radio][name=total-totals],input[type=radio][name=total-result-types],.total-tourney-types').on('change', function() {
+    function getTotals() {
         var totalTotals = document.getElementsByName('total-totals');
         var resultTotals = document.getElementsByName('total-result-types');
 
@@ -68,6 +50,34 @@
             },
             dataType: "json"
         });
+    }
+
+    $(document).ready(function() {
+        getTotals();
+    } );
+
+
+    function getRadioBoxValue(radioBoxes) {
+        var ret;
+        for(var i = 0; i < radioBoxes.length; i++){
+            if(radioBoxes[i].checked){
+                ret = radioBoxes[i].value;
+            }
+        }
+        return ret;
+    }
+
+    function get_faction_filter(tourney_types) {
+        var ftt = {}
+        for(var i = 0; i < tourney_types.length;i++) {
+            var filter = tourney_types[i]
+            ftt[filter.value] = $(filter).is(':checked');
+        }
+        return ftt;
+    }
+
+    $('input[type=radio][name=total-totals],input[type=radio][name=total-result-types],.total-tourney-types').on('change', function() {
+        getTotals();
     });
 </script>
 
@@ -93,37 +103,47 @@
 </div>
 
 <script>
-$('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=radio][name=faction-result-types],.faction-tourney-types').on('change', function() {
-    var show_faction_as_percentage = $('#faction-percentage-toggle').is(':checked');
-    var factionTotals = document.getElementsByName('faction-totals');
-    var resultTotals = document.getElementsByName('faction-result-types');
 
-    var aggregationType = getRadioBoxValue(factionTotals);
-    var resultsType     = getRadioBoxValue(resultTotals);
+    function getFactionTotals() {
+        var show_faction_as_percentage = $('#faction-percentage-toggle').is(':checked');
+        var factionTotals = document.getElementsByName('faction-totals');
+        var resultTotals = document.getElementsByName('faction-result-types');
 
-    var faction_tourney_types = $('.faction-tourney-types');
-    var ftt = get_faction_filter( faction_tourney_types );
+        var aggregationType = getRadioBoxValue(factionTotals);
+        var resultsType     = getRadioBoxValue(resultTotals);
 
-    var url = "/get_faction_time_series";
-    $.ajax({
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        url: url,
-        data: JSON.stringify(
-                {
-                    data: { 'show_faction_as_percentage' : show_faction_as_percentage,
-                            'aggregation_type' : aggregationType,
-                            'results_type' : resultsType,
-                            'tourney_filters': ftt }
-                }
-        ),
-        success: function (data) {
-            var faction_options = data['faction_options'];
-            $('#faction_total').highcharts(faction_options);
-        },
-        dataType: "json"
+        var faction_tourney_types = $('.faction-tourney-types');
+        var ftt = get_faction_filter( faction_tourney_types );
+
+        var url = "/get_faction_time_series";
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: url,
+            data: JSON.stringify(
+                    {
+                        data: { 'show_faction_as_percentage' : show_faction_as_percentage,
+                                'aggregation_type' : aggregationType,
+                                'results_type' : resultsType,
+                                'tourney_filters': ftt }
+                    }
+            ),
+            success: function (data) {
+                var faction_options = data['faction_options'];
+                $('#faction_total').highcharts(faction_options);
+            },
+            dataType: "json"
+        });
+
+    }
+
+    $(document).ready(function() {
+        getFactionTotals();
+    } );
+
+    $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=radio][name=faction-result-types],.faction-tourney-types').on('change', function() {
+        getFactionTotals();
     });
-});
 </script>
 <hr>
 
@@ -157,47 +177,56 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
 
 <script>
 
-    $('.ship-tourney-types,input[type=radio][name=ship-result-types],input[type=radio][name=ship-totals],#ship-percentage-toggle,#ship-rebel-filter,#ship-imperial-filter,#ship-scum-filter').on('change', function() {
-    var show_ship_as_percentage = $('#ship-percentage-toggle').is(':checked');
-    var rebel_checked = $('#ship-rebel-filter').is(':checked');
-    var imperial_checked = $('#ship-imperial-filter').is(':checked');
-    var scum_checked = $('#ship-scum-filter').is(':checked');
+    function getShipTotals(showTopTen) {
+        var show_ship_as_percentage = $('#ship-percentage-toggle').is(':checked');
+        var rebel_checked = $('#ship-rebel-filter').is(':checked');
+        var imperial_checked = $('#ship-imperial-filter').is(':checked');
+        var scum_checked = $('#ship-scum-filter').is(':checked');
 
-    var shipTotals = document.getElementsByName('ship-totals');
-    var resultTotals = document.getElementsByName('ship-result-types');
+        var shipTotals = document.getElementsByName('ship-totals');
+        var resultTotals = document.getElementsByName('ship-result-types');
 
-    var aggregationType = getRadioBoxValue(shipTotals);
-    var resultsType     = getRadioBoxValue(resultTotals);
+        var aggregationType = getRadioBoxValue(shipTotals);
+        var resultsType     = getRadioBoxValue(resultTotals);
 
-    var tourney_types = $('.ship-tourney-types');
-    var ftt = get_faction_filter( tourney_types );
+        var tourney_types = $('.ship-tourney-types');
+        var ftt = get_faction_filter( tourney_types );
 
-    var url = "/get_ship_time_series";
-    $.ajax({
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        url: url,
-        data: JSON.stringify(
-                {
-                    data: {
-                        'imperial_checked': imperial_checked,
-                        'rebel_checked': rebel_checked,
-                        'scum_checked': scum_checked,
-                        'show_ship_as_percentage' : show_ship_as_percentage,
-                        'aggregation_type' : aggregationType,
-                        'results_type' : resultsType,
-                        'tourney_filters': ftt
+        var url = "/get_ship_time_series";
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: url,
+            data: JSON.stringify(
+                    {
+                        data: {
+                            'show_top_10' : showTopTen,
+                            'imperial_checked': imperial_checked,
+                            'rebel_checked': rebel_checked,
+                            'scum_checked': scum_checked,
+                            'show_ship_as_percentage' : show_ship_as_percentage,
+                            'aggregation_type' : aggregationType,
+                            'results_type' : resultsType,
+                            'tourney_filters': ftt
+                        }
                     }
-                }
-        ),
-        success: function (data) {
-            var ship_options = data['ship_options'];
-            adjustVisibles(ship_options)
-            $('#ships').highcharts(ship_options);
-        },
-        dataType: "json"
+            ),
+            success: function (data) {
+                var ship_options = data['ship_options'];
+                adjustVisibles(ship_options)
+                $('#ships').highcharts(ship_options);
+            },
+            dataType: "json"
+        });
+    }
+
+    $(document).ready(function() {
+        getShipTotals(true);
+    } );
+
+    $('.ship-tourney-types,input[type=radio][name=ship-result-types],input[type=radio][name=ship-totals],#ship-percentage-toggle,#ship-rebel-filter,#ship-imperial-filter,#ship-scum-filter').on('change', function() {
+        getShipTotals(false);
     });
-});
 </script>
 <hr>
 
@@ -230,7 +259,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
     <hr>
 
 <script>
-    $('#pilot-tourney-types,input[type=radio][name=pilot-result-types],input[type=radio][name=pilot-totals],#pilot-percentage-toggle,#pilot-rebel-filter,#pilot-imperial-filter,#pilot-scum-filter').on('change', function() {
+
+    function getPilotTotals(showTopTen) {
         var show_pilot_as_percentage = $('#pilot-percentage-toggle').is(':checked');
         var rebel_checked = $('#pilot-rebel-filter').is(':checked');
         var imperial_checked = $('#pilot-imperial-filter').is(':checked');
@@ -259,7 +289,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                             'show_pilot_as_percentage' : show_pilot_as_percentage,
                             'aggregation_type' : aggregationType,
                             'results_type' : resultsType,
-                            'tourney_filters': ftt
+                            'tourney_filters': ftt,
+                            'show_top_10' : showTopTen
                         }
                     }
             ),
@@ -270,7 +301,16 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
             },
             dataType: "json"
     });
-});
+
+    }
+
+    $(document).ready(function() {
+        getPilotTotals(true);
+    } );
+
+    $('#pilot-tourney-types,input[type=radio][name=pilot-result-types],input[type=radio][name=pilot-totals],#pilot-percentage-toggle,#pilot-rebel-filter,#pilot-imperial-filter,#pilot-scum-filter').on('change', function() {
+        getPilotTotals(false);
+    });
 </script>
 <div id="upgrades" style="min-width: 310px; height: 650px; margin: 0 auto"></div>
 <div>
@@ -293,16 +333,17 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
         <input type="radio" name="upgrade-result-types" id="upgrade-cut-radio" value="cut" >Only results that made "the cut"
     </div>
     <div id="upgrade-types">Upgrade types
-        <select style="width:300px" id="upgrade-types-select" class="upgrade-types-select" placeholder="Filter by upgrade type" multiple="multiple">
-            {%  for ut in upgrade_types %}
-                <option value="{{ ut }}">{{ ut }}</option>
-            {% endfor %}
-        </select>
+        <div class="select" style="width:300px" id="upgrade-types-select" class="upgrade-types-select" placeholder="Filter by upgrade type" multiple="multiple" </div>
     </div>
 </div>
 <script>
 
-    function applyUpgradeFilter()
+
+    $(document).ready(function() {
+        getUpgradeTotals(true);
+    } );
+
+    function applyUpgradeFilter(upgrade_name_to_type)
     {
             var selectedUpgrades = $('#upgrade-types-select').select2("val")
             chart = $('#upgrades').highcharts()
@@ -318,7 +359,9 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                 for (var i = 0; i < series.length; i++) {
                     var upgradeName = series[i].name;
                     var makeVisible = false;
+                    //console.log(selectedUpgrades);
                     for (var j = 0; j < selectedUpgrades.length; j++) {
+                        //console.log(selectedUpgrades[j]);
                         if (upgrade_name_to_type[upgradeName] == selectedUpgrades[j]) {
                             makeVisible = true;
                         }
@@ -328,13 +371,10 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
             }
             chart.redraw();
     }
+    var upgrade_name_to_type;
 
-    $('#upgrade-types-select').on('change', function() {
-        applyUpgradeFilter();
-    });
-    $('#upgrade-tourney-types,input[type=radio][name=upgrade-result-types],input[type=radio][name=upgrade-totals],' +
-            '#upgrade-percentage-toggle').on('change', function() {
-        var show_upgrade_as_percentage = $('#upgrade-percentage-toggle').is(':checked');
+    function getUpgradeTotals(showTopTen) {
+                var show_upgrade_as_percentage = $('#upgrade-percentage-toggle').is(':checked');
 
         var upgradeTotals = document.getElementsByName('upgrade-totals');
         var resultTotals = document.getElementsByName('upgrade-result-types');
@@ -356,20 +396,33 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                             'show_upgrade_as_percentage': show_upgrade_as_percentage,
                             'aggregation_type': aggregationType,
                             'results_type': resultsType,
-                            'tourney_filters': ftt
+                            'tourney_filters': ftt,
+                            'show_top_10': showTopTen
                         }
                     }
             ),
             success: function (data) {
                 var upgrade_options = data['upgrade_options'];
-                console.log(upgrade_options);
+                var upgrade_types = data['upgrade_types'];
+                upgrade_name_to_type = data['upgrade_name_to_type'];
                 adjustVisibles(upgrade_options);
                 $('#upgrades').highcharts(upgrade_options);
-                applyUpgradeFilter();
+                $('#upgrade-types-select').select2( { data: upgrade_types, multiple: 'multiple', placeholder: "select one or more types" } );
 
+                if ( ! showTopTen ) {
+                    applyUpgradeFilter(upgrade_name_to_type);
+                }
             },
             dataType: "json"
         });
+
+    }
+    $('#upgrade-types-select').on('change', function() {
+        applyUpgradeFilter(upgrade_name_to_type);
+    });
+    $('#upgrade-tourney-types,input[type=radio][name=upgrade-result-types],input[type=radio][name=upgrade-totals],' +
+            '#upgrade-percentage-toggle').on('change', function() {
+        getUpgradeTotals(false);
     });
 
 </script>
@@ -389,24 +442,24 @@ function adjustVisibles(chartOptions)
     }
 }
 
-var ship_total_options = {{ ship_total_options | safe }};
-var faction_options = {{ faction_options | safe }};
-var ship_options = {{ ship_options | safe }};
-var pilot_options = {{ pilot_options | safe }};
-var upgrade_options = {{ upgrade_options | safe }};
-var upgrade_types = {{ upgrade_types | safe }};
-var upgrade_name_to_type = {{ upgrade_name_to_type | safe }}
-adjustVisibles(ship_options);
-adjustVisibles(pilot_options);
-adjustVisibles(upgrade_options);
+//var ship_total_options = {{ ship_total_options | safe }};
+//var faction_options = {{ faction_options | safe }};
+//var ship_options = {{ ship_options | safe }};
+//var pilot_options = {{ pilot_options | safe }};
+//var upgrade_options = {{ upgrade_options | safe }};
+//var upgrade_types = {{ upgrade_types | safe }};
+//var upgrade_name_to_type = {{ upgrade_name_to_type | safe }}
+//adjustVisibles(ship_options);
+//adjustVisibles(pilot_options);
+//adjustVisibles(upgrade_options);
 
 
-$('#total_total').highcharts( ship_total_options );
-$('#faction_total').highcharts( faction_options );
-$('#ships').highcharts( ship_options );
-$('#pilots').highcharts( pilot_options );
-$('#upgrades').highcharts( upgrade_options );
-$('.upgrade-types-select').select2();
+//$('#total_total').highcharts( ship_total_options );
+//$('#faction_total').highcharts( faction_options );
+//$('#ships').highcharts( ship_options );
+//$('#pilots').highcharts( pilot_options );
+//$('#upgrades').highcharts( upgrade_options );
+//$('.upgrade-types-select').select2();
 
 
 </script>
