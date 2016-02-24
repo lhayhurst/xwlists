@@ -39,6 +39,15 @@ def year_mo_sort(x,y):
     else:
         return 1
 
+def check_visible(faction, imperial_checked, rebel_checked, scum_checked):
+    if rebel_checked == False and faction == Faction.REBEL.description:
+        return 0
+    if imperial_checked == False and faction == Faction.IMPERIAL.description:
+        return 0
+    if scum_checked == False and faction == Faction.SCUM.description:
+        return 0
+    return 1
+
 class HighChartGraph:
     def __init__(self):
         self.options = {}
@@ -328,7 +337,7 @@ class ShipHighchartOptions:
                     disambiguated_ship_name = ship
                 series = { 'name': disambiguated_ship_name,
                            'data': collections.OrderedDict(),
-                            'visible': self.check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
+                            'visible': check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
                 for year_mo in data[faction][ship].keys():
                     self.hlcgo.add_category(year_mo)
                     val = data[faction][ship][year_mo]
@@ -362,17 +371,6 @@ class ShipHighchartOptions:
 
     def disambiguate_ship_by_faction(self, faction, sname):
         return sname + "( " + faction + " )"
-
-    def check_visible(self, faction, imperial_checked, rebel_checked, scum_checked):
-        if rebel_checked == False and faction == Faction.REBEL.description:
-            return 0
-        if imperial_checked == False and faction == Faction.IMPERIAL.description:
-            return 0
-        if scum_checked == False and faction == Faction.SCUM.description:
-            return 0
-        return 1
-
-
 
 class PilotHighchartOptions:
     def __init__(self, ship_pilot_time_series_data,
@@ -421,7 +419,7 @@ class PilotHighchartOptions:
                         disambiguated_pilot_name = pilot
                     series = { 'name': disambiguated_pilot_name,
                                'data': collections.OrderedDict(),
-                               'visible': self.check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
+                               'visible': check_visible(faction, imperial_checked, rebel_checked, scum_checked) }
                     for year_mo in data[faction][ship][pilot].keys():
                         self.highchart.add_category(year_mo)
                         val = data[faction][ship][pilot][year_mo]
@@ -456,15 +454,6 @@ class PilotHighchartOptions:
 
     def disambiguate(self, faction, sname):
         return sname + "( " + faction + " )"
-
-    def check_visible(self, faction, imperial_checked, rebel_checked, scum_checked):
-        if rebel_checked == False and faction == Faction.REBEL.description:
-            return 0
-        if imperial_checked == False and faction == Faction.IMPERIAL.description:
-            return 0
-        if scum_checked == False and faction == Faction.SCUM.description:
-            return 0
-        return 1
 
 class UpgradeHighChartOptions:
     def __init__(self, upgrade_time_series_data,
@@ -538,6 +527,114 @@ class UpgradeHighChartOptions:
 
         self.highchart.finalize()
 
+class PilotSkillHighchartsGraph:
+    def __init__(self, pilot_skill_time_series_data,
+                 ships_filter = None,
+                 show_as_percentage=True,
+                 rebel_checked=True,
+                 scum_checked=True,
+                 imperial_checked=True):
+
+        hclgo = None
+
+        yaxis_label = "Number of ships taken"
+
+        if not show_as_percentage:
+            hclgo = HighChartLineGraphOptions(title="Pilot skill",
+                                              yaxis_label=yaxis_label)
+        else:
+            hclgo = HighChartAreaGraphOptions(title="Pilot skill", yaxis_label=yaxis_label)
+        self.options = hclgo.get_options()
+        self.highchart = hclgo
+        self.finalize(pilot_skill_time_series_data,
+                      ships_filter,
+                      rebel_checked,
+                      scum_checked,
+                      imperial_checked)
+
+    def finalize(self, pilot_skill_time_series_data,
+                 ships_filter,
+                 rebel_checked,
+                 scum_checked,
+                 imperial_checked):
+
+        data = pilot_skill_time_series_data.time_series_data
+        all_series = {}
+        for faction in data.keys():
+            if not check_visible(faction, imperial_checked, rebel_checked, scum_checked):
+                continue
+            for ship in data[faction].keys():
+                if ships_filter is not None and len(ships_filter) > 0 and not ship in ships_filter:
+                    continue
+                for pilot_skill in data[faction][ship].keys():
+                    series = None
+                    if all_series.has_key( pilot_skill ):
+                        series = all_series[pilot_skill]
+                    else:
+                        series = { 'name': str(pilot_skill),
+                                   'data': collections.OrderedDict(),
+                                   'visible': 1 }
+                        all_series[pilot_skill] = series
+
+                    for year_mo in data[faction][ship][pilot_skill].keys():
+                        self.highchart.add_category(year_mo)
+                        val = data[faction][ship][pilot_skill][year_mo]
+                        if not series['data'].has_key(year_mo):
+                            series['data'][year_mo] = 0
+                        series['data'][year_mo] += val
+
+        # #sort the series from biggest to smallest based the last months value
+        unsorted = {}
+        for ps in all_series.keys():
+            ps_series = all_series[ps]
+            sorted_keys = sorted(ps_series['data'].keys(), cmp=year_mo_sort)
+            latest_year_mo = sorted_keys[-1]
+            last_value = ps_series['data'][latest_year_mo]
+            unsorted[ps]=last_value
+
+        sorted_upgrades = sorted(unsorted.items(), key=operator.itemgetter(1))
+        for ps_last_val in reversed(sorted_upgrades):
+            ps = ps_last_val[0]
+            series = all_series[ps]
+            self.highchart.add_series( series )
+
+        self.highchart.finalize()
+
+
+class PilotSkillTimeSeriesData:
+    def __init__(self, pm, tourney_filters=None,
+                 show_the_cut_only=False ):
+        self.pm = pm
+        records = pm.get_pilot_skill_time_series(tourney_filters,show_the_cut_only);
+        self.time_series_data = collections.OrderedDict()
+        self.ships = {}
+
+        for rec in records:
+            year        = int(rec[0])
+            month       = int(rec[1])
+            faction     = rec[2].description
+            ship        = rec[3].description
+            pilot_skill = int(rec[4])
+            count       = int(rec[5])
+
+            if not self.ships.has_key((ship)):
+                self.ships[ship] = 1
+
+            if not self.time_series_data.has_key(faction):
+                self.time_series_data[faction] = collections.OrderedDict()
+
+            if not self.time_series_data[faction].has_key(ship):
+                self.time_series_data[faction][ship] = collections.OrderedDict()
+
+            if not self.time_series_data[faction][ship].has_key(pilot_skill):
+                self.time_series_data[faction][ship][pilot_skill] = collections.OrderedDict()
+
+            year_mo = str(year) + "-" + str(month)
+
+            if not self.time_series_data[faction][ship][pilot_skill].has_key(year_mo):
+                self.time_series_data[faction][ship][pilot_skill][year_mo] = 0
+
+            self.time_series_data[faction][ship][pilot_skill][year_mo] += count
 
 
 class ShipPilotTimeSeriesData:

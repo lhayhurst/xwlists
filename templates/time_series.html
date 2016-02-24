@@ -300,6 +300,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
         </select>
     </div>
 </div>
+
+
 <script>
 
     function applyUpgradeFilter()
@@ -362,7 +364,6 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
             ),
             success: function (data) {
                 var upgrade_options = data['upgrade_options'];
-                console.log(upgrade_options);
                 adjustVisibles(upgrade_options);
                 $('#upgrades').highcharts(upgrade_options);
                 applyUpgradeFilter();
@@ -373,6 +374,81 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
     });
 
 </script>
+
+<div id="pilot_skill" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="ps-filters">
+    <div id="ps_total_filters">
+        <input type="checkbox" id="ps-percentage-toggle" value="ps-percentage-toggle" checked>Show as percentage
+    </div>
+    <div id="ps-factions">Factions
+        <input type="checkbox" id="ps-rebel-filter" value="{{ rebel }}" checked>{{ rebel }}
+        <input type="checkbox" id="ps-imperial-filter" value="{{ imperial }}" checked>{{ imperial }}
+        <input type="checkbox" id="ps-scum-filter" value="{{ scum }}" checked>{{ scum }}
+    </div>
+    <div id="ps-tourney-types">Tournament types:
+        {% for tourney_type in tourney_types %}
+            <input type="checkbox" class='ps-tourney-types' id="ps-tourney-type-{{ loop.counter }}" value="{{ tourney_type }}" checked>{{ tourney_type }}
+        {% endfor %}
+    </div>
+    <div id="ps-tournament-results">Player results
+        <input type="radio" name="ps-result-types" id="ps-all-radio" value="all" checked>All player results
+        <input type="radio" name="ps-result-types" id="ps-cut-radio" value="cut" >Only results that made "the cut"
+    </div>
+    <div id="upgrade-types">Ship types
+        <select style="width:300px" id="ps-ships-types-select" class="ps-ships-types-select" placeholder="Filter by ship type" multiple="multiple">
+            {%  for ut in ps_ships %}
+                <option value="{{ ut }}">{{ ut }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+</div>
+<hr>
+
+<script>
+
+    $('#ps-ships-types-select,.ps-tourney-types,input[type=radio][name=ps-result-types],' +
+            '#ps-percentage-toggle,#ps-rebel-filter,#ps-imperial-filter,#ps-scum-filter').on('change', function() {
+    var show_ps_as_percentage = $('#ps-percentage-toggle').is(':checked');
+    var rebel_checked = $('#ps-rebel-filter').is(':checked');
+    var imperial_checked = $('#ps-imperial-filter').is(':checked');
+    var scum_checked = $('#ps-scum-filter').is(':checked');
+
+    var resultTotals = document.getElementsByName('ps-result-types');
+    var resultsType  = getRadioBoxValue(resultTotals);
+
+    var tourney_types = $('.ps-tourney-types');
+    var ftt = get_faction_filter( tourney_types );
+
+    var selectedShips = $('#ps-ships-types-select').select2("val")
+
+    var url = "/get_ps_time_series";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: url,
+        data: JSON.stringify(
+                {
+                    data: {
+                        'imperial_checked': imperial_checked,
+                        'rebel_checked': rebel_checked,
+                        'scum_checked': scum_checked,
+                        'show_ps_as_percentage' : show_ps_as_percentage,
+                        'results_type' : resultsType,
+                        'tourney_filters': ftt,
+                        'ships_filter': selectedShips
+                    }
+                }
+        ),
+        success: function (data) {
+            var ps_options = data['ps_options'];
+            $('#pilot_skill').highcharts(ps_options);
+        },
+        dataType: "json"
+    });
+});
+</script>
+
 
 <script>
 
@@ -395,7 +471,9 @@ var ship_options = {{ ship_options | safe }};
 var pilot_options = {{ pilot_options | safe }};
 var upgrade_options = {{ upgrade_options | safe }};
 var upgrade_types = {{ upgrade_types | safe }};
-var upgrade_name_to_type = {{ upgrade_name_to_type | safe }}
+var upgrade_name_to_type = {{ upgrade_name_to_type | safe }};
+var ps_options = {{ pilot_skill_options | safe }};
+var ps_ships = {{ ps_ships | safe }};
 adjustVisibles(ship_options);
 adjustVisibles(pilot_options);
 adjustVisibles(upgrade_options);
@@ -407,6 +485,8 @@ $('#ships').highcharts( ship_options );
 $('#pilots').highcharts( pilot_options );
 $('#upgrades').highcharts( upgrade_options );
 $('.upgrade-types-select').select2();
+$('.ps-ships-types-select').select2();
+$('#pilot_skill').highcharts( ps_options );
 
 
 </script>

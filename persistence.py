@@ -1324,6 +1324,42 @@ class PersistenceManager:
     def commit(self):
         self.db_connector.get_session().commit()
 
+    def get_pilot_skill_time_series(self, tourney_filters, show_the_cut_only):
+
+        session = self.db_connector.get_session()
+
+        filters = [
+            TourneyList.tourney_id == Tourney.id ,
+            ArchtypeList.id == TourneyList.archtype_id,
+            Ship.archtype_id == ArchtypeList.id ,
+            Ship.ship_pilot_id == ShipPilot.id ,
+            ShipPilot.pilot_id == Pilot.id
+        ]
+
+        if show_the_cut_only:
+            filters.append( TourneyRanking.tourney_id == Tourney.id)
+            filters.append( TourneyList.player_id == TourneyRanking.player_id)
+            filters.append(TourneyRanking.elim_rank != None)
+
+        year  = sqlalchemy.extract('year', Tourney.tourney_date)
+        month = sqlalchemy.extract('month', Tourney.tourney_date)
+        ship_pilot_rollup_sql = session.query(
+            year.label("year"),
+            month.label("month"),
+            ArchtypeList.faction, ShipPilot.ship_type, Pilot.pilot_skill,
+                             func.count( Pilot.pilot_skill).label("count")).\
+                             filter( and_(*filters)).\
+            group_by(
+                year,
+                month,
+                ArchtypeList.faction, ShipPilot.ship_type, Pilot.pilot_skill ).\
+            statement.compile(dialect=mysql.dialect())
+
+        connection = self.db_connector.get_engine().connect()
+        ship_pilot_rollup = connection.execute(ship_pilot_rollup_sql)
+        return ship_pilot_rollup
+
+
     def get_ship_pilot_rollup(self, tourney_filters,show_the_cut_only):
 
         session = self.db_connector.get_session()

@@ -22,7 +22,8 @@ from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event, ArchtypeList, LeagueMatch, \
     LeaguePlayer
 from rollup import ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTotalHighChartOptions, \
-    ShipHighchartOptions, PilotHighchartOptions, UpgradeHighChartOptions
+    ShipHighchartOptions, PilotHighchartOptions, UpgradeHighChartOptions, PilotSkillTimeSeriesData, \
+    PilotSkillHighchartsGraph
 from search import Search
 from uidgen import ListUIDGen
 import xwingmetadata
@@ -1472,6 +1473,9 @@ def time_series():
     for tourney_type in tourney_types:
         tt.append( tourney_type[0])
 
+    pskill = PilotSkillTimeSeriesData(pm)
+    pskillgraph = PilotSkillHighchartsGraph(pskill)
+
 
     return render_template("time_series.html",
                            ship_total_options=total_options.options,
@@ -1481,10 +1485,41 @@ def time_series():
                            upgrade_options=upgrade_options.options,
                            upgrade_types=sorted(pcd.upgrade_types.keys()),
                            upgrade_name_to_type=pcd.upgrade_name_to_type,
+                           pilot_skill_options=pskillgraph.options,
                            tourney_types=tt,
+                           ps_ships = sorted(pskill.ships.keys()),
                            scum=Faction.SCUM.description,
                            rebel=Faction.REBEL.description,
                            imperial=Faction.IMPERIAL.description)
+
+@app.route("/get_ps_time_series",methods=['POST'])
+def get_ps_time_series():
+    data               = request.json['data']
+    show_as_percentage = data['show_ps_as_percentage']
+    tourney_filters    = data['tourney_filters']
+    results_type       = data['results_type']
+    ships              = data['ships_filter']
+    imperial_checked   = data['imperial_checked']
+    rebel_checked      = data['rebel_checked']
+    scum_checked       = data['scum_checked']
+
+    show_as_count = True
+
+    show_only_the_cut = False
+    if results_type is not None and results_type == "cut":
+        show_only_the_cut = True
+
+    pm               = PersistenceManager(myapp.db_connector)
+
+
+    pskill = PilotSkillTimeSeriesData(pm, tourney_filters=tourney_filters,show_the_cut_only=show_only_the_cut)
+    pskillgraph = PilotSkillHighchartsGraph(pskill,
+                                            ships_filter=ships,
+                                            show_as_percentage=show_as_percentage,
+                                            rebel_checked=rebel_checked,
+                                            scum_checked=scum_checked,
+                                            imperial_checked=imperial_checked)
+    return jsonify( ps_options=pskillgraph.options)
 
 
 @app.route("/get_total_time_series",methods=['POST'])
@@ -1533,7 +1568,6 @@ def get_faction_time_series():
                                                 show_the_cut_only=show_only_the_cut)
     faction_options  = FactionTotalHighChartOptions(pcd,show_as_percentage,show_as_count)
     return jsonify( faction_options=faction_options.options)
-
 
 @app.route("/get_ship_time_series",methods=['POST'])
 def get_ship_time_series():
@@ -1630,7 +1664,6 @@ def get_upgrade_time_series():
                                             show_as_percentage=show_as_percentage,
                                             top_10_only=False)
     return jsonify( upgrade_options=upgrade_options.options)
-
 
 def to_float(dec):
     return float("{0:.2f}".format( float(dec) * float(100)))
