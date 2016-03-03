@@ -480,23 +480,45 @@
             updateTotals();
         }
 
+        function tieX1Equipped(upgradeValue) {
+            return upgradeValue == "TIE/X1";
+/*            squadMemberEl.find( '.upgrade .row-value .select').each(function(i,upgrade) {
+                if ( $(upgrade).select2('data') != null ) {
+                    var uname = $(upgrade).select2('data').text;
+                    if ( uname == "TIE/X1") {
+                        isEquipped = true;
+                        return;
+                    }
+                }
+            } );
+            return isEquipped;
+*/
+        }
+
         function upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue) {
             var upgradeHref = getUpgradeHref( upgradeType, upgradeValue );
             if ( upgradeHref && 'action' in upgradeHref ) {
+                var titleHack = false;
+                if ( tieX1Equipped(upgradeValue) ) {
+                    titleHack = true;
+                }
+
                 var action = upgradeHref.action;
                 for ( var i = 0; i < action.length; i++ )
                 {
                     if ( action[i].type == 'ADD_UPGRADE' ) {
                         var upgrade = action[i].value;
-                        upgradeItems = getUpgradeItems( squadMemberEl, upgrade, ship, faction, pilotHref );
+                        upgradeItems = getUpgradeItems( squadMemberEl, upgrade, ship, faction, pilotHref, titleHack );
                         addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function (upgradeValue) {
                                 upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgrade, upgradeValue);
                         } );
                     }
                 }
             }
+            //if TIE/X1 is equipped, then lower the cost of all the system upgrades
             updateTotals();
         }
+
 
         function addRow(parentEl, className, label, items, changeHandler)
         {
@@ -510,20 +532,6 @@
             rowEl.find('.row-value .select')
                     .select2({data:items, placeholder:'select a ' + label, allowClear: allowClearValue })
                     .on('change', function(e) {
-                        if (e.target.value==='TIE/X1') { //this is a little hack, but what can you do
-                            //cheapen the cost of all the system upgrades
-                            upgrades['System'].map( function  ( u ) {
-                               // console.log("title is tie x1, cheapening by 4");
-                               newCost = u.cost - 4;
-                               if ( newCost < 0 ) {
-                                   u.cost = 0;
-                               }
-                               else {
-                                   u.cost = newCost;
-                               }
-                            });
-                        }
-
                         changeHandler(e.target.value);
 
                     }).on('select2-removed', function(e) {
@@ -534,7 +542,7 @@
             return rowEl;
         }
 
-        function getUpgradeItems(squadMemberEl, upgradeType, ship, faction, pilotHref )
+        function getUpgradeItems(squadMemberEl, upgradeType, ship, faction, pilotHref, titleHack )
         {
             var upgradeItems = upgrades[upgradeType].map(function (u) {
 
@@ -542,7 +550,14 @@
                     return manageConstraints(ship, u.constraints, faction, pilotHref, u, upgradeType);
                 }
                 else {
-                    return {text: u.name, id: u.name, cost: u.cost, type: upgradeType, disabled: false};
+                    var cost = u.cost;
+                    if ( titleHack) {
+                        cost = u.cost - 4;
+                        if (cost < 0) {
+                            cost = 0;
+                        }
+                    }
+                    return {text: u.name, id: u.name, cost: cost, type: upgradeType, disabled: false};
                 }
             });
 
@@ -559,7 +574,7 @@
 
         function addUpgrade(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType)
         {
-            var upgradeItems = getUpgradeItems( squadMemberEl, upgradeType, ship, faction, pilotHref );
+            var upgradeItems = getUpgradeItems( squadMemberEl, upgradeType, ship, faction, pilotHref, false );
 
             addRow(squadMemberEl, 'upgrade', upgradeType, upgradeItems, function (upgradeValue) {
                 upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue);
