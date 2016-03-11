@@ -1439,7 +1439,7 @@ def down():
 
 @app.route('/')
 def index():
-    return redirect(url_for('heatmap') )
+    return redirect(url_for("heatmap") )
 
 @app.route("/pretty_print")
 def pretty_print():
@@ -1740,7 +1740,7 @@ def set_geo():
     return redirect(url_for("venues"))
 
 @app.route("/heatmap")
-def headmap():
+def heatmap():
     pm               = PersistenceManager(myapp.db_connector)
     venues         = pm.get_venues()
     data = []
