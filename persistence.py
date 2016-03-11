@@ -398,9 +398,12 @@ class LeagueMatch(Base):
             return self.player2_list.pretty_print_list()
         return "<br>"
 
+tourney_venue_table_name = 'tourney_venue'
+
 class Tourney(Base):
     __tablename__ = tourney_table
     id = Column(Integer, primary_key=True)
+    venue_id          = Column(Integer, ForeignKey( '{0}.id'.format(tourney_venue_table_name) ) )
     tourney_name      = Column(String(128))
     tourney_date      = Column(Date)
     tourney_type      = Column(String(128))
@@ -417,7 +420,8 @@ class Tourney(Base):
     rankings        = relationship( "TourneyRanking", back_populates="tourney", order_by="asc(TourneyRanking.rank)", cascade="all,delete,delete-orphan")
     tourney_players = relationship( "TourneyPlayer", back_populates="tourney", cascade="all,delete,delete-orphan")
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
-    venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
+    #venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
+    venue           = relationship( "TourneyVenue", back_populates="tourney",  uselist=False)
 
     def is_standard_format(self):
         return self.format == 'Standard - 100 Point Dogfight'
@@ -998,16 +1002,14 @@ class TourneySet(Base):
     tourney            = relationship( Tourney.__name__, back_populates="sets")
     set                = relationship( Set.__name__,  uselist=False)
 
-tourney_venue_table_name = 'tourney_venue'
 class TourneyVenue(Base):
     __tablename__      = tourney_venue_table_name
     id                 = Column(Integer, primary_key=True)
-    tourney_id         = Column(Integer, ForeignKey('{0}.id'.format(tourney_table)))
     country            = Column(String(128))
     state              = Column(String(128))
     city               = Column(String(128))
     venue              = Column(String(128))
-    tourney            = relationship( Tourney.__name__, back_populates="venue", uselist=False)
+    tourney            = relationship( Tourney.__name__, back_populates="venue")
 
 class PersistenceManager:
 
@@ -1142,6 +1144,9 @@ class PersistenceManager:
 
     def get_ship_upgrades(self):
         return self.db_connector.get_session().query(ShipUpgrade).all()
+
+    def get_venues(self):
+        return self.db_connector.get_session().query(TourneyVenue).all()
 
     def get_round_results_for_list(self, list_id):
         ret = self.db_connector.get_session().query(RoundResult).filter(
