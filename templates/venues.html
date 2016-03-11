@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+
+    <table id="venues" class="display" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Venue</th>
+        <th>Num. events</th>
+        <th>City</th>
+        <th>State</th>
+        <th>Country</th>
+        <th>Lat</th>
+        <th>Lon</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for v in venues %}
+          {% if v.valid_venue() %}
+          <tr>
+             <td >{{ v.get_name() }}</td>
+             <td>{{ v.get_num_events() }}</td>
+             <td>{{ v.get_city() }}</td>
+             <td>{{ v.get_state()}}</td>
+             <td>{{ v.get_country()}}</td>
+             <td>{{ v.latitude}}</td>
+             <td>{{ v.longitude}}</td>
+          {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
+<script>
+    $(document).ready( function () {
+        $('#venues').dataTable({
+            "order": [[1, "desc"]],
+            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
+
+        });
+    });
+</script>
+{% endblock %}

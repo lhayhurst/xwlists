@@ -1014,6 +1014,25 @@ class TourneyVenue(Base):
     longitude          = Column(sqlalchemy.types.Numeric)
     tourneys           = relationship( Tourney.__name__, back_populates="venue")
 
+    def valid_venue(self):
+        return self.venue is not None and len(self.venue) > 0
+
+    def get_name(self):
+        return decode(self.venue)
+
+    def get_city(self):
+        return decode(self.city)
+
+    def get_state(self):
+        return decode(self.state)
+
+    def get_country(self):
+        return decode(self.country)
+
+    def get_num_events(self):
+        return len(self.tourneys)
+
+
 class PersistenceManager:
 
     db_connector = None

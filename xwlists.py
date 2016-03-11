@@ -1439,7 +1439,7 @@ def down():
 
 @app.route('/')
 def index():
-    return redirect(url_for('time_series') )
+    return redirect(url_for('heatmap') )
 
 @app.route("/pretty_print")
 def pretty_print():
@@ -1698,28 +1698,29 @@ def fix_venue_dupes():
 
     return redirect(url_for("tourneys"))
 
-@app.route("/geo")
+@app.route("/venues")
 def geo():
     pm               = PersistenceManager(myapp.db_connector)
     venues           = pm.get_venues()
+    return render_template("venues.html", venues=venues)
 
 @app.route("/set_geo")
 def set_geo():
     pm               = PersistenceManager(myapp.db_connector)
-    tourneys         = pm.get_tourneys()
+    venues           = pm.get_venues()
     g = Nominatim()
     data = {}
     seen = {}
     i = 0
-    for tourney in tourneys:
-        city = tourney.venue.city
-        state = tourney.venue.state
-        country = tourney.venue.country
+    for venue in venues:
+        city = venue.get_city()
+        state = venue.get_state()
+        country = venue.get_country()
         key = "%s %s %s" % ( city, state, country )
         l = None
         if not seen.has_key(key):
             try:
-                print "looking up key %s for tourney %d" % ( key, tourney.id )
+                print "looking up key %s for venue %d" % ( key, venue.id )
                 l = g.geocode(key)
             except:
                 print "unable to lookup key %s" % (  key )
@@ -1728,62 +1729,28 @@ def set_geo():
             l = seen[key]
         if not l:
             continue
-        address = l.address
-        if not data.has_key( address ):
-            if not math.isnan(l.latitude) and not math.isnan(l.longitude):
-                data[address] = { 'tourneys': [tourney], 'lat' : l.latitude, 'lng' : l.longitude}
-        else:
-            data[address]['tourneys'].append(tourney)
+        venue.latitude = l.latitude
+        venue.longitude = l.longitude
+
         if i % 10 == 0:
             print "processed %d records" % (  i )
         i += 1
 
-    for rec in data.values():
-        for tourney in rec['tourneys']:
-            tourney.latitude = rec['lat']
-            tourney.longitude = rec['lng']
-            pm.get_session().add(tourney)
-
-    pm.get_session().commit()
-    return redirect(url_for('tourneys'))
+    pm.db_connector.get_session().commit()
+    return redirect(url_for("venues"))
 
 @app.route("/heatmap")
 def headmap():
     pm               = PersistenceManager(myapp.db_connector)
-    tourneys         = pm.get_tourneys()
-    g = Nominatim()
-    data = {}
-    seen = {}
-    i = 0
-    for tourney in tourneys:
-        city = tourney.venue.city
-        state = tourney.venue.state
-        country = tourney.venue.country
-        key = "%s %s %s" % ( city, state, country )
-        l = None
-        if not seen.has_key(key):
-            l = g.geocode(key)
-            seen[key] = l
-        else:
-            l = seen[key]
-        if not l:
-            continue
-        address = l.address
-        if not data.has_key( address ):
-            if not math.isnan(l.latitude) and not math.isnan(l.longitude):
-                data[address] = { 'count': 1, 'lat' : l.latitude, 'lng' : l.longitude}
-            else:
-                print l + " has NaN!"
-        else:
-            data[address]['count'] +=1
-        i = i + 1
-        if i % 10 == 0:
-            print "processed %d tourneys" % ( i )
-        if i > 30:
-            break
-    data = data.values()
+    venues         = pm.get_venues()
+    data = []
+    for venue in venues:
+        if venue.latitude is not None and venue.longitude is not None:
+            data.append( { 'count': len(venue.tourneys),
+                           'lat': float(venue.latitude),
+                           'lng': float(venue.longitude)})
 
-    return render_template("heat_map.html", data=data)
+    return render_template("heat_map.html", data=data, venues=venues)
 
 def to_float(dec):
     return float("{0:.2f}".format( float(dec) * float(100)))
