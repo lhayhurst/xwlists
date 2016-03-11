@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+    <style>
+        #mapclass { height: 180px; }
+    </style>
+   <div id="map" name="map" style="width: 900px; height:688px"></div>
+
+
+<script>
+
+    var testData = {
+      max: 8,
+      data: {{ data | safe }}
+              //[{lat: 24.6408, lng:46.7728, count: 3},{lat: 50.75, lng:-1.55, count: 1}, ]
+    };
+
+    var cfg = {
+          // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+          // if scaleRadius is false it will be the constant radius used in pixels
+          "radius": 2,
+          "maxOpacity": .8,
+          // scales the radius based on map zoom
+          "scaleRadius": true,
+          // if set to false the heatmap uses the global maximum for colorization
+          // if activated: uses the data maximum within the current map boundaries
+          //   (there will always be a red spot with useLocalExtremas true)
+          "useLocalExtrema": true,
+          // which field name in your data represents the latitude - default "lat"
+          latField: 'lat',
+          // which field name in your data represents the longitude - default "lng"
+          lngField: 'lng',
+          // which field name in your data represents the data value - default "value"
+          valueField: 'count'
+    };
+
+    var heatMapLayer = new HeatmapOverlay(cfg);
+    var baseLayer = L.tileLayer(
+            'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}',
+            {
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+                maxZoom: 18,
+                id: 'sozin.pcehdkkk',
+                accessToken: 'pk.eyJ1Ijoic296aW4iLCJhIjoiY2lsbW80cGZyNjhscXV1bWM3bHQ3bmczYyJ9.ezV5ULppmFVoz4A9aNQEOw'
+            }
+    );
+
+    var mymap = L.map('map', { layers : [ baseLayer, heatMapLayer]}).setView([51.505, -0.09], 2);
+    heatMapLayer.setData( testData );
+
+
+</script>
+{% endblock %}

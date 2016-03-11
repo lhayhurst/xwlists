@@ -8,7 +8,9 @@ from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
 import sys
 import re
+from geopy import Nominatim
 from markupsafe import Markup
+import math
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI
@@ -99,7 +101,7 @@ def mail_message(subject, message):
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
     with app.app_context():
         print("sending msg ")
-        mail.send(msg)
+        #mail.send(msg)
 
 
 def mail_error(errortext):
@@ -108,7 +110,7 @@ def mail_error(errortext):
     msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
         print("sending msg ")
-        mail.send(msg)
+        #mail.send(msg)
 
 @app.route("/about")
 def about():
@@ -908,7 +910,7 @@ def add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
             if set is not None:
                 ts = TourneySet(tourney=t, set=set)
                 pm.db_connector.get_session().add(ts)
-    tv = TourneyVenue(tourney=t, country=country, state=state, city=city, venue=venue)
+    tv  = pm.get_tourney_venue( country=country, state=state, city=city, venue=venue)
     t.venue = tv
     pm.db_connector.get_session().add(tv)
 
@@ -1664,6 +1666,124 @@ def get_upgrade_time_series():
                                             show_as_percentage=show_as_percentage,
                                             top_10_only=False)
     return jsonify( upgrade_options=upgrade_options.options)
+
+
+@app.route("/fix_venue_dupes")
+def fix_venue_dupes():
+    pm               = PersistenceManager(myapp.db_connector)
+    venues           = pm.get_venues()
+    fixes = {}
+    for v in venues:
+        key = "%s-%s-%s-%s"% ( v.country, v.state, v.city, v.venue)
+        if not fixes.has_key( key ):
+            fixes[key] = { 'first': v, 'goners': []}
+        else:
+            fixes[key]['goners'].append(v)
+
+    goners = []
+    for href in fixes.values():
+        first  = href['first']
+        g = href['goners']
+        for goner in g:
+            adjusted_tourneys = goner.tourneys
+            for adjusted_tourney in adjusted_tourneys:
+                adjusted_tourney.venue    = first
+            goners.append(goner)
+    pm.db_connector.get_session().commit()
+
+    for goner in goners:
+        pm.db_connector.get_session().delete(goner)
+
+    pm.db_connector.get_session().commit()
+
+    return redirect(url_for("tourneys"))
+
+@app.route("/geo")
+def geo():
+    pm               = PersistenceManager(myapp.db_connector)
+    venues           = pm.get_venues()
+
+@app.route("/set_geo")
+def set_geo():
+    pm               = PersistenceManager(myapp.db_connector)
+    tourneys         = pm.get_tourneys()
+    g = Nominatim()
+    data = {}
+    seen = {}
+    i = 0
+    for tourney in tourneys:
+        city = tourney.venue.city
+        state = tourney.venue.state
+        country = tourney.venue.country
+        key = "%s %s %s" % ( city, state, country )
+        l = None
+        if not seen.has_key(key):
+            try:
+                print "looking up key %s for tourney %d" % ( key, tourney.id )
+                l = g.geocode(key)
+            except:
+                print "unable to lookup key %s" % (  key )
+            seen[key] = l
+        else:
+            l = seen[key]
+        if not l:
+            continue
+        address = l.address
+        if not data.has_key( address ):
+            if not math.isnan(l.latitude) and not math.isnan(l.longitude):
+                data[address] = { 'tourneys': [tourney], 'lat' : l.latitude, 'lng' : l.longitude}
+        else:
+            data[address]['tourneys'].append(tourney)
+        if i % 10 == 0:
+            print "processed %d records" % (  i )
+        i += 1
+
+    for rec in data.values():
+        for tourney in rec['tourneys']:
+            tourney.latitude = rec['lat']
+            tourney.longitude = rec['lng']
+            pm.get_session().add(tourney)
+
+    pm.get_session().commit()
+    return redirect(url_for('tourneys'))
+
+@app.route("/heatmap")
+def headmap():
+    pm               = PersistenceManager(myapp.db_connector)
+    tourneys         = pm.get_tourneys()
+    g = Nominatim()
+    data = {}
+    seen = {}
+    i = 0
+    for tourney in tourneys:
+        city = tourney.venue.city
+        state = tourney.venue.state
+        country = tourney.venue.country
+        key = "%s %s %s" % ( city, state, country )
+        l = None
+        if not seen.has_key(key):
+            l = g.geocode(key)
+            seen[key] = l
+        else:
+            l = seen[key]
+        if not l:
+            continue
+        address = l.address
+        if not data.has_key( address ):
+            if not math.isnan(l.latitude) and not math.isnan(l.longitude):
+                data[address] = { 'count': 1, 'lat' : l.latitude, 'lng' : l.longitude}
+            else:
+                print l + " has NaN!"
+        else:
+            data[address]['count'] +=1
+        i = i + 1
+        if i % 10 == 0:
+            print "processed %d tourneys" % ( i )
+        if i > 30:
+            break
+    data = data.values()
+
+    return render_template("heat_map.html", data=data)
 
 def to_float(dec):
     return float("{0:.2f}".format( float(dec) * float(100)))

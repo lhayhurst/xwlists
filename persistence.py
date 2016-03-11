@@ -1,4 +1,5 @@
 from flask import url_for
+from geopy import Nominatim
 from markupsafe import Markup
 import sqlalchemy
 from sqlalchemy.dialects import mysql
@@ -421,7 +422,7 @@ class Tourney(Base):
     tourney_players = relationship( "TourneyPlayer", back_populates="tourney", cascade="all,delete,delete-orphan")
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
     #venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
-    venue           = relationship( "TourneyVenue", back_populates="tourney",  uselist=False)
+    venue           = relationship( "TourneyVenue", back_populates="tourneys",  uselist=False)
 
     def is_standard_format(self):
         return self.format == 'Standard - 100 Point Dogfight'
@@ -1009,7 +1010,9 @@ class TourneyVenue(Base):
     state              = Column(String(128))
     city               = Column(String(128))
     venue              = Column(String(128))
-    tourney            = relationship( Tourney.__name__, back_populates="venue")
+    latitude           = Column(sqlalchemy.types.Numeric)
+    longitude          = Column(sqlalchemy.types.Numeric)
+    tourneys           = relationship( Tourney.__name__, back_populates="venue")
 
 class PersistenceManager:
 
@@ -1126,6 +1129,27 @@ class PersistenceManager:
     def get_league_player(self, challonge_player_id):
         return self.db_connector.get_session().query(LeaguePlayer).filter(LeaguePlayer.challonge_id == challonge_player_id).first()
 
+
+    def get_tourney_venue(self, country,state,city,venue):
+
+        venue =  self.db_connector.get_session().query( TourneyVenue ).\
+                    filter(TourneyVenue.country == country,
+                    TourneyVenue.state == state,
+                    TourneyVenue.city == city,
+                    TourneyVenue.venue == venue).first()
+
+        if venue is None:
+            venue = TourneyVenue( country=country, state=state, city=city, venue=venue)
+            g = Nominatim()
+            key = "%s %s %s" % ( city, state, country )
+            try:
+                l = g.geocode(key)
+                if l is not None:
+                    venue.latitude  = l.latitude
+                    venue.longitude = l.longitude
+            except Exception:
+                print "Unable to lookup lat/lon for %s " % ( key )
+        return venue
 
     def get_match(self, match_id):
         return self.db_connector.get_session().query(LeagueMatch).\

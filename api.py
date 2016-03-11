@@ -72,6 +72,9 @@ class TournamentApiHelper:
     tourney_types = ["World Championship", "Nationals", "Regional", "Store Championship", "Vassal play", "Other"]
     valid_sets = sets_and_expansions.keys()
 
+    def __init__(self,pm):
+        self.pm = pm
+
     def check_token(self, json_data, tourney):
         if not json_data.has_key(API_TOKEN):
             return self.bail("Missing API token json, bailing out ...", 403)
@@ -120,15 +123,21 @@ class TournamentApiHelper:
     def extract_venue(self, t, tourney):
         if t.has_key(VENUE):
             vhref = t[VENUE]
-            venue = TourneyVenue()
+            country = None
+            state   = None
+            city    = None
+            venue   = None
+
             if vhref.has_key(COUNTRY):
-                venue.country = vhref[COUNTRY]
+                country = vhref[COUNTRY]
             if vhref.has_key(STATE):
-                venue.state = vhref[STATE]
+                state = vhref[STATE]
             if vhref.has_key(CITY):
-                venue.city = vhref[CITY]
+                city = vhref[CITY]
             if vhref.has_key(VENUE):
-                venue.venue = vhref[VENUE]
+                venue = vhref[VENUE]
+
+            venue = self.pm.get_tourney_venue(country,state,city,venue)
             tourney.venue = venue
 
     def extract_player(self, p, player, ranking):
@@ -344,7 +353,9 @@ class TournamentsAPI(restful.Resource):
 
     def post(self):
         json_data = None
-        helper = TournamentApiHelper()
+        pm = PersistenceManager(myapp.db_connector)
+
+        helper = TournamentApiHelper(pm)
         self.helper = helper
 
         try:
@@ -380,7 +391,6 @@ class TournamentsAPI(restful.Resource):
                     return helper.bail("invalid tourney type %s" % ( tourney_type ), 403)
 
                 #good to go!
-                pm = PersistenceManager(myapp.db_connector)
                 tourney = Tourney(tourney_name=tourney_name, tourney_date=tourney_date,
                                   tourney_type=tourney_type, round_length=round_length, entry_date=parsed_date,
                                   participant_count=participant_count, locked=False)
