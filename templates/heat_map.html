@@ -41,10 +41,10 @@
     var layerFiveHeatMapConfig = {
           // radius should be small ONLY if scaleRadius is true (or small radius is intended)
           // if scaleRadius is false it will be the constant radius used in pixels
-          "radius": 1,
+          "radius": 75,
           "maxOpacity": .8,
           // scales the radius based on map zoom
-          "scaleRadius": true,
+          "scaleRadius": false,
           // if set to false the heatmap uses the global maximum for colorization
           // if activated: uses the data maximum within the current map boundaries
           //   (there will always be a red spot with useLocalExtremas true)
@@ -100,10 +100,12 @@
            mymap.addLayer(markerLayer);
            mymap.removeLayer(heatMapLayer);
            mymap.addLayer(zoomedHeatMapLayer);
+           zoomedHeatMapLayer._draw();
        } else {
            mymap.removeLayer(markerLayer);
            mymap.removeLayer(zoomedHeatMapLayer);
            mymap.addLayer(heatMapLayer);
+           heatMapLayer._draw();
 
        }
     });
