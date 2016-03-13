@@ -9,13 +9,17 @@
 
 <script>
 
+    var geoData = {{ data | safe }};
+    var markers = [];
+
     var testData = {
       max: 20,
-      data: {{ data | safe }}
+      data: geoData
               //[{lat: 24.6408, lng:46.7728, count: 3},{lat: 50.75, lng:-1.55, count: 1}, ]
     };
 
-    var cfg = {
+
+    var topLevelConfig = {
           // radius should be small ONLY if scaleRadius is true (or small radius is intended)
           // if scaleRadius is false it will be the constant radius used in pixels
           "radius": 2,
@@ -34,7 +38,28 @@
           valueField: 'count'
     };
 
-    var heatMapLayer = new HeatmapOverlay(cfg);
+    var layerFiveHeatMapConfig = {
+          // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+          // if scaleRadius is false it will be the constant radius used in pixels
+          "radius": 1,
+          "maxOpacity": .8,
+          // scales the radius based on map zoom
+          "scaleRadius": true,
+          // if set to false the heatmap uses the global maximum for colorization
+          // if activated: uses the data maximum within the current map boundaries
+          //   (there will always be a red spot with useLocalExtremas true)
+          "useLocalExtrema": true,
+          // which field name in your data represents the latitude - default "lat"
+          latField: 'lat',
+          // which field name in your data represents the longitude - default "lng"
+          lngField: 'lng',
+          // which field name in your data represents the data value - default "value"
+          valueField: 'count'
+    };
+
+    var heatMapLayer = new HeatmapOverlay(topLevelConfig);
+    var zoomedHeatMapLayer = new HeatmapOverlay(layerFiveHeatMapConfig);
+
     var baseLayer = L.tileLayer(
             'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}',
             {
@@ -45,8 +70,43 @@
             }
     );
 
+    for( var i = 0; i < geoData.length; i++ ) {
+        var marker = L.marker( [geoData[i]['lat'],
+                    geoData[i]['lng']],
+                   { 'draggable':false,
+
+                   }
+        )
+        marker.bindPopup( geoData[i]['name']);
+        marker.on('mouseover', function (e) {
+            this.openPopup();
+        });
+        marker.on('mouseout', function (e) {
+            this.closePopup();
+        });
+        markers.push(marker);
+    }
+
+    var markerLayer = L.layerGroup( markers );
     var mymap = L.map('map', { layers : [ baseLayer, heatMapLayer]}).setView([51.505, -0.09], 2);
+
     heatMapLayer.setData( testData );
+    zoomedHeatMapLayer.setData( testData );
+
+    mymap.on( 'zoomend', function() {
+       var currentZoom = mymap.getZoom();
+       //console.log(currentZoom);
+       if ( currentZoom >= 5 ) {
+           mymap.addLayer(markerLayer);
+           mymap.removeLayer(heatMapLayer);
+           mymap.addLayer(zoomedHeatMapLayer);
+       } else {
+           mymap.removeLayer(markerLayer);
+           mymap.removeLayer(zoomedHeatMapLayer);
+           mymap.addLayer(heatMapLayer);
+
+       }
+    });
 
 
 </script>

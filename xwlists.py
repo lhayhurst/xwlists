@@ -1747,7 +1747,10 @@ def heatmap():
         if venue.latitude is not None and venue.longitude is not None:
             data.append( { 'count': len(venue.tourneys),
                            'lat': float(venue.latitude),
-                           'lng': float(venue.longitude)})
+                           'lng': float(venue.longitude),
+                           'name': "%s: %d event(s)" % (venue.venue, len(venue.tourneys)),
+                           }
+                         )
 
     return render_template("heat_map.html", data=data, venues=venues)
 
