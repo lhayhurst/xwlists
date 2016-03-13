@@ -424,6 +424,18 @@ class Tourney(Base):
     #venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
     venue           = relationship( "TourneyVenue", back_populates="tourneys",  uselist=False)
 
+    def get_country(self):
+        if self.venue is None:
+            return "Unknown"
+        return self.venue.get_country()
+
+    def get_state(self):
+        if self.venue is None:
+            return "Unknown"
+        return self.venue.get_state()
+
+
+
     def is_standard_format(self):
         return self.format == 'Standard - 100 Point Dogfight'
 

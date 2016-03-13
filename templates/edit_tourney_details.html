@@ -121,8 +121,8 @@ function tourney_format_custom_valid(formInstance)
 $(document).ready(function(){
 
     var tourney_type     = {{ tourney.tourney_type | tojson | safe }}
-    var country          = {{ tourney.venue.country | tojson | safe }}
-    var state            = {{ tourney.venue.state | tojson | safe }}
+    var country          = {{ tourney.get_country() | tojson | safe }}
+    var state            = {{ tourney.get_state() | tojson | safe }}
 
     document.getElementById('tourney_format_custom').addEventListener('keydown', function(e) {
         $('#tourney_format_dropdown').select2( 'val', '' );

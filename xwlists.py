@@ -681,6 +681,10 @@ def update_tourney_details():
     tourney.round_length = round_length
     tourney.format = tourney_format
     tourney.participant_count = participant_count
+
+    if tourney.venue is None:
+        tourney.venue = pm.get_tourney_venue(country,state,city,venue)
+
     tourney.venue.country = country
     tourney.venue.state = state
     tourney.venue.city = city
