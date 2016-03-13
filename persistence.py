@@ -1191,6 +1191,9 @@ class PersistenceManager:
     def get_venues(self):
         return self.db_connector.get_session().query(TourneyVenue).all()
 
+    def get_venue_by_id(self, venue_id):
+        return self.db_connector.get_session().query(TourneyVenue).filter(TourneyVenue.id == venue_id).first()
+
     def get_round_results_for_list(self, list_id):
         ret = self.db_connector.get_session().query(RoundResult).filter(
             or_(

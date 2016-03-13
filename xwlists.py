@@ -1698,11 +1698,6 @@ def fix_venue_dupes():
 
     return redirect(url_for("tourneys"))
 
-@app.route("/venues")
-def geo():
-    pm               = PersistenceManager(myapp.db_connector)
-    venues           = pm.get_venues()
-    return render_template("venues.html", venues=venues)
 
 @app.route("/set_geo")
 def set_geo():
@@ -1751,6 +1746,38 @@ def heatmap():
                            'lng': float(venue.longitude)})
 
     return render_template("heat_map.html", data=data, venues=venues)
+
+@app.route("/edit_venue_geo",methods=['POST'])
+def edit_venue_geo():
+    pm               = PersistenceManager(myapp.db_connector)
+    venue_id = request.values['data[id]']
+    lat = request.values['data[lat]']
+    lng = request.values['data[lng]']
+    name = request.values['data[name]']
+    num_events = request.values['data[num_events]']
+    city = request.values['data[city]']
+    state = request.values['data[state]']
+    country = request.values['data[country]']
+
+    venue = pm.get_venue_by_id(venue_id)
+
+    venue.longitude = lng
+    venue.latitude  = lat
+    venue.venue     = name
+    venue.city      = city
+    venue.state     = state
+    venue.country   = country
+
+    pm.db_connector.get_session().commit()
+
+    return json.dumps(  { "row" : {'id': venue_id,
+                                   'name':name,
+                                   'lat':lat,
+                                   'lng':lng,
+                                   'num_events': num_events,
+                                   'city':city,
+                                   'state':state,
+                                   'country':country}  }  )
 
 def to_float(dec):
     return float("{0:.2f}".format( float(dec) * float(100)))

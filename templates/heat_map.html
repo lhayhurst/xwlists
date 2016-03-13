@@ -62,6 +62,7 @@
     <table id="venues" class="display" cellspacing="0" width="100%">
     <thead>
       <tr>
+        <th>Id</th>
         <th>Venue</th>
         <th>Num. events</th>
         <th>City</th>
@@ -75,6 +76,7 @@
       {% for v in venues %}
           {% if v.valid_venue() %}
           <tr>
+             <td>{{ v.id }}</td>
              <td >{{ v.get_name() }}</td>
              <td>{{ v.get_num_events() }}</td>
              <td>{{ v.get_city() }}</td>
@@ -88,9 +90,74 @@
     </tbody>
 </table>
 <script>
+
+    var editor;
+
+
     $(document).ready( function () {
+
+        editor = new $.fn.dataTable.Editor( {
+            ajax: "/edit_venue_geo",
+            table: "#venues",
+            fields:  [
+                {
+                    label: "Latitude",
+                    name: "lat"
+                },
+                {
+                    label: "Longitude",
+                    name: "lng"
+                },
+                {
+                    label: "Name",
+                    name: "name",
+                    //type: "hidden"
+                },
+                {
+                    label: "Num. Events",
+                    name: "num_events",
+                    type: "hidden"
+                },
+                {
+                    label: "City",
+                    name: "city",
+                    //type: "hidden"
+                },
+                {
+                    label: "State",
+                    name: "state",
+                    //type: "hidden"
+                },
+                {
+                    label: "Country",
+                    name: "country",
+                    //type: "hidden"
+                },
+                {
+                    label: "Id",
+                    name: "id",
+                    type: "hidden"
+                }] } )
+
+        $('#venues').on( 'click', 'tbody td:not(:first-child)', function (e) {
+            editor.bubble( this );
+        } );
+
         $('#venues').dataTable({
+            columns: [
+                { data: "id" },
+                { data: "name" },
+                { data: "num_events" },
+                { data: "city" },
+                { data: "state" },
+                { data: "country" },
+                { data: "lat" },
+                { data: "lng" } ],
             "order": [[1, "desc"]],
+            select: {
+                style:    'os',
+                selector: 'td:first-child'
+            },
             lengthMenu: [[10, 50, -1], [10, 50, "All"]],
 
         });
