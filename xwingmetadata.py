@@ -343,6 +343,7 @@ upgrades = {
         {'name': 'Plasma Torpedoes', 'canon_name': 'plasmatorpedoes', 'cost': 3},
     ),
     BOMB: (
+        {'name': 'Thermal Detonators', 'cost': 3},
         {'name': 'Seismic Charges', 'cost': 2},
         {'name': 'Proximity Mines', 'cost': 3},
         {'name': 'Proton Bombs', 'cost': 5},
@@ -436,6 +437,7 @@ upgrades = {
 
          ),
     SALVAGED_ASTROMECH_DROID: (
+        {'name': 'Overclocked R4', 'canon_name': 'overclockedr4', 'cost': 1},
         {'name': 'Genius', 'canon_name': 'genius', 'cost': 0},
         {'name': 'R4 Agromech', 'canon_name': 'r4agromech', 'cost': 2},
         {'name': 'R4-B11', 'canon_name': 'r4b11', 'cost': 3},
@@ -490,6 +492,18 @@ ships = {
     ),
 
     G1A_STARFIGHTER : (
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Ruthless Freelancer', 'cost': 23, 'canon_name':'ruthlessfreelancer',
+         'upgrades': (CREW, SYSTEM, ILLICIT, TITLE, MOD ),
+         'pilot_skill' : 3,
+        },
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Gand Findsman', 'cost': 25, 'canon_name':'gandfindsman',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (EPT, CREW, SYSTEM, ILLICIT, TITLE, MOD ),
+         'pilot_skill' : 5,
+        },
+
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': '4-LOM', 'cost': 27, 'canon_name':'4lom',
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'upgrades': (EPT, CREW, SYSTEM, ILLICIT, TITLE, MOD ),
@@ -503,11 +517,18 @@ ships = {
     ),
 
     TIE_ADVANCED_PROTOTYPE : (
+
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Seinar Test Pilot', 'cost': 16, 'canon_name':'seinartestpilot',
          #'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'upgrades': (MISSILE, TITLE, MOD ),
          'pilot_skill' : 2,
         },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Baron of the Empire', 'cost': 19, 'canon_name':'baronoftheempire',
+         #'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'upgrades': (MISSILE, TITLE, MOD,EPT ),
+         'pilot_skill' : 4,
+        },
+
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Valen Rudor', 'cost': 22, 'canon_name':'valenrudor',
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'upgrades': (EPT, MISSILE, TITLE, MOD ),
@@ -546,6 +567,11 @@ ships = {
 
 
     VCX100: (
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Lothal Rebel', 'cost': 35, 'canon_name':'lothalrebel',
+         'upgrades': (SYSTEM, TURRET, TORPEDO, TORPEDO, CREW, CREW, TITLE, MOD ),
+         'pilot_skill' : 3,
+        },
+
         {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Chopper', 'cost': 37, 'canon_name':'chopper',
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'upgrades': (SYSTEM, TURRET, TORPEDO, TORPEDO, CREW, CREW, TITLE, MOD ),
