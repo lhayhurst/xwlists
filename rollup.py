@@ -12,16 +12,17 @@ releases = {
     "2013-2" : "Wave 2",
     "2013-9" : "Wave 3",
     "2014-2" : "Wave 4",
-    "2014-6" : "Wave 5",
-    "2015-2" : "Wave 6",
-    "2015-8" : "Wave 7",
-    "2015-11": "Wave 8 (T-70, Tie/FO)",
     "2014-3" : "Imperial Aces",
-    "2014-9" : "Rebel Aces",
     "2014-4" : "Rebel Transport",
     "2014-5" : "Tantive IV",
+    "2014-6" : "Wave 5",
+    "2014-9" : "Rebel Aces",
+    "2015-2" : "Wave 6",
     "2015-6" : "Imperial Raider",
+    "2015-8" : "Wave 7",
+    "2015-11": "Wave 8 (T-70, Tie/FO)",
     "2015-12" : "Imperial Assault Carrier",
+    "2016-3" : "Wave 8"
 }
 
 def year_mo_sort(x,y):
