@@ -72,7 +72,7 @@ TIE_ADVANCED_PROTOTYPE_CANON_NAME = 'tieadvprototype'
 G1A_STARFIGHTER = 'G-1A Starfighter'
 G1A_STARFIGHTER_CANON_NAME = 'g1astarfighter'
 JUMPMASTER_5000_CANON_NAME = "jumpmaster5000"
-JUMPMASTER_5000_NAME = "JumpMaster 5000"
+JUMPMASTER_5000_ = "JumpMaster 5000"
 
 EPT = "Elite Pilot Talent"
 EPT_CANON = 'ept'
@@ -249,10 +249,10 @@ upgrades = {
     TITLE: (
 
         {'name': 'Punishing One', 'cost': 12, 'canon_name' : 'punishingone',
-         'constraints': ({'type': SHIP_TYPE, 'value': JUMPMASTER_5000_NAME})},
+         'constraints': ({'type': SHIP_TYPE, 'value': JUMPMASTER_5000_})},
 
         {'name': 'Mist Hunter', 'cost': 0, 'canon_name' : 'misthunter',
-         'action': [{'type': 'ADD_UPGRADE', 'value': TORPEDO}],
+         'action': [{'type': 'ADD_UPGRADE', 'value': CANNON}],
          'constraints': ({'type': SHIP_TYPE, 'value': G1A_STARFIGHTER})},
 
         {'name': 'Ghost', 'cost': 0, 'canon_name' : 'ghost',
@@ -464,29 +464,28 @@ upgrades = {
 
 ships = {
 
-    JUMPMASTER_5000_NAME : (
+    JUMPMASTER_5000_ : (
         {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Contracted Scout',
          'cost': 25, 'canon_name':'contractedscout',
-         #'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
-         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT ),
+         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT,MOD,TITLE ),
          'pilot_skill' : 3,
         },
         {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Manaroo',
          'cost': 27, 'canon_name':'Manaroo',
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
-         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT ),
+         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT,MOD,TITLE ),
          'pilot_skill' : 4,
         },
         {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Tel Trevura',
          'cost': 30, 'canon_name':'Tel Trevura',
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
-         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT ),
+         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT,MOD,TITLE ),
          'pilot_skill' : 7,
         },
         {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Dengar',
          'cost': 33, 'canon_name':'Dengar',
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
-         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT ),
+         'upgrades': (EPT, TORPEDO, TORPEDO, CREW, SALVAGED_ASTROMECH_DROID, ILLICIT,MOD,TITLE ),
          'pilot_skill' : 9,
         },
     ),

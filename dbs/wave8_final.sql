@@ -11,7 +11,7 @@ select 'g1astarfighter', id from pilot where canon_name='ruthlessfreelancer';
 insert into pilot ( name, canon_name, cost, pilot_skill  )
 values ( 'Gand Findsman','gandfindsman', '25', '5' );
 insert  ship_pilot ( ship_type, pilot_id)
-select 'g1astarfighter', id from pilot where canon_name='ruthlessfreelancer';
+select 'g1astarfighter', id from pilot where canon_name='gandfindsman';
 
 insert into pilot ( name, canon_name, cost, pilot_skill  )
 values ( 'Lothal Rebel','lothalrebel', '35', '3' );

@@ -126,7 +126,7 @@ class ShipType(DeclEnum):
     G1A_STARFIGHTER = xwingmetadata.G1A_STARFIGHTER_CANON_NAME, xwingmetadata.G1A_STARFIGHTER
     ATTACK_SHUTTLE = xwingmetadata.ATTACK_SHUTTLE_CANON_NAME, xwingmetadata.ATTACK_SHUTTLE
     VCX100 = xwingmetadata.VCX100_CANON_NAME, xwingmetadata.VCX100
-    JUMPMASTER_5000 = xwingmetadata.JUMPMASTER_5000_CANON_NAME, xwingmetadata.JUMPMASTER_5000_NAME
+    JUMPMASTER_5000 = xwingmetadata.JUMPMASTER_5000_CANON_NAME, xwingmetadata.JUMPMASTER_5000_
 
 class Event(Base):
     __tablename__ = event_table
