@@ -236,7 +236,6 @@ upgrades = {
         {'name': 'R7 Astromech', 'cost': 2},
         {'name': 'R2-F2', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R5-D8', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
-        {'name': 'R5-P8', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R5-P9', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R7-T1', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R2-D6', 'cost': 1, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
@@ -442,6 +441,7 @@ upgrades = {
         {'name': 'Genius', 'canon_name': 'genius', 'cost': 0},
         {'name': 'R4 Agromech', 'canon_name': 'r4agromech', 'cost': 2},
         {'name': 'R4-B11', 'canon_name': 'r4b11', 'cost': 3},
+        {'name': 'R5-P8', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'Salvaged Astromech', 'canon_name': 'salvagedastromech', 'cost': 2},
         {'name': 'Unhinged Astromech', 'canon_name': 'unhingedastromech', 'cost': 1},
 
