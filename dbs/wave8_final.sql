@@ -26,3 +26,8 @@ values
 insert into upgrade ( upgrade_type, name, cost, canon_name )
 values
 ( 'samd', 'Overclocked R4', 1, 'overclockedr4');
+
+
+insert into upgrade ( upgrade_type, name, cost, canon_name )
+values
+( 'amd', 'R5-P8', 3, 'r5p8');

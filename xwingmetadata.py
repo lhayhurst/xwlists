@@ -236,6 +236,7 @@ upgrades = {
         {'name': 'R7 Astromech', 'cost': 2},
         {'name': 'R2-F2', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R5-D8', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
+        {'name': 'R5-P8', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R5-P9', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R7-T1', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R2-D6', 'cost': 1, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
