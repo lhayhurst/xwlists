@@ -31,3 +31,9 @@ values
 insert into upgrade ( upgrade_type, name, cost, canon_name )
 values
 ( 'amd', 'R5-P8', 3, 'r5p8');
+
+insert into upgrade ( upgrade_type, name, cost, canon_name )
+values
+( 'missile', 'XX-23 S-Thread Tracers', 1, 'xx23sthreadtracers');
+
+

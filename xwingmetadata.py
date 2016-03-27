@@ -361,6 +361,7 @@ upgrades = {
 
     ),
     MISSILE: (
+        {'name': 'XX-23 S-Thread Tracers', 'cost':1},
         {'name': 'Chardaan Refit', 'cost': -2, 'constraints': ({'type': SHIP_TYPE, 'value': A_WING})},
         {'name': 'Ion Pulse Missiles', 'cost': 3},
         {'name': 'Proton Rockets', 'cost': 3},
