@@ -145,7 +145,9 @@ sets_and_expansions = {'Core Set': [],
                                   'M3-A Interceptor Expansion'],
                        'Wave 7': ['K-Wing Expansion Pack', 'Kiharxz Fighter Expansion Pack',
                                   'Tie Punisher Expansion Pack', 'Hound\'s Tooth Expansion Pack'],
-                       'Force Awakens Core Set': []
+                       'Force Awakens Core Set': [],
+                       'Wave 8': ['Punishing One Expansion Pack', 'Ghost Expansion Pack', 'Tie Inquisitor Expansion Pack',
+                                  'T-70 X-Wing Expansion Pack,' 'Mist Hunter Expansion Pack', 'TIE/fo Expansion Pack']
                        }
 
 formats = {'Standard - 100 Point Dogfight', 'Epic Play - 300 points', 'Escalation'}
