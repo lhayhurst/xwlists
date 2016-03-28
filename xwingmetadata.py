@@ -322,6 +322,7 @@ upgrades = {
         {'name': 'Fire-Control System', 'cost': 2},
         {'name': 'Advanced Sensors', 'cost': 3},
         {'name': 'Accuracy Corrector', 'cost': 3},
+        {'name': 'Reinforced Deflectors', 'cost': 3},
         {'name': 'Sensor Jammer', 'cost': 4},
         {'name': 'Advanced Targeting Computer', 'canon_name': 'advtargetingcomputer', 'cost': 5},
 

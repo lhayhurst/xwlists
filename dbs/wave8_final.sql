@@ -37,3 +37,7 @@ values
 ( 'missile', 'XX-23 S-Thread Tracers', 1, 'xx23sthreadtracers');
 
 
+insert into upgrade ( upgrade_type, name, cost, canon_name )
+values
+( 'system', 'Reinforced Deflectors', 3, 'reinforceddeflectors');
+
