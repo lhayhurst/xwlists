@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from sqlalchemy import and_, or_, func
+from sqlalchemy import and_, or_, func, not_
 from whoosh.qparser import QueryParser
 from whoosh.query import Term
 
@@ -15,10 +15,12 @@ def wildcard(term):
 
 
 expression_map = { 'AND' : and_,
-                   'OR'  : or_ }
+                   'OR'  : or_,
+                   'NOT' : not_}
 
 and_regex = re.compile( r'\s+and\s+')
-or_regex = re.compile( r'\s+or\s+')
+or_regex  = re.compile( r'\s+or\s+')
+not_regex = re.compile( r'\s+not\s+')
 
 PILOT_MATCH = "pilot_match"
 SHIP_MATCH  = "ship_match"
@@ -67,7 +69,7 @@ def tree_to_expr(tree, subq):
     fn = expression_map[tree.JOINT.strip()]
     return fn(
         *(
-            [tree_to_expr( child, subq) for child in tree ]
+                [tree_to_expr( child, subq) for child in tree ]
         )
     )
 
@@ -102,6 +104,7 @@ class Search:
 
         search_term = re.sub( and_regex, ' AND ',  search_term )
         search_term = re.sub( or_regex, ' OR ', search_term)
+        search_term = re.sub( not_regex, ' NOT ', search_term)
 
         parser = QueryParser("content", schema=None)
         q = parser.parse(search_term)
