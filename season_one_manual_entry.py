@@ -151,7 +151,6 @@ if __name__ == "__main__":
     league = pm.get_league( "X-Wing Vassal League Season One")
 
     #create all the divisions for each tier
-    #create_divisions()
+    create_divisions(c,pm)
     create_players(c, pm, ch, league)
-    #and finally create all the matchups
     create_matchups(c, pm, ch, league)
