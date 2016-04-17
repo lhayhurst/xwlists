@@ -57,6 +57,10 @@ ADD CONSTRAINT `tier_id_fkey`
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
 
+ALTER TABLE `sozin$lists`.`league_match`
+ADD COLUMN `updated_at` DATETIME NULL DEFAULT NULL COMMENT '' AFTER `tier_id`;
+
+
 ALTER TABLE `sozin$lists`.`tier_player`
 ADD COLUMN `division_id` INT(11) NULL COMMENT '' AFTER `tier_id`,
 ADD INDEX `player_division_fkey_idx` (`division_id` ASC)  COMMENT '';

@@ -119,87 +119,6 @@ def about():
     return render_template('about.html')
 
 
-#see http://api.challonge.com/v1/documents/participants/show
-def bootstrap_tier_players(c, tier, pm, player_ids):
-    listed_players = None
-    if player_ids is None:
-        listed_players = c.participant_index(tier.get_challonge_name())
-    else:
-        listed_players = []
-        for pid in player_ids.keys():
-            player = c.get_participant(tier.get_challonge_name(), pid)
-            listed_players.append(player)
-
-    for lp in listed_players:
-        pid = lp['id']
-        # check to see if this player is already in the database
-        league_player = pm.get_tier_player(pid)
-        if league_player is None:
-            league_player = TierPlayer()
-            league_player.challonge_id = pid
-            league_player.name = lp['challonge-username']
-
-            league_player.checked_in = not lp['invitation-pending']
-            league_player.tier_id = tier.id
-            if league_player.name is None:
-                league_player.name = lp['display-name']
-                if not lp['invitation-pending'] == True:
-                    print "Challonge API Error: checked in was true when challonge-username was None for user %s" % (
-                    league_player.name)
-            #print "adding player %s " % ( league_player.name)
-            myapp.db_connector.get_session().add(league_player)
-        else:
-            #print "league player %s already exists, checking for status change" % ( league_player.name)
-            changed = False
-            # transitioned from checked in to not checked in?
-            if lp['challonge-username'] is not None and not league_player.name == lp['challonge-username']:
-                league_player.name = lp['challonge-username']
-                changed = True
-            if league_player.checked_in == False and lp['invitation-pending'] == False:
-                league_player.checked_in = True
-                changed = True
-            if changed:
-                #print "status change detected, set checked in to %s" % ( league_player.checked_in )
-                myapp.db_connector.get_session().add(league_player)
-    myapp.db_connector.get_session().commit()
-
-@app.route("/cache_tier_players_using_matches")
-def cache_tier_players_using_matches():
-    #this is a dumb way to do it, but there is a bug in challonge's participant fetch, so it has to be this way
-    tier_name = request.args.get('tier_name')
-    c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
-    pm = PersistenceManager(myapp.db_connector)
-    tier = pm.get_tier(tier_name)
-
-    print "fetching match results for tier %s" % ( tier.challonge_name )
-    match_results_for_tier = c.match_index(tier.get_challonge_name())
-
-    player_ids = {}
-    for mr in match_results_for_tier:
-        p1id = mr['player1-id']
-        p2id = mr['player2-id']
-        if not player_ids.has_key( p1id):
-            player_ids[p1id] = 1
-        else:
-            player_ids[p1id] +=1
-
-        if not player_ids.has_key( p2id):
-            player_ids[p2id] = 1
-        else:
-            player_ids[p2id] +=1
-
-    #ok, we have all the player ids now from the matches, so go fetch the m... one by one
-    bootstrap_tier_players(c,tier,pm,player_ids)
-
-@app.route("/cache_tier_players")
-def cache_xwvl_players():
-    tier_name = request.args.get('tier_name')
-    c  = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
-    pm = PersistenceManager(myapp.db_connector)
-    tier = pm.get_tier(tier_name)
-    bootstrap_tier_players(c, tier, pm)
-    return redirect(url_for('tier_players', tier_id=tier.id))
-
 @app.route( "/tier_players")
 def tier_players():
     tier_id = request.args.get('tier_id')
@@ -211,11 +130,12 @@ def tier_players():
     return render_template("tier_players.html", players=players, tier=tier)
 
 def create_default_match_result(match_result, tier, pm):
-    p1id = match_result['player1-id']
-    p2id = match_result['player2-id']
+    p1id = match_result['player1_id']
+    p2id = match_result['player2_id']
     player1 = pm.get_tier_player(p1id)
     player2 = pm.get_tier_player(p2id)
-    #TODO: freak out if not found
+    if player1 is None or player2 is None:
+        return
     lm = LeagueMatch()
     lm.tier_id = tier.id
     lm.player1 = player1
@@ -223,22 +143,28 @@ def create_default_match_result(match_result, tier, pm):
     lm.challonge_match_id = match_result['id']
     lm.state = match_result['state']
 
-    scores_csv = match_result['scores-csv']
+    scores_csv = match_result['scores_csv']
     p1_score = None
     p2_score = None
-    if scores_csv is not None:
-        scores = str.split(scores_csv, '-')
+    if scores_csv is not None and len(str(scores_csv)) > 0:
+        scores = str.split(str(scores_csv), '-')
         lm.player1_score = scores[0]
         lm.player2_score = scores[1]
 
     return lm
 
 def update_match_result(match_result,dbmr,pm):
-    #things that can change: score...thats it for now
+    #things that can change: score... and updated it
+
+    changed  = False
+    updated_at = match_result['updated_at']
+    if dbmr.updated_at is None or dbmr.updated_at != updated_at:
+        dbmr.updated_at = updated_at
+        changed = True
+
     scores_csv = match_result['scores_csv']
     p1_score = None
     p2_score = None
-    changed  = False
     if scores_csv is not None and len(str(scores_csv)) > 0:
         scores = str.split(str(scores_csv), '-')
         p1_score = int(scores[0])
@@ -262,7 +188,7 @@ def league_admin():
     return render_template('league_admin.html')
 
 @app.route("/cache_league_results")
-def cache_tier_results():
+def cache_league_results():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
     league = pm.get_league("X-Wing Vassal League Season One")
@@ -276,12 +202,15 @@ def cache_tier_results():
 
             if dbmr is None:
                 dbmr = create_default_match_result(match_result, tier, pm)
-                changed = True
+                if dbmr is not None:
+                    changed = True
+                else:
+                    continue #skip this record
             else: #some sort of update occured
                 changed = update_match_result(match_result,dbmr,pm)
 
             #fetch the match attachment url
-            if dbmr.is_complete():
+            if dbmr is not None and dbmr.is_complete():
                 match_attachments = c.attachments_index(tier.get_challonge_name(), match_id)
                 if len(match_attachments) > 0:
                     match_attachment = match_attachments[0] #there can only be one
@@ -298,7 +227,7 @@ def cache_tier_results():
             if changed:
                 myapp.db_connector.get_session().add( dbmr )
     myapp.db_connector.get_session().commit()
-    return redirect(url_for('tier_matches', league_id=tier.id))
+    return redirect(url_for('tier_matches', tier_id=tier.id))
 
 @app.route("/tier_matches")
 def tier_matches():
@@ -431,12 +360,10 @@ def league_divisions():
     league = pm.get_league("X-Wing Vassal League Season One")
     #overall_stats, league_stats, player_stats = get_league_stats(league)
     tiers = league.tiers
+    matches = pm.get_recent_league_matches(league)
 
     return render_template("league_s1.html",
-                           league=league, tiers=tiers)
-                           #league_stats=league_stats,
-                           #player_stats=player_stats,
-                           #overall_stats=overall_stats)
+                           league=league, tiers=tiers, matches=matches)
 
 
 @app.route("/escrow")

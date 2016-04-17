@@ -7,19 +7,56 @@
     }
 </style>
 <br>
-<div><b>{{ league.get_name() }}</b>
+<div><b>{{ league.get_name() }}</b><br>
+{% for tier in tiers %}
+    <a href="/tier_matches?tier_id={{ tier.id }}">{{ tier.get_name() }} matches</a>
+    <br>
+{% endfor %}
+<br>
+<b>Recent league matches</b>
+<table id="matches" class="display" cellspacing="0" width="100%">
+  <thead>
+  <tr>
+    <th>Updated at</th>
+    <th>Tier</th>
+    <th>Division</th>
+    <th>Player 1</th>
+    <th>Player 2</th>
+    <th>Match State</th>
+    <th>VLog</th>
+    <th>Player 1 Score</th>
+    <th>Player 2 Score</th>
+    <th>Player 1 List</th>
+    <th>Player 2 List</th>
+  </thead>
+  <tbody>
+  </tr>
+      {% for m in matches %}
+      <tr>
+         <td>{{  m.updated_at}}</td>
+         <td>{{  m.player1.tier.get_name()}}</td>
+         <td>{{  m.player1.division.get_name()}}</td>
+         <td>{{  m.player1.get_name()}}</td>
+         <td>{{  m.player2.get_name()}}</td>
+         <td>{{  m.state }}</td>
+         <td>{{  m.get_vlog_url() | safe }}</td>
+         <td>{{  m.player1_score }}</td>
+         <td>{{  m.player2_score }}</td>
+         <td >{{ m.get_player1_list_display() | safe }}
+         <td >{{ m.get_player2_list_display() | safe }}
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
 
 
 <script>
     $(document).ready( function () {
-        $('#divisions').dataTable({
+        $('#matches').dataTable({
             "order": [[1, "desc"]],
-            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
-
-        });
-        $('#players').dataTable({
-            "order": [[2, "desc"],[3, "desc"]],
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            iDisplayLength: -1,
         });
     });
 </script>
