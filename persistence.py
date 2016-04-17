@@ -217,8 +217,8 @@ class League(Base):
     name          = Column(String(128))
     def get_name(self):
         return decode( self.name )
+    challonge_name = Column(String(128))
     tiers         = relationship( "Tier", back_populates="league", cascade="all,delete,delete-orphan")
-    matches       = relationship( "LeagueMatch", back_populates="league", cascade="all,delete,delete-orphan")
 
 
 tier_table = "league_tier"
@@ -229,17 +229,40 @@ class Tier(Base):
     name             = Column(String(128))
     def get_name(self):
         return decode( self.name )
+    challonge_name             = Column(String(128))
+    players           = relationship( "TierPlayer", back_populates="tier", cascade="all,delete,delete-orphan")
+
     league           = relationship( League.__name__, back_populates="tiers")
+    matches       = relationship( "LeagueMatch", back_populates="tier", cascade="all,delete,delete-orphan")
     divisions        = relationship( "Division", back_populates="tier", cascade="all,delete,delete-orphan")
 
-league_player_table = "league_player"
+
+    def get_challonge_name(self):
+        return "%s-%s" % ( self.league.challonge_name, self.challonge_name)
+
 division_table = "league_division"
-class LeaguePlayer(Base):
-    __tablename__ = league_player_table
+class Division(Base):
+    __tablename__     = division_table
+    id                = Column(Integer, primary_key=True)
+    tier_id           = Column(Integer, ForeignKey( '{0}.id'.format(tier_table) ) )
+    name              = Column(String(128))
+    challonge_name    = Column(String(128))
+
+    def get_name(self):
+        return decode( self.name )
+    tier              = relationship( Tier.__name__, back_populates="divisions")
+    players           = relationship( "TierPlayer", back_populates="division", cascade="all,delete,delete-orphan")
+
+tier_player_table = "tier_player"
+class TierPlayer(Base):
+    __tablename__ = tier_player_table
     id                = Column(Integer, primary_key=True)
     challonge_id      = Column(Integer)
-    division_id       = Column(Integer, ForeignKey( '{0}.id'.format(division_table) ) )
-    division          = relationship( "Division", uselist=False)
+    group_id   = Column(Integer)
+    tier_id       = Column(Integer, ForeignKey( '{0}.id'.format(tier_table) ) )
+    division_id   = Column(Integer, ForeignKey( '{0}.id'.format(division_table) )  )
+    division      = relationship("Division",uselist=False)
+    tier          = relationship( "Tier ", uselist=False)
     name              = Column(String(128))
     def get_name(self):
         if self.name is None:
@@ -256,25 +279,19 @@ class LeaguePlayer(Base):
             if m.state == 'complete':
                 num_completed += 1
         return num_completed
-
-class Division(Base):
-    __tablename__     = division_table
-    id                = Column(Integer, primary_key=True)
-    tier_id           = Column(Integer, ForeignKey( '{0}.id'.format(tier_table) ) )
-    name              = Column(String(128))
-    def get_name(self):
-        return decode( self.name )
-    tier              = relationship( Tier.__name__, back_populates="divisions")
-    players           = relationship( LeaguePlayer.__name__, back_populates="division", cascade="all,delete,delete-orphan")
-
+    person_name = Column(String(128))
+    email_address = Column(String(128))
+    timezone = Column(String(128))
+    reddit_handle = Column(String(128))
+    challengeboards_handle = Column(String(128))
 
 league_match_table = "league_match"
 class LeagueMatch(Base):
     __tablename__       = league_match_table
     id                  = Column(Integer, primary_key=True)
-    player1_id          = Column(Integer, ForeignKey( '{0}.id'.format(league_player_table) ) )
-    player2_id          = Column(Integer, ForeignKey( '{0}.id'.format(league_player_table) ) )
-    league_id           = Column(Integer, ForeignKey( '{0}.id'.format(league_table) ) )
+    player1_id          = Column(Integer, ForeignKey( '{0}.id'.format(tier_player_table) ) )
+    player2_id          = Column(Integer, ForeignKey( '{0}.id'.format(tier_player_table) ) )
+    tier_id           = Column(Integer, ForeignKey( '{0}.id'.format(tier_table) ) )
     challonge_match_id  = Column(Integer)
     player1_score       = Column(Integer)
     player2_score       = Column(Integer)
@@ -283,13 +300,16 @@ class LeagueMatch(Base):
     player2_list_url    = Column(String(2048))
     challonge_attachment_url = Column(String(2048))
 
-    league             = relationship( League.__name__, uselist=False)
-    player1             = relationship( LeaguePlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player1_id')
-    player2             = relationship( LeaguePlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player2_id')
+    tier             = relationship( Tier.__name__, uselist=False)
+    player1             = relationship( TierPlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player1_id')
+    player2             = relationship( TierPlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player2_id')
     player1_list_id     = Column(Integer, ForeignKey( '{0}.id'.format(archtype_list_table) ) )
     player2_list_id     = Column(Integer, ForeignKey( '{0}.id'.format(archtype_list_table) ) )
     player1_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
     player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player2_list_id')
+
+    def is_complete(self):
+        return self.state is not None and self.state == "complete"
 
     def get_player_list_text_with_link(self, player_id):
         #both lists have been submitted
@@ -1154,12 +1174,28 @@ class PersistenceManager:
     def get_league(self, league_name):
         return self.db_connector.get_session().query(League).filter(League.name == league_name).first()
 
+    def get_tier(self, tier_name):
+        return self.db_connector.get_session().query(Tier).filter(Tier.challonge_name == tier_name).first()
+
     def get_division(self, division_name):
-        return self.db_connector.get_session().query(Division).filter(Division.league_division_name == division_name).first()
+        return self.db_connector.get_session().query(Division).filter(Division.name == division_name).first()
 
-    def get_league_player(self, challonge_player_id):
-        return self.db_connector.get_session().query(LeaguePlayer).filter(LeaguePlayer.challonge_id == challonge_player_id).first()
 
+    def get_tier_by_id(self, tier_id):
+        return self.db_connector.get_session().query(Tier).filter(Tier.id == tier_id).first()
+
+    def get_tier_player(self, challonge_player_group_id):
+        return self.db_connector.get_session().\
+            query(TierPlayer).filter(TierPlayer.group_id == challonge_player_group_id).first()
+
+    def get_tier_player_by_name(self, player_name, league_name ):
+        query =  self.db_connector.get_session().query(TierPlayer).\
+            filter(TierPlayer.name == player_name,
+                   TierPlayer.tier_id == Tier.id,
+                   Tier.league_id == League.id,
+                   League.name == league_name
+                   )
+        return query.first()
 
     def get_tourney_venue(self, country,state,city,venue):
 
