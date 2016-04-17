@@ -1,4 +1,5 @@
 import decimal
+import json
 import urllib
 import urllib2
 try:
@@ -35,7 +36,7 @@ def fetch(method, uri, params_prefix=None, **params):
     params = urllib.urlencode(_prepare_params(params, params_prefix))
 
     # build the HTTP request
-    url = "https://%s/%s.xml" % (CHALLONGE_API_URL, uri)
+    url = "https://%s/%s.json" % (CHALLONGE_API_URL, uri)
     print "fetching url " + url
     if method == "GET":
         req = urllib2.Request("%s?%s" % (url, params))
@@ -43,8 +44,8 @@ def fetch(method, uri, params_prefix=None, **params):
         req = urllib2.Request(url)
         req.add_data(params)
     req.get_method = lambda: method
-    req.add_header("Accept", "application/xml");
-    req.add_header("Content-Type", "application/xml");
+    req.add_header("Accept", "application/json");
+    req.add_header("Content-Type", "application/json");
 
     # use basic authentication
     user, api_key = get_credentials()
@@ -73,8 +74,12 @@ def fetch(method, uri, params_prefix=None, **params):
 
 def fetch_and_parse(method, uri, params_prefix=None, **params):
     """Fetch the given uri and return the root Element of the response."""
-    doc = ElementTree.parse(fetch(method, uri, params_prefix, **params))
-    return _parse(doc.getroot())
+    response = fetch(method, uri, params_prefix, **params)
+    data = response.read()
+    json_data = json.loads( data )
+    return json_data
+    #doc = ElementTree.parse(response)
+    #return _parse(doc.getroot())
 
 
 def _parse(root):
@@ -99,6 +104,8 @@ def _parse(root):
             value = decimal.Decimal(child.text)
         elif type == "integer":
             value = int(child.text)
+        elif type == "array":
+            return [_parse(child) for child in root]
         else:
             value = child.text
 

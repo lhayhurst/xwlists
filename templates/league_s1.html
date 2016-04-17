@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+<br>
+<div><b>{{ league.get_name() }}</b>
+
+
+<script>
+    $(document).ready( function () {
+        $('#divisions').dataTable({
+            "order": [[1, "desc"]],
+            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
+
+        });
+        $('#players').dataTable({
+            "order": [[2, "desc"],[3, "desc"]],
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        });
+    });
+</script>
+{% endblock %}

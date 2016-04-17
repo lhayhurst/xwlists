@@ -25,8 +25,11 @@ class ChallongeHelper:
     def participant_index(self, tournament):
         return challonge.participants.index(tournament)
 
-    def match_index(self, tournament):
-        return challonge.matches.index(tournament)
+    def get_participant(self, tournament, participant_id):
+        return challonge.participants.show( tournament, participant_id)
+
+    def match_index(self, tournament, **params):
+        return challonge.matches.index(tournament, **params)
 
     def attachments_index(self, tournament, match_id):
         url = "tournaments/%s/matches/%s/attachments" % (tournament, match_id)
@@ -40,8 +43,9 @@ class challongeAPITest(unittest.TestCase):
         challonge_key  = os.getenv('CHALLONGE_API_KEY')
         self.ch = ChallongeHelper(challonge_user, challonge_key)
 
+    @unittest.skip("because")
     def testGetTournament(self):
-        i = self.ch.get_tournament("XWingVassalLeagueSeasonZero")
+        i = self.ch.get_participant("xwingvassal-deepcore", 2534700)
         print i
 
 if __name__ == "__main__":

@@ -13,9 +13,9 @@
   <thead>
   <tr>
     <th>Player 1</th>
-    <th>Division</th>
+    <th>Tier</th>
     <th>Player 2</th>
-    <th>Division</th>
+    <th>Tier</th>
     <th>Match State</th>
     <th>VLog</th>
     <th>Player 1 Score</th>
@@ -25,12 +25,12 @@
   </thead>
   <tbody>
   </tr>
-      {% for m in league.matches %}
+      {% for m in tier.matches %}
       <tr>
          <td>{{  m.player1.get_name()}}</td>
-         <td>{{  m.player1.division.get_name()}}</td>
+         <td>{{  m.player1.tier.get_name()}}</td>
          <td>{{  m.player2.get_name()}}</td>
-         <td>{{  m.player2.division.get_name()}}</td>
+         <td>{{  m.player2.tier.get_name()}}</td>
          <td>{{  m.state }}</td>
          <td>{{  m.get_vlog_url() | safe }}</td>
          <td>{{  m.player1_score }}</td>
