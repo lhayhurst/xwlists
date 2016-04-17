@@ -7,12 +7,13 @@
     }
 </style>
 <br>
-<div><b>{{ league.get_name() }}</b><br>
+<div><b>{{ league.get_name() }} Tiers</b><br>
 {% for tier in tiers %}
-    <a href="/tier_matches?tier_id={{ tier.id }}">{{ tier.get_name() }} matches</a>
+    {{ tier.get_name() }} : <a href="{{ tier.get_challonge_url() }}">Challonge page</a> | <a href="/tier_matches?tier_id={{ tier.id }}">matches</a>
     <br>
 {% endfor %}
 <br>
+<hr>
 <b>Recent league matches</b>
 <table id="matches" class="display" cellspacing="0" width="100%">
   <thead>

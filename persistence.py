@@ -236,6 +236,8 @@ class Tier(Base):
     matches       = relationship( "LeagueMatch", back_populates="tier", cascade="all,delete,delete-orphan")
     divisions        = relationship( "Division", back_populates="tier", cascade="all,delete,delete-orphan")
 
+    def get_challonge_url(self):
+        return "http://xwingvassal.challonge.com/" + self.challonge_name
 
     def get_challonge_name(self):
         return "%s-%s" % ( self.league.challonge_name, self.challonge_name)
