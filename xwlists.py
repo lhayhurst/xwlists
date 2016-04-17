@@ -161,7 +161,7 @@ def cache_xwvl_players():
     print "caching league players"
     c  = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Zero")
+    league = pm.get_league("X-Wing Vassal League Season Zero Dot Five")
     bootstrap_league_players(c, league, pm)
     return redirect(url_for('league_players', league_id=league.id))
 
@@ -169,7 +169,7 @@ def cache_xwvl_players():
 def league_players():
     league_id = request.args.get('league_id')     #TODO: unused for now, use when we have more than one league ( if ever )
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Zero")
+    league = pm.get_league("X-Wing Vassal League Season Zero Dot Five")
     players = []
     for tier in league.tiers:
         for division in tier.divisions:
@@ -232,7 +232,7 @@ def league_admin():
 def cache_league_results():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Zero")
+    league = pm.get_league("X-Wing Vassal League Season Zero Dot Five")
 
     for d in league.tiers[0].divisions: #TODO: iterate through tiers when we have tiers to go through
         print "fetching match results for division %s" % ( d.name )

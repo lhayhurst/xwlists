@@ -166,6 +166,8 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 upgrades = {
     CREW: (
 
+        {'name': 'Systems Officer', 'canon_name': 'systemsofficer', 'cost': 2,
+         'constraints': (IMPERIAL_FACTION_CONSTRAINT),},
         {'name': 'Boba Fett', 'canon_name': 'bobafett', 'cost': 1,
          'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
         {'name': 'Gonk', 'canon_name': 'gonk', 'cost': 2,
@@ -971,6 +973,12 @@ ships = {
          'pilot_skill' : 5,
          'canon_name': 'gammasquadronveteran',
          'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD, EPT)},
+
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Deathfire', 'cost': 17,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 3,
+         'canon_name': 'deathfire',
+         'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD)},
 
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Tomax Bren', 'cost': 24,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),

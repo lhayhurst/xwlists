@@ -1,3 +1,5 @@
+import os
+import unittest
 import challonge
 
 
@@ -29,3 +31,18 @@ class ChallongeHelper:
     def attachments_index(self, tournament, match_id):
         url = "tournaments/%s/matches/%s/attachments" % (tournament, match_id)
         return challonge.api.fetch_and_parse("GET", url)
+
+class challongeAPITest(unittest.TestCase):
+
+    def __init__(self,*args, **kwargs):
+        super(challongeAPITest, self).__init__(*args, **kwargs)
+        challonge_user = os.getenv('CHALLONGE_USER')
+        challonge_key  = os.getenv('CHALLONGE_API_KEY')
+        self.ch = ChallongeHelper(challonge_user, challonge_key)
+
+    def testGetTournament(self):
+        i = self.ch.get_tournament("XWingVassalLeagueSeasonZero")
+        print i
+
+if __name__ == "__main__":
+    unittest.main()
