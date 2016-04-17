@@ -223,6 +223,7 @@ def cache_league_results():
                             match_attachment_asset_url = match_attachment_asset_url[match_attachment_asset_url.startswith("//")
                                                                                     and len("//"):]
                             dbmr.challonge_attachment_url = match_attachment_asset_url
+                            dbmr.updated_at = func.now()
                             changed = True
             if changed:
                 myapp.db_connector.get_session().add( dbmr )
