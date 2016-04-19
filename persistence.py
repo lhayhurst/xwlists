@@ -272,7 +272,13 @@ class TierPlayer(Base):
     reddit_handle = Column(String(128))
     challengeboards_handle = Column(String(128))
     checked_in        = Column(Boolean)
-    matches           = relationship("LeagueMatch", foreign_keys='LeagueMatch.player1_id')
+    matches           = relationship("LeagueMatch", primaryjoin="or_(TierPlayer.id==LeagueMatch.player1_id,TierPlayer.id==LeagueMatch.player2_id)")
+
+    def get_url(self):
+        url = url_for('league_player', player_id=self.id)
+        return Markup('<a href="' + url + '">' + self.get_name() +'</a>')
+
+
 
     def get_name(self):
         if self.name is None:
