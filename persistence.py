@@ -266,26 +266,41 @@ class TierPlayer(Base):
     division      = relationship("Division",uselist=False)
     tier          = relationship( "Tier ", uselist=False)
     name              = Column(String(128))
-    def get_name(self):
-        if self.name is None:
-            return ""
-        return decode( self.name )
-    checked_in        = Column(Boolean)
-    matches           = relationship("LeagueMatch", foreign_keys='LeagueMatch.player1_id')
-    def num_matches_played(self):
-        if self.matches is None:
-            return 0
-        num_completed = 0
-        for m in self.matches:
-            #print m.state
-            if m.state == 'complete':
-                num_completed += 1
-        return num_completed
     person_name = Column(String(128))
     email_address = Column(String(128))
     timezone = Column(String(128))
     reddit_handle = Column(String(128))
     challengeboards_handle = Column(String(128))
+    checked_in        = Column(Boolean)
+    matches           = relationship("LeagueMatch", foreign_keys='LeagueMatch.player1_id')
+
+    def get_name(self):
+        if self.name is None:
+            return ""
+        return decode( self.name )
+
+    def get_stats(self):
+        ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0, 'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0 }
+        for m in self.matches:
+            if m.is_complete():
+                ret['total'] +=1
+                if m.player_won(self):
+                    ret['wins'] += 1
+                elif m.player_lost(self):
+                    ret['losses'] += 1
+                else:
+                    ret['draws'] += 1
+                list_played = m.get_list(self)
+                if list_played is not None:
+                    if list_played.is_rebel():
+                        ret['rebs'] +=1
+                    elif list_played.is_imperial():
+                        ret['imps'] +=1
+                    elif list_played.is_scum():
+                        ret['scum'] +=1
+                ret['killed'] += m.points_killed( self )
+                ret['lost'] += m.points_lost( self )
+        return ret
 
 league_match_table = "league_match"
 class LeagueMatch(Base):
@@ -311,6 +326,55 @@ class LeagueMatch(Base):
     player1_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
     player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player2_list_id')
 
+
+    def points_killed(self, player):
+        if self.player1 is not None and player.id == self.player1.id:
+            return self.player1_score
+        if self.player2 is not None and player.id == self.player2.id:
+            return self.player2_score
+        return 0
+
+    def points_lost(self, player):
+        if self.player1 is not None and player.id == self.player1.id:
+            return self.player2_score
+        if self.player2 is not None and player.id == self.player2.id:
+            return self.player1_score
+        return 0
+
+
+    def get_list(self, player):
+        if self.player1 is not None and player.id == self.player1.id:
+            return self.player1_list
+        if self.player2 is not None and player.id == self.player2.id:
+            return self.player2_list
+        return None
+
+    def get_winner(self):
+        winner = None
+        if self.is_complete():
+            if self.player1_score > self.player2_score:
+                winner = self.player1
+            elif self.player2_score > self.player1_score:
+                winner = self.player2
+        return winner
+
+    def was_draw(self):
+        return self.is_complete() and self.player1_score == self.player2_score
+
+    def player_lost(self,player):
+        if self.was_draw():
+            return False
+        return self.player_won(player) == False
+
+    def player_won(self, player):
+        winner = self.get_winner()
+        if winner is not None:
+            if winner == player:
+                return True
+            else:
+                return False
+        return False
+
     def is_complete(self):
         return self.state is not None and self.state == "complete"
 
@@ -333,7 +397,6 @@ class LeagueMatch(Base):
             return '<a href="' + url + '">Escrow ' + player_name + '\'s list</a>'
         else:
             return self.get_player_list_text_with_link(player_id)
-
 
     def get_player1_list_display(self):
         return self.get_player_list_display(self.player1_id, self.player1_list_id, self.player1.get_name())
@@ -372,7 +435,6 @@ class LeagueMatch(Base):
 
     def get_player2_escrow_text(self):
         return self.get_player_escrow_text(self.player2_id)
-
 
     def is_complete(self):
         return self.state is not None and self.state == 'complete'
@@ -583,6 +645,21 @@ class ArchtypeList(Base):
      ships            = relationship(Ship.__name__,uselist=True)
      tourney_lists    = relationship("TourneyList", uselist=True)
      tags             = relationship("ArchtypeTag", uselist=True)
+
+     def is_rebel(self):
+         if self.faction is not None and self.faction == Faction.REBEL:
+             return True
+         return False
+
+     def is_imperial(self):
+         if self.faction is not None and self.faction == Faction.IMPERIAL:
+             return True
+         return False
+
+     def is_scum(self):
+         if self.faction is not None and self.faction == Faction.SCUM:
+             return True
+         return False
 
      def pretty_print_list(self):
 
@@ -1176,6 +1253,12 @@ class PersistenceManager:
 
     def get_league(self, league_name):
         return self.db_connector.get_session().query(League).filter(League.name == league_name).first()
+
+    def get_league_by_id(self, league_id):
+        return self.db_connector.get_session().query(League).filter(League.id == league_id).first()
+
+    def get_league_player_by_id(self, player_id):
+        return self.db_connector.get_session().query(TierPlayer).filter(TierPlayer.id == player_id).first()
 
     def get_tier(self, tier_name):
         return self.db_connector.get_session().query(Tier).filter(Tier.challonge_name == tier_name).first()

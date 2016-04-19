@@ -118,16 +118,24 @@ def mail_error(errortext):
 def about():
     return render_template('about.html')
 
-
-@app.route( "/tier_players")
-def tier_players():
-    tier_id = request.args.get('tier_id')
+@app.route("/league_player")
+def league_player():
+    player_id = request.args.get('player_id')
     pm = PersistenceManager(myapp.db_connector)
-    tier = pm.get_tier_by_id( tier_id )
+    player = pm.get_league_player_by_id(player_id)
+    player_stats = player.get_stats()
+    return render_template("league_player.html", player=player, stats=player_stats)
+
+@app.route( "/league_players")
+def league_players():
+    league_id = request.args.get('league_id')
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league_by_id(league_id)
     players = []
-    for player in tier.players:
-        players.append(player)
-    return render_template("tier_players.html", players=players, tier=tier)
+    for tier in league.tiers:
+        for player in tier.players:
+            players.append(player)
+    return render_template("league_players.html", players=players)
 
 def create_default_match_result(match_result, tier, pm):
     p1id = match_result['player1_id']
@@ -359,7 +367,6 @@ def get_league_stats(league):
 def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
     league = pm.get_league("X-Wing Vassal League Season One")
-    #overall_stats, league_stats, player_stats = get_league_stats(league)
     tiers = league.tiers
     matches = pm.get_recent_league_matches(league)
 

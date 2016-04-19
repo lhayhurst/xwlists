@@ -7,26 +7,24 @@
         vertical-align:middle;
     }
 </style>
-
-<div>{{ tier.get_name() }}</div>
-<br>
+<b>Vassal League Season 1 Players</b><br>
+Click on the player's home page to see their league stats, their games, subscribe to their list escrow, etc.
+    <hr>
+    <br>
 <table id="players" class="display" cellspacing="0" width="100%">
   <thead>
   <tr>
     <th>Tier</th>
-    <th>Player</th>
-    <th>Checked In</th>
-    <th>Matches Played</th>
+    <th>Division</th>
+    <th>Player Home Page</th>
+  </tr>
   </thead>
   <tbody>
-  </tr>
       {% for p in players %}
       <tr>
-         <td>{{ tier.get_name() }}</td>
-         <td>{{ p.get_name() }}</td>
-         <td>{{ p.checked_in }}</td>
-         <td>{{ p.num_matches_played() }}</td>
-
+         <td>{{ p.tier.get_name() }}</td>
+         <td>{{ p.division.get_name() }}</td>
+         <td><a href="/league_player?player_id={{ p.id }}">{{ p.get_name() }}</a></td>
       </tr>
       {% endfor %}
   </tbody>

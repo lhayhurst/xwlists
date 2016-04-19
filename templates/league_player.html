@@ -1,22 +1,48 @@
 {% extends "layout.html" %}
 {% block content %}
+
 <style>
     td {
         text-align:center;
         vertical-align:middle;
     }
 </style>
-<br>
-<a href="/league_players?league_id={{ league.id }}">All league players</a>
-<br>
- <div><b>{{ league.get_name() }} Tiers</b><br>
-{% for tier in tiers %}
-    {{ tier.get_name() }} : <a href="{{ tier.get_challonge_url() }}">Challonge page</a> | <a href="/tier_matches?tier_id={{ tier.id }}">matches</a>
-    <br>
-{% endfor %}
-<br>
+<b>Player:</b> {{ player.get_name() }}<br>
+<b>Tier:</b> <a href="{{ player.tier.get_challonge_url() }}">{{ player.tier.get_name() }}</a>  <br>
+<b>Division:</b> {{ player.division.get_name() }}<br>
+<b>Summary of results</b>
 <hr>
-<b>Recent league matches</b>
+<table id="stats" class="display" cellspacing="0" width="100%" >
+  <thead>
+  <tr>
+    <th>Games Played</th>
+    <th>Wins</th>
+    <th>Losses</th>
+    <th>Draws</th>
+    <th>Points Destroyed</th>
+    <th>Points Lost</th>
+    <th>Rebel Lists</th>
+    <th>Imperial Lists</th>
+    <th>Scum Lists</th>
+
+  </tr>
+  </thead>
+  <tbody>
+      <tr>
+         <td>{{ stats['total']}}</td>
+         <td>{{ stats['wins']}}</td>
+         <td>{{ stats['losses']}}</td>
+         <td>{{ stats['draws']}}</td>
+         <td>{{ stats['killed']}}</td>
+         <td>{{ stats['lost']}}</td>
+         <td>{{ stats['rebs']}}</td>
+         <td>{{ stats['imps']}}</td>
+         <td>{{ stats['scum']}}</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<b>League matches</b>
 <table id="matches" class="display" cellspacing="0" width="100%">
   <thead>
   <tr>
@@ -31,10 +57,10 @@
     <th>Player 2 Score</th>
     <th>Player 1 List</th>
     <th>Player 2 List</th>
+  </tr>
   </thead>
   <tbody>
-  </tr>
-      {% for m in matches %}
+      {% for m in player.matches %}
       <tr>
          <td>{{  m.updated_at}}</td>
          <td>{{  m.player1.tier.get_name()}}</td>
@@ -52,15 +78,18 @@
   </tbody>
 </table>
 
-
-
 <script>
     $(document).ready( function () {
+
         $('#matches').dataTable({
-            "order": [[1, "desc"]],
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-            iDisplayLength: -1,
-        });
-    });
+		paging: false,
+		searching: false,
+        sorting:false,
+		lengthChange: false,
+		info: false,
+		destroy: true});
+
+    } );
 </script>
+
 {% endblock %}
