@@ -24,7 +24,7 @@ Click on the player's home page to see their league stats, their games, subscrib
       <tr>
          <td>{{ p.tier.get_name() }}</td>
          <td>{{ p.division.get_name() }}</td>
-         <td><a href="/league_player?player_id={{ p.id }}">{{ p.get_name() }}</a></td>
+         <td>{{ p.get_url() }}</td>
       </tr>
       {% endfor %}
   </tbody>
