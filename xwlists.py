@@ -423,6 +423,8 @@ def mail_escrow_complete(match,pm):
     for s in match.subscriptions:
         if s.notified:
             continue
+        s.notified = True
+        pm.db_connector.get_session().commit()
         recipients = list(ADMINS)
         recipients.append(s.observer.email_address)
         msg = Message("Escrow complete for match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
@@ -434,8 +436,6 @@ def mail_escrow_complete(match,pm):
         msg.html = html
         with app.app_context():
             mail.send(msg)
-            s.notified = True
-            pm.db_connector.get_session().commit()
 
 
 @app.route("/unsubscribe_escrow")
