@@ -24,7 +24,7 @@ from decoder import decode
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event, ArchtypeList, LeagueMatch, \
-    TierPlayer
+    TierPlayer, EscrowSubscription
 from rollup import ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTotalHighChartOptions, \
     ShipHighchartOptions, PilotHighchartOptions, UpgradeHighChartOptions, PilotSkillTimeSeriesData, \
     PilotSkillHighchartsGraph
@@ -117,6 +117,31 @@ def mail_error(errortext):
 @app.route("/about")
 def about():
     return render_template('about.html')
+
+@app.route("/set_up_escrow_subscription")
+def set_up_escrow_subscription():
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league("X-Wing Vassal League Season One")
+    matches = []
+    for tier in league.tiers:
+        for player in tier.players:
+            for match in player.matches:
+                es = EscrowSubscription( observer=player, match=match)
+                pm.db_connector.get_session().add( es )
+                matches.append( match )
+    pm.db_connector.get_session().commit()
+    return render_template("escrow_subscriptions.html", matches=matches)
+
+@app.route("/escrow_subscriptions")
+def escrow_subscriptions():
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league("X-Wing Vassal League Season One")
+    matches = []
+    for tier in league.tiers:
+        for player in tier.players:
+            for match in player.matches:
+                matches.append( match )
+    return render_template("escrow_subscriptions.html", matches=matches)
 
 @app.route("/league_player")
 def league_player():
@@ -394,6 +419,34 @@ def escrow():
                            needs_escrow=needs_escrow,
                            match_complete=match_complete)
 
+def mail_escrow_complete(match):
+    msg = Message("Escrow complete for match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
+                  sender=ADMINS[0],
+                  recipients=ADMINS)
+    html = render_template("escrow_complete.html",match=match,player_id=match.subscriptions[0].observer.id)
+
+    msg.body = 'text body'
+    msg.html = html
+    with app.app_context():
+        mail.send(msg)
+
+@app.route("/unsubscribe_escrow")
+def unsubscribe_escrow():
+    match_id  = request.args.get("match_id")
+    player_id = long(request.args.get("player_id"))
+    pm        = PersistenceManager(myapp.db_connector)
+    match     = pm.get_match(match_id)
+    email_address = None
+    player_name   = None
+    for s in match.subscriptions:
+        if s.observer.id == player_id:
+            email_address = s.observer.email_address
+            player_name   = s.observer.get_name()
+            pm.db_connector.get_session().delete(s)
+            break
+    pm.db_connector.get_session().commit()
+    return 'Thanks %s, email %s has been unsubscribed from future escrow completion announcements' % ( player_name, email_address)
+
 @app.route("/escrow_change")
 def escrow_change():
     match_id  = request.args.get("match_id")
@@ -403,6 +456,9 @@ def escrow_change():
     escrow_complete = 1
     if match.needs_escrow():
         escrow_complete = 0
+
+    if escrow_complete:
+        mail_escrow_complete(match)
 
     response  = jsonify(player1_list=match.get_player1_escrow_text(),
                         player2_list=match.get_player2_escrow_text(),

@@ -331,7 +331,18 @@ class LeagueMatch(Base):
     player2_list_id     = Column(Integer, ForeignKey( '{0}.id'.format(archtype_list_table) ) )
     player1_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player1_list_id')
     player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player2_list_id')
+    subscriptions       = relationship("EscrowSubscription",
+                                       back_populates='match',cascade="all,delete,delete-orphan")
 
+    def unsubscribe_escrow(self,player_id):
+        ret = '<a href="' + url_for('unsubscribe_escrow', match_id=self.id,player_id=player_id ) +  '">Unsubscribe</a>'
+        return Markup(ret)
+
+    def get_subscriber_email_addresses(self):
+        ret = ""
+        for s in self.subscriptions:
+            ret += s.observer.email_address + ","
+        return ret
 
     def points_killed(self, player):
         if self.player1 is not None and player.id == self.player1.id:
@@ -346,7 +357,6 @@ class LeagueMatch(Base):
         if self.player2 is not None and player.id == self.player2.id:
             return self.player1_score
         return 0
-
 
     def get_list(self, player):
         if self.player1 is not None and player.id == self.player1.id:
@@ -456,8 +466,6 @@ class LeagueMatch(Base):
         elif player_id == self.player2_id:
             self.player2_list = archtype
 
-
-
     def get_player1_list_url(self):
         return self.get_player_list_url(self.player1_id)
 
@@ -489,6 +497,16 @@ class LeagueMatch(Base):
         if self.player2_list is not None:
             return self.player2_list.pretty_print_list()
         return "<br>"
+
+escrow_subscription_table = 'escrow_subscription'
+class EscrowSubscription(Base):
+    __tablename__ = escrow_subscription_table
+    id = Column(Integer, primary_key=True)
+    match_id = Column(Integer, ForeignKey( '{0}.id'.format(league_match_table) ) )
+    observer_id = Column(Integer, ForeignKey( '{0}.id'.format(tier_player_table) ) )
+    match                = relationship( LeagueMatch.__name__, uselist=False,back_populates='subscriptions')
+    observer             = relationship( TierPlayer.__name__, uselist=False)
+
 
 tourney_venue_table_name = 'tourney_venue'
 
