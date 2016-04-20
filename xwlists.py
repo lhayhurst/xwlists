@@ -419,16 +419,24 @@ def escrow():
                            needs_escrow=needs_escrow,
                            match_complete=match_complete)
 
-def mail_escrow_complete(match):
-    msg = Message("Escrow complete for match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
-                  sender=ADMINS[0],
-                  recipients=ADMINS)
-    html = render_template("escrow_complete.html",match=match,player_id=match.subscriptions[0].observer.id)
+def mail_escrow_complete(match,pm):
+    for s in match.subscriptions:
+        if s.notified:
+            continue
+        recipients = list(ADMINS)
+        recipients.append(s.observer.email_address)
+        msg = Message("Escrow complete for match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
+                      sender=ADMINS[0],
+                      recipients=recipients)
+        html = render_template("escrow_complete.html",match=match,player_id=s.observer.id)
 
-    msg.body = 'text body'
-    msg.html = html
-    with app.app_context():
-        mail.send(msg)
+        msg.body = 'text body'
+        msg.html = html
+        with app.app_context():
+            mail.send(msg)
+            s.notified = True
+            pm.db_connector.get_session().commit()
+
 
 @app.route("/unsubscribe_escrow")
 def unsubscribe_escrow():
@@ -458,7 +466,10 @@ def escrow_change():
         escrow_complete = 0
 
     if escrow_complete:
-        mail_escrow_complete(match)
+        try:
+            mail_escrow_complete(match,pm)
+        except Exception as inst:
+            print "unable to send out escrow email, reason: %s" % ( inst )
 
     response  = jsonify(player1_list=match.get_player1_escrow_text(),
                         player2_list=match.get_player2_escrow_text(),

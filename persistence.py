@@ -506,6 +506,7 @@ class EscrowSubscription(Base):
     observer_id = Column(Integer, ForeignKey( '{0}.id'.format(tier_player_table) ) )
     match                = relationship( LeagueMatch.__name__, uselist=False,back_populates='subscriptions')
     observer             = relationship( TierPlayer.__name__, uselist=False)
+    notified             = Column(Boolean)
 
 
 tourney_venue_table_name = 'tourney_venue'
