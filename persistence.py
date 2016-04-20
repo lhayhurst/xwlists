@@ -335,7 +335,7 @@ class LeagueMatch(Base):
                                        back_populates='match',cascade="all,delete,delete-orphan")
 
     def unsubscribe_escrow(self,player_id):
-        ret = '<a href="' + url_for('unsubscribe_escrow', match_id=self.id,player_id=player_id ) +  '">Unsubscribe</a>'
+        ret = '<a href="' + url_for('unsubscribe_escrow', match_id=self.id,player_id=player_id,_external=True ) +  '">Unsubscribe</a>'
         return Markup(ret)
 
     def get_subscriber_email_addresses(self):
