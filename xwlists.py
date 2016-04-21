@@ -220,6 +220,23 @@ def update_match_result(match_result,dbmr,pm):
 def league_admin():
     return render_template('league_admin.html')
 
+@app.route("/add_league_player_form_results")
+def add_league_player_form_results():
+    print "foo"
+
+@app.route("/add_league_player")
+def add_league_player():
+    c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league("X-Wing Vassal League Season One")
+    tiers = []
+    divisions = []
+    for tier in league.tiers:
+        tiers.append(tier)
+        for division in tier.divisions:
+            divisions.append(division)
+    return render_template('add_league_player.html',league=league,tiers=tiers,divisions=divisions)
+
 @app.route("/cache_league_results")
 def cache_league_results():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
@@ -420,40 +437,22 @@ def escrow():
                            match_complete=match_complete)
 
 def mail_escrow_complete(match,pm):
+    recipients = list(ADMINS)
     for s in match.subscriptions:
         if s.notified:
             continue
+        recipients.append( s.observer.email_address)
         s.notified = True
-        pm.db_connector.get_session().commit()
-        recipients = list(ADMINS)
-        recipients.append(s.observer.email_address)
-        msg = Message("Escrow complete for match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
-                      sender=ADMINS[0],
-                      recipients=recipients)
-        html = render_template("escrow_complete.html",match=match,player_id=s.observer.id)
-
-        msg.body = 'text body'
-        msg.html = html
-        with app.app_context():
-            mail.send(msg)
-
-
-@app.route("/unsubscribe_escrow")
-def unsubscribe_escrow():
-    match_id  = request.args.get("match_id")
-    player_id = long(request.args.get("player_id"))
-    pm        = PersistenceManager(myapp.db_connector)
-    match     = pm.get_match(match_id)
-    email_address = None
-    player_name   = None
-    for s in match.subscriptions:
-        if s.observer.id == player_id:
-            email_address = s.observer.email_address
-            player_name   = s.observer.get_name()
-            pm.db_connector.get_session().delete(s)
-            break
     pm.db_connector.get_session().commit()
-    return 'Thanks %s, email %s has been unsubscribed from future escrow completion announcements' % ( player_name, email_address)
+    msg = Message("Escrow complete for match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
+                  sender=ADMINS[0],
+                  recipients=recipients)
+    html = render_template("escrow_complete.html",match=match,player_id=s.observer.id)
+
+    msg.body = 'text body'
+    msg.html = html
+    with app.app_context():
+        mail.send(msg)
 
 @app.route("/escrow_change")
 def escrow_change():

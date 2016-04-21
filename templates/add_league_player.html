@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+P { text-align: center }
+</style>
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('add_league_player_form_results') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data">
+    <fieldset>
+        <legend>Add a new league player!</legend>
+        <div data-row-span="3">
+            <div data-field-span="1">
+                <label>Challonge handle</label>
+                <input type="text"
+                       name="challonge_name"/>
+            </div>
+            <div data-field-span="1">
+                <label>Email address</label>
+                <input type="text"
+                       name="email_address"/>
+            </div>
+            <div data-field-span="1">
+                <label>Player's name (if known)</label>
+                <input type="text"
+                       name="name"/>
+            </div>
+        </div>
+        <div data-row-span="3">
+            <div data-field-span="1">
+                <label>Timezone</label>
+                <input type="text"
+                       name="timezone"/>
+            </div>
+            <div data-field-span="1">
+                <label>Reddit handle</label>
+                <input type="text"
+                       name="reddit_handle"/>
+            </div>
+            <div data-field-span="1">
+                <label>Challongeboard handle</label>
+                <input type="text"
+                       name="challongeboard_handle"/>
+            </div>
+        </div>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Tier</label>
+                   <select id="tier_dropdown" name="tier_dropdown"  placeholder="Select a tier">
+                    <option></option>
+                    {%  for t in tiers %}
+                        <option value="{{ t.id }}">{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div data-field-span="1">
+                <label>Division</label>
+
+                   <select id="division_dropdown" name="division_dropdown"  placeholder="Select a division">
+                    <option></option>
+                    {%  for d in divisions %}
+                        <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+    </fieldset>
+</form>
+
+{% endblock %}
