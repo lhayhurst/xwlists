@@ -7,3 +7,6 @@ values ( 'Deathfire', 17, 'deathfire' );
 
 insert  ship_pilot ( ship_type, pilot_id)
 select 'tiebomber', id from pilot where canon_name='deathfire';
+
+
+

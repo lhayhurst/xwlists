@@ -1001,9 +1001,23 @@ ships = {
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Scimitar Squadron Pilot', 'cost': 16,
          'upgrades': (TITLE, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, MOD)}),
 
-    TIE_DEFENDER: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Rexler Brath', 'cost': 37,
+    TIE_DEFENDER: (
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Glaive Squadron Pilot', 'cost': 34,
+                    'upgrades': (TITLE, MISSILE, CANNON, MOD, EPT)
+         },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Countess Ryad', 'cost': 34,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+                    'upgrades': (TITLE, MISSILE, CANNON, MOD, EPT)
+         },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Maarek Stele', 'cost': 35,
                     'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
-                    'upgrades': (TITLE, MISSILE, CANNON, MOD, EPT)},
+                    'upgrades': (TITLE, MISSILE, CANNON, MOD, EPT)
+         },
+
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Rexler Brath', 'cost': 37,
+                    'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+                    'upgrades': (TITLE, MISSILE, CANNON, MOD, EPT)
+         },
                    {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Colonel Vessery', 'cost': 35,
                     'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
                     'upgrades': (TITLE, MISSILE, CANNON, MOD, EPT)},
