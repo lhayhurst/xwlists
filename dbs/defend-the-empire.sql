@@ -14,4 +14,4 @@ insert into pilot ( name, cost, canon_name, pilot_skill )
 values ( 'Maarek Stele', 35, 'maarekstele', 7 );
 
 insert  ship_pilot ( ship_type, pilot_id)
-select 'tiedefender', id from pilot where canon_name='maarekstele';
+select 'tiedefender', id from pilot where canon_name='maarekstele' and cost=35;

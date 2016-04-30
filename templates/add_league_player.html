@@ -16,17 +16,17 @@ P { text-align: center }
             <div data-field-span="1">
                 <label>Challonge handle</label>
                 <input type="text"
-                       name="challonge_name"/>
+                       name="challonge_name" required/>
             </div>
             <div data-field-span="1">
                 <label>Email address</label>
                 <input type="text"
-                       name="email_address"/>
+                       name="email_address" required/>
             </div>
             <div data-field-span="1">
                 <label>Player's name (if known)</label>
                 <input type="text"
-                       name="name"/>
+                       name="name" required/>
             </div>
         </div>
         <div data-row-span="3">
@@ -49,7 +49,7 @@ P { text-align: center }
         <div data-row-span="2">
             <div data-field-span="1">
                 <label>Tier</label>
-                   <select id="tier_dropdown" name="tier_dropdown"  placeholder="Select a tier">
+                   <select id="tier_dropdown" name="tier_dropdown"  width="500" style="width: 500px;" placeholder="Select the tier that the player is in">
                     <option></option>
                     {%  for t in tiers %}
                         <option value="{{ t.id }}">{{ t.name }}</option>
@@ -58,17 +58,43 @@ P { text-align: center }
             </div>
             <div data-field-span="1">
                 <label>Division</label>
-
-                   <select id="division_dropdown" name="division_dropdown"  placeholder="Select a division">
+                   <select id="division_dropdown" name="division_dropdown"  width="500" style="width: 500px;" placeholder="Select the division that the player is in">
                     <option></option>
-                    {%  for d in divisions %}
-                        <option value="{{ d.id }}">{{ d.name }}</option>
-                    {% endfor %}
                 </select>
             </div>
         </div>
 
     </fieldset>
+    <input type="hidden" name="league_id" value="{{ league.id }}" />
+    <input type="submit" class="btn" name="submit-button" id="submit-button" />
+
 </form>
+
+<script>
+
+    var tier_divisions_map = {{ tiers_divisions | tojson | safe }};
+
+
+    $(document).ready(function() {
+
+        $("#tier_dropdown").select2();
+        $("#division_dropdown").select2();
+
+        $('#tier_dropdown').on("select2-selecting", function(e) {
+            console.log(e.object['text']);
+            var divisions = tier_divisions_map[e.object['text']];
+            console.log(divisions);
+            $("#division_dropdown").select2();
+            for( var i = 0; i < divisions.length; i++ ) {
+                var division = divisions[i];
+                var newOption = new Option(division.name, division.id, true, true);
+                $("#division_dropdown").append(newOption);
+            }
+
+        } );
+
+    });
+
+</script>
 
 {% endblock %}

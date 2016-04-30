@@ -220,22 +220,113 @@ def update_match_result(match_result,dbmr,pm):
 def league_admin():
     return render_template('league_admin.html')
 
-@app.route("/add_league_player_form_results")
+@app.route("/add_league_player_form_results",methods=['POST'])
 def add_league_player_form_results():
-    print "foo"
+    challonge_name        = decode(request.form['challonge_name'])
+    email_address         = decode(request.form['email_address'])
+    name                  = decode(request.form['name'])
+    timezone              = decode(request.form['timezone'])
+    reddit_handle         = decode(request.form['reddit_handle'])
+    challongeboard_handle = decode(request.form['challongeboard_handle'])
+    division_id           = request.form['division_dropdown']
+    tier_id               = request.form['tier_dropdown']
+
+    pm = PersistenceManager(myapp.db_connector)
+
+    #check to see if this player already exists
+    tier_player = pm.get_league_player_by_name(challonge_name)
+    if tier_player is not None: #hmm, already exists
+        player_stats = tier_player.get_stats()
+        return render_template("league_player.html", player=tier_player, stats=player_stats)
+
+    tier = pm.get_tier_by_id(tier_id)
+    tier_player = TierPlayer()
+    tier_player.challengeboards_handle = challongeboard_handle
+    tier_player.division = pm.get_division_by_id(division_id)
+    tier_player.tier = tier
+    tier_player.email_address = email_address
+    tier_player.name = challonge_name
+    tier_player.person_name = name
+    tier_player.reddit_handle = reddit_handle
+    tier_player.timezone = timezone
+
+    #the player basics are in, now go lookup the player from
+    ch = ChallongeHelper(os.getenv('CHALLONGE_USER'), os.getenv('CHALLONGE_API_KEY'))
+    players = ch.participant_index(tier.get_challonge_name())
+
+    found = False
+    player_id = None
+    for player in players:
+        player = player['participant']
+        lookup_name = None
+        challonge_username_ = player['challonge_username']
+        checked_in = player['checked_in']
+        if challonge_username_ is None or checked_in is False:
+            lookup_name = player['display_name']
+            # print "player %s has not checked in " % ( player['display-name'])
+        else:
+            lookup_name = challonge_username_
+
+        if lookup_name == tier_player.name:
+            found = True
+            tier_player.checked_in = player['checked_in']
+            player_id = player['id']
+            tier_player.challonge_id = player_id
+            tier_player.group_id = player['group_player_ids'][0]
+            break
+
+    if found == False:
+        #return an error page
+        return render_template("league_player_add_failed.html", name=tier_player.name)
+
+    pm.db_connector.get_session().add(tier_player)
+    pm.db_connector.get_session().commit()
+
+    #the player is added, now go get his/her matches
+    matchups = ch.match_index(tier.get_challonge_name())
+    for matchup in matchups:
+        matchup = matchup['match']
+        p1id = matchup['player1_id']
+        p2id = matchup['player2_id']
+        match_result = pm.get_match_by_challonge_id(matchup['id'])
+        if match_result is None: #this really shouldn't happen, but hey, if it does, add a new record
+            dbmr = create_default_match_result(matchup, tier, pm)
+            if dbmr is not None:
+                pm.db_connector.get_session().add(dbmr)
+            continue
+
+        if p1id == player_id or p2id == player_id:
+            #we've found our man
+            if p1id == player_id:
+                player = pm.get_tier_player(p1id)
+                match_result.player1 = player
+            else:
+                player = pm.get_tier_player(p2id)
+                match_result.player2 = player
+
+    pm.db_connector.get_session().commit()
+    player_stats = tier_player.get_stats()
+    return render_template("league_player.html", player=tier_player, stats=player_stats)
+
+
+
 
 @app.route("/add_league_player")
 def add_league_player():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
     league = pm.get_league("X-Wing Vassal League Season One")
+    tiers_divisions = {}
     tiers = []
-    divisions = []
     for tier in league.tiers:
         tiers.append(tier)
+        tiers_divisions[tier.get_name()] = []
         for division in tier.divisions:
-            divisions.append(division)
-    return render_template('add_league_player.html',league=league,tiers=tiers,divisions=divisions)
+            tiers_divisions[tier.get_name()].append( {'name': division.get_name(), 'id': division.id } )
+    return render_template('add_league_player.html',league=league,tiers_divisions=tiers_divisions,tiers=tiers)
+
+
+
 
 @app.route("/cache_league_results")
 def cache_league_results():
