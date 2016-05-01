@@ -184,16 +184,15 @@ def create_default_match_result(match_result, tier, pm):
         lm.player1_score = scores[0]
         lm.player2_score = scores[1]
 
+    updated_at = match_result['updated_at']
+    lm.updated_at = updated_at
+
     return lm
 
 def update_match_result(match_result,dbmr,pm):
     #things that can change: score... and updated it
 
     changed  = False
-    updated_at = match_result['updated_at']
-    if dbmr.updated_at is None or dbmr.updated_at != updated_at:
-        dbmr.updated_at = updated_at
-        changed = True
 
     scores_csv = match_result['scores_csv']
     p1_score = None
@@ -213,6 +212,11 @@ def update_match_result(match_result,dbmr,pm):
     if state is not None and dbmr.state != state:
         dbmr.state = state
         changed = True
+
+    if changed:
+        updated_at = match_result['updated_at']
+        if dbmr.updated_at is None or dbmr.updated_at != updated_at:
+            dbmr.updated_at = updated_at
 
     return changed
 
