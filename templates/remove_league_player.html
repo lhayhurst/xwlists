@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+P { text-align: center }
+</style>
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('remove_league_player_form_results') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data">
+    <fieldset>
+        <legend>Remove a player from the league</legend>
+        <div data-row-span="3">
+            <div data-field-span="1">
+                <label>Challonge handle</label>
+               <select id="player_dropdown" name="player_dropdown"  width="500" style="width: 500px;" placeholder="Select the player to remove">
+                <option></option>
+                {%  for p in players %}
+                    <option value="{{ p.id }}">{{ p.get_name() }}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+    </fieldset>
+    <input type="hidden" name="league_id" value="{{ league.id }}" />
+    <input type="submit" class="btn" name="submit-button" id="submit-button" />
+
+</form>
+
+<script>
+
+    $(document).ready(function() {
+
+        $("#player_dropdown").select2();
+    });
+
+</script>
+
+{% endblock %}

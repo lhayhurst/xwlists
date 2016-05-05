@@ -224,6 +224,35 @@ def update_match_result(match_result,dbmr,pm):
 def league_admin():
     return render_template('league_admin.html')
 
+@app.route("/remove_league_player")
+def remove_league_player():
+    league_id = request.args.get('league_id')
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league_by_id(league_id)
+    players = []
+    for tier in league.tiers:
+        for player in tier.players:
+            players.append(player)
+    return render_template("remove_league_player.html", league=league, players=players)
+
+@app.route("/remove_league_player_form_results",methods=['POST'])
+def remove_league_player_form_results():
+    player_id        = decode(request.form['player_dropdown'])
+    league_id        = decode(request.form['league_id'])
+
+    pm = PersistenceManager(myapp.db_connector)
+    player = pm.get_league_player_by_id(player_id)
+    #take out their matches
+    for match in player.matches:
+        for subscription in match.subscriptions:
+            pm.db_connector.get_session().delete(subscription)
+        pm.db_connector.get_session().delete(match)
+    pm.db_connector.get_session().delete(player)
+    pm.db_connector.get_session().commit()
+    return redirect(url_for("league_players", league_id=league_id))
+
+
+
 @app.route("/add_league_player_form_results",methods=['POST'])
 def add_league_player_form_results():
     challonge_name        = decode(request.form['challonge_name'])
