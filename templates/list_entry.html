@@ -738,12 +738,8 @@
                 memberEl.find('.sub-total').text( memberCost );
                 squadTotal += memberCost;
             });
-            if ( squadTotal > 0 && squadTotal <= 100 ) {
+            if ( squadTotal > 0 ) {
                 $('.submit-squad').removeAttr("disabled");
-                $('.submit-squad').show();
-            }
-            if ( squadTotal > 100 ) {
-                  $('.submit-squad').attr("disabled", true );
                 $('.submit-squad').show();
             }
             $('.total').text(squadTotal);
