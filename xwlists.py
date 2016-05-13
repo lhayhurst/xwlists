@@ -1528,9 +1528,6 @@ def add_squad():
 
          pm = PersistenceManager(myapp.db_connector)
 
-         #if an existing archtype already exists, use it it
-         #otherwise create a new archtype
-
          ships = []
          for squad_member in data:
              ship_pilot = pm.get_ship_pilot( squad_member['ship'], squad_member['pilot'] )
