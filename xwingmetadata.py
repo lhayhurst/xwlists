@@ -254,6 +254,10 @@ upgrades = {
     ),
     TITLE: (
 
+        {'name': 'Black One', 'cost': 1, 'canon_name' : 'blackone',
+         'constraints': ({'type': SHIP_TYPE, 'value': T_70})},
+
+
         {'name': 'Punishing One', 'cost': 12, 'canon_name' : 'punishingone',
          'constraints': ({'type': SHIP_TYPE, 'value': JUMPMASTER_5000_})},
 
@@ -280,6 +284,7 @@ upgrades = {
          'constraints': ({'type': SHIP_TYPE, 'value': A_WING}),
          'action': [{'type': 'ADD_UPGRADE', 'value': EPT}]},
         {'name': 'Millennium Falcon', 'cost': 1, 'constraints': ({'type': SHIP_TYPE, 'value': YT_1300})},
+        {'name': 'Millennium Falcon 2', 'cost': 1, 'constraints': ({'type': SHIP_TYPE, 'value': YT_1300})},
         {'name': 'Dauntless', 'cost': 2, 'constraints': ({'type': SHIP_TYPE, 'value': VT_DECIMATOR})},
         {'name': 'Moldy Crow', 'cost': 3, 'constraints': ({'type': SHIP_TYPE, 'value': HWK_290})},
         {'name': 'ST-321', 'cost': 3, 'constraints': ({'type': SHIP_TYPE, 'value': LAMBDA_SHUTTLE})},
@@ -601,28 +606,35 @@ ships = {
     (
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Novice',
          'cost': 24, 'pilot_skill': 2, 'canon_name': 'bluesquadronnovice',
-         'upgrades': (DROID, TORPEDO, MOD, TECH)},
+         'upgrades': (TITLE,DROID, TORPEDO, MOD, TECH)},
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Red Squadron Veteran', 'cost': 26,
          'cost': 26, 'pilot_skill': 4, 'canon_name': 'redsquadronveteran',
-         'upgrades': (DROID, TORPEDO, MOD, TECH, EPT)},
+         'upgrades': (TITLE,DROID, TORPEDO, MOD, TECH, EPT)},
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Blue Ace', 'cost': 27,
          'cost': 27, 'pilot_skill': 5, 'canon_name': 'blueace',
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
-         'upgrades': (DROID, TORPEDO, MOD, TECH)},
+         'upgrades': (TITLE,DROID, TORPEDO, MOD, TECH)},
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Red Ace', 'cost': 29,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill': 6, 'canon_name': 'redace',
-         'upgrades': (DROID, TORPEDO, MOD, TECH)},
+         'upgrades': (TITLE,DROID, TORPEDO, MOD, TECH)},
 
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Ello Asty', 'cost': 30,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill': 7, 'canon_name': 'elloasty',
-         'upgrades': (DROID, TORPEDO, MOD, EPT, TECH)},
+         'upgrades': (TITLE,DROID, TORPEDO, MOD, EPT, TECH)},
 
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Poe Dameron',
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'cost': 31, 'pilot_skill': 8, 'canon_name': 'poedameron',
-         'upgrades': (DROID, TORPEDO, MOD, EPT, TECH)},
+         'upgrades': (TITLE,DROID, TORPEDO, MOD, EPT, TECH)},
+
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Poe Dameron (PS9)',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'cost': 33, 'pilot_skill': 9, 'canon_name': 'poedameron-swx57',
+         'upgrades': (TITLE, DROID, TORPEDO, MOD, EPT, TECH)},
+
+
     ),
 
     # TODO: Zeta Leader, Episilon Ace,
@@ -741,7 +753,11 @@ ships = {
               'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
               'upgrades': (TITLE, MISSILE, EPT, MOD)}),
 
-    YT_1300: ({'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Han Solo', 'cost': 46,
+    YT_1300: (
+              {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Rey', 'cost': 45,
+               'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+               'upgrades': (EPT, MISSILE, TITLE, MOD, CREW, CREW)},
+              {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Han Solo', 'cost': 46,
                'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
                'upgrades': (EPT, MISSILE, TITLE, MOD, CREW, CREW)},
               {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Chewbacca', 'cost': 42,
