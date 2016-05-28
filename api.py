@@ -448,7 +448,8 @@ class TournamentsAPI(restful.Resource):
 
 class PlayerAPI(restful.Resource):
     def delete(self, tourney_id, player_id):
-        helper = TournamentApiHelper()
+        pm = PersistenceManager(myapp.db_connector)
+        helper = TournamentApiHelper(pm)
         json_data = None
         try:
             json_data = request.get_json(force=True)
@@ -471,7 +472,8 @@ class PlayerAPI(restful.Resource):
         pm.db_connector.get_session().commit()
 
     def post(self, tourney_id, player_id):
-        helper = TournamentApiHelper()
+        pm = PersistenceManager(myapp.db_connector)
+        helper = TournamentApiHelper(pm)
         json_data = None
         try:
             json_data = request.get_json(force=True)
@@ -519,7 +521,8 @@ class PlayerAPI(restful.Resource):
 
 class PlayersAPI(restful.Resource):
     def get(self, tourney_id):
-        helper = TournamentApiHelper()
+        pm = PersistenceManager(myapp.db_connector)
+        helper = TournamentApiHelper(pm)
         if not helper.isint(tourney_id):
             return helper.bail("invalid tourney_id  %d passed to player get" % ( tourney_id), 403)
         pm = PersistenceManager(myapp.db_connector)
@@ -566,7 +569,8 @@ class PlayersAPI(restful.Resource):
         return None, players
 
     def post(self, tourney_id):
-        helper = TournamentApiHelper()
+        pm = PersistenceManager(myapp.db_connector)
+        helper = TournamentApiHelper(pm)
         bail, players = self.put_or_post(helper, tourney_id)
         if bail:
             return bail
@@ -588,7 +592,8 @@ class PlayersAPI(restful.Resource):
         return response
 
     def put(self, tourney_id):
-        helper = TournamentApiHelper()
+        pm = PersistenceManager(myapp.db_connector)
+        helper = TournamentApiHelper(pm)
         bail, players = self.put_or_post(helper, tourney_id)
         if bail:
             return bail
@@ -657,7 +662,8 @@ class TournamentAPI(restful.Resource):
 
         # go through and try to update what we can.
         json_data = None
-        helper = TournamentApiHelper()
+        pm = PersistenceManager(myapp.db_connector)
+        helper = TournamentApiHelper(pm)
         self.helper = helper
 
         try:
@@ -753,7 +759,7 @@ class TournamentAPI(restful.Resource):
 
     def delete(self, tourney_id):
         pm = PersistenceManager(myapp.db_connector)
-        helper = TournamentApiHelper()
+        helper = TournamentApiHelper(pm)
         self.helper = helper
         t = pm.get_tourney_by_id(tourney_id)
         if t is None:
@@ -838,7 +844,8 @@ class TournamentTokenAPI(restful.Resource):
     '''
 
     def post(self, tourney_id):
-        helper = TournamentApiHelper()
+        pm = PersistenceManager(myapp.db_connector)
+        helper = TournamentApiHelper(pm)
 
         try:
             email = request.form['email']

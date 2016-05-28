@@ -5,7 +5,8 @@ import myapp
 from persistence import PersistenceManager
 
 
-dev_url  =  'http://localhost:5000/api/v1/tournaments'
+dev_endpoint = 'http://localhost:5002/api/v1/'
+dev_url  =  dev_endpoint + 'tournaments'
 prod_url = 'http://lists.starwarsclubhouse.com/api/v1/tournaments'
 
 class apiTest(unittest.TestCase):
@@ -78,7 +79,6 @@ class apiTest(unittest.TestCase):
         self.assertEqual(tourney.venue.country, 'United States')
         self.assertEqual(tourney.venue.state, 'Illinois')
         self.assertEqual(tourney.venue.city, 'Chicago')
-        self.assertEqual(tourney.venue.venue, 'Dice Dojo')
 
         #and the players/rankings
         self.assertEqual(len(tourney.tourney_players), 6)
@@ -126,7 +126,7 @@ class apiTest(unittest.TestCase):
 
         #resubmit it to try to create dupes
         t['api_token'] = js['api_token']
-        url = 'http://localhost:5000/api/v1/tournament/' + str(tourney.id)
+        url = dev_endpoint + 'tournament/' + str(tourney.id)
         resp = put(url,
                     data=json.dumps(t))
         self.assertEqual(200, resp.status_code)
@@ -142,7 +142,7 @@ class apiTest(unittest.TestCase):
         #ok, now delete the thing
         j = { "api_token": tourney.api_token }
 
-        delete_url = 'http://localhost:5000/api/v1/tournament/' + str(id)
+        delete_url = dev_endpoint + 'tournament/' + str(id)
         resp = delete(delete_url ,
                     data=json.dumps(j))
         print resp.text
@@ -174,7 +174,7 @@ class apiTest(unittest.TestCase):
               'players': p
         }
 
-        player_get_url = 'http://localhost:5000/api/v1/tournament/' + str(tourney_id) + "/players"
+        player_get_url = dev_endpoint + 'tournament/' + str(tourney_id) + "/players"
         resp = post( player_get_url , data=json.dumps(t))
         print resp.text
         self.assertEqual( 201, resp.status_code)
@@ -240,7 +240,7 @@ class apiTest(unittest.TestCase):
                   ]
               }
         }
-        url = 'http://localhost:5000/api/v1/tournament/' + str(tourney_id)
+        url = dev_endpoint + 'tournament/' + str(tourney_id)
 
         resp = put(url,
                     data=json.dumps(t))
@@ -295,7 +295,7 @@ class apiTest(unittest.TestCase):
 
         #ok, get works just fine.
         #ty out player get
-        player_get_url = 'http://localhost:5000/api/v1/tournament/' + str(tourney_id) + "/players"
+        player_get_url = dev_endpoint + 'tournament/' + str(tourney_id) + "/players"
         print player_get_url
         resp = get( player_get_url )
         print resp.text
@@ -382,7 +382,7 @@ class apiTest(unittest.TestCase):
         #try to take out jenny
 
         d = {"api_token": api_token}
-        delete_url = 'http://localhost:5000/api/v1/tournament/' + str(tourney_id) + "/player/" + str(p2['id'])
+        delete_url = dev_endpoint + 'tournament/' + str(tourney_id) + "/player/" + str(p2['id'])
         resp = delete( delete_url , data=json.dumps(d))
         print resp.text
         self.assertEqual( 200, resp.status_code)
