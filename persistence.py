@@ -794,25 +794,19 @@ class ArchtypeList(Base):
 
      @staticmethod
      def generate_hash_key(ships):
-        liststring = ""
-        ship_strings    = []
-        pilot_strings   = []
-        upgrade_strings = []
+        strings = []
         for ship in ships:
             sp = ship.ship_pilot
-            ship_strings.append( str( sp.ship_type ))
-            pilot_strings.append( sp.pilot.canon_name )
+            if sp is not None and sp.ship_type is not None:
+                strings.append( str( sp.ship_type ))
+            if sp is not None and sp.pilot is not None:
+                strings.append( sp.pilot.canon_name )
             for supgrade in ship.upgrades:
                 if supgrade.upgrade is not None:
-                    upgrade_strings.append( supgrade.upgrade.canon_name )
-        key = None
+                    strings.append( supgrade.upgrade.canon_name )
         liststring = ""
-        for s in sorted(ship_strings):
+        for s in (strings):
             liststring = liststring + s
-        for p in sorted(pilot_strings):
-            liststring = liststring + p
-        for u in sorted(upgrade_strings):
-            liststring = liststring + u
 
         if len(liststring) == 0:
             key = 0

@@ -1568,8 +1568,12 @@ def add_squad():
 @app.route("/generate_hash_keys")
 def generate_hash_keys():
     pm = PersistenceManager( myapp.db_connector )
-    gen = ListUIDGen(pm)
-    gen.generate()
+    archtypes = pm.get_all_archtypes()
+    for archtype in archtypes:
+        if len(archtype.ships) > 0:
+            hashkey = archtype.generate_hash_key( archtype.ships )
+            archtype.hashkey = hashkey
+    pm.db_connector.get_session().commit()
     return redirect(url_for('tourneys') )
 
 @app.route('/display_list')
