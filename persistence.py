@@ -1279,9 +1279,11 @@ class PersistenceManager:
     def get_league_player_by_id(self, player_id):
         return self.db_connector.get_session().query(TierPlayer).filter(TierPlayer.id == player_id).first()
 
-    def get_league_player_by_name(self, challonge_name):
+    def get_league_player_by_name(self, challonge_name,tier_id):
         return self.db_connector.get_session().\
-            query(TierPlayer).filter(TierPlayer.name == challonge_name).first()
+            query(TierPlayer).filter(
+            TierPlayer.name == challonge_name,
+            TierPlayer.tier_id == tier_id).first()
 
 
     def get_tier(self, tier_name,league):

@@ -267,7 +267,7 @@ def add_league_player_form_results():
     pm = PersistenceManager(myapp.db_connector)
 
     #check to see if this player already exists
-    tier_player = pm.get_league_player_by_name(challonge_name)
+    tier_player = pm.get_league_player_by_name(challonge_name,tier_id)
     if tier_player is not None: #hmm, already exists
         player_stats = tier_player.get_stats()
         return render_template("league_player.html", player=tier_player, stats=player_stats)
