@@ -160,7 +160,7 @@ def league_players():
     for tier in league.tiers:
         for player in tier.players:
             players.append(player)
-    return render_template("league_players.html", players=players)
+    return render_template("league_players.html", players=players,league=league)
 
 def create_default_match_result(match_result, tier, pm):
     p1id = match_result['player1_id']
