@@ -1284,18 +1284,23 @@ class PersistenceManager:
             query(TierPlayer).filter(TierPlayer.name == challonge_name).first()
 
 
-    def get_tier(self, tier_name):
-        return self.db_connector.get_session().query(Tier).filter(Tier.challonge_name == tier_name).first()
+    def get_tier(self, tier_name,league):
+        return self.db_connector.get_session().query(Tier).filter(
+            Tier.challonge_name == tier_name,
+            Tier.league_id == league.id,).first()
 
-    def get_division(self, division_name):
-        return self.db_connector.get_session().query(Division).filter(Division.name == division_name).first()
+    def get_division(self, division_name, league):
+        return self.db_connector.get_session().query(Division).filter\
+            (Division.name == division_name,
+             Division.tier_id == Tier.id,
+             Tier.league_id == league.id).first()
 
     def get_recent_league_matches(self, league):
-        return self.db_connector.get_session().query(LeagueMatch).\
+        query = self.db_connector.get_session().query(LeagueMatch).\
             filter( LeagueMatch.tier_id == Tier.id,
                     Tier.league_id == League.id,
                     League.id == league.id).order_by(LeagueMatch.updated_at.desc()).limit(100).all()
-
+        return query
 
     def get_division_by_id(self,division_id):
         return self.db_connector.get_session().query(Division).filter(Division.id == division_id).first()

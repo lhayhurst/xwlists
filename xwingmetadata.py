@@ -231,6 +231,7 @@ upgrades = {
          'constraints': (IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT)},
         {'name': 'Bombardier', 'cost': 1},
         {'name': 'Bossk', 'cost': 2, 'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT)},
+        {'name': 'Tail Gunner', 'cost': 2, },
 
     ),
     DROID: (
@@ -250,6 +251,7 @@ upgrades = {
         {'name': 'BB-8', 'cost': 2, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R5-X3', 'cost': 1, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'Targetting Astromech', 'cost': 2},
+        {'name': 'R3 Astromech', 'cost':2}
 
     ),
     TITLE: (

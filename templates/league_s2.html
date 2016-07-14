@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+<br>
+<a href="/league_season_one">Go here for old Season one data</a>
+<br>
+<br><a href="/league_players?league_id={{ league.id }}">Season Two players</a>
+<br>
+ <div><b>{{ league.get_name() }} Tiers</b><br>
+{% for tier in tiers %}
+    {{ tier.get_name() }} : <a href="{{ tier.get_challonge_url() }}">Challonge page</a> | <a href="/tier_matches?tier_id={{ tier.id }}">matches</a>
+    <br>
+{% endfor %}
+<br>
+<hr>
+<b>Recent league matches</b>
+<table id="matches" class="display" cellspacing="0" width="100%">
+  <thead>
+  <tr>
+    <th>Updated at</th>
+    <th>Tier</th>
+    <th>Division</th>
+    <th>Player 1</th>
+    <th>Player 2</th>
+    <th>Match State</th>
+    <th>VLog</th>
+    <th>Player 1 Score</th>
+    <th>Player 2 Score</th>
+    <th>Player 1 List</th>
+    <th>Player 2 List</th>
+  </thead>
+  <tbody>
+  </tr>
+      {% for m in matches %}
+      <tr>
+         <td>{{  m.updated_at}}</td>
+         <td>{{  m.player1.tier.get_name()}}</td>
+         <td>{{  m.player1.division.get_name()}}</td>
+         <td>{{  m.player1.get_url()}}</td>
+         <td>{{  m.player2.get_url()}}</td>
+         <td>{{  m.state }}</td>
+         <td>{{  m.get_vlog_url() | safe }}</td>
+         <td>{{  m.player1_score }}</td>
+         <td>{{  m.player2_score }}</td>
+         <td >{{ m.get_player1_list_display() | safe }}
+         <td >{{ m.get_player2_list_display() | safe }}
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+
+
+<script>
+    $(document).ready( function () {
+        $('#matches').dataTable({
+            "order": [[1, "desc"]],
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            iDisplayLength: -1,
+        });
+    });
+</script>
+{% endblock %}

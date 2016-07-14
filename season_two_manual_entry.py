@@ -16,12 +16,11 @@ class ChallongeMatchCSVImporter:
         if tsvfile is None:
             return
         pm = PersistenceManager( myapp.db_connector )
-        league_name = "X-Wing Vassal League Season One"
+        league_name = "X-Wing Vassal League Season Two"
         league = pm.get_league(league_name)
-        cmid = 1
         self.tsv_players = {}
         self.divisions = {}
-        with open(tsvfile, 'rb') as input:
+        with open(tsvfile, 'rU') as input:
             reader = csv.reader( input,delimiter='\t' )
             for row in reader:
                 person_name = unicode(row[0].strip())
@@ -30,12 +29,10 @@ class ChallongeMatchCSVImporter:
                 time_zone = row[3].strip()
                 reddit_handle = row[4].strip()
                 challengeboards_name = row[5].strip()
-                was_season_zero = row[6].strip()
-                comments = row[7].strip()
-                tier_name = row[8].strip()
-                tier_number = row[9].strip()
-                division_name = row[10].strip()
-                division_letter = row[11].strip()
+                tier_name = row[6].strip()
+                tier_number = row[7].strip()
+                division_name = row[8].strip()
+                division_letter = row[9].strip()
                 self.tsv_players[challonge_name] = { 'person_name': person_name,
                                                 'email_address' : email_address,
                                                 'challonge_name' : challonge_name,
@@ -50,10 +47,10 @@ class ChallongeMatchCSVImporter:
                     self.divisions[division_name] = { 'name': division_name, 'letter':division_letter, 'tier': tier_name}
 
 
-def create_divisions(c, pm):
+def create_divisions(c, pm, league):
     for name in c.divisions.keys():
         division = c.divisions[name]
-        tier = pm.get_tier(division['tier'])
+        tier = pm.get_tier(division['tier'],league)
         d = Division()
         d.challonge_name = division['letter']
         d.name = name
@@ -111,7 +108,7 @@ def create_players(c, pm, ch, league):
             checked_in = player['checked_in']
             if challonge_username_ is None or checked_in is False:
                 lookup_name = player['display_name']
-                # print "player %s has not checked in " % ( player['display-name'])
+                print "player %s has not checked in " % ( lookup_name)
             else:
                 lookup_name = challonge_username_
             if c.tsv_players.has_key(lookup_name):
@@ -126,9 +123,8 @@ def create_players(c, pm, ch, league):
                 print "looking up division %s for player %s" % (division_name, lookup_name)
 
                 if not divisions_href.has_key(division_name):
-                    divisions_href[division_name] = pm.get_division(division_name)
+                    divisions_href[division_name] = pm.get_division(division_name, league)
                 tier_player.division = divisions_href[division_name]
-
                 tier_player.tier = tier_player.division.tier
                 tier_player.challengeboards_handle = decode(tsv_record['challengeboards_name'])
                 tier_player.challonge_id = player['id']
@@ -148,9 +144,9 @@ if __name__ == "__main__":
     challonge_user = os.getenv('CHALLONGE_USER')
     challonge_key  = os.getenv('CHALLONGE_API_KEY')
     ch = ChallongeHelper(challonge_user, challonge_key)
-    league = pm.get_league( "X-Wing Vassal League Season One")
+    league = pm.get_league( "X-Wing Vassal League Season Two")
 
     #create all the divisions for each tier
-    create_divisions(c,pm)
+    create_divisions(c,pm,league)
     create_players(c, pm, ch, league)
     create_matchups(c, pm, ch, league)

@@ -532,6 +532,17 @@ def get_league_stats(league):
 @app.route("/league")
 def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league("X-Wing Vassal League Season Two")
+    tiers = league.tiers
+    matches = pm.get_recent_league_matches(league)
+
+    return render_template("league_s2.html",
+                           league=league, tiers=tiers, matches=matches)
+
+
+@app.route("/league_season_one")
+def league_season_one():
+    pm = PersistenceManager(myapp.db_connector)
     league = pm.get_league("X-Wing Vassal League Season One")
     tiers = league.tiers
     matches = pm.get_recent_league_matches(league)

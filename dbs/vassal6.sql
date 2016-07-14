@@ -1,0 +1,2 @@
+insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'amd', 'R3 Astromech', 'r3astromech', '2');
+insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'crew', 'Tail Gunner', 'tailgunner', '2');
