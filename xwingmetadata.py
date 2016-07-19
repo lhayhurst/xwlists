@@ -43,6 +43,8 @@ T_70 = 'T-70 X-Wing'
 T_70_CANON_NAME = 't70xwing'
 TIE_FO_FIGHTER = 'Tie/fo Fighter'
 TIE_FO_FIGHTER_CANON_NAME = 'tiefofighter'
+TIE_SF_FIGHTER = 'TIE/sf Fighter'
+TIE_sf_FIGHTER_CANON_NAME = 'tiesffighter'
 
 # WAVE 6
 STAR_VIPER_CANON = 'starviper'
@@ -256,6 +258,10 @@ upgrades = {
     ),
     TITLE: (
 
+        {'name': 'Special Ops Training', 'cost': 0, 'canon_name' : 'specialopstraining',
+         'constraints': ({'type': SHIP_TYPE, 'value': TIE_SF_FIGHTER})},
+
+
         {'name': 'Black One', 'cost': 1, 'canon_name' : 'blackone',
          'constraints': ({'type': SHIP_TYPE, 'value': T_70})},
 
@@ -328,6 +334,7 @@ upgrades = {
 
     ),
     SYSTEM: (
+        {'name': 'Collision Detector', 'canon_name': 'collisiondetector', 'cost': 0},
         {'name': 'Electronic Baffle', 'canon_name': 'electronicbaffle', 'cost': 1},
         {'name': 'Enhanced Scopes', 'cost': 1},
         {'name': 'Fire-Control System', 'cost': 2},
@@ -335,6 +342,7 @@ upgrades = {
         {'name': 'Accuracy Corrector', 'cost': 3},
         {'name': 'Reinforced Deflectors', 'cost': 3},
         {'name': 'Sensor Jammer', 'cost': 4},
+        {'name': 'Advanced Targeting Computer', 'canon_name': 'advtargetingcomputer', 'cost': 5},
         {'name': 'Advanced Targeting Computer', 'canon_name': 'advtargetingcomputer', 'cost': 5},
 
     ),
@@ -386,12 +394,12 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
-
         {'name': 'Guidance Chips', 'canon_name': 'guidancechips', 'cost': 0},
         {'name': 'Long-Range Scanners', 'canon_name': 'longrangescanners', 'cost': 0},
         {'name': 'Munitions Failsafe', 'cost': 1},
         {'name': 'Tactical Jammer', 'cost': 1, 'constraints': ({'type': SHIP_SIZE, 'value': LARGE_SHIP})},
         {'name': 'Targeting Computer', 'cost': 2},
+        {'name': 'Vectored Thrusters', 'canon_name': 'vectoredthrusters', 'cost': 2},
         {'name': 'Anti-Pursuit Lasers', 'cost': 2, 'constraints': ({'type': SHIP_SIZE, 'value': LARGE_SHIP})},
         {'name': 'Stygium Particle Accelerator', 'cost': 2},
         {'name': 'Advanced Cloaking Device', 'cost': 4, 'constraints': ({'type': SHIP_TYPE, 'value': TIE_PHANTOM})},
@@ -472,12 +480,28 @@ upgrades = {
     ),
     TECH: (
         {'name': 'Weapons Guidance', 'canon_name': 'weaponsguidance', 'cost': 2},
+        {'name': 'Sensor Cluster', 'canon_name': 'sensorcluster', 'cost': 2},
         {'name': 'Comm Relay', 'canon_name': 'commrelay', 'cost': 3},
 
     )
 }
 
 ships = {
+
+    TIE_SF_FIGHTER : (
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Zeta Specialist', 'cost': 23, 'canon_name':'zetaspecialist',
+         'upgrades': (SYSTEM, MISSILE,TECH, TITLE, MOD ),
+         'pilot_skill' : 3,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Backdraft', 'cost': 27, 'canon_name':'ruthlessfreelancer',
+         'upgrades': (EPT, SYSTEM, MISSILE,TECH, TITLE, MOD ),
+         'pilot_skill' : 7,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Quickdraw', 'cost': 29, 'canon_name':'Quickdraw',
+         'upgrades': (EPT, SYSTEM, MISSILE,TECH, TITLE, MOD ),
+         'pilot_skill' : 9,
+        },
+    ),
 
     JUMPMASTER_5000_ : (
         {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Contracted Scout',
