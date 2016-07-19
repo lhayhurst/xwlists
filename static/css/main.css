@@ -14,8 +14,8 @@ p {
 /* classes */
 .main-section {
     width: 100%;
-    /*height: 500px;*/
-    /*height: inherit;*/
+    margin: 0;
+    overflow: hidden;
 }
 
 .alignright {
@@ -76,8 +76,10 @@ p {
 }
 
 .entries {
-    margin-left: 66%;
-    padding: 20px;
+    padding: 0 2%;
+    overflow: hidden;
+    width: 36%;
+    float: left;
 }
 
 .doughnut-graph {
@@ -176,11 +178,20 @@ p {
 
     /*list display*/
 
-        .charts {
-            width: 66%; /*!!!*/
-            float: left;
-        }
+.charts {
+    width: 60%;
+    float: left;
+    overflow: hidden;
+}
 
-    /*gtr*/
+@media only screen and (max-width: 640px) {
+    .entries {
+        width: 96%;
+        float: none;
+    }
+    .charts {
+        display: none;
+    }
+}
 
 
