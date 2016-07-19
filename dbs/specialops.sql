@@ -6,8 +6,17 @@ CHANGE COLUMN `ship_type` `ship_type` ENUM('ewing','hwk290','yt2400freighter','x
 'vcx100', 'attackshuttle', 'tieadvprototype', 'g1astarfighter','tiesffighter' ) NULL DEFAULT NULL ;
 
 insert into pilot ( name, canon_name, cost, pilot_skill  ) values ( 'Zeta Specialist','zetaspecialist', '23', '3' );
+insert  ship_pilot ( ship_type, pilot_id)
+select 'tiesffighter', id from pilot where canon_name='zetaspecialist';
+
 insert into pilot ( name, canon_name, cost, pilot_skill  ) values ( 'Backdraft','backdraft', '27', '7' );
+insert  ship_pilot ( ship_type, pilot_id)
+select 'tiesffighter', id from pilot where canon_name='backdraft';
+
 insert into pilot ( name, canon_name, cost, pilot_skill  ) values ( 'Quickdraw','quickdraw', '29', '9' );
+insert  ship_pilot ( ship_type, pilot_id)
+select 'tiesffighter', id from pilot where canon_name='quickdraw';
+
 
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'title', 'Special Ops Training', 'specialopstraining', '0');
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'system', 'Collision Detector', 'collisiondetector', '0');

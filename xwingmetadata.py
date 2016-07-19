@@ -44,7 +44,7 @@ T_70_CANON_NAME = 't70xwing'
 TIE_FO_FIGHTER = 'Tie/fo Fighter'
 TIE_FO_FIGHTER_CANON_NAME = 'tiefofighter'
 TIE_SF_FIGHTER = 'TIE/sf Fighter'
-TIE_sf_FIGHTER_CANON_NAME = 'tiesffighter'
+TIE_SF_FIGHTER_CANON_NAME = 'tiesffighter'
 
 # WAVE 6
 STAR_VIPER_CANON = 'starviper'
