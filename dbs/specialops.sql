@@ -3,7 +3,7 @@ CHANGE COLUMN `ship_type` `ship_type` ENUM('ewing','hwk290','yt2400freighter','x
 'tieinterceptor','lambdaclassshuttle','tiephantom','ywing','vt49decimator','firespray31','tiebomber','tiefighter',
 'z95headhunter','awing','tiedefender', 'starviper', 'aggressor',
 'm3ascykinterceptor', 'm3ainterceptor', 'yv666', 'kihraxzfighter', 'kwing', 'tiepunisher', 't70xwing', 'tiefofighter',
-'vcx100', 'attackshuttle', 'tieadvprototype', 'g1astarfighter','tiesffighter' ) NULL DEFAULT NULL ;
+'vcx100', 'attackshuttle', 'tieadvprototype', 'g1astarfighter','tiesffighter','jumpmaster5000' ) NULL DEFAULT NULL ;
 
 insert into pilot ( name, canon_name, cost, pilot_skill  ) values ( 'Zeta Specialist','zetaspecialist', '23', '3' );
 insert  ship_pilot ( ship_type, pilot_id)

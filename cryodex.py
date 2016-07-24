@@ -50,7 +50,7 @@ class CryodexRank:
         self.player_name = player_name
         self.score       = int(score)
         self.mov         = int(mov)
-        self.sos         = int(sos)
+        self.sos         = sos
         self.dropped     = dropped
         self.list_id     = list_id
 

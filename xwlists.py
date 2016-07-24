@@ -54,6 +54,8 @@ static_dir = os.path.join( here, app.config['UPLOAD_FOLDER'] )
 
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+DO_MAIL       = os.environ.get('DO_MAIL')
+
 
 from werkzeug.contrib.cache import SimpleCache
 simple_cache = SimpleCache()
@@ -102,8 +104,8 @@ def mail_message(subject, message):
     msg.body = 'text body'
     msg.html = '<b>A Message From XWJuggler</b><br><hr>' + message
     with app.app_context():
-        print("sending msg ")
-        mail.send(msg)
+        if DO_MAIL:
+            mail.send(msg)
 
 
 def mail_error(errortext):
@@ -111,8 +113,8 @@ def mail_error(errortext):
     msg.body = 'text body'
     msg.html = '<b>ERROR</b><br><hr>' + errortext
     with app.app_context():
-        print("sending msg ")
-        mail.send(msg)
+        if DO_MAIL:
+            mail.send(msg)
 
 @app.route("/about")
 def about():
