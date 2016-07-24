@@ -1171,7 +1171,6 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
                 converter.convert(pm, tourney_list)
 
             except Exception as err:
-                print ("unable to fetch list id " + rank.list_id + " from voidstate, reason: " + str(err) )
                 mail_error(errortext=str(err) + "<br><br>Unable to fetch list id " + rank.list_id + " from voidstate" )
 
 
