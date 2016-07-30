@@ -55,6 +55,7 @@ static_dir = os.path.join( here, app.config['UPLOAD_FOLDER'] )
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 DO_MAIL       = os.environ.get('DO_MAIL')
+ADMIN_EMAIL   = os.environ.get('ADMIN_EMAIL')
 
 
 from werkzeug.contrib.cache import SimpleCache
@@ -72,7 +73,7 @@ app.config.update(dict(
 ))
 
 # administrator list
-ADMINS = ['sozinsky@gmail.com']
+ADMINS = [ADMIN_EMAIL]
 
 mail = Mail(app)
 
@@ -253,8 +254,6 @@ def remove_league_player_form_results():
     pm.db_connector.get_session().commit()
     return redirect(url_for("league_players", league_id=league_id))
 
-
-
 @app.route("/add_league_player_form_results",methods=['POST'])
 def add_league_player_form_results():
     challonge_name        = decode(request.form['challonge_name'])
@@ -343,9 +342,6 @@ def add_league_player_form_results():
     player_stats = tier_player.get_stats()
     return render_template("league_player.html", player=tier_player, stats=player_stats)
 
-
-
-
 @app.route("/add_league_player")
 def add_league_player():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
@@ -359,9 +355,6 @@ def add_league_player():
         for division in tier.divisions:
             tiers_divisions[tier.get_name()].append( {'name': division.get_name(), 'id': division.id } )
     return render_template('add_league_player.html',league=league,tiers_divisions=tiers_divisions,tiers=tiers)
-
-
-
 
 @app.route("/cache_league_results")
 def cache_league_results():
@@ -398,9 +391,10 @@ def cache_league_results():
                             #remove it
                             match_attachment_asset_url = match_attachment_asset_url[match_attachment_asset_url.startswith("//")
                                                                                     and len("//"):]
-                            dbmr.challonge_attachment_url = match_attachment_asset_url
-                            dbmr.updated_at = func.now()
-                            changed = True
+                            if dbmr.challonge_attachment_url != match_attachment_asset_url: #one more go at it :-)
+                                dbmr.challonge_attachment_url = match_attachment_asset_url
+                                dbmr.updated_at = func.now()
+                                changed = True
             if changed:
                 myapp.db_connector.get_session().add( dbmr )
     myapp.db_connector.get_session().commit()

@@ -12,20 +12,39 @@ Python bindings.
     . ~/venv/xwlists/bin/activate
     pip install -r requirements.txt
 
-Initializing the Database
+Initializing and Browsing the Database
 =========================
 
-    mysql < dbs/prod.sql
-
     To familiarize yourself with the database model, please have a look at dbs/database_model.png 
+
+    To create the database, from shell run
+        mysql < dbs/prod.sql
+
+    The file dbs/prod.sql is updated hourly into github from the pythonanywhere server.
+
+    This program uses SQL-Alchemy object bindings and expression building for all its sql management. The schema itself is managed manually (it should be using Flask-Migrate).
+    
 
 Running the App
 ===============
 
 In development mode, so you can see meaningful error messages:
 
-    LOCAL_DB_URL='mysql://localhost/sozin$lists' python xwlists.py dev
+    python xwlists.py dev
 
+Here are the two environment variables the program expects and some sample values:
+
+    DYLD_LIBRARY_PATH /usr/local/mysql/lib
+    LOCAL_DB_URL mysql://root...
+
+Here are the optional environment variables.
+
+    DO_MAIL set to 1 if you want email
+    MAIL_USERNAME if doing mail, your google mail username
+    MAIL_PASSWORD and your google mail password
+    ADMIN_EMAIL an email address where you'd like to receive your emails
+    CHALLONGE_API_KEY if you are using the challonge import functions for vassal league, contact me
+    
 Note, if you get the following error on application startup:
 
   ImportError: dlopen(/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/_mysql.so, 2): Library not loaded: libmysqlclient.18.dylib
