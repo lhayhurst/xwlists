@@ -17,6 +17,8 @@ Initializing the Database
 
     mysql < dbs/prod.sql
 
+    To familiarize yourself with the database model, please have a look at dbs/database_model.png 
+
 Running the App
 ===============
 
