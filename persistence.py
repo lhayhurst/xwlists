@@ -1164,6 +1164,10 @@ class TourneyVenue(Base):
     def get_num_events(self):
         return len(self.tourneys)
 
+    def venue_url(self):
+        url = url_for('venue', venue_id=self.id)
+        return '<a target="_blank" href="' + url + '">' + self.get_name() +'</a>'
+
 
 class PersistenceManager:
 

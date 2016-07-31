@@ -1,0 +1,69 @@
+tourneys.html{% extends "layout.html" %}
+{% block content %}
+
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+<h1>{{ venue.get_name() }}</h1>
+{{ venue.get_city() }}, {{ venue.get_state() }}, {{ venue.get_country() }}<br>
+<br>
+<table id="tourneys" class="display" cellspacing="0" width="100%">
+  <thead>
+  <tr>
+    <th >Name</th>
+    <th >Date Played</th>
+    <th>Num. Players</th>
+    <th >Results</th>
+    <th >Type</th>
+    <th >Round Length</th>
+
+    {% if admin %}
+    <th >Admin</th>
+    {% endif %}
+  </thead>
+  <tbody>
+  </tr>
+      {% for tourney in venue.tourneys %}
+      <tr>
+         <td >{{ tourney.get_tourney_name() }}</td>
+         <td >{{ tourney.tourney_date }}</td>
+         <td>{{ tourney.participant_count }}</td>
+         <td ><a href="{{ url_for( 'get_tourney_details', tourney_id=tourney.id ) }}">Browse/edit results</a></td>
+         <td >{{ tourney.tourney_type }}</td>
+         <td >{{ tourney.round_length }}</td>
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+<script>
+    $.fn.dataTable.moment = function ( format, locale ) {
+        var types = $.fn.dataTable.ext.type;
+
+        // Add type detection
+        types.detect.unshift( function ( d ) {
+            return moment( d, format, locale, true ).isValid() ?
+                'moment-'+format :
+                null;
+        } );
+
+        // Add sorting method - use an integer for the sorting
+        types.order[ 'moment-'+format+'-pre' ] = function ( d ) {
+            return moment( d, format, locale, true ).unix();
+        };
+    };
+    $(document).ready( function () {
+        $.fn.dataTable.moment( 'YYYY-MM-DD HH:mm:ss' );
+        $.fn.dataTable.moment( 'YYYY-MM-DD' );
+        $('#tourneys').dataTable( {
+                "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+                iDisplayLength: 25,
+                "order": [[ 0, "desc" ]]
+        });
+    } );
+</script>
+
+{% endblock %}

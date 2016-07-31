@@ -1906,6 +1906,13 @@ def set_geo():
     pm.db_connector.get_session().commit()
     return redirect(url_for("venues"))
 
+@app.route("/venue")
+def venue():
+    pm               = PersistenceManager(myapp.db_connector)
+    venue_id         = request.args.get('venue_id')
+    venue            =pm.get_venue_by_id(venue_id)
+    return render_template('venue.html', venue=venue)
+
 @app.route("/heatmap")
 def heatmap():
     pm               = PersistenceManager(myapp.db_connector)
@@ -1913,10 +1920,12 @@ def heatmap():
     data = []
     for venue in venues:
         if venue.latitude is not None and venue.longitude is not None:
+            markup =  Markup("%s: %d event(s)" % (venue.venue_url(), len(venue.tourneys)))
             data.append( { 'count': len(venue.tourneys),
                            'lat': float(venue.latitude),
                            'lng': float(venue.longitude),
-                           'name': "%s: %d event(s)" % (venue.venue, len(venue.tourneys)),
+                           'name': str(markup.decode()),
+
                            }
                          )
 

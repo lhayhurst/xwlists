@@ -81,9 +81,9 @@
         marker.on('mouseover', function (e) {
             this.openPopup();
         });
-        marker.on('mouseout', function (e) {
-            this.closePopup();
-        });
+        //marker.on('mouseout', function (e) {
+        //    this.closePopup();
+        //});
         markers.push(marker);
     }
 
@@ -127,6 +127,7 @@
         <th>Id</th>
         <th>Venue</th>
         <th>Num. events</th>
+        <th>Browse events</th>
         <th>City</th>
         <th>State</th>
         <th>Country</th>
@@ -141,6 +142,7 @@
              <td>{{ v.id }}</td>
              <td >{{ v.get_name() }}</td>
              <td>{{ v.get_num_events() }}</td>
+             <td> {{ v.venue_url() }}</td>
              <td>{{ v.get_city() }}</td>
              <td>{{ v.get_state()}}</td>
              <td>{{ v.get_country()}}</td>
