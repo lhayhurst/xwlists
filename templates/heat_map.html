@@ -142,7 +142,7 @@
              <td>{{ v.id }}</td>
              <td >{{ v.get_name() }}</td>
              <td>{{ v.get_num_events() }}</td>
-             <td> {{ v.venue_url() }}</td>
+             <td> {{ v.venue_url()|safe }}</td>
              <td>{{ v.get_city() }}</td>
              <td>{{ v.get_state()}}</td>
              <td>{{ v.get_country()}}</td>
