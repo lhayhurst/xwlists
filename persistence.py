@@ -540,6 +540,11 @@ class Tourney(Base):
             return "Unknown"
         return self.venue.get_country()
 
+    def get_venue_url(self):
+        if self.venue:
+            return self.venue.venue_url()
+        return ""
+
     def get_state(self):
         if self.venue is None:
             return "Unknown"
@@ -630,8 +635,6 @@ class Tourney(Base):
     def venue_string(self):
         ret = ""
         if self.venue is not None:
-            if self.venue.venue is not None:
-                ret = self.venue.venue
             if self.venue.city is not None:
                 ret = ret + "/" + self.venue.city
             if self.venue.state is not None:

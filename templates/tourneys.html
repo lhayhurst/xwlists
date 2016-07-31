@@ -18,12 +18,13 @@
   <tr>
     <th>Id</th>
     <th >Name</th>
+    <th>Venue</th>
     <th>Num. Players</th>
     <th >Results</th>
     <th >Type</th>
     <th >Date Played</th>
     <th >Round Length</th>
-    <th >Venue/City/State/Country</th>
+    <th >City/State/Country</th>
     <th >Export Lists</th>
 
     {% if admin %}
@@ -36,6 +37,7 @@
       <tr>
          <th>{{ tourney.id }}</th>
          <td >{{ tourney.get_tourney_name() }}</td>
+         <td>{{ tourney.get_venue_url()|safe }}</td>
          <td>{{ tourney.participant_count }}</td>
          <td ><a href="{{ url_for( 'get_tourney_details', tourney_id=tourney.id ) }}">Browse/edit results</a></td>
          <td >{{ tourney.tourney_type }}</td>
