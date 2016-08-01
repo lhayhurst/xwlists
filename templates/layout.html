@@ -66,7 +66,16 @@
             font-family: 'Helvetica Neue', 'Helvetica', 'Lucida Grande', 'Arial', sans-serif;
             font-weight: 100;
             font-size: 48px;
-            top: -18px;
+            top: -6px;
+        }
+        .main-descriptor {
+            display: inline-block;
+            position: relative;
+            font-family: 'Helvetica Neue', 'Helvetica', 'Lucida Grande', 'Arial', sans-serif;
+            font-weight: 100;
+            font-size: 24px;
+            top: -6px;
+            text-align:center;
         }
         .summary-block {
             position: relative;
@@ -86,30 +95,22 @@
             font-size: 11px;
             font-family: 'Helvetica', 'Lucida Grande', 'Arial', sans-serif;
         }
+        .banner-image {
+            float: right;
+            /* margin-bottom: 0; */
+            margin-top: -.6EM;
+            margin-right: .2EM;
+        }
     </style>
 	<div id="conteneur">
 		  <div id="header">
               <span class="main-title">X-Wing List Juggler</span>
-              <div class="summary-block" style="visibility: hidden">
-                  <span class="summaries" id="tourney-count">fetching</span>
-                  <span class="summary-title">Tourneys</span>
-              </div>
-              <div class="summary-block" style="visibility: hidden">
-                  <span class="summaries" id="list-count">fetching</span>
-                  <span class="summary-title">Lists</span>
-              </div>
-              <div class="summary-block" style="visibility: hidden">
-                  <span class="summaries" id="ship-count">fetching</span>
-                  <span class="summary-title">Ships</span>
-              </div>
-              <div class="summary-block" style="visibility: hidden">
-                  <span class="summaries" id="upgrade-count">fetching</span>
-                  <span class="summary-title">Upgrades</span>
-              </div>
-              <div class="summary-block" style="visibility: hidden">
-                  <span class="summaries" id="points-spent">fetching</span>
-                  <span class="summary-title">Points spent</span>
-              </div>
+              <span class="main-descriptor">A hub for tournament results and lists</span>
+              <span class="banner-image">
+                <a href="https://www.patreon.com/scumandvillainy">
+                        <img border="0" alt="scumandvillainypatreon" src="/static/img/snvbanner.png" >
+                </a>
+                </span>
            </div>
     <script>
 
@@ -117,37 +118,6 @@
            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
-        $(document).ready(function() {
-            $.ajax({
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                url: "/get_summaries",
-                success: function (data) {
-                    console.log(data);
-                    numTourneys  = data.tourneys;
-                    numLists     = data.lists;
-                    numShips     = data.ships;
-                    numUpgrades  = data.upgrades;
-                    pointsSpent  = data.points_spent;
-
-                    tourneysSpan = document.getElementById( 'tourney-count');
-                    tourneysSpan.innerHTML = numberWithCommas(numTourneys);
-                    listsSpan    = document.getElementById( 'list-count');
-                    listsSpan.innerHTML = numberWithCommas(numLists);
-                    shipsSpan    = document.getElementById( 'ship-count');
-                    shipsSpan.innerHTML = numberWithCommas(numShips);
-                    upgradesSpan    = document.getElementById( 'upgrade-count');
-                    upgradesSpan.innerHTML = numberWithCommas(numUpgrades);
-                    pointsSpan    = document.getElementById( 'points-spent');
-                    pointsSpan.innerHTML = numberWithCommas(pointsSpent);
-
-                },
-                error: function (data) {
-                    ;
-                },
-                dataType: "json"
-            });
-        });
     </script>
 
 
