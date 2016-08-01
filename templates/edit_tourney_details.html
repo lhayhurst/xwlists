@@ -75,7 +75,7 @@
             </div>
             <div data-field-span="1">
                 <label>Venue name</label>
-                <input type="text" name="venue" value="{{  tourney.venue.venue }}"required/>
+                <input type="text" id="venue" name="venue" value="{{  tourney.venue_name() }}" required/>
             </div>
         </div>
     </fieldset>
@@ -123,6 +123,8 @@ $(document).ready(function(){
     var tourney_type     = {{ tourney.tourney_type | tojson | safe }}
     var country          = {{ tourney.get_country() | tojson | safe }}
     var state            = {{ tourney.get_state() | tojson | safe }}
+    var venues           = {{ venues | tojson | safe  }}
+    console.log(venues);
 
     document.getElementById('tourney_format_custom').addEventListener('keydown', function(e) {
         $('#tourney_format_dropdown').select2( 'val', '' );
@@ -131,7 +133,9 @@ $(document).ready(function(){
 
     $('#tourney_format_dropdown').on( 'change', function(e) {
         $('#tourney_format_custom').val("")
-    })
+    });
+
+    $('#venue').autocomplete( { source: venues});
 
 
     window.ParsleyValidator.addValidator('notDefaultSelection', function(value, requirement) {
@@ -151,7 +155,6 @@ $(document).ready(function(){
     $('#sets > option').prop("selected", "selected");
     $("#sets").trigger("change");
     $('#form').parsley().subscribe('parsley:form:validate', function (formInstance) {
-        console.log("parsley:form:validate");
         // if one of these blocks is not failing do not prevent submission
         // we use here group validation with option force (validate even non required fields)
 

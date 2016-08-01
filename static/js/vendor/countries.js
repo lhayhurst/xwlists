@@ -322,7 +322,7 @@ function setCountryAndStateValue( countryElementId, country, stateElementId, sta
     }
     populateStates( countryElementId, stateElementId );
     for ( var i = 0; i < stateElement.length; i++ ) {
-        console.log( stateElement.options[i]);
+        //console.log( stateElement.options[i]);
         if(stateElement.options[i].value == state) {
           stateElement.options[i].selected = true;
           break;

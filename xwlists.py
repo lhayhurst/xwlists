@@ -795,22 +795,6 @@ def remove_tag():
     update_archtypes_cache(archtype)
     return jsonify({"success":1})
 
-@app.route("/edit_tourney_details")
-def edit_tourney_details():
-    tourney_id   = request.args.get('tourney_id')
-
-    pm                = PersistenceManager(myapp.db_connector)
-    tourney           = pm.get_tourney_by_id(tourney_id)
-
-    tourney_date      = tourney.tourney_date
-    date_str          = "%d/%d/%d" % ( tourney_date.month, tourney_date.day, tourney_date.year)
-    print "tourney date is " + date_str
-
-    return render_template('edit_tourney_details.html', tourney_id=tourney_id,
-                                                tourney=tourney,
-                                                tourney_formats = xwingmetadata.formats,
-                                                tourney_date = date_str,
-                                                unlocked=False )
 
 @app.route("/update_tourney_details/",methods=['POST'])
 def update_tourney_details():
@@ -976,6 +960,25 @@ def new():
                                                tourney_formats = xwingmetadata.formats,
                                                format_default  = xwingmetadata.format_default,
                                                venues          = venues)
+
+@app.route("/edit_tourney_details")
+def edit_tourney_details():
+    tourney_id   = request.args.get('tourney_id')
+
+    pm                = PersistenceManager(myapp.db_connector)
+    tourney           = pm.get_tourney_by_id(tourney_id)
+    venues            = pm.get_tourney_venues()
+    tourney_date      = tourney.tourney_date
+    date_str          = "%d/%d/%d" % ( tourney_date.month, tourney_date.day, tourney_date.year)
+    print "tourney date is " + date_str
+
+    return render_template('edit_tourney_details.html', tourney_id=tourney_id,
+                                                tourney=tourney,
+                                                venues=venues,
+                                                tourney_formats = xwingmetadata.formats,
+                                                tourney_date = date_str,
+                                                unlocked=False)
+
 
 def generate( rows ):
     for r in rows:

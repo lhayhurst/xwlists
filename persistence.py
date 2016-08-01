@@ -643,6 +643,11 @@ class Tourney(Base):
             ret = "Unknown"
         return decode(ret)
 
+    def venue_name(self):
+        if self.venue is not None:
+            return self.venue.get_name()
+        return "Unknown"
+
 tourney_player_table = "tourney_player"
 class TourneyPlayer(Base):
     __tablename__    = tourney_player_table
