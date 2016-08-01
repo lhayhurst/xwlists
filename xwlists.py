@@ -970,9 +970,12 @@ def edit_elim_results():
 @app.route("/new")
 def new():
     set = sorted(xwingmetadata.sets_and_expansions.keys() )
+    pm         = PersistenceManager(myapp.db_connector)
+    venues     = pm.get_tourney_venues()
     return render_template('new_tourney.html', sets      = set,
                                                tourney_formats = xwingmetadata.formats,
-                                               format_default  = xwingmetadata.format_default )
+                                               format_default  = xwingmetadata.format_default,
+                                               venues          = venues)
 
 def generate( rows ):
     for r in rows:

@@ -96,7 +96,8 @@
             </div>
             <div data-field-span="1">
                 <label>Venue name</label>
-                <input type="text" name="venue" required/>
+                <input id="venue" name="venue" size="42" required>
+                </input>
             </div>
         </div>
          <legend>Tourney results</legend>
@@ -149,8 +150,15 @@ function tourney_format_custom_valid(formInstance)
 
 
 $(document).ready(function(){
-    var tourney_format_default = {{ format_default | tojson | safe }}
+    var tourney_format_default = {{ format_default | tojson | safe }};
     $('#tourney_format_dropdown').val(tourney_format_default);
+
+    var venues = {{ venues | tojson | safe }};
+    console.log(venues);
+    $( "#venue" ).autocomplete({
+               source: venues
+    });
+
 
     document.getElementById('tourney_format_custom').addEventListener('keydown', function(e) {
         $('#tourney_format_dropdown').select2( 'val', '' );

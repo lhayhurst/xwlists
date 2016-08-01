@@ -550,8 +550,6 @@ class Tourney(Base):
             return "Unknown"
         return self.venue.get_state()
 
-
-
     def is_standard_format(self):
         return self.format == 'Standard - 100 Point Dogfight'
 
@@ -1330,6 +1328,12 @@ class PersistenceManager:
                    League.name == league_name
                    )
         return query.first()
+
+    def get_tourney_venues(self):
+        ret = []
+        for v in self.db_connector.get_session().query(TourneyVenue.venue).distinct():
+            ret.append(str(decode(v.venue)))
+        return ret
 
     def get_tourney_venue(self, country,state,city,venue):
 
