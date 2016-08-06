@@ -122,12 +122,16 @@ class ShipType(DeclEnum):
     KIHRAXZ_FIGHTER = xwingmetadata.KIHRAXZ_FIGHTER_CANON_NAME, xwingmetadata.KIHRAXZ_FIGHTER
     T_70 = xwingmetadata.T_70_CANON_NAME, xwingmetadata.T_70
     TIE_FO_FIGHTER = xwingmetadata.TIE_FO_FIGHTER_CANON_NAME, xwingmetadata.TIE_FO_FIGHTER
-    TIE_SF_FIGHTER = xwingmetadata.TIE_SF_FIGHTER_CANON_NAME, xwingmetadata.TIE_SF_FIGHTER
     TIE_ADVANCED_PROTOTYPE = xwingmetadata.TIE_ADVANCED_PROTOTYPE_CANON_NAME, xwingmetadata.TIE_ADVANCED_PROTOTYPE
     G1A_STARFIGHTER = xwingmetadata.G1A_STARFIGHTER_CANON_NAME, xwingmetadata.G1A_STARFIGHTER
     ATTACK_SHUTTLE = xwingmetadata.ATTACK_SHUTTLE_CANON_NAME, xwingmetadata.ATTACK_SHUTTLE
     VCX100 = xwingmetadata.VCX100_CANON_NAME, xwingmetadata.VCX100
     JUMPMASTER_5000 = xwingmetadata.JUMPMASTER_5000_CANON_NAME, xwingmetadata.JUMPMASTER_5000_
+    TIE_SF_FIGHTER = xwingmetadata.TIE_SF_FIGHTER_CANON_NAME, xwingmetadata.TIE_SF_FIGHTER
+    ARC_170 = xwingmetadata.ARC_170_CANON_NAME, xwingmetadata.ARC_170
+    PROTECTORATE_STARFIGHTER = xwingmetadata.PROTECTORATE_STARFIGHTER_CANON_NAME, xwingmetadata.PROTECTORATE_STARFIGHTER
+    LANCER_CLASS_PURSUIT_CRAFT = xwingmetadata.LANCER_CLASS_PURSUIT_CRAFT_CANON_NAME, xwingmetadata.LANCER_CLASS_PURSUIT_CRAFT
+
 
 class Event(Base):
     __tablename__ = event_table

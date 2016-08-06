@@ -43,8 +43,7 @@ T_70 = 'T-70 X-Wing'
 T_70_CANON_NAME = 't70xwing'
 TIE_FO_FIGHTER = 'Tie/fo Fighter'
 TIE_FO_FIGHTER_CANON_NAME = 'tiefofighter'
-TIE_SF_FIGHTER = 'TIE/sf Fighter'
-TIE_SF_FIGHTER_CANON_NAME = 'tiesffighter'
+
 
 # WAVE 6
 STAR_VIPER_CANON = 'starviper'
@@ -64,7 +63,7 @@ YV_666_FREIGHTER_CANON_NAME = 'yv666'
 K_WING = 'K-Wing'
 K_WING_CANON_NAME = 'kwing'
 
-#unreleased/vassal only
+#wave 8
 VCX100 = 'VCX-100'
 VCX100_CANON_NAME = 'vcx100'
 ATTACK_SHUTTLE = 'Attack Shuttle'
@@ -75,6 +74,22 @@ G1A_STARFIGHTER = 'G-1A Starfighter'
 G1A_STARFIGHTER_CANON_NAME = 'g1astarfighter'
 JUMPMASTER_5000_CANON_NAME = "jumpmaster5000"
 JUMPMASTER_5000_ = "JumpMaster 5000"
+
+#wave 9
+TIE_SF_FIGHTER = 'TIE/sf Fighter'
+TIE_SF_FIGHTER_CANON_NAME = 'tiesffighter'
+
+ARC_170 = 'ARC-170'
+ARC_170_CANON_NAME = 'arc170'
+
+PROTECTORATE_STARFIGHTER = 'Protectorate Starfighter'
+PROTECTORATE_STARFIGHTER_CANON_NAME = 'protectoratestarfighter'
+
+LANCER_CLASS_PURSUIT_CRAFT = 'Lancer-craft Pursuit Craft'
+LANCER_CLASS_PURSUIT_CRAFT_CANON_NAME = 'lancerclasspursuitcraft'
+
+
+
 
 EPT = "Elite Pilot Talent"
 EPT_CANON = 'ept'
@@ -149,7 +164,8 @@ sets_and_expansions = {'Core Set': [],
                                   'Tie Punisher Expansion Pack', 'Hound\'s Tooth Expansion Pack'],
                        'Force Awakens Core Set': [],
                        'Wave 8': ['Punishing One Expansion Pack', 'Ghost Expansion Pack', 'Tie Inquisitor Expansion Pack',
-                                  'T-70 X-Wing Expansion Pack,' 'Mist Hunter Expansion Pack', 'TIE/fo Expansion Pack']
+                                  'T-70 X-Wing Expansion Pack,' 'Mist Hunter Expansion Pack', 'TIE/fo Expansion Pack'],
+                       'Wave 9': ['Protectorate Starfighter Expansion Pack', 'ARC-170 Expansion Pack', 'Shadow Caster Expansion Pack', 'Special Forces TIE Expansion Pack']
                        }
 
 formats = {'Standard - 100 Point Dogfight', 'Epic Play - 300 points', 'Escalation'}
@@ -167,6 +183,16 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 # all the x-wing upgrades.
 upgrades = {
     CREW: (
+
+        {'name': 'Tail Gunner', 'canon_name': 'tailgunner', 'cost': 2 },
+        {'name': 'IG-88D', 'canon_name': 'ig88d', 'cost': 1,
+         'constraints': (SCUM_FACTION_CONSTRAINT),},
+
+        {'name': 'Ketsu Onyo', 'canon_name': 'ketsuonyo', 'cost': 1,
+         'constraints': (SCUM_FACTION_CONSTRAINT),},
+
+        {'name': 'Latts Razzi', 'canon_name': 'lattsrazzi', 'cost': 1,
+         'constraints': (SCUM_FACTION_CONSTRAINT),},
 
         {'name': 'Systems Officer', 'canon_name': 'systemsofficer', 'cost': 2,
          'constraints': (IMPERIAL_FACTION_CONSTRAINT),},
@@ -239,6 +265,7 @@ upgrades = {
     DROID: (
         {'name': 'R2 Astromech', 'cost': 1},
         {'name': 'R5 Astromech', 'cost': 1},
+        {'name': 'R3 Astromech', 'cost': 2},
         {'name': 'R4-D6', 'cost': 1, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R5-K6', 'cost': 2, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
         {'name': 'R3-A2', 'cost': 2, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
@@ -258,9 +285,18 @@ upgrades = {
     ),
     TITLE: (
 
+        {'name': 'Concord Dawn Protector', 'cost': 1, 'canon_name' : 'concorddawnprotector',
+         'constraints': ({'type': SHIP_TYPE, 'value': PROTECTORATE_STARFIGHTER})},
+
+        {'name': 'Shadow Caster', 'cost': 3, 'canon_name' : 'shadowcaster',
+         'constraints': ({'type': SHIP_TYPE, 'value': LANCER_CLASS_PURSUIT_CRAFT})},
+
+        {'name': 'Alliance Overhaul', 'cost': 0, 'canon_name' : 'allianceoverhaul',
+         'constraints': ({'type': SHIP_TYPE, 'value': ARC_170})},
+
+
         {'name': 'Special Ops Training', 'cost': 0, 'canon_name' : 'specialopstraining',
          'constraints': ({'type': SHIP_TYPE, 'value': TIE_SF_FIGHTER})},
-
 
         {'name': 'Black One', 'cost': 1, 'canon_name' : 'blackone',
          'constraints': ({'type': SHIP_TYPE, 'value': T_70})},
@@ -354,6 +390,8 @@ upgrades = {
         {'name': 'Twin Laser Turret', 'canon_name': 'twinlaserturret', 'cost': 6},
     ),
     TORPEDO: (
+
+        {'name': 'Seismic Torpedoes', 'cost': 2},
         {'name': 'Flechette Torpedoes', 'cost': 2},
         {'name': 'Proton Torpedoes', 'cost': 4},
         {'name': 'Ion Torpedoes', 'cost': 5},
@@ -394,6 +432,7 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
+        {'name': 'Gyroscopic Targeting', 'canon_name': 'gyroscopictargeting', 'cost': 2},
         {'name': 'Guidance Chips', 'canon_name': 'guidancechips', 'cost': 0},
         {'name': 'Long-Range Scanners', 'canon_name': 'longrangescanners', 'cost': 0},
         {'name': 'Munitions Failsafe', 'cost': 1},
@@ -424,6 +463,7 @@ upgrades = {
 
     EPT:
         (
+         {'name': 'Fearlessness', 'cost': 1, 'canon_name':'fearlessness'},
          {'name': 'Attanni Mindlink', 'cost': 1, 'canon_name':'attannimindlink'},
          {'name': 'Rage', 'cost': 1, 'canon_name':'rage'},
          {'name': 'Adaptability', 'cost': 0, 'canon_name':'adaptability'},
@@ -470,6 +510,9 @@ upgrades = {
     ),
 
     ILLICIT: (
+
+        {'name': 'Rigged Cargo Chute', 'canon_name': 'riggedcargochute', 'cost': 1},
+        {'name': 'Black Market Slicer Tools', 'canon_name': 'blackmarketslicertools', 'cost': 1},
         {'name': 'Hot Shot Blaster', 'canon_name': 'hotshotblaster', 'cost': 3},
         {'name': 'Dead Mans Switch', 'canon_name': 'deadmansswitch', 'cost': 2},
         {'name': 'Feedback Array', 'canon_name': 'feedbackarray', 'cost': 2},
@@ -488,6 +531,33 @@ upgrades = {
 
 ships = {
 
+    PROTECTORATE_STARFIGHTER: (
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Fenn Rau', 'cost': 28, 'canon_name':'fennrau',
+         'upgrades': (EPT, TORPEDO, TITLE, MOD ),
+         'pilot_skill' : 9,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Old Teroch', 'cost': 26, 'canon_name':'oldteroch',
+         'upgrades': (EPT, TORPEDO, TITLE, MOD ),
+         'pilot_skill' : 7,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Kad Solus', 'cost': 25, 'canon_name':'kadsolus',
+         'upgrades': (EPT, TORPEDO, TITLE, MOD ),
+         'pilot_skill' : 6,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Concord Dawn Ace', 'cost': 23, 'canon_name':'concorddawnace',
+         'upgrades': (EPT, TORPEDO, TITLE, MOD ),
+         'pilot_skill' : 5,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Concord Dawn Veteran', 'cost': 22, 'canon_name':'concorddawnace',
+         'upgrades': (EPT, TORPEDO, TITLE, MOD ),
+         'pilot_skill' : 3,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Zealous Recruit', 'cost': 20, 'canon_name':'zealousrecruit',
+         'upgrades': (TORPEDO, TITLE, MOD ),
+         'pilot_skill' : 1,
+        },
+    ),
+
     TIE_SF_FIGHTER : (
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Zeta Specialist', 'cost': 23, 'canon_name':'zetaspecialist',
          'upgrades': (SYSTEM, MISSILE,TECH, TITLE, MOD ),
@@ -501,6 +571,53 @@ ships = {
          'upgrades': (EPT, SYSTEM, MISSILE,TECH, TITLE, MOD ),
          'pilot_skill' : 9,
         },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Omega Specialist', 'cost': 25, 'canon_name':'omegaspecialist',
+         'upgrades': (EPT, SYSTEM, MISSILE,TECH, TITLE, MOD ),
+         'pilot_skill' : 5,
+        },
+    ),
+
+
+    ARC_170: (
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Braylen Stramm', 'cost': 25, 'canon_name':'braylenstramm',
+         'upgrades': (TORPEDO, CREW, DROID, TITLE, MOD ),
+         'pilot_skill' : 3,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Norra Wexley', 'cost': 29, 'canon_name':'norrawexley',
+         'upgrades': (EPT, TORPEDO, CREW, DROID, TITLE, MOD ),
+         'pilot_skill' : 7,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Shara Bey', 'cost': 28, 'canon_name':'sharabey',
+         'upgrades': (EPT, TORPEDO, CREW, DROID, TITLE, MOD ),
+         'pilot_skill' : 6,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Thane Kyrell', 'cost': 26, 'canon_name':'thanekyrell',
+         'upgrades': (TORPEDO, CREW, DROID, TITLE, MOD ),
+         'pilot_skill' : 4,
+        },
+    ),
+
+    LANCER_CLASS_PURSUIT_CRAFT: (
+        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Asajj Ventress', 'cost': 37, 'canon_name':'asajjventress',
+         'upgrades': (EPT, CREW, ILLICIT, ILLICIT, TITLE, MOD ),
+         'pilot_skill' : 6,
+        },
+
+        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Ketsu Onyo', 'cost': 38, 'canon_name':'ketsuonyo',
+         'upgrades': (EPT, CREW, ILLICIT, ILLICIT, TITLE, MOD ),
+         'pilot_skill' : 7,
+        },
+
+        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Sabine Wren [Scum]', 'cost': 35, 'canon_name':'sabinewren-swx56',
+         'upgrades': (CREW, ILLICIT, ILLICIT, TITLE, MOD ),
+         'pilot_skill' : 5,
+        },
+
+        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Shadowport Hunter', 'cost': 33, 'canon_name':'shadowporthunter',
+         'upgrades': (CREW, ILLICIT, ILLICIT, TITLE, MOD ),
+         'pilot_skill' : 2,
+        },
+
     ),
 
     JUMPMASTER_5000_ : (
