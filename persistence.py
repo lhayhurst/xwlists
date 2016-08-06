@@ -1680,7 +1680,7 @@ class PersistenceManager:
             Upgrade.name,]
 
         if venue_id:
-            filters.append(Tourney.id == venue_id)
+            filters.append(Tourney.venue_id == venue_id)
             group_by_filters.append(Tourney.venue_id)
 
         if show_the_cut_only:
