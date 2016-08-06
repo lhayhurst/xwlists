@@ -604,9 +604,10 @@ class PilotSkillHighchartsGraph:
 
 class PilotSkillTimeSeriesData:
     def __init__(self, pm, tourney_filters=None,
-                 show_the_cut_only=False ):
+                 show_the_cut_only=False,
+                 venue_id=None):
         self.pm = pm
-        records = pm.get_pilot_skill_time_series(tourney_filters,show_the_cut_only);
+        records = pm.get_pilot_skill_time_series(tourney_filters,show_the_cut_only,venue_id);
         self.time_series_data = collections.OrderedDict()
         self.ships = {}
 
@@ -639,12 +640,13 @@ class PilotSkillTimeSeriesData:
 
 
 class ShipPilotTimeSeriesData:
-    def __init__(self, pm,
+    def     __init__(self, pm,
                  tourney_filters=None,
                  show_as_count=False,
                  show_the_cut_only=False,
                  calculate_ship_pilot=True,
-                 calculate_upgrades=False):
+                 calculate_upgrades=False,
+                 venue_id=None):
         self.pm               = pm
         self.grand_total_data = collections.OrderedDict()
         self.faction_data     = collections.OrderedDict()
@@ -655,18 +657,19 @@ class ShipPilotTimeSeriesData:
         self.upgrade_ships    = {}
         self.upgrade_types    = {}
         self.upgrade_name_to_type = {}
+        self.venue_id         = venue_id
 
         self.show_as_count     = show_as_count
         self.show_the_cut_only = show_the_cut_only
 
         if calculate_ship_pilot:
-            self.ship_pilot_time_series_data = pm.get_ship_pilot_rollup(tourney_filters,show_the_cut_only)
-            self.pilot_upgrade_time_series_data = pm.get_pilot_upgrade_rollups( tourney_filters,show_the_cut_only )
+            self.ship_pilot_time_series_data = pm.get_ship_pilot_rollup(tourney_filters,show_the_cut_only,venue_id)
+            self.pilot_upgrade_time_series_data = pm.get_pilot_upgrade_rollups( tourney_filters,show_the_cut_only,venue_id )
             self.visit_time_series_data( self.ship_pilot_time_series_data)
             self.visit_time_series_data(self.pilot_upgrade_time_series_data)
 
         if calculate_upgrades:
-            self.upgrade_time_series_data = pm.get_upgrade_rollups( tourney_filters, show_the_cut_only)
+            self.upgrade_time_series_data = pm.get_upgrade_rollups( tourney_filters, show_the_cut_only, venue_id)
             self.visit_upgrade_rollups(self.upgrade_time_series_data )
 
 
@@ -806,10 +809,7 @@ class ShipPilotTimeSeriesData:
                 self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade] = collections.OrderedDict()
 
             if not self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade].has_key(year_mo):
-                self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade][year_mo] = collections.OrderedDict()
-
-            if not self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade][year_mo].has_key(year_mo):
-                self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade][year_mo] = 0 #epic
+                self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade][year_mo] = 0
 
             self.upgrade_data[faction][ship][pilot][upgrade_type][upgrade][year_mo]  += datapoint
 

@@ -1566,7 +1566,7 @@ class PersistenceManager:
     def commit(self):
         self.db_connector.get_session().commit()
 
-    def get_pilot_skill_time_series(self, tourney_filters, show_the_cut_only):
+    def get_pilot_skill_time_series(self, tourney_filters, show_the_cut_only,venue_id):
 
         session = self.db_connector.get_session()
 
@@ -1578,23 +1578,31 @@ class PersistenceManager:
             ShipPilot.pilot_id == Pilot.id
         ]
 
+        year  = sqlalchemy.extract('year', Tourney.tourney_date)
+        month = sqlalchemy.extract('month', Tourney.tourney_date)
+        group_by_filters = [
+            year,
+            month,
+            ArchtypeList.faction, ShipPilot.ship_type, Pilot.pilot_skill
+        ]
+
+        if venue_id is not None:
+            filters.append(Tourney.venue_id == venue_id)
+            group_by_filters.append(Tourney.venue_id)
+
         if show_the_cut_only:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
             filters.append( TourneyList.player_id == TourneyRanking.player_id)
             filters.append(TourneyRanking.elim_rank != None)
 
-        year  = sqlalchemy.extract('year', Tourney.tourney_date)
-        month = sqlalchemy.extract('month', Tourney.tourney_date)
+
         ship_pilot_rollup_sql = session.query(
             year.label("year"),
             month.label("month"),
             ArchtypeList.faction, ShipPilot.ship_type, Pilot.pilot_skill,
                              func.count( Pilot.pilot_skill).label("count")).\
                              filter( and_(*filters)).\
-            group_by(
-                year,
-                month,
-                ArchtypeList.faction, ShipPilot.ship_type, Pilot.pilot_skill ).\
+            group_by(*group_by_filters ).\
             statement.compile(dialect=mysql.dialect())
 
         connection = self.db_connector.get_engine().connect()
@@ -1602,7 +1610,7 @@ class PersistenceManager:
         return ship_pilot_rollup
 
 
-    def get_ship_pilot_rollup(self, tourney_filters,show_the_cut_only):
+    def get_ship_pilot_rollup(self, tourney_filters,show_the_cut_only,venue_id):
 
         session = self.db_connector.get_session()
 
@@ -1613,6 +1621,18 @@ class PersistenceManager:
             Ship.ship_pilot_id == ShipPilot.id ,
             ShipPilot.pilot_id == Pilot.id
         ]
+
+        year  = sqlalchemy.extract('year', Tourney.tourney_date)
+        month = sqlalchemy.extract('month', Tourney.tourney_date)
+        group_by_filters = [ year,
+                     month,
+                     ArchtypeList.faction,
+                     ShipPilot.ship_type,
+                     Pilot.name]
+
+        if venue_id is not None:
+            filters.append( Tourney.venue_id == venue_id )
+            group_by_filters.append(Tourney.venue_id)
 
         if show_the_cut_only:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
@@ -1622,8 +1642,7 @@ class PersistenceManager:
         if tourney_filters is not None:
             self.apply_tourney_type_filter(filters, tourney_filters)
 
-        year  = sqlalchemy.extract('year', Tourney.tourney_date)
-        month = sqlalchemy.extract('month', Tourney.tourney_date)
+
         ship_pilot_rollup_sql = session.query(
             year.label("year"),
             month.label("month"),
@@ -1631,17 +1650,14 @@ class PersistenceManager:
                              func.count( Pilot.id).label("num_pilots"),
                              func.sum( Pilot.cost).label("cost_pilots")).\
                              filter( and_(*filters)).\
-            group_by( rollup(
-                year,
-                month,
-                ArchtypeList.faction, ShipPilot.ship_type, Pilot.name) ).\
+            group_by( rollup( *group_by_filters ) ).\
             statement.compile(dialect=mysql.dialect())
 
         connection = self.db_connector.get_engine().connect()
         ship_pilot_rollup = connection.execute(ship_pilot_rollup_sql)
         return ship_pilot_rollup
 
-    def get_upgrade_rollups(self, tourney_filters, show_the_cut_only):
+    def get_upgrade_rollups(self, tourney_filters, show_the_cut_only,venue_id):
 
         session = self.db_connector.get_session()
 
@@ -1654,6 +1670,18 @@ class PersistenceManager:
             ShipUpgrade.ship_id == Ship.id,
             Upgrade.id == ShipUpgrade.upgrade_id ]
 
+        group_by_filters = [
+            sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
+            sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+            ArchtypeList.faction,
+            ShipPilot.ship_type,
+            Pilot.name,
+            Upgrade.upgrade_type,
+            Upgrade.name,]
+
+        if venue_id:
+            filters.append(Tourney.id == venue_id)
+            group_by_filters.append(Tourney.venue_id)
 
         if show_the_cut_only:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
@@ -1674,13 +1702,7 @@ class PersistenceManager:
                         func.sum( Upgrade.cost).label("cost_upgrades") ).\
             filter( and_(*filters)).\
             group_by(
-                sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
-                sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
-                ArchtypeList.faction,
-                ShipPilot.ship_type,
-                Pilot.name,
-                Upgrade.upgrade_type,
-                Upgrade.name,
+                *group_by_filters
             ).\
             statement.compile(dialect=mysql.dialect())
 
@@ -1690,7 +1712,7 @@ class PersistenceManager:
         return ret
 
 
-    def get_pilot_upgrade_rollups(self, tourney_filters, show_the_cut_only):
+    def get_pilot_upgrade_rollups(self, tourney_filters, show_the_cut_only,venue_id):
 
         session = self.db_connector.get_session()
 
@@ -1703,6 +1725,15 @@ class PersistenceManager:
             ShipUpgrade.ship_id == Ship.id,
             Upgrade.id == ShipUpgrade.upgrade_id ]
 
+        group_by_filters = [sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
+                    sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
+                    ArchtypeList.faction,
+                    ShipPilot.ship_type,
+                    Pilot.name]
+
+        if venue_id:
+            filters.append(Tourney.venue_id == venue_id)
+            group_by_filters.append(Tourney.venue_id)
 
         if show_the_cut_only:
             filters.append( TourneyRanking.tourney_id == Tourney.id)
@@ -1722,11 +1753,7 @@ class PersistenceManager:
             filter( and_(*filters)).\
             group_by(
                 rollup(
-                    sqlalchemy.extract('year', Tourney.tourney_date).label("year"),
-                    sqlalchemy.extract('month', Tourney.tourney_date).label("month"),
-                    ArchtypeList.faction,
-                    ShipPilot.ship_type,
-                    Pilot.name,
+                    *group_by_filters
                 )
             ).\
             statement.compile(dialect=mysql.dialect())

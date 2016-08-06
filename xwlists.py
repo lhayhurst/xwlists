@@ -1632,8 +1632,15 @@ def pretty_print():
 
 @app.route("/time_series")
 def time_series():
+    venue_id         = request.args.get('venue_id')
     pm               = PersistenceManager(myapp.db_connector)
-    pcd              = ShipPilotTimeSeriesData( pm, calculate_upgrades=True )
+    pcd              = ShipPilotTimeSeriesData( pm,
+                                                venue_id=venue_id,
+                                                calculate_upgrades=True )
+    venue_name = ""
+    if venue_id is not None:
+        venue = pm.get_venue_by_id(venue_id)
+        venue_name = venue.get_name()
 
     total_options    = ShipTotalHighchartOptions(pcd)
     faction_options  = FactionTotalHighChartOptions(pcd)
@@ -1653,10 +1660,11 @@ def time_series():
     for tourney_type in tourney_types:
         tt.append( tourney_type[0])
 
-    pskill = PilotSkillTimeSeriesData(pm)
+    pskill = PilotSkillTimeSeriesData(pm,venue_id)
     pskillgraph = PilotSkillHighchartsGraph(pskill)
 
-
+    if venue_id is None:
+        venue_id = 0
     return render_template("time_series.html",
                            ship_total_options=total_options.options,
                            faction_options=faction_options.options,
@@ -1670,7 +1678,9 @@ def time_series():
                            ps_ships = sorted(pskill.ships.keys()),
                            scum=Faction.SCUM.description,
                            rebel=Faction.REBEL.description,
-                           imperial=Faction.IMPERIAL.description)
+                           imperial=Faction.IMPERIAL.description,
+                           venue_id=str(venue_id),
+                           venue_name=venue_name)
 
 @app.route("/get_ps_time_series",methods=['POST'])
 def get_ps_time_series():
@@ -1682,6 +1692,7 @@ def get_ps_time_series():
     imperial_checked   = data['imperial_checked']
     rebel_checked      = data['rebel_checked']
     scum_checked       = data['scum_checked']
+    venue_id           = data['venue_id']
 
     show_as_count = True
 
@@ -1692,7 +1703,10 @@ def get_ps_time_series():
     pm               = PersistenceManager(myapp.db_connector)
 
 
-    pskill = PilotSkillTimeSeriesData(pm, tourney_filters=tourney_filters,show_the_cut_only=show_only_the_cut)
+    pskill = PilotSkillTimeSeriesData(pm,
+                                      venue_id=venue_id,
+                                      tourney_filters=tourney_filters,
+                                      show_the_cut_only=show_only_the_cut)
     pskillgraph = PilotSkillHighchartsGraph(pskill,
                                             ships_filter=ships,
                                             show_as_percentage=show_as_percentage,
@@ -1708,6 +1722,7 @@ def get_total_time_series():
     aggregation_type   = data['aggregation_type']
     results_type       = data['results_type']
     tourney_filters    = data['tourney_filters']
+    venue_id           = data['venue_id']
 
     show_as_count = True
     if aggregation_type is not None and aggregation_type == "sum":
@@ -1721,7 +1736,8 @@ def get_total_time_series():
     pm               = PersistenceManager(myapp.db_connector)
     pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
                                                 show_as_count=show_as_count,
-                                                show_the_cut_only=show_only_the_cut)
+                                                show_the_cut_only=show_only_the_cut,
+                                                venue_id=venue_id)
     total_options    = ShipTotalHighchartOptions(pcd,
                                                  show_as_count=show_as_count)
     return jsonify( options=total_options.options)
@@ -1733,6 +1749,7 @@ def get_faction_time_series():
     aggregation_type   = data['aggregation_type']
     tourney_filters    = data['tourney_filters']
     results_type       = data['results_type']
+    venue_id           = data['venue_id']
 
     show_as_count = True
     if aggregation_type is not None and aggregation_type == "sum":
@@ -1743,7 +1760,9 @@ def get_faction_time_series():
         show_only_the_cut = True
 
     pm               = PersistenceManager(myapp.db_connector)
-    pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
+    pcd              = ShipPilotTimeSeriesData( pm,
+                                                venue_id=venue_id,
+                                                tourney_filters=tourney_filters,
                                                 show_as_count=show_as_count,
                                                 show_the_cut_only=show_only_the_cut)
     faction_options  = FactionTotalHighChartOptions(pcd,show_as_percentage,show_as_count)
@@ -1759,6 +1778,7 @@ def get_ship_time_series():
     aggregation_type   = data['aggregation_type']
     tourney_filters    = data['tourney_filters']
     results_type       = data['results_type']
+    venue_id           = data['venue_id']
 
     show_as_count = True
     if aggregation_type is not None and aggregation_type == "sum":
@@ -1769,7 +1789,9 @@ def get_ship_time_series():
         show_only_the_cut = True
 
     pm               = PersistenceManager(myapp.db_connector)
-    pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
+    pcd              = ShipPilotTimeSeriesData( pm,
+                                                venue_id=venue_id,
+                                                tourney_filters=tourney_filters,
                                                 show_as_count=show_as_count,
                                                 show_the_cut_only=show_only_the_cut)
     ships_by_faction = pm.get_ships_by_faction()
@@ -1793,6 +1815,7 @@ def get_pilot_time_series():
     aggregation_type   = data['aggregation_type']
     tourney_filters    = data['tourney_filters']
     results_type       = data['results_type']
+    venue_id           = data['venue_id']
 
     show_as_count = True
     if aggregation_type is not None and aggregation_type == "sum":
@@ -1803,7 +1826,9 @@ def get_pilot_time_series():
         show_only_the_cut = True
 
     pm               = PersistenceManager(myapp.db_connector)
-    pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
+    pcd              = ShipPilotTimeSeriesData( pm,
+                                                venue_id=venue_id,
+                                                tourney_filters=tourney_filters,
                                                 show_as_count=show_as_count,
                                                 show_the_cut_only=show_only_the_cut)
     pilots_by_faction = pm.get_pilots_by_faction()
@@ -1824,6 +1849,7 @@ def get_upgrade_time_series():
     aggregation_type   = data['aggregation_type']
     tourney_filters    = data['tourney_filters']
     results_type       = data['results_type']
+    venue_id           = data['venue_id']
 
     show_as_count = True
     if aggregation_type is not None and aggregation_type == "sum":
@@ -1834,7 +1860,9 @@ def get_upgrade_time_series():
         show_only_the_cut = True
 
     pm               = PersistenceManager(myapp.db_connector)
-    pcd              = ShipPilotTimeSeriesData( pm, tourney_filters=tourney_filters,
+    pcd              = ShipPilotTimeSeriesData( pm,
+                                                venue_id=venue_id,
+                                                tourney_filters=tourney_filters,
                                                 show_as_count=show_as_count,
                                                 show_the_cut_only=show_only_the_cut,
                                                 calculate_ship_pilot=False,

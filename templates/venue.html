@@ -9,7 +9,7 @@ tourneys.html{% extends "layout.html" %}
 </style>
 <h1>{{ venue.get_name() }}</h1>
 {{ venue.get_city() }}, {{ venue.get_state() }}, {{ venue.get_country() }}<br>
-<br>
+<a href="/time_series?venue_id={{ venue.id }}">Meta breakdown for this venue</a><br><br>
 <table id="tourneys" class="display" cellspacing="0" width="100%">
   <thead>
   <tr>

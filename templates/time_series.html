@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 
-
+<h2>{{ venue_name }}</h2>
 <div id="total_total" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 <hr>
 <div id="total-filters">
@@ -59,7 +59,8 @@
                     {
                         data: { 'aggregation_type' : aggregationType,
                                 'results_type' : resultsType,
-                                'tourney_filters': ftt }
+                                'tourney_filters': ftt,
+                                'venue_id':venue_id}
                     }
             ),
             success: function (data) {
@@ -114,7 +115,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                     data: { 'show_faction_as_percentage' : show_faction_as_percentage,
                             'aggregation_type' : aggregationType,
                             'results_type' : resultsType,
-                            'tourney_filters': ftt }
+                            'tourney_filters': ftt,
+                            'venue_id':venue_id}
                 }
         ),
         success: function (data) {
@@ -186,7 +188,9 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                         'show_ship_as_percentage' : show_ship_as_percentage,
                         'aggregation_type' : aggregationType,
                         'results_type' : resultsType,
-                        'tourney_filters': ftt
+                        'tourney_filters': ftt,
+                        'venue_id' : venue_id
+
                     }
                 }
         ),
@@ -259,7 +263,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                             'show_pilot_as_percentage' : show_pilot_as_percentage,
                             'aggregation_type' : aggregationType,
                             'results_type' : resultsType,
-                            'tourney_filters': ftt
+                            'tourney_filters': ftt,
+                            'venue_id':venue_id
                         }
                     }
             ),
@@ -358,7 +363,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                             'show_upgrade_as_percentage': show_upgrade_as_percentage,
                             'aggregation_type': aggregationType,
                             'results_type': resultsType,
-                            'tourney_filters': ftt
+                            'tourney_filters': ftt,
+                            'venue_id':venue_id
                         }
                     }
             ),
@@ -436,7 +442,8 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
                         'show_ps_as_percentage' : show_ps_as_percentage,
                         'results_type' : resultsType,
                         'tourney_filters': ftt,
-                        'ships_filter': selectedShips
+                        'ships_filter': selectedShips,
+                        'venue_id':venue_id
                     }
                 }
         ),
@@ -474,6 +481,12 @@ var upgrade_types = {{ upgrade_types | safe }};
 var upgrade_name_to_type = {{ upgrade_name_to_type | safe }};
 var ps_options = {{ pilot_skill_options | safe }};
 var ps_ships = {{ ps_ships | safe }};
+var venue_id = {{ venue_id | safe }}
+if (venue_id == 0) {
+    venue_id = null;
+}
+console.log(ship_total_options);
+console.log(venue_id);
 adjustVisibles(ship_options);
 adjustVisibles(pilot_options);
 adjustVisibles(upgrade_options);
