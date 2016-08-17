@@ -246,6 +246,11 @@
         return  /^[0-9]+$/.test(''+v);
     }
 
+    function isFloat(v)
+    {
+        return /^[+-]?\d+(\.\d+)?$/;
+    }
+
     function isBlank(str) {
         return (!str || !str.length);
     }
@@ -387,7 +392,7 @@
                         this.error('mov', 'MOV must be an integer number');
                         return false;
                     }
-                    else if (!isBlank(o.data.sos) && ! aNumber(o.data.sos) ) {
+                    else if (!isBlank(o.data.sos) && ! isFloat(o.data.sos) ) {
                         this.error('sos', 'SOS must be an integer number');
                         return false;
                     }
