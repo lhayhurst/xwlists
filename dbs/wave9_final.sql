@@ -131,7 +131,6 @@ values
 ( 'mod', 'Smuggling Compartment', 0, 'smugglingcompartment');
 
 
---tie sf
 insert into pilot ( name, canon_name, cost, pilot_skill  ) values ( 'Omega Specialist','omegaspecialist', '25', '5' );
 insert  ship_pilot ( ship_type, pilot_id)
 select 'tiesffighter', id from pilot where canon_name='omegaspecialist';
