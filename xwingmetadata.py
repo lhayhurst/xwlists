@@ -446,6 +446,8 @@ upgrades = {
         {'name': 'B-Wing/E2', 'cost': 1,
          'action': [{'type': 'ADD_UPGRADE', 'value': CREW}],
          'constraints': ({'type': SHIP_TYPE, 'value': B_WING})},
+        {'name': 'Smuggling Compartment', 'cost': 0,
+         'action': [{'type': 'ADD_UPGRADE', 'value': ILLICIT}]},
         {'name': 'Stealth Device', 'cost': 3},
         {'name': 'Hull Upgrade', 'cost': 3},
         {'name': 'Shield Upgrade', 'cost': 4},

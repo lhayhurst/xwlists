@@ -34,7 +34,7 @@ select 'protectoratestarfighter', id from pilot where canon_name='concorddawnvet
 insert into pilot ( name, canon_name, cost, pilot_skill  )
 values ( 'Zealous Recruit','zealousrecruit', '20', '1' );
 insert  ship_pilot ( ship_type, pilot_id)
-select 'protectoratestarfighter', id from pilot where canon_name='oldteroch';
+select 'protectoratestarfighter', id from pilot where canon_name='zealousrecruit';
 
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'title', 'Concord Dawn Protector', 'concorddawnprotector', '1');
 
@@ -125,6 +125,11 @@ values
 insert into upgrade ( upgrade_type, name, cost, canon_name )
 values
 ( 'title', 'Alliance Overhaul', 0, 'allianceoverhaul');
+
+insert into upgrade ( upgrade_type, name, cost, canon_name )
+values
+( 'mod', 'Smuggling Compartment', 0, 'smugglingcompartment');
+
 
 --tie sf
 insert into pilot ( name, canon_name, cost, pilot_skill  ) values ( 'Omega Specialist','omegaspecialist', '25', '5' );
