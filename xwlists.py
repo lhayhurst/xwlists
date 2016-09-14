@@ -1617,7 +1617,7 @@ def down():
 
 @app.route('/')
 def index():
-    return redirect(url_for("heatmap") )
+    return render_template( 'search.html')
 
 @app.route("/pretty_print")
 def pretty_print():

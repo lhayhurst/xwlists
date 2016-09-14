@@ -27,7 +27,7 @@ insert  ship_pilot ( ship_type, pilot_id)
 select 'protectoratestarfighter', id from pilot where canon_name='concorddawnace';
 
 insert into pilot ( name, canon_name, cost, pilot_skill  )
-values ( 'Concord Dawn Veteran','concorddawnveteran', '22', '3' );
+values ( 'Concord Dawn Veteran','concorddawnveteran', '23', '3' );
 insert  ship_pilot ( ship_type, pilot_id)
 select 'protectoratestarfighter', id from pilot where canon_name='concorddawnveteran';
 
