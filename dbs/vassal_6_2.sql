@@ -19,9 +19,6 @@ insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'tech', 'P
 
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'ept', 'Snap Shot', 'snapshot', '2');
 
-
---pilots
-
 insert into pilot ( name, cost, canon_name )
 values ( 'Sabine Wren (TIE Fighter)', 15, 'sabinewren-swx59' );
 insert  ship_pilot ( ship_type, pilot_id)
