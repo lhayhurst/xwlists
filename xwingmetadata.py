@@ -184,6 +184,19 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 upgrades = {
     CREW: (
 
+        {'name': 'Cassian Andor', 'canon_name': 'cassianandor', 'cost': 2,
+         'constraints': (REBEL_FACTION_CONSTRAINT),},
+
+        {'name': 'Jyn Erso', 'canon_name': 'jynerso', 'cost': 2,
+         'constraints': (REBEL_FACTION_CONSTRAINT),},
+
+        {'name': 'Rey', 'canon_name': 'rey', 'cost': 2,
+         'constraints': (REBEL_FACTION_CONSTRAINT),},
+
+        {'name': 'Finn', 'canon_name': 'finn', 'cost': 5,
+         'constraints': (REBEL_FACTION_CONSTRAINT),},
+
+
         {'name': 'Tail Gunner', 'canon_name': 'tailgunner', 'cost': 2 },
         {'name': 'IG-88D', 'canon_name': 'ig88d', 'cost': 1,
          'constraints': (SCUM_FACTION_CONSTRAINT),},
@@ -263,6 +276,8 @@ upgrades = {
 
     ),
     DROID: (
+
+        {'name': 'M9-G8', 'cost': 3,'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT)},
         {'name': 'R2 Astromech', 'cost': 1},
         {'name': 'R5 Astromech', 'cost': 1},
         {'name': 'R3 Astromech', 'cost': 2},
@@ -432,6 +447,10 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
+        {'name': 'Smuggling Compartment', 'canon_name': 'smugglingcompartment', 'cost': 0,
+           'action': [{'type': 'ADD_UPGRADE', 'value': ILLICIT}],
+           'constraints': ({'type': SHIP_TYPE, 'value': [YT_2400, YT_1300] } ),
+         },
         {'name': 'Gyroscopic Targeting', 'canon_name': 'gyroscopictargeting', 'cost': 2},
         {'name': 'Guidance Chips', 'canon_name': 'guidancechips', 'cost': 0},
         {'name': 'Long-Range Scanners', 'canon_name': 'longrangescanners', 'cost': 0},
@@ -465,6 +484,7 @@ upgrades = {
 
     EPT:
         (
+         {'name': 'Snap Shot', 'cost': 2, 'canon_name':'snapshot'},
          {'name': 'Fearlessness', 'cost': 1, 'canon_name':'fearlessness'},
          {'name': 'Attanni Mindlink', 'cost': 1, 'canon_name':'attannimindlink'},
          {'name': 'Rage', 'cost': 1, 'canon_name':'rage'},
@@ -513,6 +533,7 @@ upgrades = {
 
     ILLICIT: (
 
+        {'name': 'Burnout SLAM', 'canon_name': 'burnoutslam', 'cost': 1},
         {'name': 'Rigged Cargo Chute', 'canon_name': 'riggedcargochute', 'cost': 1},
         {'name': 'Black Market Slicer Tools', 'canon_name': 'blackmarketslicertools', 'cost': 1},
         {'name': 'Hot Shot Blaster', 'canon_name': 'hotshotblaster', 'cost': 3},
@@ -524,6 +545,8 @@ upgrades = {
 
     ),
     TECH: (
+        {'name': 'Primed Thrusters', 'canon_name': 'patternanalyzer', 'cost': 1},
+        {'name': 'Pattern Analyzer', 'canon_name': 'patternanalyzer', 'cost': 2},
         {'name': 'Weapons Guidance', 'canon_name': 'weaponsguidance', 'cost': 2},
         {'name': 'Sensor Cluster', 'canon_name': 'sensorcluster', 'cost': 2},
         {'name': 'Comm Relay', 'canon_name': 'commrelay', 'cost': 3},
@@ -779,7 +802,20 @@ ships = {
          'cost': 33, 'pilot_skill': 9, 'canon_name': 'poedameron-swx57',
          'upgrades': (TITLE, DROID, TORPEDO, MOD, EPT, TECH)},
 
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Jess Pava',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'cost': 25, 'pilot_skill': 3, 'canon_name': 'jesspava',
+         'upgrades': (TITLE, DROID, TORPEDO, MOD, TECH)},
 
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Snap Wexley',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'cost': 28, 'pilot_skill': 6, 'canon_name': 'snapwexley',
+         'upgrades': (TITLE, DROID, TORPEDO, MOD, EPT, TECH)},
+
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Nien Nunb',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'cost': 29, 'pilot_skill': 7, 'canon_name': 'niennunb',
+         'upgrades': (TITLE, DROID, TORPEDO, MOD, EPT, TECH)},
     ),
 
     # TODO: Zeta Leader, Episilon Ace,
@@ -899,6 +935,16 @@ ships = {
               'upgrades': (TITLE, MISSILE, EPT, MOD)}),
 
     YT_1300: (
+
+              {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Han Solo (TFA)', 'cost': 46,
+               'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+               'upgrades': (EPT, MISSILE, TITLE, MOD, CREW, CREW)},
+
+              {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Chewbacca (TFA)', 'cost': 42,
+               'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+               'upgrades': (EPT, MISSILE, TITLE, MOD, CREW, CREW)},
+
+
               {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Rey', 'cost': 45,
                'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
                'upgrades': (EPT, MISSILE, TITLE, MOD, CREW, CREW)},
@@ -1011,6 +1057,9 @@ ships = {
                'upgrades': (CANNON, MISSILE, CREW, TITLE, MOD)}),
 
     TIE_FIGHTER: (
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Sabine Wren (TIE Fighter)', 'cost': 15,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (EPT, MOD)},
+
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Howlrunner', 'cost': 18,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (EPT, MOD)},
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Mauler Mithel', 'cost': 17,
