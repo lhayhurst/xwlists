@@ -1,5 +1,3 @@
---add Sabine's Tie as a ship
-
 
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'mod', 'Smuggling Compartment', 'smugglingcompartment', '0');
 
