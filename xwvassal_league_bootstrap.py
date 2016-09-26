@@ -16,7 +16,7 @@ class ChallongeMatchCSVImporter:
         if tsvfile is None:
             return
         pm = PersistenceManager( myapp.db_connector )
-        league_name = "X-Wing Vassal League Season Two"
+        league_name = "X-Wing Vassal League Season Three"
         league = pm.get_league(league_name)
         self.tsv_players = {}
         self.divisions = {}
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     challonge_user = os.getenv('CHALLONGE_USER')
     challonge_key  = os.getenv('CHALLONGE_API_KEY')
     ch = ChallongeHelper(challonge_user, challonge_key)
-    league = pm.get_league( "X-Wing Vassal League Season Two")
+    league = pm.get_league( "X-Wing Vassal League Season Three")
 
     #create all the divisions for each tier
     create_divisions(c,pm,league)

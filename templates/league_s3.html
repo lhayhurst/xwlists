@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+<br>
+<br>
+ <div><b>{{ league.get_name() }} Tiers</b><br>
+{% for tier in tiers %}
+    {{ tier.get_name() }} : <a href="{{ tier.get_challonge_url() }}">Challonge page</a> | <a href="/tier_matches?tier_id={{ tier.id }}">matches</a>
+    <br>
+{% endfor %}
+<br><a href="/league_players?league_id={{ league.id }}">All Season Three players</a>
+
+ <br>
+<br>
+     <hr><a href="/league_season_one">Go here for old Season one data</a><br>
+<a href="/league_season_two">Go here for old Season two data</a>
+<br>
+
+
+<script>
+    $(document).ready( function () {
+        $('#matches').dataTable({
+            "order": [[1, "desc"]],
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            iDisplayLength: -1,
+        });
+    });
+</script>
+{% endblock %}

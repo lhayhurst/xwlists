@@ -124,7 +124,7 @@ def about():
 @app.route("/set_up_escrow_subscription")
 def set_up_escrow_subscription():
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season One")
+    league = pm.get_league("X-Wing Vassal League Season Three")
     matches = []
     for tier in league.tiers:
         for player in tier.players:
@@ -346,7 +346,7 @@ def add_league_player_form_results():
 def add_league_player():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Two")
+    league = pm.get_league("X-Wing Vassal League Season Three")
     tiers_divisions = {}
     tiers = []
     for tier in league.tiers:
@@ -360,7 +360,7 @@ def add_league_player():
 def cache_league_results():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Two")
+    league = pm.get_league("X-Wing Vassal League Season Three")
     for tier in league.tiers:
         match_results_for_tier = c.match_index(tier.get_challonge_name())
 
@@ -528,11 +528,11 @@ def get_league_stats(league):
 @app.route("/league")
 def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Two")
+    league = pm.get_league("X-Wing Vassal League Season Three")
     tiers = league.tiers
     matches = pm.get_recent_league_matches(league)
 
-    return render_template("league_s2.html",
+    return render_template("league_s3.html",
                            league=league, tiers=tiers, matches=matches)
 
 
@@ -544,6 +544,16 @@ def league_season_one():
     matches = pm.get_recent_league_matches(league)
 
     return render_template("league_s1.html",
+                           league=league, tiers=tiers, matches=matches)
+
+@app.route("/league_season_two")
+def league_season_two():
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league("X-Wing Vassal League Season Two")
+    tiers = league.tiers
+    matches = pm.get_recent_league_matches(league)
+
+    return render_template("league_s2.html",
                            league=league, tiers=tiers, matches=matches)
 
 
