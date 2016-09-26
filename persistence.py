@@ -260,6 +260,27 @@ class Division(Base):
     tier              = relationship( Tier.__name__, back_populates="divisions")
     players           = relationship( "TierPlayer", back_populates="division", cascade="all,delete,delete-orphan")
 
+
+    def get_ranking(self):
+        results = []
+        for p in self.players:
+            results.append(p.get_stats())
+        sorted_stats = reversed(sorted(results, key = lambda stat: (stat['wins'], stat['mov']) ))
+        ret = []
+        i = 1
+        for ss in sorted_stats:
+            ret.append( {
+                            'player' : ss['player'],
+                            'player_rank': i,
+                            'player_wins': ss['wins'],
+                            'player_losses': ss['losses'],
+                            'player_draws': ss['draws'],
+                            'player_mov' : ss['mov'] } )
+            i = i+1
+        return ret
+
+
+
 tier_player_table = "tier_player"
 class TierPlayer(Base):
     __tablename__ = tier_player_table
@@ -291,16 +312,19 @@ class TierPlayer(Base):
         return decode( self.name )
 
     def get_stats(self):
-        ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0, 'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0 }
+        ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0, 'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0, 'mov':0 }
         for m in self.matches:
             if m.is_complete():
                 ret['total'] +=1
                 if m.player_won(self):
                     ret['wins'] += 1
+                    ret['mov'] += 100 + ( m.points_killed(self) - m.points_lost(self))
                 elif m.player_lost(self):
                     ret['losses'] += 1
+                    ret['mov'] += 100 - ( m.points_lost(self) - m.points_killed(self))
                 else:
                     ret['draws'] += 1
+                    ret['mov'] += 100
                 list_played = m.get_list(self)
                 if list_played is not None:
                     if list_played.is_rebel():
@@ -311,6 +335,7 @@ class TierPlayer(Base):
                         ret['scum'] +=1
                 ret['killed'] += m.points_killed( self )
                 ret['lost'] += m.points_lost( self )
+        ret['player'] = self
         return ret
 
 league_match_table = "league_match"

@@ -298,6 +298,14 @@ def league_player():
     player_stats = player.get_stats()
     return render_template("league_player.html", player=player, stats=player_stats)
 
+
+@app.route("/tier_rankings")
+def tier_rankings():
+    tier_id = request.args.get('tier_id')
+    pm = PersistenceManager(myapp.db_connector)
+    tier = pm.get_tier_by_id(tier_id)
+    return render_template( 'league_division_rankings.html', tier=tier)
+
 @app.route( "/league_players")
 def league_players():
     league_id = request.args.get('league_id')
@@ -702,6 +710,7 @@ def league_season_two():
 
     return render_template("league_s2.html",
                            league=league, tiers=tiers, matches=matches)
+
 
 
 @app.route("/escrow")

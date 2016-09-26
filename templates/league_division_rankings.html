@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+<b>{{ tier.get_name() }} Results</b><br>
+    <br>
+{% for d in tier.divisions %}
+    <hr>
+    <b>{{ d.get_name() }}</b>
+    <table id="ranking-{{ loop.index }}" class="display" cellspacing="0" width="100%">
+          <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Wins</th>
+            <th>Losses</th>
+            <th>Draws</th>
+            <th>MoV</th>
+          </tr>
+          </thead>
+          <tbody>
+           {% for r in d.get_ranking() %}
+              <tr>
+                 <td>{{ r['player_rank'] }}</td>
+                 <td>{{ r['player'].get_url() }}</td>
+                 <td>{{ r['player_wins'] }}</td>
+                 <td>{{ r['player_losses'] }}</td>
+                 <td>{{ r['player_draws'] }}</td>
+                 <td>{{ r['player_mov'] }}</td>
+
+              </tr>
+              {% endfor %}
+          </tbody>
+    </table>
+{% endfor %}
+
+<script>
+    $(document).ready( function () {
+        $('table.display').DataTable({
+            paging: false,
+            searching: false
+        });
+    } );
+</script>
+
+{% endblock %}
