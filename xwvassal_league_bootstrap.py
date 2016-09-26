@@ -12,39 +12,34 @@ import csv
 
 class ChallongeMatchCSVImporter:
 
-    def __init__(self,tsvfile):
-        if tsvfile is None:
-            return
-        pm = PersistenceManager( myapp.db_connector )
-        league_name = "X-Wing Vassal League Season Three"
-        league = pm.get_league(league_name)
+
+    def __init__(self,input):
         self.tsv_players = {}
         self.divisions = {}
-        with open(tsvfile, 'rU') as input:
-            reader = csv.reader( input,delimiter='\t' )
-            for row in reader:
-                person_name = unicode(row[0].strip())
-                email_address = row[1].strip()
-                challonge_name = unicode(row[2].strip())
-                time_zone = row[3].strip()
-                reddit_handle = row[4].strip()
-                challengeboards_name = row[5].strip()
-                tier_name = row[6].strip()
-                tier_number = row[7].strip()
-                division_name = row[8].strip()
-                division_letter = row[9].strip()
-                self.tsv_players[challonge_name] = { 'person_name': person_name,
-                                                'email_address' : email_address,
-                                                'challonge_name' : challonge_name,
-                                                'time_zone' : time_zone,
-                                                'reddit_handle' : reddit_handle,
-                                                'challengeboards_name':challengeboards_name ,
-                                                'tier_name' : tier_name,
-                                                'tier_number' : tier_number,
-                                                'division_name' : division_name,
-                                                'division_letter' : division_letter }
-                if not self.divisions.has_key( division_name ):
-                    self.divisions[division_name] = { 'name': division_name, 'letter':division_letter, 'tier': tier_name}
+        reader = csv.reader( input,delimiter='\t' )
+        for row in reader:
+            person_name = unicode(row[0].strip())
+            email_address = row[1].strip()
+            challonge_name = unicode(row[2].strip())
+            time_zone = row[3].strip()
+            reddit_handle = row[4].strip()
+            challengeboards_name = row[5].strip()
+            tier_name = row[6].strip()
+            tier_number = row[7].strip()
+            division_name = row[8].strip()
+            division_letter = row[9].strip()
+            self.tsv_players[challonge_name] = { 'person_name': person_name,
+                                            'email_address' : email_address,
+                                            'challonge_name' : challonge_name,
+                                            'time_zone' : time_zone,
+                                            'reddit_handle' : reddit_handle,
+                                            'challengeboards_name':challengeboards_name ,
+                                            'tier_name' : tier_name,
+                                            'tier_number' : tier_number,
+                                            'division_name' : division_name,
+                                            'division_letter' : division_letter }
+            if not self.divisions.has_key( division_name ):
+                self.divisions[division_name] = { 'name': division_name, 'letter':division_letter, 'tier': tier_name}
 
 
 def create_divisions(c, pm, league):

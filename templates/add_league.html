@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+P { text-align: center }
+</style>
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('add_league_form_results') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data">
+    <fieldset>
+        <legend>Create a New League!</legend>
+        <div data-row-span="3">
+            <div data-field-span="1">
+                <label>Challonge name</label>
+                <input type="text"
+                       name="challonge_name" required/>
+            </div>
+            <div data-field-span="1">
+                <label>Human readable name</label>
+                <input type="text"
+                       name="name" required/>
+            </div>
+            <div data-field-span="1">
+                <label>Season Number</label>
+                <input type="text"
+                       name="season_number" required/>
+            </div>
+        </div>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>League players file</label>
+                <input type="file" name="league_file" accepts="txt" >
+            </div>
+        </div>
+    </fieldset>
+    <input type="submit" class="btn" name="submit-button" id="submit-button" />
+</form>
+
+
+
+{% endblock %}
