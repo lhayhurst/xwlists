@@ -1,4 +1,4 @@
---out with the old
+season2.sql--out with the old
 
 SET SQL_SAFE_UPDATES = 0;
 use sozin$lists;

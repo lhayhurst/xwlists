@@ -4,9 +4,12 @@ from random import randint
 import urllib
 import datetime
 import uuid
+from dateutil import parser
 from flask import render_template, request, url_for, redirect, jsonify, Response, send_from_directory
 from flask.ext.mail import Mail, Message
 import sys
+from xwvassal_league_bootstrap import ChallongeMatchCSVImporter
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
 import re
@@ -24,7 +27,7 @@ from decoder import decode
 import myapp
 from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
     TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event, ArchtypeList, LeagueMatch, \
-    TierPlayer, EscrowSubscription
+    TierPlayer, EscrowSubscription, League, Tier, Division
 from rollup import ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTotalHighChartOptions, \
     ShipHighchartOptions, PilotHighchartOptions, UpgradeHighChartOptions, PilotSkillTimeSeriesData, \
     PilotSkillHighchartsGraph
@@ -43,7 +46,7 @@ app =  myapp.create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 UPLOAD_FOLDER = "static/tourneys"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif', 'html', 'json'])
+ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif', 'html', 'json', 'tsv'])
 
 is_maintenance_mode = False
 
@@ -124,7 +127,7 @@ def about():
 @app.route("/set_up_escrow_subscription")
 def set_up_escrow_subscription():
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season One")
+    league = pm.get_league("X-Wing Vassal League Season Three")
     matches = []
     for tier in league.tiers:
         for player in tier.players:
@@ -145,6 +148,147 @@ def escrow_subscriptions():
             for match in player.matches:
                 matches.append( match )
     return render_template("escrow_subscriptions.html", matches=matches)
+
+@app.route("/add_league")
+def create_league():
+    return render_template("add_league.html")
+
+def create_divisions(c, pm, league):
+    for name in c.divisions.keys():
+        division = c.divisions[name]
+        tier = pm.get_tier(division['tier'],league)
+        d = Division()
+        d.challonge_name = division['letter']
+        d.name = name
+        d.tier = tier
+        pm.db_connector.get_session().add(d)
+    pm.db_connector.get_session().commit()
+
+def create_default_match_result(match_result, tier, pm):
+    p1id = match_result['player1_id']
+    p2id = match_result['player2_id']
+    player1 = pm.get_tier_player(p1id)
+    player2 = pm.get_tier_player(p2id)
+    if player1 is None or player2 is None:
+        #one of the byes, ignore it
+        return None
+    #TODO: freak out if not found
+    lm = LeagueMatch()
+    lm.tier_id = tier.id
+    lm.player1 = player1
+    lm.player2 = player2
+    lm.challonge_match_id = match_result['id']
+    lm.state = match_result['state']
+
+    scores_csv = match_result['scores_csv']
+    p1_score = None
+    p2_score = None
+    if scores_csv is not None and len(scores_csv) > 0:
+        scores_csv = str(scores_csv)
+        scores = str.split(scores_csv, '-')
+        lm.player1_score = scores[0]
+        lm.player2_score = scores[1]
+
+    return lm
+
+def create_matchups(c, pm, ch, league):
+    for tier in league.tiers:
+        matchups = ch.match_index(tier.get_challonge_name())
+        for matchup in matchups:
+            matchup = matchup['match']
+            dbmr = create_default_match_result(matchup, tier, pm)
+            if dbmr is not None:
+                pm.db_connector.get_session().add(dbmr)
+    pm.db_connector.get_session().commit()
+
+def create_players(c, pm, ch, league):
+    divisions_href = {}
+    cin = ""
+
+    for tier in league.tiers:
+        players = ch.participant_index(tier.get_challonge_name())
+        for player in players:
+            lookup_name = None
+            player = player['participant']
+            challonge_username_ = player['challonge_username']
+            checked_in = player['checked_in']
+            if challonge_username_ is None or checked_in is False:
+                lookup_name = player['display_name']
+                print "player %s has not checked in " % ( lookup_name)
+            else:
+                lookup_name = challonge_username_
+            if c.tsv_players.has_key(lookup_name):
+                # we're good to go
+                tsv_record = c.tsv_players[lookup_name]
+                if checked_in is False:
+                    cin = cin + decode(tsv_record['email_address']) + ","
+
+                # create the player record
+                tier_player = TierPlayer()
+                division_name = decode(tsv_record['division_name'])
+                print "looking up division %s for player %s" % (division_name, lookup_name)
+
+                if not divisions_href.has_key(division_name):
+                    divisions_href[division_name] = pm.get_division(division_name, league)
+                tier_player.division = divisions_href[division_name]
+                tier_player.tier = tier_player.division.tier
+                tier_player.challengeboards_handle = decode(tsv_record['challengeboards_name'])
+                tier_player.challonge_id = player['id']
+                tier_player.group_id = player['group_player_ids'][0]
+                tier_player.name = lookup_name
+                tier_player.email_address = decode(tsv_record['email_address'])
+                tier_player.person_name = decode(tsv_record['person_name'])
+                tier_player.reddit_handle = decode(tsv_record['reddit_handle'])
+                tier_player.timezone = decode(tsv_record['time_zone'])
+                pm.db_connector.get_session().add(tier_player)
+    pm.db_connector.get_session().commit()
+
+@app.route("/add_form_results", methods=['POST'])
+def add_league_form_results():
+    league_challonge_name        = decode(request.form['challonge_name'])
+    league_name                  = decode(request.form['name'])
+    season_number                = decode(request.form['season_number'])
+    league_file                  = request.files['league_file']
+
+    c = ChallongeMatchCSVImporter(league_file.stream)
+    pm = PersistenceManager(myapp.db_connector)
+
+    #create the leagues and then the tiers
+    league = League(challonge_name=league_challonge_name, name=league_name)
+    pm.db_connector.get_session().add(league)
+    create_league_tiers(league, pm, season_number)
+    pm.db_connector.get_session().commit()
+
+    challonge_user = os.getenv('CHALLONGE_USER')
+    challonge_key  = os.getenv('CHALLONGE_API_KEY')
+    ch = ChallongeHelper(challonge_user, challonge_key)
+
+    #create all the divisions for each tier
+    create_divisions(c,pm,league)
+    create_players(c, pm, ch, league)
+    create_matchups(c, pm, ch, league)
+
+    return redirect("/league")
+
+
+
+
+
+
+
+def create_league_tiers(league, pm, season_number):
+    tiers = {"Deep Core": "deepcore" + season_number,
+             "Core Worlds": "coreworlds" + season_number,
+             "Inner Rim": "innerrim" + season_number,
+             "Outer Rim": "outerrim" + season_number,
+             "Unknown Reaches": "unknownreaches" + season_number}
+    for tier_name in tiers.keys():
+        tier_challonge_name = tiers[tier_name]
+        lt = Tier(name=tier_name,
+                  challonge_name=tier_challonge_name,
+                  league=league)
+        pm.db_connector.get_session().add(lt)
+
 
 @app.route("/league_player")
 def league_player():
@@ -188,7 +332,8 @@ def create_default_match_result(match_result, tier, pm):
         lm.player2_score = scores[1]
 
     updated_at = match_result['updated_at']
-    lm.updated_at = updated_at
+    dt = parser.parse(updated_at)
+    lm.updated_at = dt
 
     return lm
 
@@ -218,8 +363,10 @@ def update_match_result(match_result,dbmr,pm):
 
     if changed:
         updated_at = match_result['updated_at']
-        if dbmr.updated_at is None or dbmr.updated_at != updated_at:
-            dbmr.updated_at = updated_at
+        dt = parser.parse(updated_at)
+
+        if dbmr.updated_at is None or dbmr.updated_at != dt:
+            dbmr.updated_at = dt
 
     return changed
 
@@ -346,7 +493,7 @@ def add_league_player_form_results():
 def add_league_player():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Two")
+    league = pm.get_league("X-Wing Vassal League Season Three")
     tiers_divisions = {}
     tiers = []
     for tier in league.tiers:
@@ -360,7 +507,7 @@ def add_league_player():
 def cache_league_results():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Two")
+    league = pm.get_league("X-Wing Vassal League Season Three")
     for tier in league.tiers:
         match_results_for_tier = c.match_index(tier.get_challonge_name())
 
@@ -528,11 +675,11 @@ def get_league_stats(league):
 @app.route("/league")
 def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Two")
+    league = pm.get_league("X-Wing Vassal League Season Three")
     tiers = league.tiers
     matches = pm.get_recent_league_matches(league)
 
-    return render_template("league_s2.html",
+    return render_template("league_s3.html",
                            league=league, tiers=tiers, matches=matches)
 
 
@@ -544,6 +691,16 @@ def league_season_one():
     matches = pm.get_recent_league_matches(league)
 
     return render_template("league_s1.html",
+                           league=league, tiers=tiers, matches=matches)
+
+@app.route("/league_season_two")
+def league_season_two():
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league("X-Wing Vassal League Season Two")
+    tiers = league.tiers
+    matches = pm.get_recent_league_matches(league)
+
+    return render_template("league_s2.html",
                            league=league, tiers=tiers, matches=matches)
 
 
