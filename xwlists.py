@@ -140,8 +140,9 @@ def set_up_escrow_subscription():
 
 @app.route("/escrow_subscriptions")
 def escrow_subscriptions():
+    league_id = request.args.get('player_id')
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season One")
+    league = pm.get_league_by_id(league_id)
     matches = []
     for tier in league.tiers:
         for player in tier.players:
