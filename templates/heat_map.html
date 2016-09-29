@@ -140,9 +140,8 @@
           {% if v.valid_venue() %}
           <tr>
              <td>{{ v.id }}</td>
-             <td >{{ v.get_name() }}</td>
+              <td> {{ v.venue_url()|safe }}</td>
              <td>{{ v.get_num_events() }}</td>
-             <td> {{ v.venue_url()|safe }}</td>
              <td>{{ v.get_city() }}</td>
              <td>{{ v.get_state()}}</td>
              <td>{{ v.get_country()}}</td>
@@ -180,7 +179,6 @@
                 {
                     label: "Num. Events",
                     name: "num_events",
-                    type: "hidden"
                 },
                 {
                     label: "City",
@@ -200,8 +198,8 @@
                 {
                     label: "Id",
                     name: "id",
-                    type: "hidden"
-                }] } )
+                }
+            ] } )
 
         $('#venues').on( 'click', 'tbody td:not(:first-child)', function (e) {
             editor.bubble( this );
