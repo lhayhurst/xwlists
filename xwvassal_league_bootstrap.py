@@ -56,8 +56,8 @@ def create_divisions(c, pm, league):
 def create_default_match_result(match_result, tier, pm):
     p1id = match_result['player1_id']
     p2id = match_result['player2_id']
-    player1 = pm.get_tier_player(p1id)
-    player2 = pm.get_tier_player(p2id)
+    player1 = pm.get_tier_player_by_group_id(p1id)
+    player2 = pm.get_tier_player_by_group_id(p2id)
     if player1 is None or player2 is None:
         #one of the byes, ignore it
         return None

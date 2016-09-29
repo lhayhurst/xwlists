@@ -1319,6 +1319,12 @@ class PersistenceManager:
     def get_league_player_by_id(self, player_id):
         return self.db_connector.get_session().query(TierPlayer).filter(TierPlayer.id == player_id).first()
 
+    def get_league_player_by_challonge_id(self, challonge_id):
+        return self.db_connector.get_session().\
+            query(TierPlayer).\
+            filter(TierPlayer.challonge_id == challonge_id).first()
+
+
     def get_league_player_by_name(self, challonge_name,tier_id):
         return self.db_connector.get_session().\
             query(TierPlayer).filter(
@@ -1351,7 +1357,7 @@ class PersistenceManager:
     def get_tier_by_id(self, tier_id):
         return self.db_connector.get_session().query(Tier).filter(Tier.id == tier_id).first()
 
-    def get_tier_player(self, challonge_player_group_id):
+    def get_tier_player_by_group_id(self, challonge_player_group_id):
         return self.db_connector.get_session().\
             query(TierPlayer).filter(TierPlayer.group_id == challonge_player_group_id).first()
 

@@ -4,10 +4,11 @@ from random import randint
 import urllib
 import datetime
 import uuid
-from dateutil import parser
-from flask import render_template, request, url_for, redirect, jsonify, Response, send_from_directory
-from flask.ext.mail import Mail, Message
 import sys
+
+from flask import render_template, request, url_for, redirect, jsonify, Response
+from flask.ext.mail import Mail, Message
+
 from xwvassal_league_bootstrap import ChallongeMatchCSVImporter
 
 reload(sys)
@@ -15,7 +16,6 @@ sys.setdefaultencoding("utf-8")
 import re
 from geopy import Nominatim
 from markupsafe import Markup
-import math
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI
@@ -25,14 +25,13 @@ from cryodex import Cryodex
 from dataeditor import RankingEditor, RoundResultsEditor
 from decoder import decode
 import myapp
-from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, UpgradeType, Upgrade, \
-    TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, TourneyVenue, Event, ArchtypeList, LeagueMatch, \
+from persistence import Tourney, TourneyList, PersistenceManager,  Faction, Ship, ShipUpgrade, TourneyRound, RoundResult, TourneyPlayer, TourneyRanking, TourneySet, \
+    Event, ArchtypeList, LeagueMatch, \
     TierPlayer, EscrowSubscription, League, Tier, Division
 from rollup import ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTotalHighChartOptions, \
     ShipHighchartOptions, PilotHighchartOptions, UpgradeHighChartOptions, PilotSkillTimeSeriesData, \
     PilotSkillHighchartsGraph
 from search import Search
-from uidgen import ListUIDGen
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher, GeneralXWSFetcher
 from flask.ext import restful
@@ -165,36 +164,9 @@ def create_divisions(c, pm, league):
         pm.db_connector.get_session().add(d)
     pm.db_connector.get_session().commit()
 
-def create_default_match_result(match_result, tier, pm):
-    p1id = match_result['player1_id']
-    p2id = match_result['player2_id']
-    player1 = pm.get_tier_player(p1id)
-    player2 = pm.get_tier_player(p2id)
-    if player1 is None or player2 is None:
-        #one of the byes, ignore it
-        return None
-    #TODO: freak out if not found
-    lm = LeagueMatch()
-    lm.tier_id = tier.id
-    lm.player1 = player1
-    lm.player2 = player2
-    lm.challonge_match_id = match_result['id']
-    lm.state = match_result['state']
-
-    scores_csv = match_result['scores_csv']
-    p1_score = None
-    p2_score = None
-    if scores_csv is not None and len(scores_csv) > 0:
-        scores_csv = str(scores_csv)
-        scores = str.split(scores_csv, '-')
-        lm.player1_score = scores[0]
-        lm.player2_score = scores[1]
-
-    return lm
-
 def create_matchups(c, pm, ch, league):
     for tier in league.tiers:
-        matchups = ch.match_index(tier.get_challonge_name())
+        matchups = ch.match_c(tier.get_challonge_name())
         for matchup in matchups:
             matchup = matchup['match']
             dbmr = create_default_match_result(matchup, tier, pm)
@@ -322,8 +294,8 @@ def league_players():
 def create_default_match_result(match_result, tier, pm):
     p1id = match_result['player1_id']
     p2id = match_result['player2_id']
-    player1 = pm.get_tier_player(p1id)
-    player2 = pm.get_tier_player(p2id)
+    player1 = pm.get_tier_player_by_group_id(p1id)
+    player2 = pm.get_tier_player_by_group_id(p2id)
     if player1 is None or player2 is None:
         return
     lm = LeagueMatch()
@@ -478,25 +450,43 @@ def add_league_player_form_results():
         matchup = matchup['match']
         p1id = matchup['player1_id']
         p2id = matchup['player2_id']
-        match_result = pm.get_match_by_challonge_id(matchup['id'])
-        if match_result is None: #this really shouldn't happen, but hey, if it does, add a new record
-            dbmr = create_default_match_result(matchup, tier, pm)
-            if dbmr is not None:
-                pm.db_connector.get_session().add(dbmr)
-            continue
 
-        if p1id == player_id or p2id == player_id:
+        if p1id == tier_player.group_id or p2id == tier_player.group_id:
             #we've found our man
-            if p1id == player_id:
-                player = pm.get_tier_player(p1id)
-                match_result.player1 = player
-            else:
-                player = pm.get_tier_player(p2id)
-                match_result.player2 = player
+            match_result = pm.get_match_by_challonge_id(matchup['id'])
+            dbmr = None
+            if match_result is None:
+                dbmr = create_default_match_result(matchup, tier, pm)
+                if dbmr is not None:
+                    pm.db_connector.get_session().add(dbmr)
 
     pm.db_connector.get_session().commit()
     player_stats = tier_player.get_stats()
     return render_template("league_player.html", player=tier_player, stats=player_stats)
+
+@app.route("/true_up_group_ids")
+def true_up_group_ids():
+    league_id        = request.args.get("league_id")
+    ch = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league_by_id(league_id)
+
+    for tier in league.tiers:
+        players = ch.participant_index(tier.get_challonge_name())
+        for player in players:
+            player = player['participant']
+            challonge_player_id = player['id']
+            db_player = pm.get_league_player_by_challonge_id(challonge_player_id)
+            if db_player is not None:
+                gid = int(player['group_player_ids'][0])
+                dbgid = db_player.group_id
+                if gid != dbgid:
+                    print "player %s had group id change from %d to %d" % ( db_player.name, dbgid, gid)
+                    db_player.group_id = gid
+    pm.db_connector.get_session().commit()
+    return redirect(url_for("league_players", league_id=league_id))
+
+
 
 @app.route("/add_league_player")
 def add_league_player():
