@@ -352,7 +352,7 @@ class LeagueMatch(Base):
     player1_list_url    = Column(String(2048))
     player2_list_url    = Column(String(2048))
     challonge_attachment_url = Column(String(2048))
-    updated_at          = Column(DateTime)
+    updated_at          = Column(String(128))
 
     tier             = relationship( Tier.__name__, uselist=False)
     player1             = relationship( TierPlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player1_id')
@@ -1341,7 +1341,8 @@ class PersistenceManager:
         query = self.db_connector.get_session().query(LeagueMatch).\
             filter( LeagueMatch.tier_id == Tier.id,
                     Tier.league_id == League.id,
-                    League.id == league.id).order_by(LeagueMatch.updated_at.desc()).limit(100).all()
+                    League.id == league.id,
+                    LeagueMatch.state == "complete").order_by(LeagueMatch.updated_at.desc()).limit(100).all()
         return query
 
     def get_division_by_id(self,division_id):

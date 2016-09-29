@@ -318,6 +318,7 @@ def league_players():
             players.append(player)
     return render_template("league_players.html", players=players,league=league)
 
+
 def create_default_match_result(match_result, tier, pm):
     p1id = match_result['player1_id']
     p2id = match_result['player2_id']
@@ -341,8 +342,7 @@ def create_default_match_result(match_result, tier, pm):
         lm.player2_score = scores[1]
 
     updated_at = match_result['updated_at']
-    dt = parser.parse(updated_at)
-    lm.updated_at = dt
+    lm.updated_at = updated_at
 
     return lm
 
@@ -372,12 +372,12 @@ def update_match_result(match_result,dbmr,pm):
 
     if changed:
         updated_at = match_result['updated_at']
-        dt = parser.parse(updated_at)
 
-        if dbmr.updated_at is None or dbmr.updated_at != dt:
-            dbmr.updated_at = dt
+        if dbmr.updated_at is None or dbmr.updated_at != updated_at:
+            dbmr.updated_at = updated_at
 
     return changed
+
 
 @app.route("/league_admin")
 def league_admin():
