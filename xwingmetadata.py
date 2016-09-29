@@ -196,8 +196,12 @@ upgrades = {
         {'name': 'Finn', 'canon_name': 'finn', 'cost': 5,
          'constraints': (REBEL_FACTION_CONSTRAINT),},
 
-
         {'name': 'Tail Gunner', 'canon_name': 'tailgunner', 'cost': 2 },
+
+        {'name': 'Ketsu Onyo', 'canon_name': 'ketsuonyo', 'cost': 1,
+         'constraints': (SCUM_FACTION_CONSTRAINT),},
+
+
         {'name': 'IG-88D', 'canon_name': 'ig88d', 'cost': 1,
          'constraints': (SCUM_FACTION_CONSTRAINT),},
 
