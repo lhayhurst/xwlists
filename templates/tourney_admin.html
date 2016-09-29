@@ -5,7 +5,8 @@
 <table id="tourneys" class="display" cellspacing="0" width="100%">
   <thead>
   <tr>
-    <th >Name</th>
+    <th>Venue</th>
+    <th>Name</th>
     <th>Id</th>
     <th>Contact</th>
     <th>Entered at</th>
@@ -15,6 +16,7 @@
   </tr>
       {% for tourney in  tourneys %}
       <tr>
+         <td>{{ tourney.get_venue_url()|safe }}</td>
          <td>{{  tourney.get_tourney_name() }}</td>
          <td >{{ tourney.id }}</td>
          <td>{{  tourney.email }}</td>
