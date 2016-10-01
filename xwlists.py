@@ -767,6 +767,32 @@ def escrow_change():
                         escrow_complete=escrow_complete)
     return response
 
+#thanks kyle ;-)
+@app.route("/cleanup_tier_matches")
+def cleanup_tier_matches():
+    league_id = request.args.get("league_id")
+    pm        = PersistenceManager(myapp.db_connector)
+    league    = pm.get_league_by_id(league_id)
+    matches   = {}
+    for tier in league.tiers:
+        for match in tier.matches:
+            p1id = match.player1_id
+            p2id = match.player2_id
+            key  = "%d-%d" % ( p1id, p2id)
+            if not matches.has_key(key):
+                matches[key] = []
+            matches[key].append(match)
+    for matchkey in matches.keys():
+        pmatches = matches[matchkey]
+        if len(pmatches) > 1:
+            #each one of these can be deleted ... except the last, assuming they are in order
+            sorted_matches = sorted(pmatches, key=lambda k: k.id)
+            #delete everything but the last one
+            for m in sorted_matches[:-1]:
+                print "deleting duplicate %d" % (m.id)
+                pm.db_connector.get_session().delete(m)
+    pm.db_connector.get_session().commit()
+    return redirect(url_for("league_players", league_id=league_id))
 
 @app.route("/delete_match", methods=['GET'])
 def delete_match():
