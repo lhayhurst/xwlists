@@ -364,6 +364,11 @@ class LeagueMatch(Base):
     subscriptions       = relationship("EscrowSubscription",
                                        back_populates='match',cascade="all,delete,delete-orphan")
 
+
+    def get_delete_url(self):
+        ret = '<a href="' + url_for('delete_match', match_id=self.id ) +  '">Delete</a>'
+        return Markup(ret)
+
     def unsubscribe_escrow(self,player_id):
         ret = '<a href="' + url_for('unsubscribe_escrow', match_id=self.id,player_id=player_id,_external=True ) +  '">Unsubscribe</a>'
         return Markup(ret)

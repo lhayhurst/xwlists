@@ -549,9 +549,10 @@ def cache_league_results():
 @app.route("/tier_matches")
 def tier_matches():
     tier_id = request.args.get('tier_id')
+    admin   = request.args.get('admin')
     pm = PersistenceManager(myapp.db_connector)
     tier = pm.get_tier_by_id(tier_id)
-    return render_template("tier_matches.html", tier=tier)
+    return render_template("tier_matches.html", tier=tier,admin=admin)
 
 def get_league_stats(league):
     league_stats = {}
@@ -765,6 +766,20 @@ def escrow_change():
                         player_id=player_id,
                         escrow_complete=escrow_complete)
     return response
+
+
+@app.route("/delete_match", methods=['GET'])
+def delete_match():
+    match_id = request.args.get("match_id")
+    pm        = PersistenceManager(myapp.db_connector)
+    match     = pm.get_match(match_id)
+    tier      = match.tier
+
+    pm.db_connector.get_session().delete(match)
+    pm.db_connector.get_session().commit()
+
+    return render_template("tier_matches.html", tier=tier)
+
 
 urlregex = re.compile(
         r'^(?:http|ftp)s?://' # http:// or https://
