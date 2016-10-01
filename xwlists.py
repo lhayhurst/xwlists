@@ -381,7 +381,8 @@ def remove_league_player_form_results():
     #take out their matches
     for match in player.matches:
         for subscription in match.subscriptions:
-            pm.db_connector.get_session().delete(subscription)
+            if subscription.observer.id == player_id:
+                pm.db_connector.get_session().delete(subscription)
         pm.db_connector.get_session().delete(match)
     pm.db_connector.get_session().delete(player)
     pm.db_connector.get_session().commit()
@@ -464,6 +465,8 @@ def add_league_player_form_results():
                 dbmr = create_default_match_result(matchup, tier, pm)
                 if dbmr is not None:
                     pm.db_connector.get_session().add(dbmr)
+            es = EscrowSubscription( observer=tier_player, match=dbmr)
+            pm.db_connector.get_session().add( es )
 
     pm.db_connector.get_session().commit()
     player_stats = tier_player.get_stats()
