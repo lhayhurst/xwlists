@@ -23,6 +23,9 @@
     <th>Player 2 Score</th>
     <th>Player 1 List</th>
     <th>Player 2 List</th>
+    {% if admin %}
+    <th >Delete</th>
+    {% endif %}
   </thead>
   <tbody>
   </tr>
@@ -39,6 +42,9 @@
          <td>{{  m.player2_score }}</td>
          <td >{{ m.get_player1_list_display() | safe }}
          <td >{{ m.get_player2_list_display() | safe }}
+         {% if admin %}
+            <th >{{ m.get_delete_url() | safe }}</th>
+         {% endif %}
       </tr>
       {% endfor %}
   </tbody>
