@@ -1477,6 +1477,10 @@ class PersistenceManager:
         return recs
 
 
+    def delete_all_subscriptions(self):
+        num_rows_deleted = self.db_connector.get_session().query(EscrowSubscription).delete()
+        return num_rows_deleted
+
     def get_tourney_by_id(self,tourney_id):
         return self.db_connector.get_session().query(Tourney).filter_by(id=tourney_id).first()
 

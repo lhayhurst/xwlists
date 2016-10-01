@@ -127,6 +127,11 @@ def about():
 def set_up_escrow_subscription():
     pm = PersistenceManager(myapp.db_connector)
     league = pm.get_league("X-Wing Vassal League Season Three")
+
+    #first delete all the old subscriptions
+    pm.delete_all_subscriptions()
+    pm.db_connector.get_session().commit()
+
     matches = []
     for tier in league.tiers:
         for player in tier.players:
