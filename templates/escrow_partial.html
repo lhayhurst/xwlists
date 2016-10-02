@@ -2,9 +2,9 @@
 <head></head>
 <body>
 <p>Hi! You are receiving this email because the match {{ match.player1.get_name() }} versus {{ match.player2.get_name() }} has partially completed the list escrow process.</p>
-<p><b>Your list:</b><br>{{ match.player1_list_text() | safe}}</p>
-If you'd like to change your list before the list escrow process completes, please feel free to hit this link:
-If you woud like to unsubscribe from this escrow notification for your matches, please reply to this email and I'll take you off the list.
+<p><b>Your list:</b><br>{{ match.get_player_list_text_with_link(player.id) | safe}}</p>
+<p>If you'd like to change your list before the list escrow process completes, please feel to reset your escrow by visiting this {{ match.reset_escrow_url(player.id) }}</p>
+<p>If you would like to unsubscribe from this escrow notification for your matches, please reply to this email and I'll take you off the list.</p>
 <p>May the force be with you! --sozin</p>
 </body>
 </html>

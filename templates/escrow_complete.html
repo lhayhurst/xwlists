@@ -2,8 +2,8 @@
 <head></head>
 <body>
 <p>Hi! You are receiving this email because the match {{ match.player1.get_name() }} versus {{ match.player2.get_name() }} has completed the list escrow process.</p>
-<p><b>{{match.player1.get_name()}}'s list</b><br>{{ match.player1_list_text() | safe}}</p>
-<p><b>{{match.player2.get_name() }}'s list</b><br> {{ match.player2_list_text() | safe }}</p>
+<p><b>{{match.player1.get_name()}}'s list</b><br>{{ match.get_player_list_text_with_link(match.player1.id)| safe}}</p>
+<p><b>{{match.player2.get_name() }}'s list</b><br> {{ match.get_player_list_text_with_link(match.player2.id) | safe }}</p>
 If you woud like to unsubscribe from this escrow notification for your matches, please reply to this email and I'll take you off the list.
 <p>May the force be with you! --sozin</p>
 </body>

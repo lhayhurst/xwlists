@@ -751,7 +751,7 @@ def mail_escrow_complete(match,pm):
         recipients.append( s.observer.email_address)
         s.notified = True
     pm.db_connector.get_session().commit()
-    msg = Message("Escrow complete for match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
+    msg = Message("Escrow complete for X-Wing Vassal League match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
                   sender=ADMINS[0],
                   recipients=recipients)
     html = render_template("escrow_complete.html",match=match,player_id=s.observer.id)
@@ -761,20 +761,36 @@ def mail_escrow_complete(match,pm):
     with app.app_context():
         mail.send(msg)
 
-def mail_escrow_partial(player,match):
+def mail_escrow_partial(player,match,pm):
     recipients = list(ADMINS)
-    recipients.append(player.email_address)
-    msg = Message("You escrowed for match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
-                  sender=ADMINS[0],
-                  recipients=recipients)
-    html = render_template("escrow_partial.html",match=match,player_id=player.observer.id)
+    for s in match.subscriptions:
+        if s.partial_notified == False and s.observer.id == player.id:
+            recipients.append(player.email_address)
+            s.partial_notified = True
 
-    msg.body = 'text body'
-    msg.html = html
-    with app.app_context():
-        mail.send(msg)
+    if len(recipients) >1:
+        pm.db_connector.get_session().commit()
+
+        msg = Message("Your escrow for X-Wing Vassal League match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
+                      sender=ADMINS[0],
+                      recipients=recipients)
+        html = render_template("escrow_partial.html",match=match,player=player)
+
+        msg.body = 'text body'
+        msg.html = html
+        with app.app_context():
+            mail.send(msg)
 
 
+@app.route("/reset_match_escrow")
+def reset_match_escrow():
+    match_id  = request.args.get("match_id")
+    player_id = request.args.get("player_id")
+    pm        = PersistenceManager(myapp.db_connector)
+    match     = pm.get_match(match_id)
+    match.delete_partial_escrow(player_id)
+    pm.db_connector.get_session().commit()
+    return redirect(url_for('escrow', match_id=match_id, player_id=player_id))
 
 @app.route("/escrow_change")
 def escrow_change():
@@ -785,9 +801,9 @@ def escrow_change():
     escrow_complete = 1
     if match.needs_escrow():
         escrow_complete = 0
-        #player = match.partial_escrow()
-        #if player:
-        #mail_escrow_partial(player,match)
+        player = match.partial_escrow()
+        if player:
+            mail_escrow_partial(player,match,pm)
     if escrow_complete:
         try:
             mail_escrow_complete(match,pm)

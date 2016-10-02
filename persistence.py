@@ -364,6 +364,21 @@ class LeagueMatch(Base):
     subscriptions       = relationship("EscrowSubscription",
                                        back_populates='match',cascade="all,delete,delete-orphan")
 
+    def reset_escrow_url(self,player_id):
+        ret = '<a href="' + url_for('reset_match_escrow', match_id=self.id, player_id=player_id,_external=True ) +  '">link</a>'
+        return Markup(ret)
+
+    def delete_partial_escrow(self,player_id):
+        player_id = long(player_id)
+        for s in self.subscriptions:
+            if s.observer.id == player_id:
+                s.partial_notified = False
+        if self.player1.id == player_id:
+            self.player1_list = None
+            self.player1_list_url = None
+        elif self.player2.id == player_id:
+            self.player2_list = None
+            self.player2_list_url = None
 
     def get_delete_url(self):
         ret = '<a href="' + url_for('delete_match', match_id=self.id ) +  '">Delete</a>'
@@ -444,8 +459,12 @@ class LeagueMatch(Base):
                 url = url_for('escrow', match_id=self.id, player_id=player_id)
                 return '<a href="' + url + '">Enter ' + player_name + '\'s list</a>'
         if self.needs_escrow():
-            url = url_for('escrow', match_id=self.id, player_id=player_id)
-            return '<a href="' + url + '">Escrow ' + player_name + '\'s list</a>'
+            if player_list_id is not None:
+                #partial escrow
+                return "Has been escrowed"
+            else:
+                url = url_for('escrow', match_id=self.id, player_id=player_id)
+                return '<a href="' + url + '">Escrow ' + player_name + '\'s list</a>'
         else:
             return self.get_player_list_text_with_link(player_id)
 
@@ -520,6 +539,13 @@ class LeagueMatch(Base):
         elif self.player2_id == player_id:
             self.player2_list_url = player_list_url
 
+    def partial_escrow(self):
+        if self.player1_list is not None:
+            return self.player1
+        if self.player2_list is not None:
+            return self.player2
+        return None
+
     def needs_escrow(self):
         return self.player1_list is None or self.player2_list is None
 
@@ -542,6 +568,7 @@ class EscrowSubscription(Base):
     match                = relationship( LeagueMatch.__name__, uselist=False,back_populates='subscriptions')
     observer             = relationship( TierPlayer.__name__, uselist=False)
     notified             = Column(Boolean)
+    partial_notified     = Column(Boolean)
 
 
 tourney_venue_table_name = 'tourney_venue'
