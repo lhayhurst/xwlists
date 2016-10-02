@@ -302,7 +302,11 @@ def create_default_match_result(match_result, tier, pm):
     player1 = pm.get_tier_player_by_group_id(p1id)
     player2 = pm.get_tier_player_by_group_id(p2id)
     if player1 is None or player2 is None:
-        return
+        if player1 is None:
+            print "couldn't find player with id %d" % ( p1id)
+        else:
+            print "couldn't find player with id %d" % ( p2id)
+        return None
     lm = LeagueMatch()
     lm.tier_id = tier.id
     lm.player1 = player1
@@ -451,6 +455,7 @@ def add_league_player_form_results():
     pm.db_connector.get_session().commit()
 
     #the player is added, now go get his/her matches
+    escrows = []
     matchups = ch.match_index(tier.get_challonge_name())
     for matchup in matchups:
         matchup = matchup['match']
@@ -465,8 +470,13 @@ def add_league_player_form_results():
                 dbmr = create_default_match_result(matchup, tier, pm)
                 if dbmr is not None:
                     pm.db_connector.get_session().add(dbmr)
-            es = EscrowSubscription( observer=tier_player, match=dbmr)
-            pm.db_connector.get_session().add( es )
+                    escrows.append(EscrowSubscription( observer=tier_player, match=dbmr))
+
+
+    pm.db_connector.get_session().commit()
+
+    for escrow in escrows:
+        pm.db_connector.get_session().add(escrow)
 
     pm.db_connector.get_session().commit()
     player_stats = tier_player.get_stats()
@@ -751,6 +761,21 @@ def mail_escrow_complete(match,pm):
     with app.app_context():
         mail.send(msg)
 
+def mail_escrow_partial(player,match):
+    recipients = list(ADMINS)
+    recipients.append(player.email_address)
+    msg = Message("You escrowed for match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
+                  sender=ADMINS[0],
+                  recipients=recipients)
+    html = render_template("escrow_partial.html",match=match,player_id=player.observer.id)
+
+    msg.body = 'text body'
+    msg.html = html
+    with app.app_context():
+        mail.send(msg)
+
+
+
 @app.route("/escrow_change")
 def escrow_change():
     match_id  = request.args.get("match_id")
@@ -760,7 +785,9 @@ def escrow_change():
     escrow_complete = 1
     if match.needs_escrow():
         escrow_complete = 0
-
+        player = match.partial_escrow()
+        if player:
+            mail_escrow_partial(player,match)
     if escrow_complete:
         try:
             mail_escrow_complete(match,pm)

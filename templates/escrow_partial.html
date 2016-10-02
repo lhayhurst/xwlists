@@ -1,0 +1,10 @@
+<html>
+<head></head>
+<body>
+<p>Hi! You are receiving this email because the match {{ match.player1.get_name() }} versus {{ match.player2.get_name() }} has partially completed the list escrow process.</p>
+<p><b>Your list:</b><br>{{ match.player1_list_text() | safe}}</p>
+If you'd like to change your list before the list escrow process completes, please feel free to hit this link:
+If you woud like to unsubscribe from this escrow notification for your matches, please reply to this email and I'll take you off the list.
+<p>May the force be with you! --sozin</p>
+</body>
+</html>
