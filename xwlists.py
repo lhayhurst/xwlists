@@ -785,9 +785,9 @@ def escrow_change():
     escrow_complete = 1
     if match.needs_escrow():
         escrow_complete = 0
-        player = match.partial_escrow()
-        if player:
-            mail_escrow_partial(player,match)
+        #player = match.partial_escrow()
+        #if player:
+        #mail_escrow_partial(player,match)
     if escrow_complete:
         try:
             mail_escrow_complete(match,pm)
