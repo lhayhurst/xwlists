@@ -51,8 +51,8 @@ Here's a <a href="https://www.reddit.com/r/xwingonline/comments/547iry/season_3_
          <td>{{  m.get_vlog_url() | safe }}</td>
          <td>{{  m.player1_score }}</td>
          <td>{{  m.player2_score }}</td>
-         <td >{{ m.get_player1_list_display() | safe }}
-         <td >{{ m.get_player2_list_display() | safe }}
+         <td >{{ m.get_player1_list_display(no_entry=True) | safe }}
+         <td >{{ m.get_player2_list_display(no_entry=True) | safe }}
       </tr>
       {% endfor %}
   </tbody>

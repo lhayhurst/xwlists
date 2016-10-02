@@ -451,28 +451,39 @@ class LeagueMatch(Base):
         else:
             return self.get_player2_list_url() + self.player2_list_text()
 
-    def get_player_list_display(self, player_id, player_list_id,player_name):
+    def get_player_list_display(self, player_id, player_list_id,player_name,no_entry=False):
         if self.is_complete():
             if player_list_id is not None:
                 return self.get_player_list_text_with_link(player_id)
             else:
-                url = url_for('escrow', match_id=self.id, player_id=player_id)
-                return '<a href="' + url + '">Enter ' + player_name + '\'s list</a>'
+                if no_entry:
+                    return "List has not been entered"
+                else:
+                    url = url_for('escrow', match_id=self.id, player_id=player_id)
+                    return '<a href="' + url + '">Enter ' + player_name + '\'s list</a>'
         if self.needs_escrow():
             if player_list_id is not None:
                 #partial escrow
                 return "Has been escrowed"
             else:
-                url = url_for('escrow', match_id=self.id, player_id=player_id)
-                return '<a href="' + url + '">Escrow ' + player_name + '\'s list</a>'
+                if no_entry:
+                    return "List has not been entered"
+                else:
+                    url = url_for('escrow', match_id=self.id, player_id=player_id)
+                    return '<a href="' + url + '">Escrow ' + player_name + '\'s list</a>'
         else:
             return self.get_player_list_text_with_link(player_id)
 
-    def get_player1_list_display(self):
-        return self.get_player_list_display(self.player1_id, self.player1_list_id, self.player1.get_name())
+    def get_player1_list_display(self,no_entry=False):
+        return self.get_player_list_display(self.player1_id,
+                                            self.player1_list_id,
+                                            self.player1.get_name(),no_entry)
 
-    def get_player2_list_display(self):
-        return self.get_player_list_display(self.player2_id, self.player2_list_id, self.player2.get_name())
+    def get_player2_list_display(self,no_entry=False):
+        return self.get_player_list_display(self.player2_id,
+                                            self.player2_list_id,
+                                            self.player2.get_name(),
+                                            no_entry)
 
     def get_player_escrow_text(self, player_id):
         #scenarios
