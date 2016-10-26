@@ -131,6 +131,8 @@ class ShipType(DeclEnum):
     ARC_170 = xwingmetadata.ARC_170_CANON_NAME, xwingmetadata.ARC_170
     PROTECTORATE_STARFIGHTER = xwingmetadata.PROTECTORATE_STARFIGHTER_CANON_NAME, xwingmetadata.PROTECTORATE_STARFIGHTER
     LANCER_CLASS_PURSUIT_CRAFT = xwingmetadata.LANCER_CLASS_PURSUIT_CRAFT_CANON_NAME, xwingmetadata.LANCER_CLASS_PURSUIT_CRAFT
+    U_WING = xwingmetadata.U_WING_CANON_NAME, xwingmetadata.U_WING
+    UPSILON_CLASS_SHUTTLE = xwingmetadata.UPSILON_CLASS_SHUTTLE_CANON_NAME, xwingmetadata.UPSILON_CLASS_SHUTTLE
 
 
 class Event(Base):
@@ -1570,18 +1572,24 @@ class PersistenceManager:
         lists = ret.all()
         return len(lists)
 
+    def get_archtype_matches(self, archtype_id):
+        ret = self.db_connector.get_session().query(RoundResult).\
+            filter(archtype_id == ArchtypeList.id,
+            ArchtypeList.id == TourneyList.archtype_id,
+            TourneyList.tourney_id == Tourney.id,
+            TourneyRound.tourney_id == Tourney.id,
+            RoundResult.round_id == TourneyRound.id,
+            or_(RoundResult.list1_id == TourneyList.id, RoundResult.list2_id == TourneyList.id))
+        results = ret.all()
+        return results
+
+
     def archtype_league_count(self, archtype):
         ret = self.db_connector.get_session().query(LeagueMatch.id).\
             filter(or_(LeagueMatch.player1_list_id == archtype.id,
                        LeagueMatch.player2_list_id == archtype.id ) )
         lists = ret.all()
         return len(lists)
-
-
-        return self.db_connector.get_session().query(func.count(LeagueMatch)).\
-            filter(archtype.id == ArchtypeList.id).\
-            filter(or_( ArchtypeList.id == LeagueMatch.player1_list_id, ArchtypeList.id == LeagueMatch.player2_list_id,) ).\
-            first()[0]
 
     def delete_tourney_list_details(self, tourney_list):
 
