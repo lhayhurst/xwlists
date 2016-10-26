@@ -78,18 +78,19 @@ JUMPMASTER_5000_ = "JumpMaster 5000"
 #wave 9
 TIE_SF_FIGHTER = 'TIE/sf Fighter'
 TIE_SF_FIGHTER_CANON_NAME = 'tiesffighter'
-
 ARC_170 = 'ARC-170'
 ARC_170_CANON_NAME = 'arc170'
-
 PROTECTORATE_STARFIGHTER = 'Protectorate Starfighter'
 PROTECTORATE_STARFIGHTER_CANON_NAME = 'protectoratestarfighter'
-
 LANCER_CLASS_PURSUIT_CRAFT = 'Lancer-craft Pursuit Craft'
 LANCER_CLASS_PURSUIT_CRAFT_CANON_NAME = 'lancerclasspursuitcraft'
 
+#wave 10
+U_WING = 'U-Wing'
+U_WING_CANON_NAME = 'uwing'
 
-
+UPSILON_CLASS_SHUTTLE = 'Upsilon-Class Shuttle'
+UPSILON_CLASS_SHUTTLE_CANON_NAME = 'upsilonclassshuttle'
 
 EPT = "Elite Pilot Talent"
 EPT_CANON = 'ept'
@@ -183,6 +184,14 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 # all the x-wing upgrades.
 upgrades = {
     CREW: (
+
+        {'name': 'Captain Rex', 'canon_name': 'captainrex', 'cost': 2,
+         'constraints': (REBEL_FACTION_CONSTRAINT),},
+
+        {'name': 'General Hux', 'canon_name': 'generalhux', 'cost': 5,
+         'constraints': (IMPERIAL_FACTION_CONSTRAINT),},
+
+        {'name': 'Operations Specialist', 'canon_name': 'operationsspecialist', 'cost': 3},
 
         {'name': 'Cassian Andor', 'canon_name': 'cassianandor', 'cost': 2,
          'constraints': (REBEL_FACTION_CONSTRAINT),},
@@ -304,6 +313,9 @@ upgrades = {
     ),
     TITLE: (
 
+        {'name': 'Kylo Rens Shuttle', 'cost': 2, 'canon_name' : 'kylorensshuttle',
+         'constraints': ({'type': SHIP_TYPE, 'value': UPSILON_CLASS_SHUTTLE})},
+
         {'name': 'Concord Dawn Protector', 'cost': 1, 'canon_name' : 'concorddawnprotector',
          'constraints': ({'type': SHIP_TYPE, 'value': PROTECTORATE_STARFIGHTER})},
 
@@ -421,6 +433,7 @@ upgrades = {
         {'name': 'Extra Munitions', 'canon_name': 'extramunitions', 'cost': 2},
         {'name': 'Plasma Torpedoes', 'canon_name': 'plasmatorpedoes', 'cost': 3},
     ),
+
     BOMB: (
         {'name': 'Thermal Detonators', 'cost': 3},
         {'name': 'Seismic Charges', 'cost': 2},
@@ -451,9 +464,11 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
+        {'name': 'Captured TIE', 'canon_name': 'capturedtie', 'cost': 1,
+          'constraints': ({'type': SHIP_TYPE, 'value': [TIE_FIGHTER] } ),},
         {'name': 'Smuggling Compartment', 'canon_name': 'smugglingcompartment', 'cost': 0,
            'action': [{'type': 'ADD_UPGRADE', 'value': ILLICIT}],
-           'constraints': ({'type': SHIP_TYPE, 'value': [YT_2400, YT_1300] } ),
+           'constraints': ({'type': SHIP_TYPE, 'value': [YT_2400, YT_1300] }, ),
          },
         {'name': 'Gyroscopic Targeting', 'canon_name': 'gyroscopictargeting', 'cost': 2},
         {'name': 'Guidance Chips', 'canon_name': 'guidancechips', 'cost': 0},
@@ -534,7 +549,7 @@ upgrades = {
     ),
 
     ILLICIT: (
-
+        {'name': 'EMP Device', 'canon_name': 'empdevice', 'cost': 2},
         {'name': 'Burnout SLAM', 'canon_name': 'burnoutslam', 'cost': 1},
         {'name': 'Rigged Cargo Chute', 'canon_name': 'riggedcargochute', 'cost': 1},
         {'name': 'Black Market Slicer Tools', 'canon_name': 'blackmarketslicertools', 'cost': 1},
@@ -547,6 +562,8 @@ upgrades = {
 
     ),
     TECH: (
+        {'name': 'Hyperwave Comm Scanner', 'canon_name': 'hyperwavecommscanner', 'cost': 1},
+        {'name': 'Targeting Synchronizer', 'canon_name': 'targetingsynchronizer', 'cost': 3},
         {'name': 'Primed Thrusters', 'canon_name': 'patternanalyzer', 'cost': 1},
         {'name': 'Pattern Analyzer', 'canon_name': 'patternanalyzer', 'cost': 2},
         {'name': 'Weapons Guidance', 'canon_name': 'weaponsguidance', 'cost': 2},
@@ -979,6 +996,10 @@ ships = {
              {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Pilot', 'cost': 22,
               'upgrades': (SYSTEM, CANNON, TORPEDO, TORPEDO, MOD)}),
 
+    U_WING: ({'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Pathfinder', 'cost': 23,
+              'upgrades': (SYSTEM, TORPEDO, CREW, CREW, TITLE, MOD)}),
+
+
     HWK_290: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Jan Ors', 'cost': 25,
                'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
                'upgrades': (EPT, TURRET, CREW, TITLE, MOD)},
@@ -1059,8 +1080,16 @@ ships = {
                'upgrades': (CANNON, MISSILE, CREW, TITLE, MOD)}),
 
     TIE_FIGHTER: (
+
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Captain Rex', 'cost': 14,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (MOD, TITLE)},
+
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Sabine Wren (TIE Fighter)', 'cost': 15,
-         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (EPT, MOD)},
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (EPT, MOD, TITLE)},
+
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Ahsoka Tano', 'cost': 17,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (EPT, MOD,TITLE)},
+
 
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Howlrunner', 'cost': 18,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (EPT, MOD)},
@@ -1090,6 +1119,21 @@ ships = {
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (MOD,)}
 
     ),
+
+
+    UPSILON_CLASS_SHUTTLE:
+        ({'ship_size': LARGE_SHIP, 'faction': IMPERIAL, 'name': 'Starkiller Base Pilot', 'cost': 30,
+              'upgrades': (SYSTEM, CREW, CREW, TECH, TECH, TITLE, MOD)},
+
+         {'ship_size': LARGE_SHIP, 'faction': IMPERIAL, 'name': 'Lieutenant Dormitz', 'cost': 31,
+              'upgrades': (SYSTEM, CREW, CREW, TECH, TECH, TITLE, MOD)},
+
+         {'ship_size': LARGE_SHIP, 'faction': IMPERIAL, 'name': 'Major Stridan', 'cost': 32,'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+              'upgrades': (SYSTEM, CREW, CREW, TECH, TECH, TITLE, MOD)},
+
+         {'ship_size': LARGE_SHIP, 'faction': IMPERIAL, 'name': 'Kylo Ren', 'cost': 34,'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+              'upgrades': (EPT, SYSTEM, CREW, CREW, TECH, TECH, TITLE, MOD)},
+                            ),
 
     TIE_ADVANCED: ({'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Darth Vader', 'cost': 29,
                     'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),

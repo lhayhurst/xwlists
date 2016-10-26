@@ -1,3 +1,5 @@
+__author__ = 'lhayhurst'
+
 from flask import url_for
 from geopy import Nominatim
 from markupsafe import Markup
@@ -5,30 +7,22 @@ import sqlalchemy
 from sqlalchemy.dialects import mysql
 from sqlalchemy import or_, BigInteger
 from decoder import decode
+import random
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql import ClauseElement, literal
+from myapp import db_connector, rollup
+from xwingmetadata import XWingMetaData
+import xwingmetadata
+from decl_enum import DeclEnum
+from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean, DateTime
+from sqlalchemy import ForeignKey
 
 REGIONAL = 'Regional'
 STORE_CHAMPIONSHIP = 'Store championship'
 NATIONAL_CHAMPIONSHIP = 'Nationals'
-
 ELIMINATION = 'elimination'
-
 SWISS = 'swiss'
-
-__author__ = 'lhayhurst'
-
-import random
-
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.sql import ClauseElement, literal
-
-from myapp import db_connector, rollup
-from xwingmetadata import XWingMetaData
-import xwingmetadata
-
-from decl_enum import DeclEnum
-from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean, DateTime
-from sqlalchemy import ForeignKey
 
 
 class Match(ClauseElement):
@@ -66,7 +60,6 @@ tag_table = "tag"
 tag_to_archtype_table = "archtype_tag"
 
 Base = db_connector.get_base()
-
 
 class RoundType(DeclEnum):
     ELIMINATION     = "Elimination", "Elimination"
@@ -131,7 +124,8 @@ class ShipType(DeclEnum):
     ARC_170 = xwingmetadata.ARC_170_CANON_NAME, xwingmetadata.ARC_170
     PROTECTORATE_STARFIGHTER = xwingmetadata.PROTECTORATE_STARFIGHTER_CANON_NAME, xwingmetadata.PROTECTORATE_STARFIGHTER
     LANCER_CLASS_PURSUIT_CRAFT = xwingmetadata.LANCER_CLASS_PURSUIT_CRAFT_CANON_NAME, xwingmetadata.LANCER_CLASS_PURSUIT_CRAFT
-
+    U_WING = xwingmetadata.U_WING_CANON_NAME, xwingmetadata.U_WING
+    UPSILON_CLASS_SHUTTLE = xwingmetadata.UPSILON_CLASS_SHUTTLE_CANON_NAME, xwingmetadata.UPSILON_CLASS_SHUTTLE
 
 class Event(Base):
     __tablename__ = event_table
@@ -1570,18 +1564,24 @@ class PersistenceManager:
         lists = ret.all()
         return len(lists)
 
+    def get_archtype_matches(self, archtype_id):
+        ret = self.db_connector.get_session().query(RoundResult).\
+            filter(archtype_id == ArchtypeList.id,
+            ArchtypeList.id == TourneyList.archtype_id,
+            TourneyList.tourney_id == Tourney.id,
+            TourneyRound.tourney_id == Tourney.id,
+            RoundResult.round_id == TourneyRound.id,
+            or_(RoundResult.list1_id == TourneyList.id, RoundResult.list2_id == TourneyList.id))
+        results = ret.all()
+        return results
+
+
     def archtype_league_count(self, archtype):
         ret = self.db_connector.get_session().query(LeagueMatch.id).\
             filter(or_(LeagueMatch.player1_list_id == archtype.id,
                        LeagueMatch.player2_list_id == archtype.id ) )
         lists = ret.all()
         return len(lists)
-
-
-        return self.db_connector.get_session().query(func.count(LeagueMatch)).\
-            filter(archtype.id == ArchtypeList.id).\
-            filter(or_( ArchtypeList.id == LeagueMatch.player1_list_id, ArchtypeList.id == LeagueMatch.player2_list_id,) ).\
-            first()[0]
 
     def delete_tourney_list_details(self, tourney_list):
 
