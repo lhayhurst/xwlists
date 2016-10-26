@@ -435,6 +435,7 @@ upgrades = {
         {'name': 'Extra Munitions', 'canon_name': 'extramunitions', 'cost': 2},
         {'name': 'Plasma Torpedoes', 'canon_name': 'plasmatorpedoes', 'cost': 3},
     ),
+
     BOMB: (
         {'name': 'Thermal Detonators', 'cost': 3},
         {'name': 'Seismic Charges', 'cost': 2},

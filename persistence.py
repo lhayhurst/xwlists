@@ -67,7 +67,6 @@ tag_to_archtype_table = "archtype_tag"
 
 Base = db_connector.get_base()
 
-
 class RoundType(DeclEnum):
     ELIMINATION     = "Elimination", "Elimination"
     PRE_ELIMINATION = 'Pre-Elimination', 'Pre-Elimination'
