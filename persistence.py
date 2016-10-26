@@ -134,7 +134,6 @@ class ShipType(DeclEnum):
     U_WING = xwingmetadata.U_WING_CANON_NAME, xwingmetadata.U_WING
     UPSILON_CLASS_SHUTTLE = xwingmetadata.UPSILON_CLASS_SHUTTLE_CANON_NAME, xwingmetadata.UPSILON_CLASS_SHUTTLE
 
-
 class Event(Base):
     __tablename__ = event_table
     id = Column( Integer, primary_key=True)

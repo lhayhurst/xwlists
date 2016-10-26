@@ -465,10 +465,8 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
-
         {'name': 'Captured TIE', 'canon_name': 'capturedtie', 'cost': 1,
           'constraints': ({'type': SHIP_TYPE, 'value': [TIE_FIGHTER] } ),},
-
         {'name': 'Smuggling Compartment', 'canon_name': 'smugglingcompartment', 'cost': 0,
            'action': [{'type': 'ADD_UPGRADE', 'value': ILLICIT}],
            'constraints': ({'type': SHIP_TYPE, 'value': [YT_2400, YT_1300] }, ),
