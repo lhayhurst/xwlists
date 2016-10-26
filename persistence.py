@@ -1,3 +1,5 @@
+__author__ = 'lhayhurst'
+
 from flask import url_for
 from geopy import Nominatim
 from markupsafe import Markup
@@ -5,30 +7,22 @@ import sqlalchemy
 from sqlalchemy.dialects import mysql
 from sqlalchemy import or_, BigInteger
 from decoder import decode
+import random
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql import ClauseElement, literal
+from myapp import db_connector, rollup
+from xwingmetadata import XWingMetaData
+import xwingmetadata
+from decl_enum import DeclEnum
+from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean, DateTime
+from sqlalchemy import ForeignKey
 
 REGIONAL = 'Regional'
 STORE_CHAMPIONSHIP = 'Store championship'
 NATIONAL_CHAMPIONSHIP = 'Nationals'
-
 ELIMINATION = 'elimination'
-
 SWISS = 'swiss'
-
-__author__ = 'lhayhurst'
-
-import random
-
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.sql import ClauseElement, literal
-
-from myapp import db_connector, rollup
-from xwingmetadata import XWingMetaData
-import xwingmetadata
-
-from decl_enum import DeclEnum
-from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean, DateTime
-from sqlalchemy import ForeignKey
 
 
 class Match(ClauseElement):

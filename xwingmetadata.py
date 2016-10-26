@@ -78,16 +78,14 @@ JUMPMASTER_5000_ = "JumpMaster 5000"
 #wave 9
 TIE_SF_FIGHTER = 'TIE/sf Fighter'
 TIE_SF_FIGHTER_CANON_NAME = 'tiesffighter'
-
 ARC_170 = 'ARC-170'
 ARC_170_CANON_NAME = 'arc170'
-
 PROTECTORATE_STARFIGHTER = 'Protectorate Starfighter'
 PROTECTORATE_STARFIGHTER_CANON_NAME = 'protectoratestarfighter'
-
 LANCER_CLASS_PURSUIT_CRAFT = 'Lancer-craft Pursuit Craft'
 LANCER_CLASS_PURSUIT_CRAFT_CANON_NAME = 'lancerclasspursuitcraft'
 
+#wave 10
 U_WING = 'U-Wing'
 U_WING_CANON_NAME = 'uwing'
 
