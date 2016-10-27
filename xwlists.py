@@ -782,10 +782,23 @@ def mail_escrow_partial(player,match,pm):
             mail.send(msg)
 
 
+
+@app.route("/force_reset_match_escrow")
+def force_reset_match_escrow():
+    match_id  = request.args.get("match_id")
+
+    pm        = PersistenceManager(myapp.db_connector)
+    match     = pm.get_match(match_id)
+    match.reset_escrow()
+    pm.db_connector.get_session().commit()
+    return redirect(url_for('escrow', match_id=match_id, player_id=match.player1_id))
+
+
 @app.route("/reset_match_escrow")
 def reset_match_escrow():
     match_id  = request.args.get("match_id")
     player_id = request.args.get("player_id")
+
     pm        = PersistenceManager(myapp.db_connector)
     match     = pm.get_match(match_id)
     match.delete_partial_escrow(player_id)
@@ -925,12 +938,75 @@ def search_guide():
     return render_template("search_guide.html")
 
 
+def merge_versus_results(pm, search_results1, search_results2):
+    s1_archtypes = {}
+    s2_archtypes = {}
+
+    results = []
+    #grab all the unique archtypes
+    for tl in search_results1:
+        archtype_id = tl.archtype_id
+        if not s1_archtypes.has_key(archtype_id):
+            s1_archtypes[archtype_id] = []
+        s1_archtypes[archtype_id].append(tl)
+
+    #now go through s2 and find all the matches against any list
+    for tl in search_results2:
+        archtype_id = tl.archtype_id
+        if not s2_archtypes.has_key(archtype_id):
+            s2_archtypes[archtype_id] = []
+        s2_archtypes[archtype_id].append(tl)
+
+    #and now go through all the games and see if these two archtypes play each other
+    matches = []
+    num_keys = len(s1_archtypes.keys())
+    print "%d keys to slog through" % ( num_keys )
+    for a in s1_archtypes.keys():
+        print "qurying archtype %d" % ( a )
+        matches = pm.get_archtype_matches(a)
+        for round_result in matches:
+            ma1 = None
+            ma2 = None
+            if round_result.list1 is not None and round_result.list1.archtype_list is not None:
+                ma1 = round_result.list1.archtype_id
+            if round_result.list2 is not None and round_result.list2.archtype_list is not None:
+                ma2 = round_result.list2.archtype_list.id
+            opponents_archtype_id = None
+            if a == ma1:
+                opponents_archtype_id = ma2
+            else:
+                opponents_archtype_id = ma1
+            if s2_archtypes.has_key(opponents_archtype_id):
+                matches.append( round_result )
+
+
 @app.route("/search_results", methods=['POST'])
 def get_search_results():
     try:
         search_text = request.json['search-text']
         s = Search( search_text )
         results = s.search()
+        return render_template( 'search_results.html', results=results, url_root=request.url_root), 200
+    except ValueError, e:
+        return render_template( 'search_error.html', errortext=str(e))
+
+@app.route("/search_versus_results", methods=['POST'])
+def get_search_versus_results():
+    try:
+        search1_text   = request.json['search1-text']
+        search2_text   = request.json['search2-text']
+        versus_enabled = request.json['versus-enabled']
+        pm = PersistenceManager(myapp.db_connector)
+        results = None
+        if versus_enabled:
+            s1 = Search(search1_text )
+            s2 = Search(search2_text )
+            r1 = s1.search()
+            r2 = s2.search()
+            results = merge_versus_results(pm, r1,r2)
+        else:
+            s = Search( search1_text )
+            results = s.search()
         return render_template( 'search_results.html', results=results, url_root=request.url_root), 200
     except ValueError, e:
         return render_template( 'search_error.html', errortext=str(e))

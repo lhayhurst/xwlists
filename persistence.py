@@ -362,7 +362,17 @@ class LeagueMatch(Base):
         ret = '<a href="' + url_for('reset_match_escrow', match_id=self.id, player_id=player_id,_external=True ) +  '">link</a>'
         return Markup(ret)
 
+    def reset_escrow(self):
+        self.player1_list_id = None
+        self.player2_list_id = None
+        self.player1_list    = None
+        self.player2_list    = None
+        self.player1_list_url = None
+        self.player2_list_url = None
+
     def delete_partial_escrow(self,player_id):
+        if self.needs_escrow() == False: #can't delete an escrow that is done!
+                return
         player_id = long(player_id)
         for s in self.subscriptions:
             if s.observer.id == player_id:

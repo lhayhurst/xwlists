@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div id="versus-div" name="versus-div" style="display:none">
+  <input type="search" id="search-text2" title="Search" style="width: 750px;border:  1px solid #ccc;font-size: 21px;"
+         placeholder="example: p=Han AND (s=awing OR s=z95) AND (u=refit OR u=falcon)">
+</div>
+    <div id="search-form">
+  <input type="search" id="search-text" title="Search" style="width: 750px;border:  1px solid #ccc;font-size: 21px;"
+         placeholder="example: p=Han AND (s=awing OR s=z95) AND (u=refit OR u=falcon)">
+  <button class="btn" name="search-button" id="search-button" style="width:30px;height:31px;padding:2px;" disabled>Go!</button>
+   <input type="checkbox" name="versus-checkbox" id="versus-checkbox" value="unchecked">Click to Enable Versus</input>
+<a href="search_guide">search help</a><br>
+</div><hr>
+<div id="result"></div>
+
+<script>
+
+
+function disableSearchButton() {
+    $('#search-button').prop('disabled', true);
+
+}
+
+function enableSearchButton() {
+    $('#search-button').prop('disabled', false);
+
+}
+
+function versusEnabled() {
+    return $("#versus-checkbox").prop('checked');
+}
+
+function searchTextHasLength() {
+    return $('#search-text').val().length > 0
+}
+
+function searchText2HasLength() {
+    return $('#search-text2').val().length > 0
+}
+
+function searchButtonMagic() {
+    if (versusEnabled()) {
+        if (searchTextHasLength() && searchText2HasLength()) {
+            enableSearchButton();
+        }
+        else {
+            disableSearchButton();
+        }
+    }
+    else {
+        if (searchTextHasLength()) {
+            enableSearchButton();
+        }
+        else {
+            disableSearchButton();
+        }
+    }
+}
+
+
+$(document).ready(function() {
+    searchButton = $('#search-button');
+    searchButton.click( onSearch )
+    $("#versus-div").hide();
+    $("#versus-checkbox").change(function() {
+        if(versusEnabled()) {
+            $("#versus-div").show();
+            searchButtonMagic();
+        }
+        else {
+            $("#versus-div").hide();
+            searchButtonMagic();
+        }
+    });
+
+    $('#search-text').on('input', function() {
+        searchButtonMagic();
+    });
+
+    $('#search-text2').on('input', function() {
+        searchButtonMagic();
+    });
+
+} );
+
+messages = [ "Interrogating Bothans...", "Searching asteroid field...", "Hacking into Imperial Navy Ship Registry...", "Scanning Kuat Drive Yards database... "]
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function waitText() {
+    message = messages[getRandomInt(0, 3)]
+    $("#result").empty().append(message);
+}
+
+function onSearch() {
+
+    /* get some values from elements on the page: */
+    var term1         = $('#search-text').val();
+    var term2         = $('#search-text').val();
+    var timer;
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: "/search_results",
+        beforeSend: function() {
+            timer = setInterval( waitText, 1000);
+        },
+        data: JSON.stringify({'search1-text': term1, 'search2-text': term2, 'versus-enabled': versusEnabled() }),
+        success: function (data) {
+            clearInterval( timer);
+            $("#result").empty().append(data.responseText);
+
+        },
+        error: function (data) {
+            clearInterval( timer);
+            $("#result").empty().append(data.responseText);
+
+        },
+        dataType: "json"
+    });
+}
+</script>
+
+
+{% endblock %}
