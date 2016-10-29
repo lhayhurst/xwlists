@@ -58,3 +58,4 @@ insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'mod', 'Ca
 
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'mod', 'Captured TIE', 'capturedtie', '1');
 
+insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'title', 'Sabines Masterpiece', 'sabinesmasterpiece', '1');

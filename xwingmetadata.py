@@ -313,6 +313,10 @@ upgrades = {
     ),
     TITLE: (
 
+        {'name': 'Sabines Masterpiece', 'cost': 1, 'canon_name' : 'sabinesmasterpiece',
+         'constraints': ({'type': SHIP_TYPE, 'value': TIE_FIGHTER}, {'faction': REBEL_FACTION_CONSTRAINT})},
+
+
         {'name': 'Kylo Rens Shuttle', 'cost': 2, 'canon_name' : 'kylorensshuttle',
          'constraints': ({'type': SHIP_TYPE, 'value': UPSILON_CLASS_SHUTTLE})},
 
