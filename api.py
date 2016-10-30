@@ -14,7 +14,7 @@ from xwingmetadata import sets_and_expansions
 import myapp
 from persistence import PersistenceManager, Tourney, TourneyVenue, TourneyPlayer, TourneyRanking, TourneyList, \
     RoundResult, TourneyRound, RoundType, TourneySet, Event
-from xws import XWSToJuggler
+from xws import XWSToJuggler, XWSListConverter
 
 PLAYER_ID = 'player_id'
 PLAYER2_ID = 'player2_id'
@@ -58,6 +58,7 @@ NAME = "name"
 ID = "id"
 PARTICIPANT_COUNT = "participant_count"
 TOURNAMENT = "tournament"
+LIST = 'list'
 TOURNAMENTS = "tournaments"
 CITY = 'city'
 STATE = 'state'
@@ -628,6 +629,12 @@ class TourneyToJsonConverter:
             if ranking.elim_rank is not None:
                 rank[ELIMINATION] = ranking.elim_rank
             players.append(player)
+
+            #if the player has a list, xws it
+            tlist = ranking.player.get_first_tourney_list()
+            if tlist:
+                converter = XWSListConverter(tlist)
+                player[LIST] = converter.data
 
         #and now the rounds
         rounds = []

@@ -12,10 +12,13 @@ class XWSListConverter:
         self.data['faction'] = str(list.faction().value)
         pilots = []
         self.data['pilots'] = pilots
-        self.data['version'] = "0.2.1"
+        self.data['version'] = "4.2.0"
         self.data['vendor'] = { 'listjuggler': {} }
 
-        for ship in list.ships:
+        archtype = list.archtype_list
+        if archtype is None:
+            return
+        for ship in archtype.ships:
             sp = ship.ship_pilot
             p  = sp.pilot
             pilot_href = {}
