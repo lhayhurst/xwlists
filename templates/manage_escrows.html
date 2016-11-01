@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+<br>
+<table id="matches" class="display" cellspacing="0" width="100%">
+  <thead>
+  <tr>
+    <th>Tier</th>
+    <th>Division</th>
+    <th>Match Id</th>
+    <th>Player 1</th>
+    <th>Player 2</th>
+    <th>Match State</th>
+    <th>Reset Player 1 Escrow</th>
+    <th>Reset Player 2 Escrow</th>
+    <th>Reset All Escrow</th>
+  </thead>
+  <tbody>
+  </tr>
+      {% for match in matches %}
+      <tr>
+         <td>{{  match.player1.tier.get_name()}}</td>
+         <td>{{  match.player1.division.get_name()}}</td>
+         <td>{{  match.id }}</td>
+         <td>{{  match.player1.get_url()}}</td>
+         <td>{{  match.player2.get_url()}}</td>
+         <td>{{  match.state }}</td>
+         <td >{{ match.get_player1_escrow_reset_link() }}
+         <td >{{ match.get_player2_escrow_reset_link() }}
+         <td >{{ match.get_escrow_reset_link() }}
+
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+<script>
+
+    $(document).ready( function () {
+        $('#matches').dataTable({
+            "order": [[ 1, "desc" ]],
+            lengthMenu: [ [10, 50, -1], [10, 50, "All"] ],
+            iDisplayLength: -1,
+        });
+    } );
+</script>
+{% endblock %}

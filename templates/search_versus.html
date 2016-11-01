@@ -2,11 +2,11 @@
 {% block content %}
 
 <div id="versus-div" name="versus-div" style="display:none">
-  <input type="search" id="search-text2" title="Search" style="width: 750px;border:  1px solid #ccc;font-size: 21px;"
+  <input type="search" id="search2-text" title="Search" style="width: 750px;border:  1px solid #ccc;font-size: 21px;"
          placeholder="example: p=Han AND (s=awing OR s=z95) AND (u=refit OR u=falcon)">
 </div>
     <div id="search-form">
-  <input type="search" id="search-text" title="Search" style="width: 750px;border:  1px solid #ccc;font-size: 21px;"
+  <input type="search" id="search1-text" title="Search" style="width: 750px;border:  1px solid #ccc;font-size: 21px;"
          placeholder="example: p=Han AND (s=awing OR s=z95) AND (u=refit OR u=falcon)">
   <button class="btn" name="search-button" id="search-button" style="width:30px;height:31px;padding:2px;" disabled>Go!</button>
    <input type="checkbox" name="versus-checkbox" id="versus-checkbox" value="unchecked">Click to Enable Versus</input>
@@ -32,11 +32,11 @@ function versusEnabled() {
 }
 
 function searchTextHasLength() {
-    return $('#search-text').val().length > 0
+    return $('#search1-text').val().length > 0
 }
 
 function searchText2HasLength() {
-    return $('#search-text2').val().length > 0
+    return $('#search2-text').val().length > 0
 }
 
 function searchButtonMagic() {
@@ -74,11 +74,11 @@ $(document).ready(function() {
         }
     });
 
-    $('#search-text').on('input', function() {
+    $('#search1-text').on('input', function() {
         searchButtonMagic();
     });
 
-    $('#search-text2').on('input', function() {
+    $('#search2-text').on('input', function() {
         searchButtonMagic();
     });
 
@@ -98,14 +98,14 @@ function waitText() {
 function onSearch() {
 
     /* get some values from elements on the page: */
-    var term1         = $('#search-text').val();
-    var term2         = $('#search-text').val();
+    var term1         = $('#search1-text').val();
+    var term2         = $('#search2-text').val();
     var timer;
 
     $.ajax({
         type: "POST",
         contentType: "application/json; charset=utf-8",
-        url: "/search_results",
+        url: "/search_versus_results",
         beforeSend: function() {
             timer = setInterval( waitText, 1000);
         },

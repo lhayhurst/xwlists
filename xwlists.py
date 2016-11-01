@@ -123,6 +123,22 @@ def mail_error(errortext):
 def about():
     return render_template('about.html')
 
+@app.route("/manage_escrows")
+def manage_escrows():
+    league_id = request.args.get('league_id')
+    pm = PersistenceManager(myapp.db_connector)
+
+    league = pm.get_league_by_id(league_id)
+
+    matches = []
+    for tier in league.tiers:
+        for player in tier.players:
+            for match in player.matches:
+                matches.append( match )
+
+
+    return render_template('manage_escrows.html', matches=matches)
+
 @app.route("/set_up_escrow_subscription")
 def set_up_escrow_subscription():
     pm = PersistenceManager(myapp.db_connector)
@@ -930,7 +946,7 @@ def escrow_list_url():
 
 @app.route("/search")
 def versus():
-    return render_template("search.html", url_root=request.url_root)
+    return render_template("search_versus.html", url_root=request.url_root)
 
 
 @app.route("/search_guide")
@@ -950,34 +966,14 @@ def merge_versus_results(pm, search_results1, search_results2):
             s1_archtypes[archtype_id] = []
         s1_archtypes[archtype_id].append(tl)
 
-    #now go through s2 and find all the matches against any list
     for tl in search_results2:
         archtype_id = tl.archtype_id
         if not s2_archtypes.has_key(archtype_id):
             s2_archtypes[archtype_id] = []
         s2_archtypes[archtype_id].append(tl)
 
-    #and now go through all the games and see if these two archtypes play each other
-    matches = []
-    num_keys = len(s1_archtypes.keys())
-    print "%d keys to slog through" % ( num_keys )
-    for a in s1_archtypes.keys():
-        print "qurying archtype %d" % ( a )
-        matches = pm.get_archtype_matches(a)
-        for round_result in matches:
-            ma1 = None
-            ma2 = None
-            if round_result.list1 is not None and round_result.list1.archtype_list is not None:
-                ma1 = round_result.list1.archtype_id
-            if round_result.list2 is not None and round_result.list2.archtype_list is not None:
-                ma2 = round_result.list2.archtype_list.id
-            opponents_archtype_id = None
-            if a == ma1:
-                opponents_archtype_id = ma2
-            else:
-                opponents_archtype_id = ma1
-            if s2_archtypes.has_key(opponents_archtype_id):
-                matches.append( round_result )
+    merged_results = pm.get_merged_search_results( s1_archtypes.keys(), s2_archtypes.keys() )
+    return merged_results
 
 
 @app.route("/search_results", methods=['POST'])

@@ -358,6 +358,17 @@ class LeagueMatch(Base):
     subscriptions       = relationship("EscrowSubscription",
                                        back_populates='match',cascade="all,delete,delete-orphan")
 
+    def get_player1_escrow_reset_link(self):
+        return self.reset_escrow_url(self.player1_id)
+
+    def get_player2_escrow_reset_link(self):
+        return self.reset_escrow_url(self.player2_id)
+
+    def get_escrow_reset_link(self):
+        ret = '<a href="' + url_for('force_reset_match_escrow', match_id=self.id,_external=True ) +  '">link</a>'
+        return Markup(ret)
+
+
     def reset_escrow_url(self,player_id):
         ret = '<a href="' + url_for('reset_match_escrow', match_id=self.id, player_id=player_id,_external=True ) +  '">link</a>'
         return Markup(ret)
@@ -1347,6 +1358,38 @@ class PersistenceManager:
         for t in all_tags:
             ret[ t.tagtext ] = 1
         return ret.keys()
+
+
+
+    def get_merged_search_results(self, archtypes1, archtypes2):
+        session = self.db_connector.get_session()
+
+        #looking for any match ups where
+        #a1 in list1 AND a2 in list2
+        # OR
+        #a1 in list2 AND a2 in list1
+
+        a1_in_list1 = [RoundResult.list1_id.in_( archtypes1 ),
+                        RoundResult.list1_id == TourneyList.id,
+                        TourneyList.archtype_id == ArchtypeList.id]
+        a1_in_list2 = [RoundResult.list2_id.in_( archtypes1 ),
+                        RoundResult.list2_id == TourneyList.id,
+                        TourneyList.archtype_id == ArchtypeList.id]
+        a2_in_list1 = [RoundResult.list1_id.in_( archtypes2 ),
+                        RoundResult.list1_id == TourneyList.id,
+                        TourneyList.archtype_id == ArchtypeList.id]
+        a2_in_list2 = [( RoundResult.list2_id.in_( archtypes2 ),
+                        RoundResult.list1_id == TourneyList.id,
+                        TourneyList.archtype_id == ArchtypeList.id)]
+
+        s   = session.query(RoundResult).filter(
+                ArchtypeList.id.in_(archtypes1),
+                ArchtypeList.id == TourneyList.archtype_id,
+                TourneyList.id == RoundResult.list1_id,
+                ArchtypeList.id.in_(archtypes2),
+                ArchtypeList.id == TourneyList.archtype_id,
+                TourneyList.id == RoundResult.list2_id).all()
+        return s
 
     def get_tourney_ids(self):
         return self.db_connector.get_session().query(Tourney.id).all()
