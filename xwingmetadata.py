@@ -230,7 +230,6 @@ upgrades = {
         {'name': 'Dengar', 'canon_name': 'dengar', 'cost': 3,
          'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
 
-
         {'name': '4-Lom', 'canon_name': '4lom', 'cost': 1, 'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
         {'name': 'Zuckuss', 'canon_name': 'zuckuss', 'cost': 1, 'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
         {'name': 'Chopper', 'canon_name': 'chopper', 'cost': 0, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
@@ -242,7 +241,6 @@ upgrades = {
         {'name': 'Zeb Orellios', 'canon_name': 'zeborellios', 'cost': 1, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
         {'name': 'Ezra Bridger', 'canon_name': 'ezrabridger', 'cost': 3, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
         {'name': 'Kanan Jarrus', 'canon_name': 'kananjarrus', 'cost': 3, 'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),},
-
 
         {'name': 'Intelligence Agent', 'cost': 1},
         {'name': 'Mercenary Copilot', 'cost': 2},
