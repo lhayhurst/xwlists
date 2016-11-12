@@ -217,7 +217,7 @@ upgrades = {
         {'name': 'Ketsu Onyo', 'canon_name': 'ketsuonyo', 'cost': 1,
          'constraints': (SCUM_FACTION_CONSTRAINT),},
 
-        {'name': 'Latts Razzi', 'canon_name': 'lattsrazzi', 'cost': 1,
+        {'name': 'Latts Razzi', 'canon_name': 'lattsrazzi', 'cost': 2,
          'constraints': (SCUM_FACTION_CONSTRAINT),},
 
         {'name': 'Systems Officer', 'canon_name': 'systemsofficer', 'cost': 2,
