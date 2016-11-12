@@ -220,6 +220,7 @@ upgrades = {
         {'name': 'Latts Razzi', 'canon_name': 'lattsrazzi', 'cost': 2,
          'constraints': (SCUM_FACTION_CONSTRAINT),},
 
+
         {'name': 'Systems Officer', 'canon_name': 'systemsofficer', 'cost': 2,
          'constraints': (IMPERIAL_FACTION_CONSTRAINT),},
         {'name': 'Boba Fett', 'canon_name': 'bobafett', 'cost': 1,
