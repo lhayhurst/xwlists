@@ -185,6 +185,8 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 upgrades = {
     CREW: (
 
+        {'name': 'Hotshot Co-Pilot', 'canon_name': 'hotshotcopilot', 'cost': 4,},
+
         {'name': 'Captain Rex', 'canon_name': 'captainrex', 'cost': 2,
          'constraints': (REBEL_FACTION_CONSTRAINT),},
 
@@ -504,6 +506,7 @@ upgrades = {
 
     EPT:
         (
+         {'name': 'Trick Shot', 'cost': 0, 'canon_name':'trickshot'},
          {'name': 'Snap Shot', 'cost': 2, 'canon_name':'snapshot'},
          {'name': 'Fearlessness', 'cost': 1, 'canon_name':'fearlessness'},
          {'name': 'Attanni Mindlink', 'cost': 1, 'canon_name':'attannimindlink'},
