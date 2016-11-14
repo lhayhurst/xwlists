@@ -961,6 +961,10 @@ ships = {
 
     YT_1300: (
 
+              {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Resistance Sympathizer', 'cost': 38,
+               'upgrades': (MISSILE, TITLE, MOD, CREW, CREW)},
+
+
               {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Han Solo (TFA)', 'cost': 46,
                'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
                'upgrades': (EPT, MISSILE, TITLE, MOD, CREW, CREW)},
