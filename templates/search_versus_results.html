@@ -9,26 +9,43 @@
     }
 </style>
 
+Term "{{ s1 }}" wins: {{ results["s1_wins"] }}<br>
+Term "{{ s2 }}" wins: {{ results["s2_wins"] }}<br>
+draws: {{ results["draws"] }}<br>
+<br>
 <table id="lists" class="compact display dataTable" cellspacing="0" width="100%">
   <thead>
       <tr>
         <th>Tourney</th>
         <th>Type</th>
-        <th >Player</th>
+        <th >Player1</th>
         <th >Swiss Standing</th>
         <th >Championship Standing</th>
         <th>List</th>
+        <th >Player2</th>
+        <th >Swiss Standing</th>
+        <th >Championship Standing</th>
+        <th>List</th>
+        <th>P1 Score</th>
+        <th>P2 Score</th>
+
       </tr>
   </thead>
 
-  {% for list in results %}
+  {% for result in results["results"] %}
   <tr>
-      <td>{{ list.tourney.get_tourney_name_as_url() }}</td>
-      <td>{{ list.tourney.tourney_type }}</td>
-      <td>{{ list.player.get_player_name() }}</td>
-      <td>{{ list.player.result.rank }}</td>
-      <td>{{ list.player.result.elim_rank }}</td>
-      <td>{{ list.pretty_print(url_root=url_root,manage_list=0) | safe     }}</td>
+      <td>{{ result.list1.tourney.get_tourney_name_as_url() }}</td>
+      <td>{{ result.list1.tourney.tourney_type }}</td>
+      <td>{{ result.list1.player.get_player_name() }}</td>
+      <td>{{ result.list1.player.result.rank }}</td>
+      <td>{{ result.list1.player.result.elim_rank }}</td>
+      <td>{{ result.list1.pretty_print(url_root=url_root,manage_list=1) | safe     }}</td>
+      <td>{{ result.list2.player.get_player_name() }}</td>
+      <td>{{ result.list2.player.result.rank }}</td>
+      <td>{{ result.list2.player.result.elim_rank }}</td>
+      <td>{{ result.list2.pretty_print(url_root=url_root,manage_list=1) | safe     }}</td>
+      <td>{{ result.list1_score }}</td>
+      <td>{{ result.list2_score }}</td>
 
   </tr>
   {% endfor %}

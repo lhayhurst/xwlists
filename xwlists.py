@@ -1000,10 +1000,17 @@ def get_search_versus_results():
             r1 = s1.search()
             r2 = s2.search()
             results = merge_versus_results(pm, r1,r2)
+            return render_template( 'search_versus_results.html',
+                                    versus_enabled=versus_enabled,
+                                    results=results,
+                                    s1 = search1_text,
+                                    s2 = search2_text,
+                                    url_root=request.url_root), 200
+
         else:
             s = Search( search1_text )
             results = s.search()
-        return render_template( 'search_results.html', results=results, url_root=request.url_root), 200
+            return render_template( 'search_results.html', versus_enabled=versus_enabled,results=results, url_root=request.url_root), 200
     except ValueError, e:
         return render_template( 'search_error.html', errortext=str(e))
 

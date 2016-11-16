@@ -44,4 +44,3 @@ insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'illicit',
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'torpedo', 'Extra Munitions', 'extramunitions', '2');
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'torpedo', 'Plasma Torpedoes', 'plasmatorpedoes', '3');
 
-
