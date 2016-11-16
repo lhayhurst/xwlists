@@ -472,7 +472,7 @@ upgrades = {
         {'name': 'Captured TIE', 'canon_name': 'capturedtie', 'cost': 1,
           'constraints': ({'type': SHIP_TYPE, 'value': [TIE_FIGHTER] } ),},
         {'name': 'Smuggling Compartment', 'canon_name': 'smugglingcompartment', 'cost': 0,
-           'action': [{'type': 'ADD_UPGRADE', 'value': ILLICIT}]
+           'action': [{'type': 'ADD_UPGRADE', 'value': ILLICIT}, {'type': 'ADD_UPGRADE', 'value': MOD}]
          },
         {'name': 'Gyroscopic Targeting', 'canon_name': 'gyroscopictargeting', 'cost': 2},
         {'name': 'Guidance Chips', 'canon_name': 'guidancechips', 'cost': 0},
