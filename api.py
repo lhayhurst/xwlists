@@ -65,7 +65,7 @@ STATE = 'state'
 COUNTRY = 'country'
 VENUE = 'venue'
 EMAIL = 'email'
-XWS = 'xws'
+XWS = 'list'
 
 
 class TournamentApiHelper:
