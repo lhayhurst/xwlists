@@ -9,7 +9,12 @@ from persistence import TourneyList, Faction, Ship, ShipUpgrade, ArchtypeList
 class XWSListConverter:
     def __init__(self, list):
         self.data = {}
-        self.data['faction'] = str(list.faction().value)
+        faction = list.faction()
+        if faction is None:
+            #print "detected list with no faction!"
+            pass
+        else:
+            self.data['faction'] = str(list.faction().value)
         pilots = []
         self.data['pilots'] = pilots
         self.data['version'] = "4.2.0"
