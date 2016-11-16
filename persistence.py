@@ -1213,6 +1213,12 @@ class RoundResult(Base):
         url = url_for( 'display_list', tourney_list_id=self.loser.id )
         return url
 
+    def list1_won(self):
+        return self.list1_score > self.list2_score
+
+    def list2_won(self):
+        return self.list2_score > self.list1_score
+
 set_table_name = "xwing_set"
 class Set(Base):
     __tablename__   = set_table_name
@@ -1360,7 +1366,6 @@ class PersistenceManager:
         return ret.keys()
 
 
-
     def get_merged_search_results(self, archtypes1, archtypes2):
         session = self.db_connector.get_session()
 
@@ -1369,27 +1374,62 @@ class PersistenceManager:
         # OR
         #a1 in list2 AND a2 in list1
 
-        a1_in_list1 = [RoundResult.list1_id.in_( archtypes1 ),
-                        RoundResult.list1_id == TourneyList.id,
-                        TourneyList.archtype_id == ArchtypeList.id]
-        a1_in_list2 = [RoundResult.list2_id.in_( archtypes1 ),
-                        RoundResult.list2_id == TourneyList.id,
-                        TourneyList.archtype_id == ArchtypeList.id]
-        a2_in_list1 = [RoundResult.list1_id.in_( archtypes2 ),
-                        RoundResult.list1_id == TourneyList.id,
-                        TourneyList.archtype_id == ArchtypeList.id]
-        a2_in_list2 = [( RoundResult.list2_id.in_( archtypes2 ),
-                        RoundResult.list1_id == TourneyList.id,
-                        TourneyList.archtype_id == ArchtypeList.id)]
+        subq1 = session.query(RoundResult).filter(
+            ArchtypeList.id.in_(archtypes1),
+            ArchtypeList.id == TourneyList.archtype_id,
+            TourneyList.id == RoundResult.list1_id
+        ).subquery()
 
-        s   = session.query(RoundResult).filter(
-                ArchtypeList.id.in_(archtypes1),
-                ArchtypeList.id == TourneyList.archtype_id,
-                TourneyList.id == RoundResult.list1_id,
-                ArchtypeList.id.in_(archtypes2),
-                ArchtypeList.id == TourneyList.archtype_id,
-                TourneyList.id == RoundResult.list2_id).all()
-        return s
+
+        q = session.query(RoundResult).filter(
+            ArchtypeList.id.in_(archtypes2),
+            ArchtypeList.id == TourneyList.archtype_id,
+            TourneyList.id == RoundResult.list2_id,
+            subq1.c.id == RoundResult.id
+        )
+
+        subq2 = session.query(RoundResult).filter(
+            ArchtypeList.id.in_(archtypes1),
+            ArchtypeList.id == TourneyList.archtype_id,
+            TourneyList.id == RoundResult.list2_id
+        ).subquery()
+
+
+        q2 = session.query(RoundResult).filter(
+            ArchtypeList.id.in_(archtypes2),
+            ArchtypeList.id == TourneyList.archtype_id,
+            TourneyList.id == RoundResult.list1_id,
+            subq2.c.id == RoundResult.id
+        )
+
+        #build the summary
+        s1_wins = 0
+        s2_wins = 0
+        draws   = 0
+
+        results1 = q.all()
+        results2  = q2.all()
+
+        #in result set 1, query one maps to list1
+        #in result set 2, query one maps to list2
+        for r in results1:
+            if r.draw:
+                draws += 1
+            elif r.list1_won():
+                s1_wins +=1
+            elif r.list2_won():
+                s2_wins +=1
+
+        for r in results2:
+            if r.draw:
+                draws += 1
+            elif r.list2_won():
+                s1_wins +=1
+            elif r.list1_won():
+                s2_wins +=1
+
+
+        return { "s1_wins" : s1_wins, "s2_wins": s2_wins, "draws": draws, "results": results1 + results2 }
 
     def get_tourney_ids(self):
         return self.db_connector.get_session().query(Tourney.id).all()
