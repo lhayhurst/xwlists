@@ -92,6 +92,9 @@ U_WING_CANON_NAME = 'uwing'
 UPSILON_CLASS_SHUTTLE = 'Upsilon-Class Shuttle'
 UPSILON_CLASS_SHUTTLE_CANON_NAME = 'upsilonclassshuttle'
 
+QUADJUMPER = 'Quadjumper'
+QUADJUMPER_CANON_NAME = 'quadjumper'
+
 EPT = "Elite Pilot Talent"
 EPT_CANON = 'ept'
 TITLE = "Title"
@@ -469,6 +472,11 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
+
+        {'name': 'Spacetug Tractor Array', 'canon_name': 'spacetugtractorarray', 'cost': 2,
+          'constraints': ({'type': SHIP_TYPE, 'value': [QUADJUMPER] } ),},
+
+
         {'name': 'Captured TIE', 'canon_name': 'capturedtie', 'cost': 1,
           'constraints': ({'type': SHIP_TYPE, 'value': [TIE_FIGHTER] } ),},
         {'name': 'Smuggling Compartment', 'canon_name': 'smugglingcompartment', 'cost': 0,
@@ -505,6 +513,7 @@ upgrades = {
 
     EPT:
         (
+         {'name': 'A Score To Settle', 'cost': 0, 'canon_name':'ascoretosettle'},
          {'name': 'Trick Shot', 'cost': 0, 'canon_name':'trickshot'},
          {'name': 'Snap Shot', 'cost': 2, 'canon_name':'snapshot'},
          {'name': 'Fearlessness', 'cost': 1, 'canon_name':'fearlessness'},
@@ -554,6 +563,7 @@ upgrades = {
     ),
 
     ILLICIT: (
+        {'name': 'Scavenger Crane', 'canon_name': 'scavengercrane', 'cost': 2},
         {'name': 'EMP Device', 'canon_name': 'empdevice', 'cost': 2},
         {'name': 'Burnout SLAM', 'canon_name': 'burnoutslam', 'cost': 1},
         {'name': 'Rigged Cargo Chute', 'canon_name': 'riggedcargochute', 'cost': 1},
@@ -579,6 +589,26 @@ upgrades = {
 }
 
 ships = {
+
+    QUADJUMPER: (
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Jakku Gunrunner', 'cost': 15, 'canon_name':'jakugunrunner',
+         'upgrades': (CREW, BOMB, TECH, ILLICIT ),
+         'pilot_skill' : 1,
+        },
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Unkar Plutt', 'cost': 17, 'canon_name':'unkarplutt',
+         'upgrades': (CREW, BOMB, TECH, ILLICIT ),
+         'pilot_skill' : 3,
+        },
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Constable Zuvio', 'cost': 19, 'canon_name':'constablezuvio',
+         'upgrades': (EPT, CREW, BOMB, TECH, ILLICIT ),
+         'pilot_skill' : 7,
+        },
+
+
+    ),
+
 
     PROTECTORATE_STARFIGHTER: (
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Fenn Rau', 'cost': 28, 'canon_name':'fennrau',

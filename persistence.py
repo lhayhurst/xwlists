@@ -126,6 +126,8 @@ class ShipType(DeclEnum):
     LANCER_CLASS_PURSUIT_CRAFT = xwingmetadata.LANCER_CLASS_PURSUIT_CRAFT_CANON_NAME, xwingmetadata.LANCER_CLASS_PURSUIT_CRAFT
     U_WING = xwingmetadata.U_WING_CANON_NAME, xwingmetadata.U_WING
     UPSILON_CLASS_SHUTTLE = xwingmetadata.UPSILON_CLASS_SHUTTLE_CANON_NAME, xwingmetadata.UPSILON_CLASS_SHUTTLE
+    QUADJUMPER = xwingmetadata.QUADJUMPER_CANON_NAME, xwingmetadata.QUADJUMPER
+
 
 class Event(Base):
     __tablename__ = event_table
