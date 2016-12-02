@@ -382,6 +382,9 @@ class LeagueMatch(Base):
         self.player2_list    = None
         self.player1_list_url = None
         self.player2_list_url = None
+        for s in self.subscriptions:
+            s.reset()
+
 
     def delete_partial_escrow(self,player_id):
         if self.needs_escrow() == False: #can't delete an escrow that is done!
@@ -597,6 +600,10 @@ class EscrowSubscription(Base):
     observer             = relationship( TierPlayer.__name__, uselist=False)
     notified             = Column(Boolean)
     partial_notified     = Column(Boolean)
+
+    def reset(self):
+        self.notified = False
+        self.partial_notified = False
 
 
 tourney_venue_table_name = 'tourney_venue'
