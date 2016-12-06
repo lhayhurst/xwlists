@@ -149,7 +149,7 @@ class TournamentApiHelper:
         if p.has_key(SCORE):
             ranking.score = p[SCORE]
         if p.has_key(SOS):
-            ranking.sos = p[SOS]
+            ranking.sos = float(p[SOS])
         if p.has_key(DROPPED):
             ranking.dropped = p[DROPPED]
         if p.has_key(RANK):
