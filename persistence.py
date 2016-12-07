@@ -1065,7 +1065,7 @@ class TourneyRanking(Base):
     player_id          = Column(Integer, ForeignKey('{0}.id'.format(tourney_player_table)))
     score              = Column(Integer)
     mov                = Column(Integer)
-    sos                = Column(Integer)
+    sos                = Column(sqlalchemy.types.Numeric)
     rank               = Column(Integer)
     elim_rank          = Column(Integer)
     dropped            = Column(Boolean)

@@ -17,11 +17,11 @@ class apiTest(unittest.TestCase):
         self.assertTrue(len(ids) > 0)
 
     def testPutAndDeleteTournament(self):
-        players = [{"name": "Lyle Hayhurst", "mov": 622, "score": 20, "sos": 50, 'dropped': False,
+        players = [{"name": "Lyle Hayhurst", "mov": 622, "score": 20, "sos": 2.00, 'dropped': False,
                          "rank": {"swiss": 1, "elimination": 2}},
-                        {"name": "Matt Babiash", "mov": 647, "score": 15, "sos": 45, 'dropped': True,
+                        {"name": "Matt Babiash", "mov": 647, "score": 15, "sos": 3.14, 'dropped': True,
                          "rank": {"swiss": 2, "elimination": 4}},
-                        {"name": "Brandon Prokos", "mov": 647, "score": 15, "sos": 45, 'dropped': True,
+                        {"name": "Brandon Prokos", "mov": 647, "score": 15, "sos": 0.76, 'dropped': True,
                          "rank": {"swiss": 2, "elimination": 4}},
                         {"name": "Phil Kalata", "mov": 647, "score": 15, "sos": 45, 'dropped': True,
                          "rank": {"swiss": 2, "elimination": 4}},
@@ -89,14 +89,14 @@ class apiTest(unittest.TestCase):
         self.assertEqual('Brandon Prokos', p2.player_name)
 
         self.assertEqual( 622, p1.result.mov)
-        self.assertEqual( 50, p1.result.sos)
+        self.assertEqual( .99, p1.result.sos)
         self.assertEqual( 20, p1.result.score)
         self.assertEqual( False, p1.result.dropped)
         self.assertEqual( 1, p1.result.rank)
         self.assertEqual( 2, p1.result.elim_rank)
 
         self.assertEqual( 647, p2.result.mov)
-        self.assertEqual( 45, p2.result.sos)
+        self.assertEqual( .76, p2.result.sos)
         self.assertEqual( 15, p2.result.score)
         self.assertEqual( True, p2.result.dropped)
         self.assertEqual( 2, p2.result.rank)
@@ -199,7 +199,7 @@ class apiTest(unittest.TestCase):
                           "player_id": bob['id'],
                           "mov": 622,
                           "score": 20,
-                          "sos": 50,
+                          "sos": 1.00,
                           'dropped': False,
                           "rank": {
                               "swiss": 1,
@@ -210,7 +210,7 @@ class apiTest(unittest.TestCase):
                           'player_id': bill['id'],
                           "mov": 647,
                           "score": 15,
-                          "sos": 45,
+                          "sos": 0.00,
                           'dropped': True,
                           "rank": {
                               "swiss": 2,

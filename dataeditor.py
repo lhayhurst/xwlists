@@ -1,3 +1,4 @@
+import decimal
 import json
 from persistence import TourneyPlayer, TourneyRanking, TourneyList
 
@@ -125,7 +126,8 @@ class RankingEditor:
             row['dropped']     = ranking.dropped
             row['championship_rank'] = ranking.elim_rank
             row['mov'] = ranking.mov
-            row['sos'] = ranking.sos
+            sos = "%.2f" % round(ranking.sos,2)
+            row['sos'] = sos
             row['list'] = ranking.pretty_print(url_root=self.url_root)
             data.append(row)
 
