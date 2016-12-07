@@ -95,6 +95,9 @@ UPSILON_CLASS_SHUTTLE_CANON_NAME = 'upsilonclassshuttle'
 QUADJUMPER = 'Quadjumper'
 QUADJUMPER_CANON_NAME = 'quadjumper'
 
+TIE_STRIKER = 'Tie Striker'
+TIE_STRIKER_CANON_NAME = 'tiestriker'
+
 EPT = "Elite Pilot Talent"
 EPT_CANON = 'ept'
 TITLE = "Title"
@@ -187,6 +190,15 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 # all the x-wing upgrades.
 upgrades = {
     CREW: (
+
+        {'name': 'Inspiring Recruit', 'canon_name': 'inspiringrecruit', 'cost': 1,},
+
+        {'name': 'Bodhi Rook', 'constraints': (REBEL_FACTION_CONSTRAINT),
+         'canon_name': 'bodhirook', 'cost': 1,},
+
+        {'name': 'Baze Malbus', 'constraints': (REBEL_FACTION_CONSTRAINT),
+         'canon_name': 'bazemalbus', 'cost': 3,},
+
 
         {'name': 'Hotshot Co-Pilot', 'canon_name': 'hotshotcopilot', 'cost': 4,},
 
@@ -316,6 +328,12 @@ upgrades = {
 
     ),
     TITLE: (
+
+        {'name': 'Pivot Wing', 'canon_name': 'pivotwing', 'cost': 0,
+          'constraints': ({'type': SHIP_TYPE, 'value': [U_WING] } ),},
+
+        {'name': 'Adaptive Ailerons', 'canon_name': 'adaptiveailerons', 'cost': 0,
+          'constraints': ({'type': SHIP_TYPE, 'value': [TIE_STRIKER] } ),},
 
         {'name': 'Sabines Masterpiece', 'cost': 1, 'canon_name' : 'sabinesmasterpiece',
          'constraints': ({'type': SHIP_TYPE, 'value': TIE_FIGHTER}, {'faction': REBEL_FACTION_CONSTRAINT})},
@@ -473,6 +491,8 @@ upgrades = {
     ),
     MOD: (
 
+        {'name': 'Lightweight Frame', 'canon_name': 'lightweightframe', 'cost': 2 },
+
         {'name': 'Spacetug Tractor Array', 'canon_name': 'spacetugtractorarray', 'cost': 2,
           'constraints': ({'type': SHIP_TYPE, 'value': [QUADJUMPER] } ),},
 
@@ -513,6 +533,7 @@ upgrades = {
 
     EPT:
         (
+         {'name': 'Swarm Leader', 'cost': 3, 'canon_name':'swarmleader'},
          {'name': 'A Score To Settle', 'cost': 0, 'canon_name':'ascoretosettle'},
          {'name': 'Trick Shot', 'cost': 0, 'canon_name':'trickshot'},
          {'name': 'Snap Shot', 'cost': 2, 'canon_name':'snapshot'},
@@ -590,19 +611,69 @@ upgrades = {
 
 ships = {
 
+    U_WING : (
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Pathfinder',
+         'cost': 23, 'canon_name':'bluesquadronpathfinder','upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD ),
+         'pilot_skill' : 2,
+        },
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Heff Tobber',
+         'cost': 24, 'canon_name':'hefftobber','upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 3,
+        },
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Bodhi Rook',
+         'cost': 25, 'canon_name':'bodhirook','upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 4,
+        },
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Cassian Andor',
+         'cost': 27, 'canon_name':'cassianandor','upgrades': (EPT, SYSTEM, TORPEDO, CREW, CREW, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 6,
+        },
+    ),
+
+    TIE_STRIKER : (
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Imperial Trainee',
+         'cost': 17, 'canon_name':'imperialtrainee',
+         'upgrades': (MOD ),
+         'pilot_skill' : 1,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Countdown',
+         'cost': 20, 'canon_name':'countdown',
+         'upgrades': (MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 5,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Pure Sabacc',
+         'cost': 22, 'canon_name':'puresabacc',
+         'upgrades': (MOD,EPT ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 6,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Duchess',
+         'cost': 23, 'canon_name':'duchess',
+         'upgrades': (MOD,EPT),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 8,
+        },
+    ),
+
     QUADJUMPER: (
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Jakku Gunrunner', 'cost': 15, 'canon_name':'jakugunrunner',
-         'upgrades': (CREW, BOMB, TECH, ILLICIT ),
+         'upgrades': (CREW, BOMB, TECH, ILLICIT, MOD ),
          'pilot_skill' : 1,
         },
 
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Unkar Plutt', 'cost': 17, 'canon_name':'unkarplutt',
-         'upgrades': (CREW, BOMB, TECH, ILLICIT ),
+         'upgrades': (CREW, BOMB, TECH, ILLICIT, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 3,
         },
 
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Constable Zuvio', 'cost': 19, 'canon_name':'constablezuvio',
-         'upgrades': (EPT, CREW, BOMB, TECH, ILLICIT ),
+         'upgrades': (EPT, CREW, BOMB, TECH, ILLICIT, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 7,
         },
 
@@ -613,14 +684,17 @@ ships = {
     PROTECTORATE_STARFIGHTER: (
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Fenn Rau', 'cost': 28, 'canon_name':'fennrau',
          'upgrades': (EPT, TORPEDO, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 9,
         },
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Old Teroch', 'cost': 26, 'canon_name':'oldteroch',
          'upgrades': (EPT, TORPEDO, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 7,
         },
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Kad Solus', 'cost': 25, 'canon_name':'kadsolus',
          'upgrades': (EPT, TORPEDO, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 6,
         },
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Concord Dawn Ace', 'cost': 23, 'canon_name':'concorddawnace',
@@ -644,10 +718,12 @@ ships = {
         },
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Backdraft', 'cost': 27, 'canon_name':'ruthlessfreelancer',
          'upgrades': (EPT, SYSTEM, MISSILE,TECH, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 7,
         },
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Quickdraw', 'cost': 29, 'canon_name':'Quickdraw',
          'upgrades': (EPT, SYSTEM, MISSILE,TECH, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 9,
         },
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Omega Specialist', 'cost': 25, 'canon_name':'omegaspecialist',
@@ -660,35 +736,43 @@ ships = {
     ARC_170: (
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Braylen Stramm', 'cost': 25, 'canon_name':'braylenstramm',
          'upgrades': (TORPEDO, CREW, DROID, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 3,
         },
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Norra Wexley', 'cost': 29, 'canon_name':'norrawexley',
          'upgrades': (EPT, TORPEDO, CREW, DROID, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 7,
         },
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Shara Bey', 'cost': 28, 'canon_name':'sharabey',
          'upgrades': (EPT, TORPEDO, CREW, DROID, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 6,
         },
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Thane Kyrell', 'cost': 26, 'canon_name':'thanekyrell',
          'upgrades': (TORPEDO, CREW, DROID, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 4,
         },
     ),
 
     LANCER_CLASS_PURSUIT_CRAFT: (
         {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Asajj Ventress', 'cost': 37, 'canon_name':'asajjventress',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'upgrades': (EPT, CREW, ILLICIT, ILLICIT, TITLE, MOD ),
          'pilot_skill' : 6,
         },
 
         {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Ketsu Onyo', 'cost': 38, 'canon_name':'ketsuonyo',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'upgrades': (EPT, CREW, ILLICIT, ILLICIT, TITLE, MOD ),
          'pilot_skill' : 7,
         },
 
-        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Sabine Wren [Scum]', 'cost': 35, 'canon_name':'sabinewren-swx56',
+        {'ship_size': LARGE_SHIP, 'faction': SCUM, 'name': 'Sabine Wren [Scum]', 'cost': 35,
+         'canon_name':'sabinewren-swx56',
          'upgrades': (CREW, ILLICIT, ILLICIT, TITLE, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill' : 5,
         },
 
