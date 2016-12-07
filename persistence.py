@@ -127,6 +127,7 @@ class ShipType(DeclEnum):
     U_WING = xwingmetadata.U_WING_CANON_NAME, xwingmetadata.U_WING
     UPSILON_CLASS_SHUTTLE = xwingmetadata.UPSILON_CLASS_SHUTTLE_CANON_NAME, xwingmetadata.UPSILON_CLASS_SHUTTLE
     QUADJUMPER = xwingmetadata.QUADJUMPER_CANON_NAME, xwingmetadata.QUADJUMPER
+    TIE_STRIKER = xwingmetadata.TIE_STRIKER_CANON_NAME, xwingmetadata.TIE_STRIKER
 
 
 class Event(Base):
