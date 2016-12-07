@@ -27,9 +27,6 @@ DRAW = 'draw'
 WIN = 'win'
 FORMAT = 'format'
 
-
-
-
 API_TOKEN = "api_token"
 SETS_USED = 'sets_used'
 DROPPED = 'dropped'
@@ -66,6 +63,7 @@ COUNTRY = 'country'
 VENUE = 'venue'
 EMAIL = 'email'
 XWS = 'list'
+FINAL_SALVO = 'final_salvo'
 
 
 class TournamentApiHelper:
@@ -280,6 +278,7 @@ class TournamentApiHelper:
                     return self.helper.bail("Result not found in match, giving up!", 403)
                 result = m[RESULT]
                 round_result = None
+
                 if result == WIN or result == DRAW:
                     player2_name = None
                     player2_id = None
@@ -318,13 +317,20 @@ class TournamentApiHelper:
                         winner = player2_list
                         loser = player1_list
 
+                    final_salvo = False
+                    if m.has_key(FINAL_SALVO):
+                        final_salvo = m[FINAL_SALVO]
+
                     #create a new result unless it already exists
                     round_result = RoundResult(round=tourney_round, list1=player1_list,
                                                list2=player2_list,
                                                winner=winner, loser=loser,
                                                list1_score=player1_points,
                                                list2_score=player2_points,
-                                               bye=False, draw=was_draw)
+                                               bye=False,
+                                               draw=was_draw,
+                                               final_salvo = final_salvo)
+
                     tourney_round.results.append(round_result)
 
                 elif result == BYE:
@@ -622,7 +628,8 @@ class TourneyToJsonConverter:
             player[PLAYER_NAME] = ranking.player.get_player_name()
             player[SCORE] = ranking.score
             player[MOV] = ranking.mov
-            player[SOS] = ranking.sos
+            sos = "%.2f" % ranking.sos
+            player[SOS] = sos
             rank = {}
             player[RANK] = rank
             rank[SWISS] = ranking.rank
@@ -654,6 +661,8 @@ class TourneyToJsonConverter:
                 resref[PLAYER1_POINTS] = result.list1_score
                 resref[PLAYER2_POINTS] = result.list2_score
                 resref[RESULT] = result.get_result_for_json()
+                if result.final_salvo is not None:
+                    resref[FINAL_SALVO] = result.final_salvo
 
         return ret
 

@@ -1096,6 +1096,7 @@ class RoundResult(Base):
     loser_id      = Column(ForeignKey('{0}.id'.format(tourney_list_table)))
     bye           = Column(Boolean)
     draw          = Column(Boolean)
+    final_salvo   = Column(Boolean)
 
     list1_score   = Column(Integer)
     list2_score   = Column(Integer)
