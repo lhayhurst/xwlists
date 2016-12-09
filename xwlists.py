@@ -380,6 +380,9 @@ def create_default_match_result(match_result, tier, pm):
 
 def update_match_result(match_result,dbmr,pm):
     #things that can change: score... and updated it
+    if dbmr.was_default:
+        #special override for default results
+        return
 
     changed  = False
 
