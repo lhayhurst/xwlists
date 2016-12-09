@@ -123,11 +123,46 @@ def mail_error(errortext):
 def about():
     return render_template('about.html')
 
+@app.route("/apply_league_default", methods=['POST'])
+def apply_league_defaults():
+    defaults = request.get_json()
+    league_id = request.args.get('league_id')
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league_by_id(league_id)
+
+    division_defaults = []
+
+    for d in defaults:
+        division_name         = d["Division"]
+        winner_challonge_name = d["Winner"]
+        loser_challonge_name  = d["Loser"]
+        division = pm.get_division(division_name, league)
+        tier     = division.tier
+        winner   = pm.get_league_player_by_name(winner_challonge_name, tier.id)
+        loser   = pm.get_league_player_by_name(loser_challonge_name, tier.id)
+
+        if winner is None:
+            print "unable to lookup winner %s from division %s" % ( winner_challonge_name, division_name )
+            continue
+        if loser is None:
+            print "unable to lookup loser %s from division %s" % ( loser_challonge_name, division_name )
+            continue
+
+        match = pm.get_league_match(winner,loser,tier)
+        if match is None:
+            print "unable to lookup match for winner %s loser %s division %s" ( winner_challonge_name, loser_challonge_name, division_name)
+            continue
+
+        #finally!
+        match.apply_default(winner,loser)
+
+    pm.db_connector.get_session().commit()
+    return redirect("/league")
+
 @app.route("/manage_escrows")
 def manage_escrows():
     league_id = request.args.get('league_id')
     pm = PersistenceManager(myapp.db_connector)
-
     league = pm.get_league_by_id(league_id)
 
     matches = []
@@ -266,10 +301,6 @@ def add_league_form_results():
 
 
 
-
-
-
-
 def create_league_tiers(league, pm, season_number):
     tiers = {"Deep Core": "deepcore" + season_number,
              "Core Worlds": "coreworlds" + season_number,
@@ -295,10 +326,14 @@ def league_player():
 
 @app.route("/tier_rankings")
 def tier_rankings():
-    tier_id = request.args.get('tier_id')
+    tier_id         = request.args.get('tier_id')
+    ignore_defaults = request.args.get('ignore_defaults')
+    if ignore_defaults is None:
+        ignore_defaults = False
+
     pm = PersistenceManager(myapp.db_connector)
     tier = pm.get_tier_by_id(tier_id)
-    return render_template( 'league_division_rankings.html', tier=tier)
+    return render_template( 'league_tier_rankings.html', tier=tier, ignore_defaults=ignore_defaults)
 
 @app.route( "/league_players")
 def league_players():
@@ -974,6 +1009,7 @@ def merge_versus_results(pm, search_results1, search_results2):
 
     merged_results = pm.get_merged_search_results( s1_archtypes.keys(), s2_archtypes.keys() )
     return merged_results
+
 
 
 @app.route("/search_results", methods=['POST'])

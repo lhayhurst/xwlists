@@ -258,10 +258,10 @@ class Division(Base):
     players           = relationship( "TierPlayer", back_populates="division", cascade="all,delete,delete-orphan")
 
 
-    def get_ranking(self):
+    def get_ranking(self,ignore_defaults):
         results = []
         for p in self.players:
-            results.append(p.get_stats())
+            results.append(p.get_stats(ignore_defaults))
         sorted_stats = reversed(sorted(results, key = lambda stat: (stat['wins'], stat['mov']) ))
         ret = []
         i = 1
@@ -308,10 +308,12 @@ class TierPlayer(Base):
             return ""
         return decode( self.name )
 
-    def get_stats(self):
+    def get_stats(self, ignore_defaults=False):
         ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0, 'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0, 'mov':0 }
         for m in self.matches:
             if m.is_complete():
+                if ignore_defaults and m.was_default:
+                    continue
                 ret['total'] +=1
                 if m.player_won(self):
                     ret['wins'] += 1
@@ -345,6 +347,7 @@ class LeagueMatch(Base):
     challonge_match_id  = Column(Integer)
     player1_score       = Column(Integer)
     player2_score       = Column(Integer)
+    was_default         = Column(Boolean)
     state               = Column(String(45))
     player1_list_url    = Column(String(2048))
     player2_list_url    = Column(String(2048))
@@ -590,6 +593,16 @@ class LeagueMatch(Base):
         if self.player2_list is not None:
             return self.player2_list.pretty_print_list()
         return "<br>"
+
+    def apply_default(self, winner,loser):
+        self.was_default = True
+        self.state       = "complete"
+        if winner.id == self.player1.id:
+            self.player1_score = 100
+            self.player2_score = 0
+        elif winner.id == self.player2.id:
+            self.player2_score = 100
+            self.player1_score = 0
 
 escrow_subscription_table = 'escrow_subscription'
 class EscrowSubscription(Base):
@@ -1612,6 +1625,14 @@ class PersistenceManager:
             filter( and_(*filters) ).distinct().all()
         return recs
 
+    def get_league_match(self, a_player, another_player, tier):
+        rec = self.db_connector.get_session().query(LeagueMatch).\
+            filter( LeagueMatch.tier_id == tier.id,
+                    or_(
+                        and_( LeagueMatch.player1_id == a_player.id, LeagueMatch.player2_id == another_player.id ),
+                        and_( LeagueMatch.player1_id == another_player.id, LeagueMatch.player2_id == a_player.id ),
+                    ) ).first()
+        return rec
 
     def delete_all_subscriptions(self):
         num_rows_deleted = self.db_connector.get_session().query(EscrowSubscription).delete()

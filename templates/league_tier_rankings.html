@@ -24,7 +24,7 @@
           </tr>
           </thead>
           <tbody>
-           {% for r in d.get_ranking() %}
+           {% for r in d.get_ranking(ignore_defaults) %}
               <tr>
                  <td>{{ r['player_rank'] }}</td>
                  <td>{{ r['player'].get_url() }}</td>
