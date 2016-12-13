@@ -126,7 +126,10 @@ class RankingEditor:
             row['dropped']     = ranking.dropped
             row['championship_rank'] = ranking.elim_rank
             row['mov'] = ranking.mov
-            sos = "%.2f" % round(ranking.sos,2)
+            if ranking.sos is None:
+                sos = None
+            else:
+                sos = "%.2f" % round(float(ranking.sos),2)
             row['sos'] = sos
             row['list'] = ranking.pretty_print(url_root=self.url_root)
             data.append(row)
