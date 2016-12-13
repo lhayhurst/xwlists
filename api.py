@@ -331,7 +331,7 @@ class TournamentApiHelper:
                             winner = player2_list
                             loser  = player1_list
                         else:
-                            return self.helper.bail("unknown player %s provided as winner" % ( winner_name ))
+                            return self.helper.bail("unknown player %s provided as winner") % ( winner_name )
 
                     #create a new result unless it already exists
                     round_result = RoundResult(round=tourney_round, list1=player1_list,
