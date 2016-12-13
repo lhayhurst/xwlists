@@ -325,11 +325,11 @@ class TournamentApiHelper:
                             return self.helper.bail("No winner provided for final salvo result", 403)
                         winner_name = m[WINNER]
                         if winner_name == player1_name:
-                            winner = player1_name
-                            loser  = player2_name
+                            winner = player1_list
+                            loser  = player2_list
                         elif winner_name == player2_name:
-                            winner = player2_name
-                            loser  = player1_name
+                            winner = player2_list
+                            loser  = player1_list
                         else:
                             return self.helper.bail("unknown player %s provided as winner" % ( winner_name ))
 
