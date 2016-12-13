@@ -321,7 +321,7 @@ class TournamentApiHelper:
                     final_salvo = False
                     if m.has_key(FINAL_SALVO):
                         final_salvo = m[FINAL_SALVO]
-                        if not m.has_key[WINNER]:
+                        if not m.has_key(WINNER):
                             return self.helper.bail("No winner provided for final salvo result", 403)
                         winner_name = m[WINNER]
                         if winner_name == player1_name:

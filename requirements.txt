@@ -21,3 +21,4 @@ wsgiref==0.1.2
 whoosh==2.5.6
 python-jsonschema-objects==0.0.15
 iso8601==0.1.11
+geopy==1.11.0
