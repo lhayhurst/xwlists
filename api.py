@@ -64,6 +64,7 @@ VENUE = 'venue'
 EMAIL = 'email'
 XWS = 'list'
 FINAL_SALVO = 'final_salvo'
+WINNER = 'winner'
 
 
 class TournamentApiHelper:
@@ -313,13 +314,24 @@ class TournamentApiHelper:
                     if player1_points > player2_points:
                         winner = player1_list
                         loser = player2_list
-                    else:
+                    elif player2_points > player1_points:
                         winner = player2_list
                         loser = player1_list
 
                     final_salvo = False
                     if m.has_key(FINAL_SALVO):
                         final_salvo = m[FINAL_SALVO]
+                        if not m.has_key[WINNER]:
+                            return self.helper.bail("No winner provided for final salvo result", 403)
+                        winner_name = m[WINNER]
+                        if winner_name == player1_name:
+                            winner = player1_name
+                            loser  = player2_name
+                        elif winner_name == player2_name:
+                            winner = player2_name
+                            loser  = player1_name
+                        else:
+                            return self.helper.bail("unknown player %s provided as winner" % ( winner_name ))
 
                     #create a new result unless it already exists
                     round_result = RoundResult(round=tourney_round, list1=player1_list,
