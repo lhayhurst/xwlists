@@ -68,6 +68,8 @@ class TestPersistence(DatabaseTestCase):
 
         converter = XWSToJuggler(xws1)
         archtype1, first_time_archtype_seen1 = converter.convert(self.pm)
+
+        converter = XWSToJuggler(xws2)
         archtype2, first_time_archtype_seen2 = converter.convert(self.pm)
 
         print(archtype1.hashkey)
