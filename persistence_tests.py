@@ -53,7 +53,7 @@ class TestPersistence(DatabaseTestCase):
                 },
                 "version": "0.3.0"
                 }
-        xws2 = {"faction": "rebel", "name": "Corran46 Dash 54",
+        xws2 = {"faction": "rebel", "name": "Dash 54 Corran46 ",
                 "pilots": [dash, corran],
                 "points": 100,
                 "vendor": {
