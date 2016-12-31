@@ -8,6 +8,7 @@ import sys
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
+from uidgen import ListUIDGen
 
 from xwvassal_league_bootstrap import ChallongeMatchCSVImporter
 
@@ -119,9 +120,44 @@ def mail_error(errortext):
         if DO_MAIL:
             mail.send(msg)
 
+is_maintenance_mode = False
+
+@app.before_request
+def check_for_maintenance():
+    if is_maintenance_mode and request.path != url_for('maintenance'):
+        return redirect(url_for('maintenance'))
+
+@app.route('/maintenance')
+def maintenance():
+    return 'List Juggler is down for some database maintenance, we should we back shortly, may the force be with you!', 503
+
+@app.route('/')
+def index():
+    return render_template( 'search_versus.html')
+
 @app.route("/about")
 def about():
     return render_template('about.html')
+
+@app.route("/fix_archtype_keys")
+def regenerate_archtype_keys():
+    pm = PersistenceManager(myapp.db_connector)
+    archtypes = pm.get_all_archtypes()
+    i = 0
+    for a in archtypes:
+        hashkey   = a.generate_hash_key(a.ships)
+        a.hashkey = hashkey
+        if i % 1000 == 0:
+            print "hashed %d records " % ( i )
+        i = i + 1
+    pm.db_connector.get_session().commit()
+
+@app.route("/fix_archtype_dupes")
+def fix_archtype_dupes():
+    pm = PersistenceManager(myapp.db_connector)
+    f = ListUIDGen(pm)
+    f.fix_dupes()
+    return redirect("/")
 
 @app.route("/apply_league_default", methods=['POST'])
 def apply_league_defaults():
@@ -1012,8 +1048,6 @@ def merge_versus_results(pm, search_results1, search_results2):
 
     merged_results = pm.get_merged_search_results( s1_archtypes.keys(), s2_archtypes.keys() )
     return merged_results
-
-
 
 @app.route("/search_results", methods=['POST'])
 def get_search_results():
@@ -1978,13 +2012,7 @@ def display_list():
                            tourney_list_id=tourney_list.id,
                            tourney_id=tourney_list.tourney.id )
 
-@app.route('/down')
-def down():
-    return render_template( 'down.html')
 
-@app.route('/')
-def index():
-    return render_template( 'search_versus.html')
 
 @app.route("/pretty_print")
 def pretty_print():

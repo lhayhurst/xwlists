@@ -108,7 +108,7 @@ class XWSToJuggler:
     def convert(self, pm, tourney_list=None):
         xws     = self.xws
         name    = None
-        if xws.has_key( name ):
+        if xws.has_key( 'name' ):
             name    = xws['name']
         faction = xws['faction']
         pilots  = xws['pilots']
@@ -163,7 +163,6 @@ class XWSToJuggler:
                         else:
                             points  = points + upgrade.cost
                         ship_upgrade = ShipUpgrade( ship=ship, upgrade=upgrade )
-                        #ship.upgrades.append( ship_upgrade )
 
         hashkey = ArchtypeList.generate_hash_key(ships)
 

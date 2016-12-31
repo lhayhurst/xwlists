@@ -2,6 +2,7 @@ from myapp import db_connector
 import myapp
 from persistence import PersistenceManager, UpgradeType, Upgrade
 from xwingmetadata import XWingMetaData
+from xws import XWSToJuggler
 
 __author__ = 'lhayhurst'
 import sys
@@ -11,66 +12,70 @@ import unittest
 class DatabaseTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.persistence_manager = PersistenceManager(True)
-
-        #just keep a top level reference to these guys for ease of use
         self.session = db_connector.get_session()
+        self.pm  = PersistenceManager(myapp.db_connector)
 
-        #and then create the database schema, reference tables
-        self.persistence_manager.create_schema()
-        self.persistence_manager.populate_reference_tables()
-        self.session.commit()
 
     def tearDown(self):
-
-#        self.session.flush()
         self.session.close_all()
-        self.persistence_manager.drop_schema()
 
 
 class TestPersistence(DatabaseTestCase):
 
     #@unittest.skip("because")
-    def testSchemaConstruction(self):
+    def testTrue(self):
         self.assertTrue(True)
 
+    def testArchtypeHashkeyGeneration(self):
+        corran = {
+            "name": "corranhorn",
+            "points": 46,
+            "ship": "ewing",
+            "upgrades": {"ept": ["veteraninstincts"], "system": ["firecontrolsystem"], "amd": ["r2d2"],
+                         "mod": ["engineupgrade"]}
+        }
+        dash = {
+            "name": "dashrendar",
+            "points": 54,
+            "ship": "yt2400freighter",
+            "upgrades": {"ept": ["pushthelimit"], "cannon": ["heavylasercannon"], "crew": ["kananjarrus"],
+                         "title": ["outrider"]}
+        }
+        xws1 = {"faction": "rebel", "name": "Corran46 Dash 54",
+                "pilots": [corran, dash],
+                "points": 100,
+                "vendor": {
+                    "yasb": {
+                        "builder": "(Yet Another) X-Wing Miniatures Squad Builder",
+                        "builder_url": "https://geordanr.github.io/xwing/",
+                        "link": "https://geordanr.github.io/xwing/?f=Rebel%20Alliance&d=v4!s!75:27,36,-1,3:-1:3:;95:18,23,-1,159:14:-1:&sn=Unnamed%20Squadron"
+                    }
+                },
+                "version": "0.3.0"
+                }
+        xws2 = {"faction": "rebel", "name": "Dash 54 Corran46 ",
+                "pilots": [dash, corran],
+                "points": 100,
+                "vendor": {
+                    "yasb": {
+                        "builder": "(Yet Another) X-Wing Miniatures Squad Builder",
+                        "builder_url": "https://geordanr.github.io/xwing/",
+                        "link": "https://geordanr.github.io/xwing/?f=Rebel%20Alliance&d=v4!s!75:27,36,-1,3:-1:3:;95:18,23,-1,159:14:-1:&sn=Unnamed%20Squadron"
+                    }
+                },
+                "version": "0.3.0"
+                }
+
+        converter = XWSToJuggler(xws1)
+        archtype1, first_time_archtype_seen1 = converter.convert(self.pm)
+
+        converter = XWSToJuggler(xws2)
+        archtype2, first_time_archtype_seen2 = converter.convert(self.pm)
+
+        print(archtype1.hashkey)
+        print(archtype2.hashkey)
+        self.assertTrue(archtype1.hashkey == archtype2.hashkey)
 
 
 if __name__ == "__main__":
-    if len (sys.argv) == 1:
-        unittest.main()
-    elif sys.argv[1] == 'create':
-        pm = PersistenceManager(db_connector)
-        pm.create_schema()
-        #pm.populate_reference_tables()
-        db_connector.get_session().commit()
-        db_connector.get_session().close_all()
-    elif sys.argv[1] == 'destroy':
-        pm = PersistenceManager(db_connector)
-        pm.drop_schema()
-        db_connector.get_session().commit()
-        db_connector.get_session().close_all()
-    elif sys.argv[1] == 'alter':
-        pm = PersistenceManager(db_connector)
-        #update all records in the ship_pilot table
-
-        meta = XWingMetaData()
-        #upgrades = meta.upgrades()
-        #pm.create_upgrade_table()
-        # upgrade_objects = []
-        # for ut in upgrades.keys():
-        #     uvs = upgrades[ut]
-        #     for uv in uvs:
-        #         upgrade = Upgrade( upgrade_type=UpgradeType.from_string( ut ), name=uv['name'], cost=uv['cost'])
-        #         upgrade_objects.append( upgrade )
-        # db_connector.get_session().add_all( upgrade_objects )
-
-        # upgrades = pm.get_upgrades()
-        # ship_upgrades = pm.get_ship_upgrades()
-        # for su in ship_upgrades:
-        #     for u in upgrades:
-        #         if su.upgrade_type == u.upgrade_type and su.upgrade == u.name:
-        #             su.upgrade_id = u.id
-        #
-        # db_connector.get_session().commit()
-        # db_connector.get_session().close_all()
+    unittest.main()
