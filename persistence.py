@@ -786,6 +786,9 @@ class ArchtypeList(Base):
      hashkey          = Column(BigInteger)
      ships            = relationship(Ship.__name__,uselist=True)
      tourney_lists    = relationship("TourneyList", uselist=True)
+     p1_league_lists  = relationship( LeagueMatch.__name__, foreign_keys='LeagueMatch.player1_list_id',  uselist=True)
+     p2_league_lists  = relationship( LeagueMatch.__name__, foreign_keys='LeagueMatch.player2_list_id',  uselist=True)
+
      tags             = relationship("ArchtypeTag", uselist=True)
 
      def is_rebel(self):
@@ -911,14 +914,20 @@ class ArchtypeList(Base):
 
      @staticmethod
      def generate_hash_key(ships):
+
         strings = []
+
+        ships = sorted(ships, key = lambda ship: ship.ship_pilot.id, reverse=False)
+
         for ship in ships:
             sp = ship.ship_pilot
             if sp is not None and sp.ship_type is not None:
                 strings.append( str( sp.ship_type ))
             if sp is not None and sp.pilot is not None:
                 strings.append( sp.pilot.canon_name )
-            for supgrade in ship.upgrades:
+            upgrades = ship.upgrades
+            upgrades = sorted( upgrades, key = lambda upgrade: upgrade.id, reverse=False)
+            for supgrade in upgrades:
                 if supgrade.upgrade is not None:
                     strings.append( supgrade.upgrade.canon_name )
         liststring = ""
@@ -1555,6 +1564,11 @@ class PersistenceManager:
         return self.db_connector.get_session().query(LeagueMatch).\
             filter(LeagueMatch.id == match_id ).first()
 
+    def get_matches_for_archtype(self,archtype_id):
+        return self.db_connector.get_session().query( LeagueMatch).\
+            filter( or_( LeagueMatch.player1_list_id == archtype_id,
+                         LeagueMatch.player2_list_id == archtype_id)).all()
+
 
     def get_match_by_challonge_id(self, match_result_id):
         return self.db_connector.get_session().query(LeagueMatch).\
@@ -1624,6 +1638,9 @@ class PersistenceManager:
         recs = self.db_connector.get_session().query(ArchtypeList.faction, Pilot.name).\
             filter( and_(*filters) ).distinct().all()
         return recs
+
+    def get_all_league_matches(self):
+        return self.db_connector.get_session().query(LeagueMatch).all()
 
     def get_league_match(self, a_player, another_player, tier):
         rec = self.db_connector.get_session().query(LeagueMatch).\
