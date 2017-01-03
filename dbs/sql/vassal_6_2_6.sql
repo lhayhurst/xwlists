@@ -29,9 +29,9 @@ insert  ship_pilot ( ship_type, pilot_id)
 select 'uwing', id from pilot where canon_name='cassianandor';
 
 insert into pilot ( name, canon_name, cost, pilot_skill  )
-values ( 'Imperial Trainee','iomperialtrainee', '17', '1' );
+values ( 'Imperial Trainee','imperialtrainee', '17', '1' );
 insert  ship_pilot ( ship_type, pilot_id)
-select 'tiestriker', id from pilot where canon_name='iomperialtrainee';
+select 'tiestriker', id from pilot where canon_name='imperialtrainee';
 
 insert into pilot ( name, canon_name, cost, pilot_skill  )
 values ( 'Countdown','countdown', '5', '20' );

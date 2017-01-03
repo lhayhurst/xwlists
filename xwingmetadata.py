@@ -191,6 +191,11 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 upgrades = {
     CREW: (
 
+        {'name': 'BoShek', 'canon_name': 'boshek', 'cost': 2,},
+
+        {'name': 'Bistan', 'canon_name': 'bistan', 'cost': 2,'constraints': (REBEL_FACTION_CONSTRAINT)},
+
+
         {'name': 'Inspiring Recruit', 'canon_name': 'inspiringrecruit', 'cost': 1,},
 
         {'name': 'Bodhi Rook', 'constraints': (REBEL_FACTION_CONSTRAINT),
@@ -533,6 +538,7 @@ upgrades = {
 
     EPT:
         (
+         {'name': 'Expertise', 'cost': 4, 'canon_name':'Expertise'},
          {'name': 'Swarm Leader', 'cost': 3, 'canon_name':'swarmleader'},
          {'name': 'A Score To Settle', 'cost': 0, 'canon_name':'ascoretosettle'},
          {'name': 'Trick Shot', 'cost': 0, 'canon_name':'trickshot'},
@@ -634,11 +640,23 @@ ships = {
     ),
 
     TIE_STRIKER : (
+
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Imperial Trainee',
          'cost': 17, 'canon_name':'imperialtrainee',
          'upgrades': (MOD ),
          'pilot_skill' : 1,
         },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Scarif Defender',
+         'cost': 18, 'canon_name':'scarifdefender',
+         'upgrades': (MOD ),
+         'pilot_skill' : 3 ,
+        },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Black Squadron Scout',
+         'cost': 20, 'canon_name':'blacksquadronscout',
+         'upgrades': (MOD,EPT ),
+         'pilot_skill' : 4,
+        },
+
         {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Countdown',
          'cost': 20, 'canon_name':'countdown',
          'upgrades': (MOD ),
