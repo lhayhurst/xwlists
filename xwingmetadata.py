@@ -1137,9 +1137,6 @@ ships = {
              {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Pilot', 'cost': 22,
               'upgrades': (SYSTEM, CANNON, TORPEDO, TORPEDO, MOD)}),
 
-    U_WING: ({'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Pathfinder', 'cost': 23,
-              'upgrades': (SYSTEM, TORPEDO, CREW, CREW, TITLE, MOD)}),
-
 
     HWK_290: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Jan Ors', 'cost': 25,
                'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
