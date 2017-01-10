@@ -2292,6 +2292,8 @@ def fix_venue_dupes():
             goners.append(goner)
     pm.db_connector.get_session().commit()
 
+    print("deleting %d venues" % ( len( goners )))
+
     for goner in goners:
         pm.db_connector.get_session().delete(goner)
 
