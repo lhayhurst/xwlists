@@ -578,16 +578,6 @@ upgrades = {
          {'name': 'Juke', 'cost': 2},
 
          ),
-    SALVAGED_ASTROMECH_DROID: (
-        {'name': 'Overclocked R4', 'canon_name': 'overclockedr4', 'cost': 1},
-        {'name': 'Genius', 'canon_name': 'genius', 'cost': 0},
-        {'name': 'R4 Agromech', 'canon_name': 'r4agromech', 'cost': 2},
-        {'name': 'R4-B11', 'canon_name': 'r4b11', 'cost': 3},
-        {'name': 'R5-P8', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
-        {'name': 'Salvaged Astromech', 'canon_name': 'salvagedastromech', 'cost': 2},
-        {'name': 'Unhinged Astromech', 'canon_name': 'unhingedastromech', 'cost': 1},
-
-    ),
 
     ILLICIT: (
         {'name': 'Scavenger Crane', 'canon_name': 'scavengercrane', 'cost': 2},
@@ -603,6 +593,18 @@ upgrades = {
         {'name': 'Cloaking Device', 'cost': 2, 'constraints': ({'type': SHIP_SIZE, 'value': SMALL_SHIP})},
 
     ),
+
+     SALVAGED_ASTROMECH_DROID: (
+        {'name': 'Overclocked R4', 'canon_name': 'overclockedr4', 'cost': 1},
+        {'name': 'Genius', 'canon_name': 'genius', 'cost': 0},
+        {'name': 'R4 Agromech', 'canon_name': 'r4agromech', 'cost': 2},
+        {'name': 'R4-B11', 'canon_name': 'r4b11', 'cost': 3},
+        {'name': 'R5-P8', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,)},
+        {'name': 'Salvaged Astromech', 'canon_name': 'salvagedastromech', 'cost': 2},
+        {'name': 'Unhinged Astromech', 'canon_name': 'unhingedastromech', 'cost': 1},
+
+    ),
+
     TECH: (
         {'name': 'Hyperwave Comm Scanner', 'canon_name': 'hyperwavecommscanner', 'cost': 1},
         {'name': 'Targeting Synchronizer', 'canon_name': 'targetingsynchronizer', 'cost': 3},
@@ -700,6 +702,7 @@ ships = {
 
 
     PROTECTORATE_STARFIGHTER: (
+
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Fenn Rau', 'cost': 28, 'canon_name':'fennrau',
          'upgrades': (EPT, TORPEDO, TITLE, MOD ),
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
