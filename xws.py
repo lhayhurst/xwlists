@@ -34,10 +34,11 @@ class XWSListConverter:
             if len(ship.upgrades) > 0:
                 pilot_href['upgrades'] = pilot_upgrades
             for ship_upgrade in ship.upgrades:
-                ut = str(ship_upgrade.upgrade.upgrade_type.value)
-                if not pilot_upgrades.has_key(ut):
-                    pilot_upgrades[ut] = []
-                pilot_upgrades[ut].append( ship_upgrade.upgrade.canon_name)
+                if ship_upgrade.upgrade is not None:
+                    ut = str(ship_upgrade.upgrade.upgrade_type.value)
+                    if not pilot_upgrades.has_key(ut):
+                        pilot_upgrades[ut] = []
+                    pilot_upgrades[ut].append( ship_upgrade.upgrade.canon_name)
 
 class GeneralXWSFetcher:
     fab_root        = "x-wing.fabpsb.net"
