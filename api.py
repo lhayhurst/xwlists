@@ -57,6 +57,7 @@ PARTICIPANT_COUNT = "participant_count"
 TOURNAMENT = "tournament"
 LIST = 'list'
 TOURNAMENTS = "tournaments"
+LEAGUES = 'leagues'
 CITY = 'city'
 STATE = 'state'
 COUNTRY = 'country'
@@ -359,6 +360,111 @@ class TournamentApiHelper:
         pm.db_connector.get_session().flush()
         return None
 
+
+class VassalLeaguesAPI(restful.Resource):
+    def get(self):
+        pm = PersistenceManager(myapp.db_connector)
+        leagues = pm.get_leagues()
+        ret = []
+        for l in leagues:
+            ret.append(l.id)
+        return json.dumps({LEAGUES: ret})
+
+LEAGUE_NAME = 'name'
+LEAGUE_CHALLONGE_NAME = 'challonge_name'
+LEAGUE_TIERS = 'tiers'
+TIER_NAME = 'name'
+TIER_CHALLONGE_NAME = 'challonge_name'
+TIER_PLAYERS = 'players'
+TIER_DIVISIONS = 'divisions'
+TIER_ID = 'tier_id'
+PLAYER_NAME = 'name'
+PLAYER_ID = 'player_id'
+DIVISION_NAME = 'name'
+DIVISION_CHALLONGE_NAME = 'challonge_name'
+DIVISION_ID = 'division_id'
+DIVISION_PLAYERS = 'players'
+
+
+class VassalLeagueAPI(restful.Resource):
+    def get(self,league_id):
+        pm = PersistenceManager(myapp.db_connector)
+        league = pm.get_league_by_id(league_id)
+        ret = {}
+        ret[LEAGUE_NAME] = league.name
+        ret[LEAGUE_CHALLONGE_NAME] = league.challonge_name
+        tiers = league.tiers
+        tiers_data = []
+        ret[LEAGUE_TIERS] = tiers_data
+
+        for t in tiers:
+            tdata = {
+                TIER_NAME : t.name,
+                TIER_CHALLONGE_NAME : t.challonge_name,
+                TIER_PLAYERS : [],
+                TIER_DIVISIONS : [],
+                TIER_ID : t.id
+            }
+
+            for division in t.divisions:
+                division_players = []
+                for player in division.players:
+                    division_players.append( { PLAYER_NAME : player.name, PLAYER_ID: player.id} )
+                tdata[TIER_DIVISIONS].append( { DIVISION_NAME : division.name,
+                                                DIVISION_CHALLONGE_NAME : division.challonge_name,
+                                                DIVISION_ID: division.id,
+                                                DIVISION_PLAYERS : division_players
+                                                })
+
+            tiers_data.append(tdata)
+        return json.dumps(ret)
+
+DIVISION_RANKING = 'division_ranking'
+TIER_RANKING     = 'tier_ranking'
+class VassalLeagueRanking(restful.Resource):
+    def get(self, league_id, tier_id):
+        pm = PersistenceManager(myapp.db_connector)
+        tier = pm.get_tier_by_id(tier_id)
+        ret = {}
+        if tier is None:
+            return json.dumps(ret)
+
+        division_rankings = []
+        tier_rankings     = []
+        ret[ DIVISION_RANKING] = division_rankings
+        ret[ TIER_RANKING ] = tier_rankings
+
+        for d in tier.divisions:
+            dr = { 'division_name' : d.name,
+                   'division_challonge_name' : d.challonge_name,
+                   'division_id' : d.id,
+                   'rankings' : []
+                   }
+            division_rankings.append(dr)
+            for r in d.get_ranking(ignore_defaults=False):
+                dr['rankings'].append(
+                    {
+                        'rank'  : r['rank'],
+                        'wins'  : r['wins'],
+                        'loses' : r['losses'],
+                        'draws' : r['draws'],
+                        'mov'   : r['mov'],
+                        'id'    : r['player'].id,
+                        'name'  : r['player'].name,
+                    })
+
+        for r in tier.get_ranking(ignore_defaults=False):
+            tier_rankings.append( {
+                        'rank'  : r['rank'],
+                        'wins'  : r['wins'],
+                        'losses' : r['losses'],
+                        'draws' : r['draws'],
+                        'mov'   : r['mov'],
+                        'id'    : r['player'].id,
+                        'name'  : r['player'].name,
+                    })
+
+        return json.dumps(ret)
 
 class TournamentsAPI(restful.Resource):
     def get(self):

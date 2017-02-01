@@ -244,6 +244,21 @@ class Tier(Base):
     def get_challonge_name(self):
         return "%s-%s" % ( self.league.challonge_name, self.challonge_name)
 
+    def get_ranking(self,ignore_defaults):
+        results = []
+        for d in self.divisions:
+            division_rankings = d.get_ranking(ignore_defaults)
+            for dr in division_rankings:
+                results.append( dr )
+        sorted_results = reversed(sorted(results, key = lambda stat: (stat['wins'], stat['mov']) ))
+        ret = []
+        i = 1
+        for sr in sorted_results:
+            sr['rank'] = i
+            i = i + 1
+            ret.append(sr)
+        return ret
+
 division_table = "league_division"
 class Division(Base):
     __tablename__     = division_table
@@ -266,13 +281,8 @@ class Division(Base):
         ret = []
         i = 1
         for ss in sorted_stats:
-            ret.append( {
-                            'player' : ss['player'],
-                            'player_rank': i,
-                            'player_wins': ss['wins'],
-                            'player_losses': ss['losses'],
-                            'player_draws': ss['draws'],
-                            'player_mov' : ss['mov'] } )
+            ss['rank'] = i
+            ret.append(ss)
             i = i+1
         return ret
 
@@ -1472,6 +1482,9 @@ class PersistenceManager:
 
     def get_all_lists(self):
         return self.db_connector.get_session().query(TourneyList).all()
+
+    def get_leagues(self):
+        return self.db_connector.get_session().query(League).all()
 
     def get_league(self, league_name):
         return self.db_connector.get_session().query(League).filter(League.name == league_name).first()

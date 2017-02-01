@@ -26,12 +26,12 @@
           <tbody>
            {% for r in d.get_ranking(ignore_defaults) %}
               <tr>
-                 <td>{{ r['player_rank'] }}</td>
+                 <td>{{ r['rank'] }}</td>
                  <td>{{ r['player'].get_url() }}</td>
-                 <td>{{ r['player_wins'] }}</td>
-                 <td>{{ r['player_losses'] }}</td>
-                 <td>{{ r['player_draws'] }}</td>
-                 <td>{{ r['player_mov'] }}</td>
+                 <td>{{ r['wins'] }}</td>
+                 <td>{{ r['losses'] }}</td>
+                 <td>{{ r['draws'] }}</td>
+                 <td>{{ r['mov'] }}</td>
 
               </tr>
               {% endfor %}
