@@ -1494,7 +1494,6 @@ class PersistenceManager:
             TierPlayer.name == challonge_name,
             TierPlayer.tier_id == tier_id).first()
 
-
     def get_tier(self, tier_name,league):
         return self.db_connector.get_session().query(Tier).filter(
             Tier.challonge_name == tier_name,

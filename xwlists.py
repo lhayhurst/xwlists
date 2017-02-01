@@ -249,16 +249,17 @@ def create_divisions(c, pm, league):
     for name in c.divisions.keys():
         division = c.divisions[name]
         tier = pm.get_tier(division['tier'],league)
-        d = Division()
-        d.challonge_name = division['letter']
-        d.name = name
-        d.tier = tier
-        pm.db_connector.get_session().add(d)
+        if tier:
+            d = Division()
+            d.challonge_name = division['letter']
+            d.name = name
+            d.tier = tier
+            pm.db_connector.get_session().add(d)
     pm.db_connector.get_session().commit()
 
 def create_matchups(c, pm, ch, league):
     for tier in league.tiers:
-        matchups = ch.match_c(tier.get_challonge_name())
+        matchups = ch.match_index(tier.get_challonge_name())
         for matchup in matchups:
             matchup = matchup['match']
             dbmr = create_default_match_result(matchup, tier, pm)
@@ -276,6 +277,13 @@ def create_players(c, pm, ch, league):
             lookup_name = None
             player = player['participant']
             challonge_username_ = player['challonge_username']
+            tier_player = pm.get_league_player_by_name(challonge_username_, tier.id)
+            if tier_player:
+                continue
+            else: #check via the display name...
+                tier_player = pm.get_league_player_by_name(player['display_name'], tier.id)
+                if tier_player:
+                    continue
             checked_in = player['checked_in']
             if challonge_username_ is None or checked_in is False:
                 lookup_name = player['display_name']
@@ -297,13 +305,20 @@ def create_players(c, pm, ch, league):
                     divisions_href[division_name] = pm.get_division(division_name, league)
                 tier_player.division = divisions_href[division_name]
                 tier_player.tier = tier_player.division.tier
-                tier_player.challengeboards_handle = decode(tsv_record['challengeboards_name'])
+                if tsv_record.has_key('challengeboards_name'):
+                    tier_player.challengeboards_handle = decode(tsv_record['challengeboards_name'])
+
                 tier_player.challonge_id = player['id']
-                tier_player.group_id = player['group_player_ids'][0]
+                if not player.has_key('group_player_ids'):
+                    if not len(player['group_player_ids']) > 0 :
+                        print "Missing player group id for player %s, skipping " % ( challonge_username_)
+                    else:
+                        tier_player.group_id = player['group_player_ids'][0]
                 tier_player.name = lookup_name
                 tier_player.email_address = decode(tsv_record['email_address'])
                 tier_player.person_name = decode(tsv_record['person_name'])
-                tier_player.reddit_handle = decode(tsv_record['reddit_handle'])
+                if tsv_record.has_key('reddit_handle'):
+                    tier_player.reddit_handle = decode(tsv_record['reddit_handle'])
                 tier_player.timezone = decode(tsv_record['time_zone'])
                 pm.db_connector.get_session().add(tier_player)
     pm.db_connector.get_session().commit()
@@ -318,9 +333,12 @@ def add_league_form_results():
     c = ChallongeMatchCSVImporter(league_file.stream)
     pm = PersistenceManager(myapp.db_connector)
 
-    #create the leagues and then the tiers
-    league = League(challonge_name=league_challonge_name, name=league_name)
-    pm.db_connector.get_session().add(league)
+    league = pm.get_league(league_name)
+    if league is None:
+        #create the leagues and then the tiers
+        league = League(challonge_name=league_challonge_name, name=league_name)
+        pm.db_connector.get_session().add(league)
+
     create_league_tiers(league, pm, season_number)
     pm.db_connector.get_session().commit()
 
@@ -340,15 +358,18 @@ def add_league_form_results():
 def create_league_tiers(league, pm, season_number):
     tiers = {"Deep Core": "deepcore" + season_number,
              "Core Worlds": "coreworlds" + season_number,
-             "Inner Rim": "innerrim" + season_number,
-             "Outer Rim": "outerrim" + season_number,
-             "Unknown Reaches": "unknownreaches" + season_number}
+#             "Inner Rim": "innerrim" + season_number,
+#             "Outer Rim": "outerrim" + season_number,
+#             "Unknown Reaches": "unknownreaches" + season_number}
+             }
     for tier_name in tiers.keys():
         tier_challonge_name = tiers[tier_name]
-        lt = Tier(name=tier_name,
-                  challonge_name=tier_challonge_name,
-                  league=league)
-        pm.db_connector.get_session().add(lt)
+        lt = pm.get_tier(tier_challonge_name, league )
+        if lt is None:
+            lt = Tier(name=tier_name,
+                      challonge_name=tier_challonge_name,
+                      league=league)
+            pm.db_connector.get_session().add(lt)
 
 
 @app.route("/league_player")
@@ -783,11 +804,11 @@ def get_league_stats(league):
 @app.route("/league")
 def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Three")
+    league = pm.get_league("X-Wing Vassal League Season Four")
     tiers = league.tiers
     matches = pm.get_recent_league_matches(league)
 
-    return render_template("league_s3.html",
+    return render_template("league_s4.html",
                            league=league, tiers=tiers, matches=matches)
 
 
@@ -812,6 +833,15 @@ def league_season_two():
                            league=league, tiers=tiers, matches=matches)
 
 
+@app.route("/league_season_three")
+def league_season_three():
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league("X-Wing Vassal League Season Three")
+    tiers = league.tiers
+    matches = pm.get_recent_league_matches(league)
+
+    return render_template("league_s3.html",
+                           league=league, tiers=tiers, matches=matches)
 
 @app.route("/escrow")
 def escrow():

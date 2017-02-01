@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    td {
+        text-align:center;
+        vertical-align:middle;
+    }
+</style>
+<br>
+<br>
+ <div><b>{{ league.get_name() }} Tiers</b><br>
+{% for tier in tiers %}
+    {{ tier.get_name() }} : <a href="{{ tier.get_challonge_url() }}">Challonge page</a> | <a href="/tier_rankings?tier_id={{ tier.id }}">rankings</a> | <a href="/tier_matches?tier_id={{ tier.id }}">matches</a>
+    <br>
+{% endfor %}
+<br><a href="/league_players?league_id={{ league.id }}">All Season Four players</a>
+
+ <br>
+<br>
+Here's a <a href="https://www.reddit.com/r/xwingonline/comments/547iry/season_3_is_now_open/">bunch of information</a> about the current season of Vassal League.
+ <hr><a href="/league_season_one">Go here for old Season one data</a><br>
+<a href="/league_season_two">Go here for old Season two data</a><br>
+<a href="/league_season_three">Go here for old Season three data</a><br>
+ <br>
+
+<b>Recent league matches</b>
+<table id="matches" class="display" cellspacing="0" width="100%">
+  <thead>
+  <tr>
+    <th>Tier</th>
+    <th>Division</th>
+    <th>Player 1</th>
+    <th>Player 2</th>
+    <th>Updated At</th>
+    <th>Match State</th>
+    <th>VLog</th>
+    <th>Player 1 Score</th>
+    <th>Player 2 Score</th>
+    <th>Player 1 List</th>
+    <th>Player 2 List</th>
+  </thead>
+  <tbody>
+  </tr>
+      {% for m in matches %}
+      <tr>
+         <td>{{  m.player1.tier.get_name()}}</td>
+         <td>{{  m.player1.division.get_name()}}</td>
+         <td>{{  m.player1.get_url()}}</td>
+         <td>{{  m.player2.get_url()}}</td>
+         <td>{{ m.updated_at }}</td>
+         <td>{{  m.state }}</td>
+         <td>{{  m.get_vlog_url() | safe }}</td>
+         <td>{{  m.player1_score }}</td>
+         <td>{{  m.player2_score }}</td>
+         <td >{{ m.get_player1_list_display(no_entry=True) | safe }}
+         <td >{{ m.get_player2_list_display(no_entry=True) | safe }}
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+
+
+<script>
+    $(document).ready( function () {
+        $('#matches').dataTable({
+            "order": [[5, "desc"]],
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            iDisplayLength: -1,
+        });
+    });
+</script>
+
+{% endblock %}

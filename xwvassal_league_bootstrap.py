@@ -1,3 +1,5 @@
+
+
 import os
 import unittest
 import sys
@@ -16,24 +18,20 @@ class ChallongeMatchCSVImporter:
     def __init__(self,input):
         self.tsv_players = {}
         self.divisions = {}
-        reader = csv.reader( input,delimiter='\t' )
+        reader = csv.reader(input,delimiter='\t' )
         for row in reader:
-            person_name = unicode(row[0].strip())
-            email_address = row[1].strip()
-            challonge_name = unicode(row[2].strip())
+            challonge_name = unicode(row[0].strip())
+            person_name = unicode(row[1].strip())
+            email_address = row[2].strip()
             time_zone = row[3].strip()
-            reddit_handle = row[4].strip()
-            challengeboards_name = row[5].strip()
-            tier_name = row[6].strip()
-            tier_number = row[7].strip()
-            division_name = row[8].strip()
-            division_letter = row[9].strip()
+            tier_name = row[4].strip()
+            tier_number = row[5].strip()
+            division_name = row[6].strip()
+            division_letter = row[7].strip()
             self.tsv_players[challonge_name] = { 'person_name': person_name,
                                             'email_address' : email_address,
                                             'challonge_name' : challonge_name,
                                             'time_zone' : time_zone,
-                                            'reddit_handle' : reddit_handle,
-                                            'challengeboards_name':challengeboards_name ,
                                             'tier_name' : tier_name,
                                             'tier_number' : tier_number,
                                             'division_name' : division_name,
@@ -139,7 +137,7 @@ if __name__ == "__main__":
     challonge_user = os.getenv('CHALLONGE_USER')
     challonge_key  = os.getenv('CHALLONGE_API_KEY')
     ch = ChallongeHelper(challonge_user, challonge_key)
-    league = pm.get_league( "X-Wing Vassal League Season Three")
+    league = pm.get_league( "X-Wing Vassal League Season Four")
 
     #create all the divisions for each tier
     create_divisions(c,pm,league)
