@@ -401,7 +401,6 @@ class VassalLeagueAPI(restful.Resource):
             tdata = {
                 TIER_NAME : t.name,
                 TIER_CHALLONGE_NAME : t.challonge_name,
-                TIER_PLAYERS : [],
                 TIER_DIVISIONS : [],
                 TIER_ID : t.id
             }
