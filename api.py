@@ -368,7 +368,7 @@ class VassalLeaguesAPI(restful.Resource):
         ret = []
         for l in leagues:
             ret.append(l.id)
-        return json.dumps({LEAGUES: ret})
+        return jsonify({LEAGUES: ret})
 
 LEAGUE_NAME = 'name'
 LEAGUE_CHALLONGE_NAME = 'challonge_name'
@@ -416,7 +416,7 @@ class VassalLeagueAPI(restful.Resource):
                                                 })
 
             tiers_data.append(tdata)
-        return json.dumps(ret)
+        return jsonify(ret)
 
 DIVISION_RANKING = 'division_ranking'
 TIER_RANKING     = 'tier_ranking'
@@ -426,7 +426,7 @@ class VassalLeagueRanking(restful.Resource):
         tier = pm.get_tier_by_id(tier_id)
         ret = {}
         if tier is None:
-            return json.dumps(ret)
+            return jsonify(ret)
 
         division_rankings = []
         tier_rankings     = []
@@ -463,7 +463,7 @@ class VassalLeagueRanking(restful.Resource):
                         'name'  : r['player'].name,
                     })
 
-        return json.dumps(ret)
+        return jsonify(ret)
 
 class TournamentsAPI(restful.Resource):
     def get(self):
@@ -472,7 +472,7 @@ class TournamentsAPI(restful.Resource):
         ret = []
         for id in ids:
             ret.append(id[0])
-        return json.dumps({TOURNAMENTS: ret})
+        return jsonify({TOURNAMENTS: ret})
 
 
     def post(self):
