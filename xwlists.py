@@ -644,7 +644,7 @@ def add_league_player():
 def cache_league_results():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Three")
+    league = pm.get_league("X-Wing Vassal League Season Four")
     for tier in league.tiers:
         match_results_for_tier = c.match_index(tier.get_challonge_name())
 
