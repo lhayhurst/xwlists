@@ -3,6 +3,7 @@
 import os
 import unittest
 import sys
+import collections
 from decoder import decode
 
 reload(sys)
@@ -11,6 +12,21 @@ from challonge_helper import ChallongeHelper
 import myapp
 from persistence import PersistenceManager, TierPlayer, Division, LeagueMatch
 import csv
+
+class CaseInsensitiveDict(collections.Mapping):
+    def __init__(self, d):
+        self._d = d
+        self._s = dict((k.lower(), k) for k in d)
+    def __contains__(self, k):
+        return k.lower() in self._s
+    def __len__(self):
+        return len(self._s)
+    def __iter__(self):
+        return iter(self._s)
+    def __getitem__(self, k):
+        return self._d[self._s[k.lower()]]
+    def actual_key_case(self, k):
+        return self._s.get(k.lower())
 
 class ChallongeMatchCSVImporter:
 
@@ -39,6 +55,7 @@ class ChallongeMatchCSVImporter:
             if not self.divisions.has_key( division_name ):
                 self.divisions[division_name] = { 'name': division_name, 'letter':division_letter, 'tier': tier_name}
 
+        self.tsv_players = CaseInsensitiveDict(self.tsv_players)
 
 def create_divisions(c, pm, league):
     for name in c.divisions.keys():
@@ -101,10 +118,12 @@ def create_players(c, pm, ch, league):
             checked_in = player['checked_in']
             if challonge_username_ is None or checked_in is False:
                 lookup_name = player['display_name']
-                print "player %s has not checked in " % ( lookup_name)
+#                print "player %s has not checked in " % ( lookup_name)
             else:
                 lookup_name = challonge_username_
-            if c.tsv_players.has_key(lookup_name):
+            if not c.tsv_players.__contains__(lookup_name):
+                print "just couldn't find player %s" % ( lookup_name)
+            else:
                 # we're good to go
                 tsv_record = c.tsv_players[lookup_name]
                 if checked_in is False:

@@ -292,10 +292,12 @@ def create_players(c, pm, ch, league):
             checked_in = player['checked_in']
             if challonge_username_ is None or checked_in is False:
                 lookup_name = player['display_name']
-                print "player %s has not checked in " % ( lookup_name)
+#                print "player %s has not checked in " % ( lookup_name)
             else:
                 lookup_name = challonge_username_
-            if c.tsv_players.has_key(lookup_name):
+            if c.tsv_players.__contains__(lookup_name):
+                #grrr ... try the case insensitive one
+
                 # we're good to go
                 tsv_record = c.tsv_players[lookup_name]
                 if checked_in is False:
@@ -304,7 +306,7 @@ def create_players(c, pm, ch, league):
                 # create the player record
                 tier_player = TierPlayer()
                 division_name = decode(tsv_record['division_name'])
-                print "looking up division %s for player %s" % (division_name, lookup_name)
+                #print "looking up division %s for player %s" % (division_name, lookup_name)
 
                 if not divisions_href.has_key(division_name):
                     divisions_href[division_name] = pm.get_division(division_name, league)
@@ -317,8 +319,8 @@ def create_players(c, pm, ch, league):
                 if not player.has_key('group_player_ids'):
                     if not len(player['group_player_ids']) > 0 :
                         print "Missing player group id for player %s, skipping " % ( challonge_username_)
-                    else:
-                        tier_player.group_id = player['group_player_ids'][0]
+                else:
+                    tier_player.group_id = player['group_player_ids'][0]
                 tier_player.name = lookup_name
                 tier_player.email_address = decode(tsv_record['email_address'])
                 tier_player.person_name = decode(tsv_record['person_name'])
@@ -326,6 +328,8 @@ def create_players(c, pm, ch, league):
                     tier_player.reddit_handle = decode(tsv_record['reddit_handle'])
                 tier_player.timezone = decode(tsv_record['time_zone'])
                 pm.db_connector.get_session().add(tier_player)
+            else:
+                print "just couldn't find player %s" %  ( lookup_name)
     pm.db_connector.get_session().commit()
 
 @app.route("/add_form_results", methods=['POST'])
@@ -363,9 +367,9 @@ def add_league_form_results():
 def create_league_tiers(league, pm, season_number):
     tiers = {"Deep Core": "deepcore" + season_number,
              "Core Worlds": "coreworlds" + season_number,
-#             "Inner Rim": "innerrim" + season_number,
-#             "Outer Rim": "outerrim" + season_number,
-#             "Unknown Reaches": "unknownreaches" + season_number}
+             "Inner Rim": "innerrim" + season_number,
+             "Outer Rim": "outerrim" + season_number,
+             "Unknown Reaches": "unknownreaches" + season_number
              }
     for tier_name in tiers.keys():
         tier_challonge_name = tiers[tier_name]
