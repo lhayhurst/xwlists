@@ -218,7 +218,7 @@ def manage_escrows():
 @app.route("/set_up_escrow_subscription")
 def set_up_escrow_subscription():
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Three")
+    league = pm.get_league("X-Wing Vassal League Season Four")
 
     #first delete all the old subscriptions
     pm.delete_all_subscriptions()
@@ -630,7 +630,7 @@ def true_up_group_ids():
 def add_league_player():
     c = ChallongeHelper( myapp.challonge_user, myapp.challonge_key )
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Three")
+    league = pm.get_league("X-Wing Vassal League Season Four")
     tiers_divisions = {}
     tiers = []
     for tier in league.tiers:
