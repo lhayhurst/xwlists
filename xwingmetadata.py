@@ -191,6 +191,9 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 upgrades = {
     CREW: (
 
+        {'name': 'Cikatro Vizago', 'canon_name': 'cikatrovizago', 'cost': 0, 'constraints': (SCUM_FACTION_CONSTRAINT)},
+
+
         {'name': 'BoShek', 'canon_name': 'boshek', 'cost': 2,},
 
         {'name': 'Bistan', 'canon_name': 'bistan', 'cost': 2,'constraints': (REBEL_FACTION_CONSTRAINT)},
@@ -333,6 +336,10 @@ upgrades = {
 
     ),
     TITLE: (
+
+        {'name': 'Light Scyk Interceptor', 'canon_name': 'lightscykinterceptor', 'cost': -2,
+          'constraints': ({'type': SHIP_TYPE, 'value': [M3_A_INTERCEPTOR] } ),},
+
 
         {'name': 'Pivot Wing', 'canon_name': 'pivotwing', 'cost': 0,
           'constraints': ({'type': SHIP_TYPE, 'value': [U_WING] } ),},
@@ -680,7 +687,7 @@ ships = {
     ),
 
     QUADJUMPER: (
-        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Jakku Gunrunner', 'cost': 15, 'canon_name':'jakugunrunner',
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Jakku Gunrunner', 'cost': 15, 'canon_name':'jakkugunrunner',
          'upgrades': (CREW, BOMB, TECH, ILLICIT, MOD ),
          'pilot_skill' : 1,
         },
@@ -1221,6 +1228,10 @@ ships = {
                'upgrades': (CANNON, MISSILE, CREW, TITLE, MOD)}),
 
     TIE_FIGHTER: (
+
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Zeb Orrelios (TIE Fighter)', 'cost': 13,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (MOD, TITLE)},
+
 
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Captain Rex', 'cost': 14,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (MOD, TITLE)},
