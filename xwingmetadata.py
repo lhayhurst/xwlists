@@ -680,7 +680,7 @@ ships = {
     ),
 
     QUADJUMPER: (
-        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Jakku Gunrunner', 'cost': 15, 'canon_name':'jakugunrunner',
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Jakku Gunrunner', 'cost': 15, 'canon_name':'jakkugunrunner',
          'upgrades': (CREW, BOMB, TECH, ILLICIT, MOD ),
          'pilot_skill' : 1,
         },
