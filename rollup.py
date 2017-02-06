@@ -22,7 +22,9 @@ releases = {
     "2015-8" : "Wave 7",
     "2015-11": "Wave 8 (T-70, Tie/FO)",
     "2015-12" : "Imperial Assault Carrier",
-    "2016-3" : "Wave 8"
+    "2016-3" : "Wave 8",
+    "2016-9" : "Wave 9",
+    "2017-2" : "Wave 10"
 }
 
 def year_mo_sort(x,y):

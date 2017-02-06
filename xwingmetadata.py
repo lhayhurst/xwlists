@@ -172,7 +172,12 @@ sets_and_expansions = {'Core Set': [],
                        'Force Awakens Core Set': [],
                        'Wave 8': ['Punishing One Expansion Pack', 'Ghost Expansion Pack', 'Tie Inquisitor Expansion Pack',
                                   'T-70 X-Wing Expansion Pack,' 'Mist Hunter Expansion Pack', 'TIE/fo Expansion Pack'],
-                       'Wave 9': ['Protectorate Starfighter Expansion Pack', 'ARC-170 Expansion Pack', 'Shadow Caster Expansion Pack', 'Special Forces TIE Expansion Pack']
+                       'Wave 9': ['Protectorate Starfighter Expansion Pack', 'ARC-170 Expansion Pack', 'Shadow Caster Expansion Pack', 'Special Forces TIE Expansion Pack'],
+                       'Wave 10': ['Upsilon-class Shuttle Expansion Pack',
+                                   'Sabine\'s TIE Fighter Expansion Pack',
+                                   'Quadjumper Expansion Pack',
+                                   'U-wing Expansion Pack',
+                                   'TIE Striker Expansion Pack']
                        }
 
 formats = {'Standard - 100 Point Dogfight', 'Epic Play - 300 points', 'Escalation'}
