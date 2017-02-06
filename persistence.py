@@ -358,6 +358,7 @@ class LeagueMatch(Base):
     player1_score       = Column(Integer)
     player2_score       = Column(Integer)
     was_default         = Column(Boolean)
+    slack_notified      = Column(Boolean)
     state               = Column(String(45))
     player1_list_url    = Column(String(2048))
     player2_list_url    = Column(String(2048))
@@ -816,7 +817,8 @@ class ArchtypeList(Base):
              return True
          return False
 
-     def pretty_print_list(self):
+
+     def pretty_print_list(self, newline="<br>"):
 
         ret = ""
         for ship in self.ships:
@@ -827,7 +829,7 @@ class ArchtypeList(Base):
                     if ship_upgrade.upgrade is not None:
                         ret = ret + " + " + ship_upgrade.upgrade.name
             if i < len(self.ships):
-                ret = ret + '<br>'
+                ret = ret + newline
             i = i + 1
         points = 0
         if self.points is not None:

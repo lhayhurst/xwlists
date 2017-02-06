@@ -757,7 +757,7 @@ class TourneyToJsonConverter:
             #if the player has a list, xws it
             tlist = ranking.player.get_first_tourney_list()
             if tlist:
-                converter = XWSListConverter(tlist)
+                converter = XWSListConverter(tlist.archtype_list)
                 player[LIST] = converter.data
 
         #and now the rounds

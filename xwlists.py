@@ -19,6 +19,7 @@ from geopy import Nominatim
 from markupsafe import Markup
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
+from requests import put, get, post, delete
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI, VassalLeaguesAPI, VassalLeagueAPI, \
     VassalLeagueRanking
 from challonge_helper import ChallongeHelper
@@ -35,7 +36,7 @@ from rollup import ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTo
     PilotSkillHighchartsGraph
 from search import Search
 import xwingmetadata
-from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher, GeneralXWSFetcher
+from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher, GeneralXWSFetcher, XWSListConverter
 from flask.ext import restful
 from flask_cors import CORS
 
@@ -874,6 +875,8 @@ def escrow():
 
 def mail_escrow_complete(match,pm):
     recipients = list(ADMINS)
+    if len(recipients) == 0:
+        return
     for s in match.subscriptions:
         if s.notified:
             continue
@@ -934,6 +937,47 @@ def reset_match_escrow():
     pm.db_connector.get_session().commit()
     return redirect(url_for('escrow', match_id=match_id, player_id=player_id))
 
+
+
+def slack_notify_escrow_complete( match, pm ):
+    if match.slack_notified:
+        return
+    tier = match.tier
+    player1 = match.player1
+    player2 = match.player2
+    c = XWSListConverter( match.player1_list )
+    p1_xws = c.data
+    c = XWSListConverter( match.player2_list )
+    p2_xws = c.data
+    js = { "tier_name": tier.name,
+             "player1": {
+                 "name" : player1.name,
+                 "challonge_division_name" : player1.division.name,
+                 "list": match.player1_list_url,
+                 "pretty_print" : match.player1_list.pretty_print_list('\n'),
+                 "xws" : p1_xws
+             },
+             "player2": {
+                 "name" : player2.name,
+                 "challonge_division_name" : player2.division.name,
+                 "list": match.player2_list_url,
+                 "pretty_print" : match.player2_list.pretty_print_list('\n'),
+                 "xws" : p2_xws
+                        }
+    }
+    jsondata = json.dumps( js )
+    resp = post("https://cv6jcoop2e.execute-api.us-east-1.amazonaws.com/prod/escrow-notify",
+                    data=jsondata)
+    print "posted, got response %d "  % ( resp.status_code )
+    if resp.status_code: # == 200:
+        #posted good
+        match.slack_notified = True
+        pm.db_connector.get_session().add(match)
+        pm.db_connector.get_session().commit()
+
+
+    return resp.status_code
+
 @app.route("/escrow_change")
 def escrow_change():
     match_id  = request.args.get("match_id")
@@ -948,7 +992,8 @@ def escrow_change():
             mail_escrow_partial(player,match,pm)
     if escrow_complete:
         try:
-            mail_escrow_complete(match,pm)
+            #mail_escrow_complete(match,pm)
+            slack_notify_escrow_complete(match,pm)
         except Exception as inst:
             print "unable to send out escrow email, reason: %s" % ( inst )
 
