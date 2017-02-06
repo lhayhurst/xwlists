@@ -942,7 +942,7 @@ def reset_match_escrow():
 def slack_notify_escrow_complete( match, pm ):
     if match.slack_notified:
         return
-    tier = match.tier
+    tier = pm.get_tier_by_id(match.tier_id)
     player1 = match.player1
     player2 = match.player2
     c = XWSListConverter( match.player1_list )
