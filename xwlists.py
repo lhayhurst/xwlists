@@ -969,7 +969,7 @@ def slack_notify_escrow_complete( match, pm ):
     resp = post("https://cv6jcoop2e.execute-api.us-east-1.amazonaws.com/prod/escrow-notify",
                     data=jsondata)
     print "posted, got response %d "  % ( resp.status_code )
-    if resp.status_code: # == 200:
+    if resp.status_code == 200:
         #posted good
         match.slack_notified = True
         pm.db_connector.get_session().add(match)
