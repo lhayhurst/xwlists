@@ -896,7 +896,7 @@ def mail_escrow_complete(match,pm):
 def mail_escrow_partial(player,match,pm):
     recipients = list(ADMINS)
     for s in match.subscriptions:
-        if s.partial_notified == False and s.observer.id == player.id:
+        if not s.partial_notified == True and s.observer.id == player.id:
             recipients.append(player.email_address)
             s.partial_notified = True
 
@@ -992,7 +992,7 @@ def escrow_change():
             mail_escrow_partial(player,match,pm)
     if escrow_complete:
         try:
-            #mail_escrow_complete(match,pm)
+            mail_escrow_complete(match,pm)
             slack_notify_escrow_complete(match,pm)
         except Exception as inst:
             print "unable to send out escrow email, reason: %s" % ( inst )
