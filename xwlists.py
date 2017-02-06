@@ -882,6 +882,7 @@ def mail_escrow_complete(match,pm):
             continue
         recipients.append( s.observer.email_address)
         s.notified = True
+        pm.db_connector.get_session().add(s)
     pm.db_connector.get_session().commit()
     msg = Message("Escrow complete for X-Wing Vassal League match: %s v %s" % ( match.player1.get_name(), match.player2.get_name()),
                   sender=ADMINS[0],
@@ -899,6 +900,7 @@ def mail_escrow_partial(player,match,pm):
         if not s.partial_notified == True and s.observer.id == player.id:
             recipients.append(player.email_address)
             s.partial_notified = True
+            pm.db_connector.get_session.add(s)
 
     if len(recipients) >1:
         pm.db_connector.get_session().commit()
@@ -942,7 +944,7 @@ def reset_match_escrow():
 def slack_notify_escrow_complete( match, pm ):
     if match.slack_notified:
         return
-    tier = pm.get_tier_by_id(match.tier_id)
+    tier = match.tier
     player1 = match.player1
     player2 = match.player2
     c = XWSListConverter( match.player1_list )
@@ -990,10 +992,11 @@ def escrow_change():
         player = match.partial_escrow()
         if player:
             mail_escrow_partial(player,match,pm)
+
     if escrow_complete:
         try:
-            mail_escrow_complete(match,pm)
             slack_notify_escrow_complete(match,pm)
+            mail_escrow_complete(match,pm)
         except Exception as inst:
             print "unable to send out escrow email, reason: %s" % ( inst )
 
