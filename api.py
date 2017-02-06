@@ -745,6 +745,8 @@ class TourneyToJsonConverter:
             player[PLAYER_NAME] = ranking.player.get_player_name()
             player[SCORE] = ranking.score
             player[MOV] = ranking.mov
+            if ranking.sos is None:
+                ranking.sos = 0
             sos = "%.2f" % ranking.sos
             player[SOS] = sos
             rank = {}
