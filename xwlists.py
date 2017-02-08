@@ -442,6 +442,8 @@ def create_default_match_result(match_result, tier, pm):
 
     updated_at = match_result['updated_at']
     lm.updated_at = updated_at
+    lm.challonge_winner_id = match_result['winner_id']
+    lm.challonge_loser_id = match_result['loser_id']
 
     return lm
 
@@ -470,6 +472,25 @@ def update_match_result(match_result,dbmr,pm):
     state = match_result['state']
     if state is not None and dbmr.state != state:
         dbmr.state = state
+        changed = True
+
+    winner_id = match_result['winner_id']
+    loser_id  = match_result['loser_id']
+
+    if dbmr.challonge_winner_id is None:
+        dbmr.challonge_winner_id = winner_id
+        changed = True
+
+    if dbmr.challonge_loser_id is None:
+        dbmr.challonge_loser_id = loser_id
+        changed = True
+
+    if dbmr.challonge_winner_id is not None and dbmr.challonge_winner_id != winner_id:
+        dbmr.challonge_winner_id = winner_id
+        changed = True
+
+    if dbmr.challonge_loser_id is not None and dbmr.challonge_loser_id != loser_id:
+        dbmr.challonge_loser_id = loser_id
         changed = True
 
     if changed:
@@ -938,8 +959,6 @@ def reset_match_escrow():
     match.delete_partial_escrow(player_id)
     pm.db_connector.get_session().commit()
     return redirect(url_for('escrow', match_id=match_id, player_id=player_id))
-
-
 
 def slack_notify_escrow_complete( match, pm ):
     if match.slack_notified:

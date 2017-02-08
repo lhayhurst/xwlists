@@ -319,6 +319,8 @@ class TierPlayer(Base):
         return decode( self.name )
 
     def get_stats(self, ignore_defaults=False):
+        if self.name == 'zer0tc':
+            print "foo"
         ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0, 'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0, 'mov':0 }
         for m in self.matches:
             if m.is_complete():
@@ -364,6 +366,8 @@ class LeagueMatch(Base):
     player2_list_url    = Column(String(2048))
     challonge_attachment_url = Column(String(2048))
     updated_at          = Column(String(128))
+    challonge_winner_id = Column(Integer)
+    challonge_loser_id  = Column(Integer)
 
     tier             = relationship( Tier.__name__, uselist=False)
     player1             = relationship( TierPlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player1_id')
@@ -457,10 +461,16 @@ class LeagueMatch(Base):
                 winner = self.player1
             elif self.player2_score > self.player1_score:
                 winner = self.player2
+            elif self.challonge_winner_id == self.player1.group_id:
+                winner = self.player1
+            elif self.challonge_winner_id == self.player2.group_id:
+                winner = self.player2
         return winner
 
     def was_draw(self):
-        return self.is_complete() and self.player1_score == self.player2_score
+        return self.is_complete() and \
+               self.player1_score == self.player2_score and \
+               self.challonge_winner_id == self.challonge_loser_id
 
     def player_lost(self,player):
         if self.was_draw():
