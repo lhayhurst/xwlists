@@ -757,6 +757,7 @@ class TourneyToJsonConverter:
                 CITY       : v.city,
                 LATITUDE   : lat,
                 LONGITUDE  : lon,
+                COUNTRY    : v.country
             }
 
         # build the tournament to ranking map
