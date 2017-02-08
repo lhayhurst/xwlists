@@ -722,6 +722,13 @@ class PlayersAPI(restful.Resource):
         if bail:
             return bail
 
+VENUE = "venue"
+VENUE_NAME = "name"
+COUNTRY = "country"
+STATE = "state"
+CITY = "city"
+LATITUDE  = "lat"
+LONGITUDE  = "lon"
 
 class TourneyToJsonConverter:
     def convert(self, t):
@@ -735,6 +742,22 @@ class TourneyToJsonConverter:
         tournament[ROUND_LENGTH] = t.round_length
         if t.format is not None:
             tournament[FORMAT] = t.format
+
+        if t.venue is not None:
+            v = t.venue
+            lon = v.longitude
+            lat = v.latitude
+            if lon is not None:
+                lon = str(lon)
+            if lat is not None:
+                lat = str(lat)
+            tournament[VENUE] = {
+                VENUE_NAME : v.venue,
+                STATE      : v.state,
+                CITY       : v.city,
+                LATITUDE   : lat,
+                LONGITUDE  : lon,
+            }
 
         # build the tournament to ranking map
         # naive assumption: assume the rankings are there
