@@ -752,12 +752,12 @@ class TourneyToJsonConverter:
             if lat is not None:
                 lat = str(lat)
             tournament[VENUE] = {
-                VENUE_NAME : v.venue,
-                STATE      : v.state,
-                CITY       : v.city,
+                VENUE_NAME : decode(v.venue),
+                STATE      : decode(v.state),
+                CITY       : decode(v.city),
                 LATITUDE   : lat,
                 LONGITUDE  : lon,
-                COUNTRY    : v.country
+                COUNTRY    : decode(v.country)
             }
 
         # build the tournament to ranking map
@@ -914,7 +914,8 @@ class TournamentAPI(restful.Resource):
 
         pm.db_connector.get_session().commit()
 
-        return jsonify(TourneyToJsonConverter().convert(t))
+        json = TourneyToJsonConverter().convert(t)
+        return jsonify(json)
 
     def delete(self, tourney_id):
         pm = PersistenceManager(myapp.db_connector)
