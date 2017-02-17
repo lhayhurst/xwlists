@@ -356,6 +356,7 @@ upgrades = {
           'constraints': ({'type': SHIP_TYPE, 'value': [TIE_STRIKER] } ),},
 
         {'name': 'Sabines Masterpiece', 'cost': 1, 'canon_name' : 'sabinesmasterpiece',
+         'action': [{'type': 'ADD_UPGRADE', 'value': CREW}, {'type': 'ADD_UPGRADE', 'value': ILLICIT}],
          'constraints': ({'type': SHIP_TYPE, 'value': TIE_FIGHTER}, {'faction': REBEL_FACTION_CONSTRAINT})},
 
 
