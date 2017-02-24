@@ -368,6 +368,7 @@ class LeagueMatch(Base):
     updated_at          = Column(String(128))
     challonge_winner_id = Column(Integer)
     challonge_loser_id  = Column(Integer)
+    scheduled_datetime  = Column(String(128))
 
     tier             = relationship( Tier.__name__, uselist=False)
     player1             = relationship( TierPlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player1_id')
@@ -378,6 +379,21 @@ class LeagueMatch(Base):
     player2_list        = relationship("ArchtypeList", uselist=False,foreign_keys='LeagueMatch.player2_list_id')
     subscriptions       = relationship("EscrowSubscription",
                                        back_populates='match',cascade="all,delete,delete-orphan")
+
+    def get_schedule(self):
+        if self.is_complete():
+            return self.scheduled_datetime
+        link_txt = None
+
+        if self.scheduled_datetime is None:
+            link_txt = "Set date/time"
+        else:
+            link_txt = self.scheduled_datetime
+        ret = '<a href="' + \
+              url_for('set_league_match_schedule', match_id=self.id,_external=True ) +\
+              '">' + link_txt + '</a>'
+        return Markup(ret)
+
 
     def get_player1_escrow_reset_link(self):
         return self.reset_escrow_url(self.player1_id)

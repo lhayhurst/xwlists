@@ -8,6 +8,8 @@ import sys
 
 from flask import render_template, request, url_for, redirect, jsonify, Response
 from flask.ext.mail import Mail, Message
+from pytz import all_timezones, timezone
+from datetime import datetime
 from uidgen import ListUIDGen
 
 from xwvassal_league_bootstrap import ChallongeMatchCSVImporter
@@ -924,6 +926,38 @@ def league_season_three():
     return render_template("league_s3.html",
                            league=league, tiers=tiers, matches=matches)
 
+@app.route("/set_league_match_schedule")
+def set_league_match_schedule():
+    match_id  = request.args.get("match_id")
+    pm = PersistenceManager(myapp.db_connector)
+    match = pm.get_match(match_id)
+    today = datetime.today().strftime('%d-%m-%Y')
+
+    return render_template("league_match_schedule.html",match=match,today=today,timezones=all_timezones)
+
+@app.route("/submit_league_match_schedule", methods=['POST'])
+def submit_league_match_schedule():
+    match_id = request.form['match_id']
+    tz       = request.form['timezone']
+    dt = request.form['datetime12']
+
+    fmt = '%d-%m-%Y %I:%M %p'
+    datetime_obj_native  = datetime.strptime(dt, fmt)
+    datetime_obj_localtz = timezone(tz).localize(datetime_obj_native)
+
+    pm = PersistenceManager(myapp.db_connector)
+    match = pm.get_match(match_id)
+    match.scheduled_datetime = datetime_obj_localtz.strftime('%d-%m-%Y %I:%M %p %Z%z')
+    pm.db_connector.get_session().add(match)
+    pm.db_connector.get_session().commit()
+
+    #finally, if the match has been escrowed, and there has been a datetime change, send it along
+    if match.self.needs_escrow() == False:
+        slack_notify_escrow_change(match, pm)
+    return redirect(url_for('tier_matches', tier_id=match.tier_id))
+
+
+
 @app.route("/escrow")
 def escrow():
     match_id  = request.args.get("match_id")
@@ -1010,7 +1044,7 @@ def reset_match_escrow():
     pm.db_connector.get_session().commit()
     return redirect(url_for('escrow', match_id=match_id, player_id=player_id))
 
-def slack_notify_escrow_complete( match, pm ):
+def slack_notify_escrow_change( match, pm ):
     if match.slack_notified:
         return
     tier = match.tier
@@ -1021,6 +1055,7 @@ def slack_notify_escrow_complete( match, pm ):
     c = XWSListConverter( match.player2_list )
     p2_xws = c.data
     js = { "tier_name": tier.name,
+             "scheduled_datetime" : match.scheduled_datetime,
              "player1": {
                  "name" : player1.name,
                  "challonge_division_name" : player1.division.name,
@@ -1064,7 +1099,7 @@ def escrow_change():
 
     if escrow_complete:
         try:
-            slack_notify_escrow_complete(match,pm)
+            slack_notify_escrow_change(match,pm)
             mail_escrow_complete(match,pm)
         except Exception as inst:
             print "unable to send out escrow email, reason: %s" % ( inst )

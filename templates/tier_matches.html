@@ -21,6 +21,7 @@
     <th>VLog</th>
     <th>Player 1 Score</th>
     <th>Player 2 Score</th>
+    <th>Scheduled For</th>
     <th>Player 1 List</th>
     <th>Player 2 List</th>
     {% if admin %}
@@ -40,6 +41,7 @@
          <td>{{  m.get_vlog_url() | safe }}</td>
          <td>{{  m.player1_score }}</td>
          <td>{{  m.player2_score }}</td>
+         <td>{{ m.get_schedule() }}</td>
          <td >{{ m.get_player1_list_display() | safe }}
          <td >{{ m.get_player2_list_display() | safe }}
          {% if admin %}
