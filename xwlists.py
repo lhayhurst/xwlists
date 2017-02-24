@@ -297,7 +297,6 @@ def create_players(c, pm, ch, league):
             else:
                 lookup_name = challonge_username_
             if c.tsv_players.__contains__(lookup_name):
-                #grrr ... try the case insensitive one
 
                 # we're good to go
                 tsv_record = c.tsv_players[lookup_name]
@@ -414,17 +413,65 @@ def league_players():
     return render_template("league_players.html", players=players,league=league)
 
 
-def create_default_match_result(match_result, tier, pm):
-    p1id = match_result['player1_id']
-    p2id = match_result['player2_id']
-    player1 = pm.get_tier_player_by_group_id(p1id)
-    player2 = pm.get_tier_player_by_group_id(p2id)
-    if player1 is None or player2 is None:
+@app.route("/add_interdivision_league_match")
+def add_interdivision_league_game():
+    league_id         = request.args.get('league_id')
+    pm                = PersistenceManager(myapp.db_connector)
+    league            = pm.get_league_by_id(league_id)
+    tier_players = {}
+    for t in league.tiers:
+        players = []
+        for p in t.players:
+            players.append({'name': p.name, 'id':p.id})
+        tier_players[t.name] = players
+    return render_template( "add_interdivision_league_match.html",
+                            league=league,
+                            tiers=league.tiers,
+                            tier_players=tier_players)
+
+@app.route("/submit_interdivisional_league_match",methods=['POST'])
+def submit_interdivisional_league_match():
+    player1_id        = request.form['player1_dropdown']
+    player2_id        = request.form['player2_dropdown']
+    tier_id           = request.form['tier_dropdown']
+    league_id         = request.form['league_id']
+
+    pm = PersistenceManager(myapp.db_connector)
+    player1 = pm.get_league_player_by_id(player1_id)
+    player2 = pm.get_league_player_by_id(player2_id)
+
+    tier = pm.get_tier_by_id(tier_id)
+    now = datetime.datetime.now()
+    match_result = {
+        'state' : 'open',
+        'id' :0,
+        'scores_csv' : None,
+        'updated_at': str(now)
+    }
+
+    dbmr = create_default_match_result(match_result, tier, pm, player1, player2)
+    pm.db_connector.get_session().add(dbmr)
+    pm.db_connector.get_session().add(EscrowSubscription( observer=player1, match=dbmr))
+    pm.db_connector.get_session().add(EscrowSubscription( observer=player2, match=dbmr))
+    pm.db_connector.get_session().commit()
+    return redirect(url_for('tier_matches', tier_id=tier.id))
+
+
+
+def create_default_match_result(match_result, tier, pm,player1=None, player2=None):
+    if player1 is None:
+        p1id = match_result['player1_id']
+        player1 = pm.get_tier_player_by_group_id(p1id)
         if player1 is None:
             print "couldn't find player with id %d" % ( p1id)
-        else:
+            return None
+    if player2 is None:
+        p2id = match_result['player2_id']
+        player2 = pm.get_tier_player_by_group_id(p2id)
+        if player2 is None:
             print "couldn't find player with id %d" % ( p2id)
-        return None
+            return None
+
     lm = LeagueMatch()
     lm.tier_id = tier.id
     lm.player1 = player1
@@ -442,9 +489,10 @@ def create_default_match_result(match_result, tier, pm):
 
     updated_at = match_result['updated_at']
     lm.updated_at = updated_at
-    lm.challonge_winner_id = match_result['winner_id']
-    lm.challonge_loser_id = match_result['loser_id']
-
+    if match_result.has_key('winner_id'):
+        lm.challonge_winner_id = match_result['winner_id']
+    if match_result.has_key('loser_id'):
+        lm.challonge_loser_id = match_result['loser_id']
     return lm
 
 def update_match_result(match_result,dbmr,pm):
@@ -505,6 +553,8 @@ def update_match_result(match_result,dbmr,pm):
 @app.route("/league_admin")
 def league_admin():
     return render_template('league_admin.html')
+
+@app.route("/add_league_tie")
 
 @app.route("/remove_league_player")
 def remove_league_player():
@@ -940,7 +990,7 @@ def mail_escrow_partial(player,match,pm):
 
 @app.route("/force_reset_match_escrow")
 def force_reset_match_escrow():
-    match_id  = request.args.get("match_id")
+    match_id  = request.args.get("match_id") #url?arg=value
 
     pm        = PersistenceManager(myapp.db_connector)
     match     = pm.get_match(match_id)

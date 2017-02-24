@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('submit_interdivisional_league_match') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data">
+    <fieldset>
+        <legend>Set up an intra-divisional league match!</legend>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>League Tier</label>
+               <select id="tier_dropdown" name="tier_dropdown"  width="500"
+                       style="width: 500px;"
+                       placeholder="Select tier">
+                <option></option>
+                {%  for t in tiers %}
+                    <option value="{{ t.id }}">{{ t.name }}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Select Player 1</label>
+                 <select id="player1_dropdown" name="player1_dropdown"
+                         width="500" style="width: 500px;"
+                         placeholder="Select the first player">
+                    <option></option>
+                </select>
+            </div>
+            <div data-field-span="1">
+                <label>Select Player 2</label>
+                 <select id="player2_dropdown" name="player2_dropdown"
+                         width="500" style="width: 500px;"
+                         placeholder="Select the second player">
+                    <option></option>
+                </select>
+            </div>
+
+        </div>
+    </fieldset>
+    <input type="hidden" name="league_id" value="{{ league.id }}" />
+    <input type="submit" class="btn" name="submit-button" id="submit-button" />
+
+</form>
+
+<script>
+
+    var tier_players_map = {{ tier_players | tojson | safe }};
+
+
+    $(document).ready(function() {
+
+        $("#tier_dropdown").select2();
+
+
+        $('#tier_dropdown').on("select2-selecting", function(e) {
+            console.log(e.object['text']);
+            var players = tier_players_map[e.object['text']];
+            console.log(players);
+            $("#player1_dropdown").select2();
+            $("#player2_dropdown").select2();
+            for( var i = 0; i < players.length; i++ ) {
+                var player = players[i];
+                var newOption1 = new Option(player.name, player.id, true, true);
+                var newOption2 = new Option(player.name, player.id, true, true);
+                $("#player1_dropdown").append(newOption1);
+                $("#player2_dropdown").append(newOption2);
+            }
+
+        } );
+
+    });
+
+</script>
+
+
+{% endblock %}

@@ -17,6 +17,7 @@ draws: {{ results["draws"] }}<br>
   <thead>
       <tr>
         <th>Tourney</th>
+        <th>Date</th>
         <th>Type</th>
         <th >Player1</th>
         <th >Swiss Standing</th>
@@ -35,6 +36,7 @@ draws: {{ results["draws"] }}<br>
   {% for result in results["results"] %}
   <tr>
       <td>{{ result.list1.tourney.get_tourney_name_as_url() }}</td>
+      <td>{{ result.list1.tourney.tourney_date }}</td>
       <td>{{ result.list1.tourney.tourney_type }}</td>
       <td>{{ result.list1.player.get_player_name() }}</td>
       <td>{{ result.list1.player.result.rank }}</td>
