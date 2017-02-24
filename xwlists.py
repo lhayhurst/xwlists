@@ -952,7 +952,7 @@ def submit_league_match_schedule():
     pm.db_connector.get_session().commit()
 
     #finally, if the match has been escrowed, and there has been a datetime change, send it along
-    if match.self.needs_escrow() == False:
+    if match.needs_escrow() == False:
         slack_notify_escrow_change(match, pm)
     return redirect(url_for('tier_matches', tier_id=match.tier_id))
 

@@ -11,9 +11,11 @@ P { text-align: center }
     {% set p2autofocus = "autofocus" %}
     {% set p1autofocus = "" %}
 {% endif %}
-<P>If you need help, please <a href="https://docs.google.com/document/d/1_6Il-zEbNtnm9q5SZO3Z9mHUT2LpN3LNk6bnpDPME1w/pub">see this guide for help on how to escrow your list!</a><br></h2>
-</P>
-<p>After you've pasted in the link to your list, simply wait for your opponent's list to appear on the page!</p>
+If you need help, please <a href="https://docs.google.com/document/d/1_6Il-zEbNtnm9q5SZO3Z9mHUT2LpN3LNk6bnpDPME1w/pub">see this guide for help on how to escrow your list!</a><br>
+
+After you've pasted in the link to your list, simply wait for your opponent's list to appear on the page!<br>
+
+You can also set the date and time that the match is going to be played by clicking here: {{ match.get_schedule() }}
 <br><br>
 <form id="form"
       class="grid-form"
