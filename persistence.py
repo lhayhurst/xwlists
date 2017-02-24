@@ -18,12 +18,6 @@ from decl_enum import DeclEnum
 from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean, DateTime
 from sqlalchemy import ForeignKey
 
-REGIONAL = 'Regional'
-STORE_CHAMPIONSHIP = 'Store championship'
-NATIONAL_CHAMPIONSHIP = 'Nationals'
-ELIMINATION = 'elimination'
-SWISS = 'swiss'
-
 
 class Match(ClauseElement):
     def __init__(self, columns, value):
@@ -285,8 +279,6 @@ class Division(Base):
             ret.append(ss)
             i = i+1
         return ret
-
-
 
 tier_player_table = "tier_player"
 class TierPlayer(Base):
@@ -658,6 +650,14 @@ class EscrowSubscription(Base):
 
 
 tourney_venue_table_name = 'tourney_venue'
+
+REGIONAL = 'Regional'
+STORE_CHAMPIONSHIP = 'Store championship'
+NATIONAL_CHAMPIONSHIP = 'Nationals'
+SYSTEM_OPEN = 'System Open'
+ELIMINATION = 'elimination'
+SWISS = 'swiss'
+
 
 class Tourney(Base):
     __tablename__ = tourney_table
