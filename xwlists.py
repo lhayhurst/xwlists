@@ -2,7 +2,6 @@ import json
 import os
 from random import randint
 import urllib
-import datetime
 import uuid
 import sys
 
@@ -1387,16 +1386,16 @@ def remove_tag():
     update_archtypes_cache(archtype)
     return jsonify({"success":1})
 
-
 @app.route("/update_tourney_details/",methods=['POST'])
 def update_tourney_details():
     tourney_id            = request.form['tourney_id']
     name                  = decode( request.form['name'] )
     type                  = request.form['tourney_type']
     print request.form['datepicker']
-    mmddyyyy              = request.form['datepicker'].split('/')
-    date                  = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1])) #YYYY, MM, DD
-    round_length  = request.form['round_length_userdef']
+    mmddyyyy              = request.form['datepicker']
+    fmt                   = '%m/%d/%Y'
+    date                  = datetime.strptime(  mmddyyyy, fmt)
+    round_length          = request.form['round_length_userdef']
     tourney_format_def    = request.form['tourney_format_dropdown']
     tourney_format_custom = request.form['tourney_format_custom']
     participant_count     = int(request.form['participant_count'])
