@@ -9,6 +9,8 @@ from persistence import TourneyList, Faction, Ship, ShipUpgrade, ArchtypeList
 class XWSListConverter:
     def __init__(self, archtype):
         self.data = {}
+        if archtype is None:
+            return
         if archtype.faction is None:
             print "detected list with no faction!"
             pass

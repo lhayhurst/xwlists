@@ -22,7 +22,7 @@ from sqlalchemy import func
 from werkzeug.utils import secure_filename
 from requests import put, get, post, delete
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI, VassalLeaguesAPI, VassalLeagueAPI, \
-    VassalLeagueRanking
+    VassalLeagueRanking, VassalLeagueMatches
 from challonge_helper import ChallongeHelper
 
 from cryodex import Cryodex
@@ -90,6 +90,7 @@ api = restful.Api(app)
 api.add_resource(VassalLeaguesAPI, '/api/v1/vassal_leagues')
 api.add_resource(VassalLeagueAPI, '/api/v1/vassal_league/<int:league_id>')
 api.add_resource(VassalLeagueRanking, '/api/v1/vassal_league_ranking/<int:league_id>/tier/<int:tier_id>/')
+api.add_resource(VassalLeagueMatches, '/api/v1/vassal_league_matches/<int:league_id>')
 
 api.add_resource(TournamentsAPI, '/api/v1/tournaments')
 api.add_resource(TournamentAPI, '/api/v1/tournament/<int:tourney_id>' )

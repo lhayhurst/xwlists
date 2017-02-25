@@ -384,7 +384,56 @@ DIVISION_NAME = 'name'
 DIVISION_CHALLONGE_NAME = 'challonge_name'
 DIVISION_ID = 'division_id'
 DIVISION_PLAYERS = 'players'
+MATCHES = 'matches'
 
+class VassalLeagueMatches(restful.Resource):
+    def get(self, league_id ):
+        pm = PersistenceManager(myapp.db_connector)
+        league = pm.get_league_by_id(league_id)
+        ret = {}
+        ret[LEAGUE_NAME] = league.name
+        ret[LEAGUE_CHALLONGE_NAME] = league.challonge_name
+        matches = []
+        ret[MATCHES] = matches
+
+        for t in league.tiers:
+            for m in t.matches:
+                c = XWSListConverter( m.player1_list )
+                p1_xws = c.data
+                c = XWSListConverter( m.player2_list )
+                p2_xws = c.data
+
+                p1_pretty_list = None
+                p2_pretty_list = None
+                if m.player1_list is not None:
+                    p1_pretty_list = m.player1_list.pretty_print_list('\n')
+                if m.player2_list is not None:
+                    p2_pretty_list = m.player2_list.pretty_print_list('\n')
+
+                matches.append( {
+                    'tier_name' : t.name,
+                    'scheduled_datetime' : m.scheduled_datetime,
+                    'state' : m.state,
+                    'vlog' : m.challonge_attachment_url,
+                    'last_updated_at': m.updated_at,
+                    'player1': {
+                         'name' : m.player1.name,
+                         "challonge_division_name" : m.player1.division.name,
+                         "list": m.player1_list_url,
+                         "pretty_print" : p1_pretty_list,
+                         "xws" : p1_xws,
+                         'score': m.player1_score
+                    },
+                    'player1': {
+                         'name' : m.player2.name,
+                         'challonge_division_name' : m.player2.division.name,
+                         'list': m.player2_list_url,
+                         'pretty_print' : p2_pretty_list,
+                         'xws' : p2_xws,
+                         'score': m.player2_score
+                    }
+                })
+        return jsonify(ret)
 
 class VassalLeagueAPI(restful.Resource):
     def get(self,league_id):
