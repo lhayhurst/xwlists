@@ -211,9 +211,8 @@ def manage_escrows():
 
     matches = []
     for tier in league.tiers:
-        for player in tier.players:
-            for match in player.matches:
-                matches.append( match )
+        for match in tier.matches:
+            matches.append( match )
 
 
     return render_template('manage_escrows.html', matches=matches)

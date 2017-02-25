@@ -394,13 +394,65 @@ class LeagueMatch(Base):
         return self.reset_escrow_url(self.player2_id)
 
     def get_escrow_reset_link(self):
+        if self.is_complete():
+            return "completed"
         ret = '<a href="' + url_for('force_reset_match_escrow', match_id=self.id,_external=True ) +  '">link</a>'
         return Markup(ret)
 
 
     def reset_escrow_url(self,player_id):
-        ret = '<a href="' + url_for('reset_match_escrow', match_id=self.id, player_id=player_id,_external=True ) +  '">link</a>'
+        link_text = None
+        if self.is_complete():
+            return "Match completed"
+        elif self.escrow_complete():
+            return "Escrowed"
+        else:
+            if player_id == self.player1_id:
+                if self.player1_list is None:
+                    return Markup(self.get_player1_list_display())
+                else:
+                    link_text = "Reset " + self.player1.get_name() + "'s escrow"
+            else:
+                if self.player2_list is None:
+                    return Markup(self.get_player2_list_display())
+                else:
+                    link_text = "Reset "+ self.player2.get_name() + "'s escrow"
+        ret = '<a href="' + \
+              url_for('reset_match_escrow', match_id=self.id, player_id=player_id,_external=True ) +  \
+              '">' + link_text + '</a>'
         return Markup(ret)
+
+    def get_player_escrow_text(self, player_id):
+        #scenarios
+        #neither player has submitted
+        if self.player1_list is None and self.player2_list is None:
+            return "<br>"
+
+        #player 1 has submitted and player 2 hasn't
+        if self.player1_list is not None and self.player2_list is None:
+            if player_id == self.player1_id:
+                return "Waiting for Player2 to submit their list"
+            else:
+                return "<br>"
+
+        #player 2 has submitted and player 1 hasn't
+        if self.player1_list is None and self.player2_list is not None:
+            if player_id == self.player1_id:
+                return "<br>"
+            else:
+                return "Waiting for Player1 to submit their list"
+
+        #both lists have been submitted
+        if  player_id == self.player1_id:
+            return self.get_player1_list_url() + self.player1_list_text()
+        else:
+            return self.get_player2_list_url() + self.player2_list_text()
+
+    def get_player1_escrow_text(self):
+        return self.get_player_escrow_text(self.player1_id)
+
+    def get_player2_escrow_text(self):
+        return self.get_player_escrow_text(self.player2_id)
 
     def reset_escrow(self):
         self.player1_list_id = None
@@ -411,7 +463,6 @@ class LeagueMatch(Base):
         self.player2_list_url = None
         for s in self.subscriptions:
             s.reset()
-
 
     def delete_partial_escrow(self,player_id):
         if self.needs_escrow() == False: #can't delete an escrow that is done!
@@ -538,38 +589,6 @@ class LeagueMatch(Base):
                                             self.player2.get_name(),
                                             no_entry)
 
-    def get_player_escrow_text(self, player_id):
-        #scenarios
-        #neither player has submitted
-        if self.player1_list is None and self.player2_list is None:
-            return "<br>"
-
-        #player 1 has submitted and player 2 hasn't
-        if self.player1_list is not None and self.player2_list is None:
-            if player_id == self.player1_id:
-                return "Waiting for Player2 to submit their list"
-            else:
-                return "<br>"
-
-        #player 2 has submitted and player 1 hasn't
-        if self.player1_list is None and self.player2_list is not None:
-            if player_id == self.player1_id:
-                return "<br>"
-            else:
-                return "Waiting for Player1 to submit their list"
-
-        #both lists have been submitted
-        if  player_id == self.player1_id:
-            return self.get_player1_list_url() + self.player1_list_text()
-        else:
-            return self.get_player2_list_url() + self.player2_list_text()
-
-    def get_player1_escrow_text(self):
-        return self.get_player_escrow_text(self.player1_id)
-
-    def get_player2_escrow_text(self):
-        return self.get_player_escrow_text(self.player2_id)
-
     def is_complete(self):
         return self.state is not None and self.state == 'complete'
 
@@ -609,6 +628,9 @@ class LeagueMatch(Base):
         if self.player2_list is not None:
             return self.player2
         return None
+
+    def escrow_complete(self):
+        return self.player1_list is not None and self.player2_list is not None
 
     def needs_escrow(self):
         return self.player1_list is None or self.player2_list is None
