@@ -13,6 +13,7 @@
     {{ tier.get_name() }} : <a href="{{ tier.get_challonge_url() }}">Challonge page</a> | <a href="/tier_rankings?tier_id={{ tier.id }}">rankings</a> | <a href="/tier_matches?tier_id={{ tier.id }}">matches</a>
     <br>
 {% endfor %}
+<br><a href="/manage_escrows?league_id={{ league.id }}">Esrow management page</a>
 <br><a href="/league_players?league_id={{ league.id }}">All Season Four players</a>
 
  <br>

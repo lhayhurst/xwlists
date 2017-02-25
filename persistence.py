@@ -1573,7 +1573,7 @@ class PersistenceManager:
             filter( LeagueMatch.tier_id == Tier.id,
                     Tier.league_id == League.id,
                     League.id == league.id,
-                    LeagueMatch.state == "complete").order_by(LeagueMatch.updated_at.desc()).limit(100).all()
+                    LeagueMatch.state == "complete").order_by(LeagueMatch.updated_at.desc()).limit(50).all()
         return query
 
     def get_division_by_id(self,division_id):
