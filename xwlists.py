@@ -442,7 +442,7 @@ def submit_interdivisional_league_match():
     player2 = pm.get_league_player_by_id(player2_id)
 
     tier = pm.get_tier_by_id(tier_id)
-    now = datetime.datetime.now()
+    now = datetime.now()
     match_result = {
         'state' : 'open',
         'id' :0,
@@ -1689,7 +1689,7 @@ def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
 
     pm = PersistenceManager(myapp.db_connector)
     t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date,
-                tourney_type=tourney_type, round_length=round_length, email=email, entry_date=datetime.datetime.now(),
+                tourney_type=tourney_type, round_length=round_length, email=email, entry_date=datetime.now(),
                 participant_count=participant_count, locked=False, format=tourney_format)
 
     pm.db_connector.get_session().add(t)
@@ -1812,8 +1812,12 @@ def add_tourney():
     name                  = decode( request.form['name'] )
     email                 = decode( request.form['email'] )
     type                  = request.form['tourney_type']
-    mmddyyyy              = request.form['datepicker'].split('/')
-    date                  = datetime.date( int(mmddyyyy[2]),int(mmddyyyy[0]), int(mmddyyyy[1])) #YYYY, MM, DD
+
+    mmddyyyy              = request.form['datepicker']
+    fmt                   = '%m/%d/%Y'
+    date                  = datetime.strptime(  mmddyyyy, fmt)
+
+
     round_length_dropdown = request.form['round_length_dropdown']
     round_length_userdef  = request.form['round_length_userdef']
     tourney_format_def    = request.form['tourney_format_dropdown']
@@ -1879,7 +1883,7 @@ def add_tourney():
         try:
             pm = PersistenceManager(myapp.db_connector)
             t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, locked=False,
-                        round_length=round_length, email=email, entry_date=datetime.datetime.now(),
+                        round_length=round_length, email=email, entry_date=datetime.now(),
                         participant_count=participant_count,format=tourney_format)
             pm.db_connector.get_session().add(t)
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue )
