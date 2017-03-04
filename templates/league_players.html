@@ -17,6 +17,7 @@ Click on the player's home page to see their league stats, their games, subscrib
     <th>Tier</th>
     <th>Division</th>
     <th>Player Home Page</th>
+    <th>Number of Games Played</th>
   </tr>
   </thead>
   <tbody>
@@ -25,6 +26,7 @@ Click on the player's home page to see their league stats, their games, subscrib
          <td>{{ p.tier.get_name() }}</td>
          <td>{{ p.division.get_name() }}</td>
          <td>{{ p.get_url() }}</td>
+         <td>{{ p.num_games_played() }}</td>
       </tr>
       {% endfor %}
   </tbody>

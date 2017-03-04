@@ -303,12 +303,17 @@ class TierPlayer(Base):
         url = url_for('league_player', player_id=self.id)
         return Markup('<a href="' + url + '">' + self.get_name() +'</a>')
 
-
-
     def get_name(self):
         if self.name is None:
             return ""
         return decode( self.name )
+
+    def num_games_played(self):
+        count = 0
+        for m in self.matches:
+            if m.is_complete():
+                count +=1
+        return count
 
     def get_stats(self, ignore_defaults=False):
         if self.name == 'zer0tc':
