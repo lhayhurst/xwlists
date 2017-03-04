@@ -346,6 +346,7 @@ class TierPlayer(Base):
         ret['player'] = self
         return ret
 
+
 league_match_table = "league_match"
 class LeagueMatch(Base):
     __tablename__       = league_match_table
