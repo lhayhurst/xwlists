@@ -133,9 +133,19 @@
 			</ul>
      </div>
      <div id="centre" >
-      {% block content %}{% endblock %}</div>
-	</div>
-	</body>
+         {% with messages = get_flashed_messages() %}
+             {% if messages %}
+                 <ul class=flashes>
+                     {% for message in messages %}
+                         <li>{{ message }}</li>
+                     {% endfor %}
+                 </ul>
+             {% endif %}
+         {% endwith %}
+         {% block content %}
+         {% endblock %}</div>
+    </div>
+    </body>
 
     <script type="text/javascript">
         $(function(){

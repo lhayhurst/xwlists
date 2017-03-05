@@ -5,7 +5,7 @@ import urllib
 import uuid
 import sys
 
-from flask import render_template, request, url_for, redirect, jsonify, Response
+from flask import render_template, request, url_for, redirect, jsonify, Response, send_from_directory, flash, send_file
 from flask.ext.mail import Mail, Message
 from pytz import all_timezones, timezone
 from datetime import datetime
@@ -48,13 +48,15 @@ VOIDSTATE = "voidstate"
 app =  myapp.create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 UPLOAD_FOLDER = "static/tourneys"
+VLOG_FOLDER   = "static/vlog"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif', 'html', 'json', 'tsv'])
+ALLOWED_EXTENSIONS = set( ['png', 'jpg', 'jpeg', 'gif', 'html', 'json', 'tsv', 'vlog'])
 
 is_maintenance_mode = False
 
 here = os.path.dirname(__file__)
 static_dir = os.path.join( here, app.config['UPLOAD_FOLDER'] )
+vlog_dir   = os.path.join( here,  VLOG_FOLDER )
 
 
 
@@ -440,6 +442,11 @@ def submit_interdivisional_league_match():
     pm = PersistenceManager(myapp.db_connector)
     player1 = pm.get_league_player_by_id(player1_id)
     player2 = pm.get_league_player_by_id(player2_id)
+
+    if player1.division == player2.division:
+        flash("Please select two players that are not in the same division!")
+        return redirect(url_for("add_interdivision_league_game",
+                        league_id=league_id ))
 
     tier = pm.get_tier_by_id(tier_id)
     now = datetime.now()
@@ -925,6 +932,74 @@ def league_season_three():
     return render_template("league_s3.html",
                            league=league, tiers=tiers, matches=matches)
 
+@app.route("/report_interdivisional_match")
+def report_interdivisional_match():
+    match_id = request.args.get("match_id")
+    pm = PersistenceManager(myapp.db_connector)
+    match = pm.get_match(match_id)
+    return render_template("report_interdivision_league_match_form.html", match=match)
+
+@app.route('/download_vlog')
+def download_vlog():
+    match_id = request.args.get("match_id")
+    pm = PersistenceManager(myapp.db_connector)
+    match = pm.get_match(match_id)
+    return send_file(vlog_dir + "/" + match.challonge_attachment_url,
+                     as_attachment=True,
+                     attachment_filename=match.challonge_attachment_url )
+
+@app.route("/submit_interdivisional_league_match_report",  methods=['POST'])
+def submit_interdivisional_league_match_report():
+    match_id = request.form['match_id']
+    pm = PersistenceManager(myapp.db_connector)
+    match = pm.get_match(match_id)
+    player1_score = request.form['player1_score']
+    player2_score = request.form['player2_score']
+    winner_id     = request.form['winner_id']
+    match.player1_score = player1_score
+    match.player2_score = player2_score
+    match.completed()
+
+    if winner_id == match.player1_id:
+        match.challonge_winner_id = match.player1.challonge_id
+        match.challonge_loser_id  = match.player2.challonge_id
+    else:
+        match.challonge_winner_id = match.player2.challonge_id
+        match.challonge_loser_id  = match.player1.challonge_id
+
+    vlog  = request.files['vlog_file']
+    if vlog is not None:
+        filename        = vlog.filename
+        if allowed_file(filename):
+            try:
+                filename = secure_filename(filename)
+                dir = vlog_dir
+                file = os.path.join( dir, filename )
+                if os.path.isfile(file): #if this file has already been uploaded ...
+                    i = 1
+                    done = False
+                    while not done and i < 1000:
+                        prefix, suffix = os.path.splitext( file)
+                        prefix = prefix + str(i)
+                        newfile = prefix + suffix
+                        if not os.path.isfile(newfile):
+                            file = newfile
+                            done = True
+                        else:
+                            i = i + 1
+
+                fd = open( file, 'w' )
+                data =  vlog.read()
+                fd.write( data  )
+                fd.close()
+                dir, filename = os.path.split(file)
+                url = filename
+                match.challonge_attachment_url = url
+            except Exception as e:
+                print("Unable to upload vlog file, reason: " + str(e))
+    pm.db_connector.get_session().commit()
+    return redirect(url_for('tier_matches', tier_id=match.tier_id))
+
 @app.route("/set_league_match_schedule")
 def set_league_match_schedule():
     match_id  = request.args.get("match_id")
@@ -933,6 +1008,7 @@ def set_league_match_schedule():
     today = datetime.today().strftime('%d-%m-%Y')
 
     return render_template("league_match_schedule.html",match=match,today=today,timezones=all_timezones)
+
 
 @app.route("/submit_league_match_schedule", methods=['POST'])
 def submit_league_match_schedule():

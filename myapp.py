@@ -74,4 +74,5 @@ challonge_key  = os.getenv('CHALLONGE_API_KEY')
 
 def create_app():
     app = Flask(__name__ , static_folder='static')
+    app.secret_key = 'q}q?fpX+QgwwKd8u7k3wsJgmY2tRu)'
     return app

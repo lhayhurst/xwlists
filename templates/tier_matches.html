@@ -33,14 +33,30 @@
       {% for m in tier.matches %}
       <tr>
          <td>{{  m.player1.tier.get_name()}}</td>
-         <td>{{  m.player1.division.get_name()}}</td>
+         {% if m.is_interdivisional() %}
+             <td>Inter-divisional</td>
+         {% else %}
+             <td>{{  m.player1.division.get_name()}}</td>
+         {% endif %}
          <td>{{  m.player1.get_url()}}</td>
          <td>{{  m.player2.get_url()}}</td>
          <td>{{  m.state }}</td>
          <td>{{ m.updated_at }}</td>
-         <td>{{  m.get_vlog_url() | safe }}</td>
-         <td>{{  m.player1_score }}</td>
-         <td>{{  m.player2_score }}</td>
+        {% if m.is_interdivisional() %}
+            {% if m.is_complete() %}
+                 <td>{{  m.get_vlog_url() | safe }}</td>
+                 <td>{{  m.player1_score }}</td>
+                 <td>{{  m.player2_score }}</td>
+            {% else %}
+                 <td>{{  m.get_report_match_url() }}</td>
+                 <td>{{  m.get_report_match_url() }}</td>
+                 <td>{{  m.get_report_match_url() }}</td>
+            {% endif %}
+        {% else %}
+                 <td>{{  m.get_vlog_url() | safe }}</td>
+                 <td>{{  m.player1_score }}</td>
+                 <td>{{  m.player2_score }}</td>
+        {% endif %}
          <td>{{ m.get_schedule() }}</td>
          <td >{{ m.get_player1_list_display() | safe }}
          <td >{{ m.get_player2_list_display() | safe }}

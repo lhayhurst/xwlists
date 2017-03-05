@@ -392,6 +392,13 @@ class LeagueMatch(Base):
               '">' + link_txt + '</a>'
         return Markup(ret)
 
+    def is_interdivisional(self):
+        return self.player1.division_id != self.player2.division_id
+
+    def get_report_match_url(self):
+        ret = '<a href="' + url_for('report_interdivisional_match', match_id=self.id,_external=True ) +  '">Report match!</a>'
+        return Markup(ret)
+
 
     def get_player1_escrow_reset_link(self):
         return self.reset_escrow_url(self.player1_id)
@@ -595,13 +602,21 @@ class LeagueMatch(Base):
                                             self.player2.get_name(),
                                             no_entry)
 
+    def completed(self):
+        self.state = 'complete'
+
     def is_complete(self):
         return self.state is not None and self.state == 'complete'
 
     def get_vlog_url(self):
-        if self.challonge_attachment_url is not None:
-            return '<a href="http://' + self.challonge_attachment_url + '">Download</a><br>'
-        return "None"
+        url = None
+        if self.challonge_attachment_url is None:
+            return "None"
+
+        if self.is_interdivisional():
+            return  '<a href="' + url_for('download_vlog', match_id=self.id, ) + '">Download</a><br>'
+
+        return '<a href="http://' + self.challonge_attachment_url + '">Download</a><br>'
 
     def set_archtype(self, player_id, archtype):
         if player_id == self.player1_id:

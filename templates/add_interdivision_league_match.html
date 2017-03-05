@@ -14,7 +14,7 @@
                 <label>League Tier</label>
                <select id="tier_dropdown" name="tier_dropdown"  width="500"
                        style="width: 500px;"
-                       placeholder="Select tier">
+                       placeholder="Select tier" required>
                 <option></option>
                 {%  for t in tiers %}
                     <option value="{{ t.id }}">{{ t.name }}</option>
@@ -27,7 +27,7 @@
                 <label>Select Player 1</label>
                  <select id="player1_dropdown" name="player1_dropdown"
                          width="500" style="width: 500px;"
-                         placeholder="Select the first player">
+                         placeholder="Select the first player" required>
                     <option></option>
                 </select>
             </div>
@@ -35,7 +35,7 @@
                 <label>Select Player 2</label>
                  <select id="player2_dropdown" name="player2_dropdown"
                          width="500" style="width: 500px;"
-                         placeholder="Select the second player">
+                         placeholder="Select the second player" required>
                     <option></option>
                 </select>
             </div>
