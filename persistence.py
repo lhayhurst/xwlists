@@ -238,10 +238,10 @@ class Tier(Base):
     def get_challonge_name(self):
         return "%s-%s" % ( self.league.challonge_name, self.challonge_name)
 
-    def get_ranking(self,ignore_defaults):
+    def get_ranking(self,ignore_defaults,ignore_interdivisional):
         results = []
         for d in self.divisions:
-            division_rankings = d.get_ranking(ignore_defaults)
+            division_rankings = d.get_ranking(ignore_defaults,ignore_interdivisional)
             for dr in division_rankings:
                 results.append( dr )
         sorted_results = reversed(sorted(results, key = lambda stat: (stat['wins'], stat['mov']) ))
@@ -267,10 +267,10 @@ class Division(Base):
     players           = relationship( "TierPlayer", back_populates="division", cascade="all,delete,delete-orphan")
 
 
-    def get_ranking(self,ignore_defaults):
+    def get_ranking(self,ignore_defaults,ignore_interdivisional):
         results = []
         for p in self.players:
-            results.append(p.get_stats(ignore_defaults))
+            results.append(p.get_stats(ignore_defaults,ignore_interdivisional))
         sorted_stats = reversed(sorted(results, key = lambda stat: (stat['wins'], stat['mov']) ))
         ret = []
         i = 1
@@ -315,13 +315,17 @@ class TierPlayer(Base):
                 count +=1
         return count
 
-    def get_stats(self, ignore_defaults=False):
+    def get_stats(self, ignore_defaults=False,ignore_interdivisional=False):
         if self.name == 'zer0tc':
             print "foo"
-        ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0, 'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0, 'mov':0 }
+        ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0,
+                'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0, 'mov':0,
+                'interdivisional_count': 0}
         for m in self.matches:
             if m.is_complete():
                 if ignore_defaults and m.was_default:
+                    continue
+                if ignore_interdivisional and m.is_interdivisional():
                     continue
                 ret['total'] +=1
                 if m.player_won(self):
@@ -343,6 +347,8 @@ class TierPlayer(Base):
                         ret['scum'] +=1
                 ret['killed'] += m.points_killed( self )
                 ret['lost'] += m.points_lost( self )
+                if m.is_interdivisional():
+                    ret['interdivisional_count'] +=1
         ret['player'] = self
         return ret
 

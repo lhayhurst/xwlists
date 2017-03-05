@@ -397,12 +397,16 @@ def league_player():
 def tier_rankings():
     tier_id         = request.args.get('tier_id')
     ignore_defaults = request.args.get('ignore_defaults')
+    ignore_interdivisional = request.args.get('ignore_interdivisional')
     if ignore_defaults is None:
         ignore_defaults = False
 
     pm = PersistenceManager(myapp.db_connector)
     tier = pm.get_tier_by_id(tier_id)
-    return render_template( 'league_tier_rankings.html', tier=tier, ignore_defaults=ignore_defaults)
+    return render_template( 'league_tier_rankings.html',
+                            tier=tier,
+                            ignore_defaults=ignore_defaults,
+                            ignore_interdivisional=ignore_interdivisional)
 
 @app.route( "/league_players")
 def league_players():

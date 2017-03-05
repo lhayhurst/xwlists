@@ -21,10 +21,11 @@
             <th>Losses</th>
             <th>Draws</th>
             <th>MoV</th>
+            <th>Num. Interdivisional Matches</th>
           </tr>
           </thead>
           <tbody>
-           {% for r in d.get_ranking(ignore_defaults) %}
+           {% for r in d.get_ranking(ignore_defaults,ignore_interdivisional) %}
               <tr>
                  <td>{{ r['rank'] }}</td>
                  <td>{{ r['player'].get_url() }}</td>
@@ -32,6 +33,7 @@
                  <td>{{ r['losses'] }}</td>
                  <td>{{ r['draws'] }}</td>
                  <td>{{ r['mov'] }}</td>
+                 <td>{{ r['interdivisional_count'] }}</td>
 
               </tr>
               {% endfor %}
