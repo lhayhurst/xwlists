@@ -489,7 +489,7 @@ class VassalLeagueRanking(restful.Resource):
                    'rankings' : []
                    }
             division_rankings.append(dr)
-            for r in d.get_ranking(ignore_defaults=False):
+            for r in d.get_ranking(ignore_defaults=False,ignore_interdivisional=False):
                 dr['rankings'].append(
                     {
                         'rank'  : r['rank'],
@@ -501,7 +501,7 @@ class VassalLeagueRanking(restful.Resource):
                         'name'  : r['player'].name,
                     })
 
-        for r in tier.get_ranking(ignore_defaults=False):
+        for r in tier.get_ranking(ignore_defaults=False,ignore_interdivisional=False):
             tier_rankings.append( {
                         'rank'  : r['rank'],
                         'wins'  : r['wins'],

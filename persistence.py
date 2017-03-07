@@ -238,7 +238,7 @@ class Tier(Base):
     def get_challonge_name(self):
         return "%s-%s" % ( self.league.challonge_name, self.challonge_name)
 
-    def get_ranking(self,ignore_defaults,ignore_interdivisional):
+    def get_ranking(self,ignore_defaults,ignore_interdivisional=False):
         results = []
         for d in self.divisions:
             division_rankings = d.get_ranking(ignore_defaults,ignore_interdivisional)
