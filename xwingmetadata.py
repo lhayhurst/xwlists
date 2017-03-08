@@ -196,6 +196,9 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 upgrades = {
     CREW: (
 
+        {'name': 'Unkar Plutt', 'canon_name': 'unkarplutt', 'cost': 1, 'constraints': (SCUM_FACTION_CONSTRAINT)},
+
+
         {'name': 'Kylo Ren', 'canon_name': 'kyloren', 'cost': 3, 'constraints': (IMPERIAL_FACTION_CONSTRAINT)},
 
 

@@ -28,6 +28,10 @@ insert into upgrade ( upgrade_type, name, cost, canon_name )
 values
 ( 'crew', 'Agent Kallus', 2, 'agentkallus');
 
+insert into upgrade ( upgrade_type, name, cost, canon_name )
+values
+( 'crew', 'Unkar Plutt', 1, 'unkarplutt');
+
 
 
 

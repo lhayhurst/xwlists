@@ -566,8 +566,6 @@ def update_match_result(match_result,dbmr,pm):
 def league_admin():
     return render_template('league_admin.html')
 
-@app.route("/add_league_tie")
-
 @app.route("/remove_league_player")
 def remove_league_player():
     league_id = request.args.get('league_id')
