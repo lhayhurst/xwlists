@@ -494,6 +494,7 @@ upgrades = {
         {'name': 'Conner Net', 'canon_name': 'connernet', 'cost': 4}
     ),
     CANNON: (
+        {'name': 'Arc Caster', 'cost': 2 },
         {'name': 'Ion Cannon', 'cost': 3},
         {'name': 'AutoBlaster', 'cost': 5},
         {'name': 'Heavy Laser Cannon', 'cost': 7},
@@ -514,6 +515,8 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
+
+        {'name': 'Pulsed Ray Shield', 'canon_name': 'pulsedrayshield', 'cost': 2 },
 
         {'name': 'Lightweight Frame', 'canon_name': 'lightweightframe', 'cost': 2 },
 
@@ -1503,6 +1506,9 @@ ships = {
     ),
 
     M3_A_INTERCEPTOR: (
+
+
+
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Cartel Spacer', 'canon_name': 'cartelspacer', 'cost': 14,
          'upgrades': (TITLE, MOD)},
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Tansarii Point Veteran',
@@ -1514,6 +1520,23 @@ ships = {
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Serissu', 'canon_name': 'serissu', 'cost': 20,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT),
          'upgrades': (EPT, TITLE, MOD)},
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Sunny Bounder', 'canon_name': 'sunnybounder', 'cost': 14,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT),
+         'upgrades': (TITLE, MOD)},
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Inaldra', 'canon_name': 'inaldra', 'cost': 15,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT),
+         'upgrades': (EPT, TITLE, MOD)},
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Quinn Jast', 'canon_name': 'quinnjast', 'cost': 18,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT),
+         'upgrades': (EPT, TITLE, MOD)},
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Genesis Red', 'canon_name': 'genesisred', 'cost': 19,
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT),
+         'upgrades': (EPT, TITLE, MOD)},
+
     ),
 
     YV_666_FREIGHTER: [
