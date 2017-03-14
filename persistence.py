@@ -415,7 +415,7 @@ class LeagueMatch(Base):
     def get_escrow_reset_link(self):
         if self.is_complete():
             return "completed"
-        ret = '<a href="' + url_for('force_reset_match_escrow', match_id=self.id,_external=True ) +  '">link</a>'
+        ret = '<a rel="nofollow" href="' + url_for('force_reset_match_escrow', match_id=self.id,_external=True ) +  '">link</a>'
         return Markup(ret)
 
 
