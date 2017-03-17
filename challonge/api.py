@@ -2,6 +2,8 @@ import decimal
 import json
 import urllib
 import urllib2
+import requests
+
 try:
     from xml.etree import cElementTree as ElementTree
 except ImportError:
@@ -38,28 +40,10 @@ def fetch(method, uri, params_prefix=None, **params):
     # build the HTTP request
     url = "https://%s/%s.json" % (CHALLONGE_API_URL, uri)
     print "fetching url " + url
-    if method == "GET":
-        req = urllib2.Request("%s?%s" % (url, params))
-    else:
-        req = urllib2.Request(url)
-        req.add_data(params)
-    req.get_method = lambda: method
-    req.add_header("Accept", "application/json");
-    req.add_header("Content-Type", "application/json");
-
-    # use basic authentication
     user, api_key = get_credentials()
-    auth_handler = urllib2.HTTPBasicAuthHandler()
-    auth_handler.add_password(
-        realm="Application",
-        uri=req.get_full_url(),
-        user=user,
-        passwd=api_key
-    )
-    opener = urllib2.build_opener(auth_handler)
 
     try:
-        response = opener.open(req)
+        response = requests.get(url, auth=(user, api_key))
     except urllib2.HTTPError, e:
         if e.code != 422:
             raise
@@ -75,8 +59,7 @@ def fetch(method, uri, params_prefix=None, **params):
 def fetch_and_parse(method, uri, params_prefix=None, **params):
     """Fetch the given uri and return the root Element of the response."""
     response = fetch(method, uri, params_prefix, **params)
-    data = response.read()
-    json_data = json.loads( data )
+    json_data = response.json()
     return json_data
     #doc = ElementTree.parse(response)
     #return _parse(doc.getroot())
