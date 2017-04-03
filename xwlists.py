@@ -963,11 +963,11 @@ def submit_interdivisional_league_match_report():
     match.completed()
 
     if winner_id == match.player1_id:
-        match.challonge_winner_id = match.player1.challonge_id
-        match.challonge_loser_id  = match.player2.challonge_id
+        match.challonge_winner_id = match.player1.group_id
+        match.challonge_loser_id  = match.player2.group_id
     else:
-        match.challonge_winner_id = match.player2.challonge_id
-        match.challonge_loser_id  = match.player1.challonge_id
+        match.challonge_winner_id = match.player2.group_id
+        match.challonge_loser_id  = match.player1.group_id
 
     vlog  = request.files['vlog_file']
     if vlog is not None:
