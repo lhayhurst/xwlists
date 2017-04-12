@@ -713,6 +713,13 @@ ships = {
          'pilot_skill' : 3,
         },
 
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Sarco Plank', 'cost': 18, 'canon_name':'sarcoplank',
+         'upgrades': (EPT, CREW, BOMB, TECH, ILLICIT, MOD ),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill' : 5,
+        },
+
+
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Constable Zuvio', 'cost': 19, 'canon_name':'constablezuvio',
          'upgrades': (EPT, CREW, BOMB, TECH, ILLICIT, MOD ),
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
