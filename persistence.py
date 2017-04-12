@@ -333,6 +333,9 @@ class TierPlayer(Base):
                     ret['mov'] += 100 + ( m.points_killed(self) - m.points_lost(self))
                 elif m.player_lost(self):
                     ret['losses'] += 1
+                    if m.points_lost(self) is None or m.points_killed(self) is None:
+                        print "wtf"
+                        print m.is_complete()
                     ret['mov'] += 100 - ( m.points_lost(self) - m.points_killed(self))
                 else:
                     ret['draws'] += 1
@@ -565,7 +568,7 @@ class LeagueMatch(Base):
         return False
 
     def is_complete(self):
-        return self.state is not None and self.state == "complete"
+        return self.state is not None and self.state == "complete" and self.player1_score is not None and self.player2_score is not None
 
     def get_player_list_text_with_link(self, player_id):
         #both lists have been submitted
@@ -610,9 +613,6 @@ class LeagueMatch(Base):
 
     def completed(self):
         self.state = 'complete'
-
-    def is_complete(self):
-        return self.state is not None and self.state == 'complete'
 
     def get_vlog_url(self):
         url = None
