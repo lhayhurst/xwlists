@@ -1,3 +1,10 @@
+API
+===
+[ListJuggler has a RESTFUL API](https://docs.google.com/document/d/1WkS3qfwVDd_OqK3egC9EUZjFcmgjdUyH9ByAgiqrIvo/edit?usp=sharing) for getting data list and tournament data, and also for creating new tournaments and lists. For example:
+
+- http://lists.starwarsclubhouse.com/api/v1/tournaments
+- http://lists.starwarsclubhouse.com/api/v1/tournament/1
+
 Installing
 ==========
 
