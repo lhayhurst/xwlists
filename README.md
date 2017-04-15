@@ -4,6 +4,7 @@ API
 
 - http://lists.starwarsclubhouse.com/api/v1/tournaments
 - http://lists.starwarsclubhouse.com/api/v1/tournament/1
+- http://lists.starwarsclubhouse.com/api/v1/tournament/1/player/245
 
 Installing
 ==========
