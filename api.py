@@ -705,7 +705,13 @@ class PlayersAPI(restful.Resource):
 
         players = []
         for player in tourney.tourney_players:
-            players.append({NAME: player.get_player_name(), ID: player.id})
+            xws = None
+            tourney_list = player.get_first_tourney_list()
+            if tourney_list:
+                xws = XWSListConverter( tourney_list.archtype_list ).data
+            players.append({NAME: player.get_player_name(),
+                            ID: player.id,
+                            XWS: xws } )
 
         response = jsonify({PLAYERS: players})
         response.status_code = 200
