@@ -1,53 +1,92 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<style>
-    td {
-        text-align:center;
-        vertical-align:middle;
-    }
-</style>
-<b>{{ tier.get_name() }} Results</b><br>
+    <style>
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+    <b>{{ tier.get_name() }} Results</b><br>
     <br>
-{% for d in tier.divisions %}
-    <hr>
-    <b>{{ d.get_name() }}</b>
-    <table id="ranking-{{ loop.index }}" class="display" cellspacing="0" width="100%">
-          <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Player</th>
-            <th>Wins</th>
-            <th>Losses</th>
-            <th>Draws</th>
-            <th>MoV</th>
-            <th>Num. Interdivisional Matches</th>
-          </tr>
-          </thead>
-          <tbody>
-           {% for r in d.get_ranking(ignore_defaults,ignore_interdivisional) %}
-              <tr>
-                 <td>{{ r['rank'] }}</td>
-                 <td>{{ r['player'].get_url() }}</td>
-                 <td>{{ r['wins'] }}</td>
-                 <td>{{ r['losses'] }}</td>
-                 <td>{{ r['draws'] }}</td>
-                 <td>{{ r['mov'] }}</td>
-                 <td>{{ r['interdivisional_count'] }}</td>
 
-              </tr>
-              {% endfor %}
-          </tbody>
-    </table>
-{% endfor %}
+    {% if consolidate_results == False %}
 
-<script>
-    $(document).ready( function () {
-        $('table.display').DataTable({
-            paging: false,
-            searching: false
+        {% for d in tier.divisions %}
+            <hr>
+            <b>{{ d.get_name() }}</b>
+            <table id="ranking-{{ loop.index }}" class="display" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Draws</th>
+                    <th>MoV</th>
+                    <th>Num. Interdivisional Matches</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for r in d.get_ranking(ignore_defaults,ignore_interdivisional) %}
+                    <tr>
+                        <td>{{ r['rank'] }}</td>
+                        <td>{{ r['player'].get_url() }}</td>
+                        <td>{{ r['wins'] }}</td>
+                        <td>{{ r['losses'] }}</td>
+                        <td>{{ r['draws'] }}</td>
+                        <td>{{ r['mov'] }}</td>
+                        <td>{{ r['interdivisional_count'] }}</td>
+
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        {% endfor %}
+    {% else %}
+        <table id="results" class="display" cellspacing="0" width="100%">
+            <thead>
+            <tr>
+                <th>Division</th>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Wins</th>
+                <th>Losses</th>
+                <th>Draws</th>
+                <th>MoV</th>
+                <th>Num. Interdivisional Matches</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            {% for d in tier.divisions %}
+                {% for r in d.get_ranking(ignore_defaults,ignore_interdivisional) %}
+                    <tr>
+                        <td>{{ d.get_name() }}</td>
+                        <td>{{ r['rank'] }}</td>
+                        <td>{{ r['player'].get_url() }}</td>
+                        <td>{{ r['wins'] }}</td>
+                        <td>{{ r['losses'] }}</td>
+                        <td>{{ r['draws'] }}</td>
+                        <td>{{ r['mov'] }}</td>
+                        <td>{{ r['interdivisional_count'] }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+
+    <script>
+        $(document).ready(function () {
+            $('table.display').DataTable({
+                paging: false,
+                searching: true
+            });
         });
-    } );
-</script>
+    </script>
 
 {% endblock %}
