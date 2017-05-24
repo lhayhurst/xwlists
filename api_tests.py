@@ -89,14 +89,13 @@ class apiTest(unittest.TestCase):
         self.assertEqual('Brandon Prokos', p2.player_name)
 
         self.assertEqual( 622, p1.result.mov)
-        self.assertEqual( .99, p1.result.sos)
+        self.assertEqual( 2.0, p1.result.sos)
         self.assertEqual( 20, p1.result.score)
         self.assertEqual( False, p1.result.dropped)
         self.assertEqual( 1, p1.result.rank)
         self.assertEqual( 2, p1.result.elim_rank)
 
         self.assertEqual( 647, p2.result.mov)
-        self.assertEqual( .76, p2.result.sos)
         self.assertEqual( 15, p2.result.score)
         self.assertEqual( True, p2.result.dropped)
         self.assertEqual( 2, p2.result.rank)
@@ -316,9 +315,37 @@ class apiTest(unittest.TestCase):
         self.assertTrue (self.isint( bill['id']))
         self.assertTrue( int(bill['id'] > 0 ))
 
+
+        #now set the players list
+        p = {"api_token": api_token,
+             "players": [ { "player_id": bob['id'],
+                            'list': {"faction": "rebel", "pilots": [{"name": "biggsdarklighter", "ship": "xwing",
+                                                                     "upgrades": {"amd": ["r4d6"],
+                                                                                  "mod": ["integratedastromech"]}},
+                                                                    {"name": "norrawexley", "ship": "arc170",
+                                                                     "upgrades": {"ept": ["pushthelimit"],
+                                                                                  "crew": ["kylekatarn"],
+                                                                                  "amd": ["r2d2"],
+                                                                                  "mod": ["vectoredthrusters"],
+                                                                                  "title": ["allianceoverhaul"]}},
+                                                                    {"name": "sharabey", "ship": "arc170",
+                                                                     "upgrades": {"ept": ["adaptability"],
+                                                                                  "crew": ["janors"], "amd": ["r3a2"],
+                                                                                  "title": ["allianceoverhaul"]}}],
+                                     "vendor": {"yasb": {"builder": "(Yet Another) X-Wing Miniatures Squad Builder",
+                                                         "builder_url": "https://geordanr.github.io/xwing",
+                                                         "link": "https://geordanr.github.io/xwing/?f=Rebel%20Alliance&d=v4!s!4:-1,77:-1:20:;204:18,-1,74,3:41:26:;205:170,-1,75,69:41:-1:&sn=Biggs%20Walks%20the%20ARCs&obs="}},
+                                     "version": "0.3.0", "name": "Biggs Walks the ARCs"}
+                            } ]
+             }
+        resp = put( player_get_url , data=json.dumps(p))
+        print resp.text
+        self.assertEqual( 200, resp.status_code)
+
         #and now the player put
         p = {"api_token": api_token,
             "players": [ { 'player_id': bob['id'], 'name': 'bob2' }, { 'player_id': bill['id'], 'name': 'bill2' }  ] }
+
 
         resp = put( player_get_url , data=json.dumps(p))
         print resp.text

@@ -169,6 +169,7 @@ class TournamentApiHelper:
             for p in players:
                 player = None
                 ranking = None
+                tourney_list = None
 
                 # first see if the tourney already has a player and player list matching this player's name
                 # if so, update it rather than creating a new one
@@ -197,14 +198,17 @@ class TournamentApiHelper:
                     i = i + 1
                 else:
                     ranking = player.result
-                    tlists_by_id[player.id] = player.get_first_tourney_list()
+                    tourney_list = player.get_first_tourney_list()
+                    tlists_by_id[player.id] = tourney_list
                     if p.has_key(PLAYER_NAME):
                         tlists_by_name[p[PLAYER_NAME]] = tlists_by_id[player.id]
 
-                # add list via XWS
-                if XWS in p:
+                if XWS in p or LIST in p:
                     try:
-                        XWSToJuggler(p[XWS]).convert(pm, tourney_list)
+                        xws_data = p[XWS]
+                        if xws_data is None:
+                            xws_data = [[LIST]]
+                        XWSToJuggler(xws_data).convert(pm, tourney_list)
                     except Exception as e:
                         print "Could not convert XWS: {} (XWS was {!r})".format(e, p[XWS])
 
@@ -767,7 +771,11 @@ class PlayersAPI(restful.Resource):
 
         players = []
         for player in tourney.tourney_players:
-            players.append({NAME: player.get_player_name(), ID: player.id})
+            xws = None
+            tourney_list = player.get_first_tourney_list()
+            if tourney_list and tourney_list.archtype_list:
+                xws = XWSListConverter(tourney_list.archtype_list).data
+            players.append({NAME: player.get_player_name(), ID: player.id, XWS: xws})
         return None, players
 
     def post(self, tourney_id):
