@@ -150,7 +150,7 @@ def maintenance():
 
 @app.route('/')
 def index():
-    return render_template('search_versus.html')
+    return redirect("/tourneys")
 
 
 @app.route("/about")
