@@ -1,80 +1,67 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<style>
-    td {
-        text-align:center;
-        vertical-align:middle;
-    }
-</style>
+    <style>
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
 
-<br>
-<a href="/new">add a new tourney</a><br><br>
-<a href="/export_all_lists" rel="nofollow">export all tourneys to csv</a><br>
+    <br>
+    <a href="/new">add a new tourney</a><br><br>
+    <a href="/export_all_lists" rel="nofollow">export all tourneys to csv</a><br>
 
-<br>
-<table id="tourneys" class="display" cellspacing="0" width="100%">
-  <thead>
-  <tr>
-    <th>Id</th>
-    <th >Name</th>
-    <th>Venue</th>
-    <th>Num. Players</th>
-    <th >Results</th>
-    <th >Type</th>
-    <th >Date Played</th>
-    <th >Round Length</th>
-    <th >City/State/Country</th>
-    <th >Export Lists</th>
+    <br>
+    <table id="tourneys" class="display" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Tourney Id</th>
+            <th>Venue</th>
+            <th>Venue Id</th>
+            <th>Geo</th>
+            <th>Num. Players</th>
+            <th>Tourney Type</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
 
-    {% if admin %}
-    <th >Admin</th>
-    {% endif %}
-  </thead>
-  <tbody>
-  </tr>
-      {% for tourney in tourneys %}
-      <tr>
-         <th>{{ tourney.id }}</th>
-         <td >{{ tourney.get_tourney_name() }}</td>
-         <td>{{ tourney.get_venue_url()|safe }}</td>
-         <td>{{ tourney.participant_count }}</td>
-         <td ><a href="{{ url_for( 'get_tourney_details', tourney_id=tourney.id ) }}">Browse/edit results</a></td>
-         <td >{{ tourney.tourney_type }}</td>
-         <td >{{ tourney.tourney_date }}</td>
-         <td >{{ tourney.round_length }}</td>
-         <td >{{ tourney.venue_string() }}</td>
-         <td ><a type="text/csv" rel="nofollow" href="{{ url_for( 'export_tourney_lists', tourney_id=tourney.id) }}">Export to csv</a></td>
-      </tr>
-      {% endfor %}
-  </tbody>
-</table>
+    <script>
+        $(document).ready(function () {
+            var table = $('#tourneys').DataTable({
+                "columnDefs" : [
+                    { targets: 0, }, //tourney date
+                    { //tourney name link
+                        'render': function ( data, type, row ) {
+                            return '<a href="/get_tourney_details?tourney_id='+row[2] +  '">' + data + "</a>"
+                        },
+                        'targets':1
+                    },
+                    {  //tourney id
+                        'visible': false, 'targets': 2, searchable: false
+                    },
+                    { //venue link
+                        'render': function ( data, type, row) {
+                            return '<a href="/venue?venue_id='+row[4] +  '">' + data + "</a>"
+                        },
+                        'targets':3
+                    },
+                    { 'visible': false, 'targets': 4, searchable: false}, //3: venue id, hidden
+                    { 'targets': 5, 'width': '8%'}
 
-<script>
-    $.fn.dataTable.moment = function ( format, locale ) {
-        var types = $.fn.dataTable.ext.type;
-
-        // Add type detection
-        types.detect.unshift( function ( d ) {
-            return moment( d, format, locale, true ).isValid() ?
-                'moment-'+format :
-                null;
-        } );
-
-        // Add sorting method - use an integer for the sorting
-        types.order[ 'moment-'+format+'-pre' ] = function ( d ) {
-            return moment( d, format, locale, true ).unix();
-        };
-    };
-    $(document).ready( function () {
-        $.fn.dataTable.moment( 'YYYY-MM-DD HH:mm:ss' );
-        $.fn.dataTable.moment( 'YYYY-MM-DD' );
-        $('#tourneys').dataTable( {
+                ],
+                "processing": true,
+                "serverSide": true,
+                "ajax": "{{ url_for('tourneys_page') }}",
                 "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
                 iDisplayLength: 25,
-                "order": [[ 0, "desc" ]]
+                "order": [[ 1, "desc" ]]
+            });
         });
-    } );
-</script>
+    </script>
 
 {% endblock %}

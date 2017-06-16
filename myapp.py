@@ -1,4 +1,6 @@
+from json import JSONEncoder
 import os
+import datetime
 from flask import Flask
 from sqlalchemy import create_engine
 from sqlalchemy.ext.compiler import compiles
@@ -71,8 +73,22 @@ db_connector   = MyDatabaseConnector()
 challonge_user = os.getenv('CHALLONGE_USER')
 challonge_key  = os.getenv('CHALLONGE_API_KEY')
 
+class CustomJSONEncoder(JSONEncoder):
+
+    def default(self, obj):
+        try:
+            if isinstance(obj, datetime.date):
+                return obj.strftime('%m/%d/%Y')
+            iterable = iter(obj)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
+        return JSONEncoder.default(self, obj)
 
 def create_app():
+
     app = Flask(__name__ , static_folder='static')
+    app.json_encoder = CustomJSONEncoder
     app.secret_key = 'q}q?fpX+QgwwKd8u7k3wsJgmY2tRu)'
     return app
