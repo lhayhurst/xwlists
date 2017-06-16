@@ -43,9 +43,9 @@ In development mode, so you can see meaningful error messages:
 Here are the two environment variables the program expects and some sample values:
 
     DYLD_LIBRARY_PATH /usr/local/mysql/lib
-    LOCAL_DB_URL mysql://root...
+    LOCAL_DB_URL mysql://root...?charset=utf8
 
-The url string for your MySQL database will looking something like mysql://$USER_NAME:$PASSPORT@localhost/sozin$lists
+The url string for your MySQL database will looking something like mysql://$USER_NAME:$PASSPORT@localhost/sozin$lists?charset=utf8
 
 Here are the optional environment variables.
 
