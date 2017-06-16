@@ -89,6 +89,6 @@ class CustomJSONEncoder(JSONEncoder):
 def create_app():
 
     app = Flask(__name__ , static_folder='static')
-    app.json_encoder = CustomJSONEncoder
+    #app.json_encoder = CustomJSONEncoder
     app.secret_key = 'q}q?fpX+QgwwKd8u7k3wsJgmY2tRu)'
     return app
