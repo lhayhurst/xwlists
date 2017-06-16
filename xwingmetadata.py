@@ -198,7 +198,7 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 upgrades = {
     CREW: (
 
-        {'name': 'IG-RM Thug Droids', 'canon_name': 'igrmthugdroids', 'cost': 5, 'constraints': (SCUM_FACTION_CONSTRAINT)},
+        {'name': 'IG-RM Thug Droids', 'canon_name': 'igrmthugdroids', 'cost': 1, },
 
         {'name': 'Jabba The Hutt', 'canon_name': 'jabbathehutt', 'cost': 5, 'constraints': (SCUM_FACTION_CONSTRAINT)},
 
@@ -367,7 +367,7 @@ upgrades = {
          'constraints': ({'type': SHIP_TYPE, 'value': [TIE_STRIKER]}), },
 
         {'name': 'Sabines Masterpiece', 'cost': 1, 'canon_name': 'sabinesmasterpiece',
-         'action': [{'type': 'ADD_UPGRADE', 'value': CREW}, {'type': 'ADD_UPGRADE', 'value': ILLICIT}],
+         'action': [ {'type': 'ADD_UPGRADE', 'value': ILLICIT}, {'type': 'ADD_UPGRADE', 'value': CREW}],
          'constraints': ({'type': SHIP_TYPE, 'value': TIE_FIGHTER}, {'faction': REBEL_FACTION_CONSTRAINT})},
 
         {'name': 'Kylo Rens Shuttle', 'cost': 2, 'canon_name': 'kylorensshuttle',
