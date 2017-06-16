@@ -34,7 +34,13 @@
         $(document).ready(function () {
             var table = $('#tourneys').DataTable({
                 "columnDefs" : [
-                    { targets: 0, }, //tourney date
+                    { targets: 0,
+                        'render': function( data, type, row) {
+                            var regex = /(.*?)\s+00:/g;
+                            var match = regex.exec(data);
+                            return match[1]
+                        }
+                    }, //tourney date
                     { //tourney name link
                         'render': function ( data, type, row ) {
                             return '<a href="/get_tourney_details?tourney_id='+row[2] +  '">' + data + "</a>"
@@ -59,7 +65,7 @@
                 "ajax": "{{ url_for('tourneys_page') }}",
                 "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
                 iDisplayLength: 25,
-                "order": [[ 1, "desc" ]]
+                "order": [[ 0, "desc" ]]
             });
         });
     </script>

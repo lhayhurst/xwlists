@@ -20,7 +20,10 @@ sys.setdefaultencoding("utf-8")
 import re
 from geopy import Nominatim
 from markupsafe import Markup
+import sqlalchemy
+
 from sqlalchemy import func
+from sqlalchemy import Date
 from werkzeug.utils import secure_filename
 from requests import post
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI, \
@@ -1415,7 +1418,7 @@ def tourney_admin():
 @app.route("/tourneys_page")
 def tourneys_page():
     columns = [
-        ColumnDT(Tourney.tourney_date),
+        ColumnDT(sqlalchemy.cast(Tourney.tourney_date, Date)),
         ColumnDT(Tourney.tourney_name),
         ColumnDT(Tourney.id),
         ColumnDT(TourneyVenue.venue),
