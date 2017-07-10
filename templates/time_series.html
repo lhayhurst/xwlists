@@ -462,12 +462,14 @@ $('#faction-percentage-toggle,input[type=radio][name=faction-totals],input[type=
 function adjustVisibles(chartOptions)
 {
     series = chartOptions.series;
-    for ( var i = 0; i < series.length; i++ ) {
-        if ( series[i].visible == 1  ) {
-            series[i].visible = true;
-        }
-        else {
-            series[i].visible = false;
+    if (series && series.length > 0) {
+        for (var i = 0; i < series.length; i++) {
+            if (series[i].visible == 1) {
+                series[i].visible = true;
+            }
+            else {
+                series[i].visible = false;
+            }
         }
     }
 }
@@ -485,17 +487,17 @@ var venue_id = {{ venue_id | safe }}
 if (venue_id == 0) {
     venue_id = null;
 }
-console.log(ship_total_options);
-console.log(venue_id);
 adjustVisibles(ship_options);
 adjustVisibles(pilot_options);
 adjustVisibles(upgrade_options);
 
 
+
 $('#total_total').highcharts( ship_total_options );
 $('#faction_total').highcharts( faction_options );
 $('#ships').highcharts( ship_options );
-$('#pilots').highcharts( pilot_options );
+//new Highcharts.Chart( 'pilots', pilot_options );
+$('#pilots').highcharts(pilot_options);
 $('#upgrades').highcharts( upgrade_options );
 $('.upgrade-types-select').select2();
 $('.ps-ships-types-select').select2();

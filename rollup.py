@@ -1,6 +1,5 @@
 import collections
 import operator
-
 from persistence import Faction
 
 COUNT_MEASURE       = 'COUNT_MEASURE'
@@ -491,7 +490,7 @@ class UpgradeHighChartOptions:
                             if all_series.has_key( upgrade ):
                                 series = all_series[upgrade ]
                             else:
-                                series = { 'name': upgrade,
+                                series = { 'name': str(upgrade),
                                            'data': collections.OrderedDict(),
                                            'visible': 1 }
                                 all_series[upgrade] = series
@@ -771,7 +770,7 @@ class ShipPilotTimeSeriesData:
             ship    = row[3].description
             pilot   = row[4]
             upgrade_type = row[5].description
-            upgrade = row[6]
+            upgrade = str(row[6])
             cnt     = int(row[7])
             cost    = int(row[8])
 

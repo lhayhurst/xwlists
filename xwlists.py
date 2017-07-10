@@ -2431,7 +2431,7 @@ def time_series():
                            ship_total_options=total_options.options,
                            faction_options=faction_options.options,
                            ship_options=ship_options.options,
-                           pilot_options=pilot_options.options,
+                           pilot_options=json.dumps(pilot_options.options),
                            upgrade_options=upgrade_options.options,
                            upgrade_types=sorted(pcd.upgrade_types.keys()),
                            upgrade_name_to_type=pcd.upgrade_name_to_type,
