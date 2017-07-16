@@ -98,6 +98,17 @@ QUADJUMPER_CANON_NAME = 'quadjumper'
 TIE_STRIKER = 'Tie Striker'
 TIE_STRIKER_CANON_NAME = 'tiestriker'
 
+#WAVE 11
+TIE_AGGRESSOR = 'Tie Aggressor'
+TIE_AGGRESSOR_CANON_NAME = 'tieaggressor'
+
+AUZITUCK_GUNSHIP = 'Auzituck Gunship'
+AUZITUCK_GUNSHIP_CANON_NAME = 'auzituckgunship'
+
+SCURGG_H6_BOMBER = 'Scurgg H-6 Bomber'
+SCURGG_H6_BOMBER_CANON_NAME = 'scurggh6bomber'
+
+
 EPT = "Elite Pilot Talent"
 EPT_CANON = 'ept'
 TITLE = "Title"
@@ -179,7 +190,11 @@ sets_and_expansions = {'Core Set': [],
                                    'Sabine\'s TIE Fighter Expansion Pack',
                                    'Quadjumper Expansion Pack',
                                    'U-wing Expansion Pack',
-                                   'TIE Striker Expansion Pack']
+                                   'TIE Striker Expansion Pack',
+                                   ],
+                       'Wave 11': [ TIE_AGGRESSOR + ' Expansion Pack',
+                                    SCURGG_H6_BOMBER + " Expansion Pack",
+                                    AUZITUCK_GUNSHIP + " Expansion Pack" ],
                        }
 
 formats = {'Standard - 100 Point Dogfight', 'Epic Play - 300 points', 'Escalation'}
@@ -197,6 +212,15 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 # all the x-wing upgrades.
 upgrades = {
     CREW: (
+
+        {'name': 'Breach Specialist', 'canon_name': 'breachspecialist',
+         'type': 'crew', 'cost': 1},
+
+
+        {'name': 'Wookiee Commandos', 'canon_name': 'wookieecommandos',
+         'type': 'crew', 'cost': 1,'constraints': (REBEL_FACTION_CONSTRAINT)},
+
+        {'name': 'Cad Bane', 'canon_name': 'cadbane', 'type': 'crew', 'cost': 2,'constraints': (SCUM_FACTION_CONSTRAINT)},
 
         {'name': 'IG-RM Thug Droids', 'canon_name': 'igrmthugdroids', 'cost': 1, },
 
@@ -357,6 +381,11 @@ upgrades = {
     ),
     TITLE: (
 
+        {'name': 'Havoc', 'canon_name': 'havoc', 'type': 'title', 'cost': 0,
+          'constraints': ({'type': SHIP_TYPE, 'value': [SCURGG_H6_BOMBER]}),
+          'action': [ {'type': 'ADD_UPGRADE', 'value': SYSTEM}, {'type': 'ADD_UPGRADE', 'value': SALVAGED_ASTROMECH_DROID}],
+         },
+
         {'name': 'Light Scyk Interceptor', 'canon_name': 'lightscykinterceptor', 'cost': -2,
          'constraints': ({'type': SHIP_TYPE, 'value': [M3_A_INTERCEPTOR]}), },
 
@@ -456,6 +485,8 @@ upgrades = {
 
     ),
     SYSTEM: (
+
+        {'name': 'Minefield Mapper', 'canon_name': 'minefieldmapper', 'type': 'system', 'cost': 0},
         {'name': 'Collision Detector', 'canon_name': 'collisiondetector', 'cost': 0},
         {'name': 'Electronic Baffle', 'canon_name': 'electronicbaffle', 'cost': 1},
         {'name': 'Enhanced Scopes', 'cost': 1},
@@ -469,6 +500,7 @@ upgrades = {
 
     ),
     TURRET: (
+        {'name': 'Synced Turret', 'canon_name': 'syncedturret', 'type': 'turret', 'cost': 4},
         {'name': 'Blaster Turret', 'cost': 4},
         {'name': 'Ion Cannon Turret', 'cost': 5},
         {'name': 'Autoblaster Turret', 'cost': 2},
@@ -490,6 +522,7 @@ upgrades = {
     ),
 
     BOMB: (
+        {'name': 'Bomblet Generator', 'canon_name': 'bombletgenerator', 'type': 'bomb', 'cost': 3},
         {'name': 'Thermal Detonators', 'cost': 3},
         {'name': 'Seismic Charges', 'cost': 2},
         {'name': 'Proximity Mines', 'cost': 3},
@@ -509,6 +542,8 @@ upgrades = {
 
     ),
     MISSILE: (
+        {'name': 'Cruise Missiles', 'canon_name': 'cruisemissiles', 'type': 'missile', 'cost': 3},
+        {'name': 'Unguided Rockets', 'canon_name': 'unguidedrockets', 'type': 'missile', 'cost': 2},
         {'name': 'XX-23 S-Thread Tracers', 'cost': 1},
         {'name': 'Chardaan Refit', 'cost': -2, 'constraints': ({'type': SHIP_TYPE, 'value': A_WING})},
         {'name': 'Ion Pulse Missiles', 'cost': 3},
@@ -564,6 +599,8 @@ upgrades = {
 
     EPT:
         (
+            {'name': 'Selflessness', 'cost': 1, 'canon_name': 'selflessness', 'type':'ept'},
+            {'name': 'Intensity', 'cost': 2, 'canon_name': 'intensity', 'type':'ept'},
             {'name': 'Expertise', 'cost': 4, 'canon_name': 'Expertise'},
             {'name': 'Swarm Leader', 'cost': 3, 'canon_name': 'swarmleader'},
             {'name': 'A Score To Settle', 'cost': 0, 'canon_name': 'ascoretosettle'},
@@ -621,6 +658,7 @@ upgrades = {
     ),
 
     SALVAGED_ASTROMECH_DROID: (
+        {'name': 'R4-E1', 'canon_name': 'r4e1', 'type': SALVAGED_ASTROMECH_DROID_CANON, 'cost': 1},
         {'name': 'Overclocked R4', 'canon_name': 'overclockedr4', 'cost': 1},
         {'name': 'Genius', 'canon_name': 'genius', 'cost': 0},
         {'name': 'R4 Agromech', 'canon_name': 'r4agromech', 'cost': 2},
@@ -644,6 +682,75 @@ upgrades = {
 }
 
 ships = {
+
+    SCURGG_H6_BOMBER: (
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Karthakk Pirate', 'canon_name': 'karthakkpirate',
+         'cost': 24,  'pilot_skill': 1,
+         'upgrades': (TURRET, TORPEDO, MISSILE, CREW, BOMB, BOMB, TITLE, MOD),
+         },
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Lok Revenant', 'canon_name': 'lokrevenant',
+         'cost': 26,  'pilot_skill': 3,
+         'upgrades': (EPT, TURRET, TORPEDO, MISSILE, CREW, BOMB, BOMB, TITLE, MOD),
+         },
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Sol Sixxa', 'canon_name': 'solsixxa',
+         'cost': 28,  'pilot_skill': 6,
+         'upgrades': (EPT, TURRET, TORPEDO, MISSILE, CREW, BOMB, BOMB, TITLE, MOD),
+         },
+
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Captain Nym (Scum)', 'canon_name': 'captainnym',
+         'cost': 30,  'pilot_skill': 8,
+         'upgrades': (EPT, TURRET, TORPEDO, MISSILE, CREW, BOMB, BOMB, TITLE, MOD),
+         },
+
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Captain Nym (Rebel)', 'canon_name': 'captainnym',
+         'cost': 30,  'pilot_skill': 8,
+         'upgrades': (EPT, TURRET, TORPEDO, MISSILE, CREW, BOMB, BOMB, TITLE, MOD),
+         },
+    ),
+
+    TIE_AGGRESSOR: (
+
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Sienar Specialist', 'canon_name': 'sienarspecialist',
+         'cost': 17,  'pilot_skill': 2,
+         'upgrades': (TURRET, MISSILE, MISSILE, MOD),
+         },
+
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Double Edge', 'canon_name': 'doubleedge',
+         'cost': 19,  'pilot_skill': 4,
+         'upgrades': (EPT, TURRET, MISSILE, MISSILE, MOD),
+         },
+
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Onyx Squadron Escort', 'canon_name': 'onyxsquadronescort',
+         'cost': 19,  'pilot_skill': 5,
+         'upgrades': (TURRET, MISSILE, MISSILE, MOD),
+         },
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Lieutenant Kestal', 'canon_name': 'lieutenantkestal',
+         'cost': 22,  'pilot_skill': 7,
+         'upgrades': (EPT, TURRET, MISSILE, MISSILE, MOD),
+         },
+    ),
+
+    AUZITUCK_GUNSHIP: (
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Kashyyyk Defender', 'canon_name': 'kashyyykdefender',
+         'cost': 24,  'pilot_skill': 1,
+         'upgrades': (CREW, CREW, MOD),
+         },
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wookie Liberator', 'canon_name': 'wookieliberator',
+         'cost': 26,  'pilot_skill': 3,
+         'upgrades': (EPT, CREW, CREW, MOD),
+         },
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Lowhhrick', 'canon_name': 'Lowhhrick',
+         'cost': 28,  'pilot_skill': 5,
+         'upgrades': (EPT, CREW, CREW, MOD),
+         },
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wullffwarro', 'canon_name': 'wullffwarro',
+         'cost': 30,  'pilot_skill': 7,
+         'upgrades': (EPT, CREW, CREW, MOD),
+         },
+    ),
+
 
     U_WING: (
         {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Pathfinder',
@@ -896,8 +1003,8 @@ ships = {
 
     TIE_ADVANCED_PROTOTYPE: (
 
-        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Seinar Test Pilot', 'cost': 16,
-         'canon_name': 'seinartestpilot',
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Sienar Test Pilot', 'cost': 16,
+         'canon_name': 'sienartestpilot',
          # 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'upgrades': (MISSILE, TITLE, MOD),
          'pilot_skill': 2,
