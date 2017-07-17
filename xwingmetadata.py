@@ -105,8 +105,8 @@ TIE_AGGRESSOR_CANON_NAME = 'tieaggressor'
 AUZITUCK_GUNSHIP = 'Auzituck Gunship'
 AUZITUCK_GUNSHIP_CANON_NAME = 'auzituckgunship'
 
-SCURGG_H6_BOMBER = 'Scurgg H-6 Bomber'
-SCURGG_H6_BOMBER_CANON_NAME = 'scurrgh6bomber'
+SCURRG_H6_BOMBER = 'Scurrg H-6 Bomber'
+SCURRG_H6_BOMBER_CANON_NAME = 'scurrgh6bomber'
 
 
 EPT = "Elite Pilot Talent"
@@ -193,7 +193,7 @@ sets_and_expansions = {'Core Set': [],
                                    'TIE Striker Expansion Pack',
                                    ],
                        'Wave 11': [ TIE_AGGRESSOR + ' Expansion Pack',
-                                    SCURGG_H6_BOMBER + " Expansion Pack",
+                                    SCURRG_H6_BOMBER + " Expansion Pack",
                                     AUZITUCK_GUNSHIP + " Expansion Pack" ],
                        }
 
@@ -382,7 +382,7 @@ upgrades = {
     TITLE: (
 
         {'name': 'Havoc', 'canon_name': 'havoc', 'type': 'title', 'cost': 0,
-          'constraints': ({'type': SHIP_TYPE, 'value': [SCURGG_H6_BOMBER]}),
+          'constraints': ({'type': SHIP_TYPE, 'value': [SCURRG_H6_BOMBER]}),
           'action': [ {'type': 'ADD_UPGRADE', 'value': SYSTEM}, {'type': 'ADD_UPGRADE', 'value': SALVAGED_ASTROMECH_DROID}],
          },
 
@@ -683,7 +683,7 @@ upgrades = {
 
 ships = {
 
-    SCURGG_H6_BOMBER: (
+    SCURRG_H6_BOMBER: (
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Karthakk Pirate', 'canon_name': 'karthakkpirate',
          'cost': 24,  'pilot_skill': 1,
          'upgrades': (TURRET, TORPEDO, MISSILE, CREW, BOMB, BOMB, TITLE, MOD),

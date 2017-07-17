@@ -123,7 +123,7 @@ class ShipType(DeclEnum):
     QUADJUMPER = xwingmetadata.QUADJUMPER_CANON_NAME, xwingmetadata.QUADJUMPER
     TIE_STRIKER = xwingmetadata.TIE_STRIKER_CANON_NAME, xwingmetadata.TIE_STRIKER
     TIE_AGGRESSOR = xwingmetadata.TIE_AGGRESSOR_CANON_NAME, xwingmetadata.TIE_AGGRESSOR
-    SCURGG_H6_BOMBER = xwingmetadata.SCURGG_H6_BOMBER_CANON_NAME, xwingmetadata.SCURGG_H6_BOMBER
+    SCURGG_H6_BOMBER = xwingmetadata.SCURRG_H6_BOMBER_CANON_NAME, xwingmetadata.SCURRG_H6_BOMBER
     AUZITUCK_GUNSHIP = xwingmetadata.AUZITUCK_GUNSHIP_CANON_NAME, xwingmetadata.AUZITUCK_GUNSHIP
 
 
