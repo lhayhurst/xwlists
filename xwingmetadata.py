@@ -106,7 +106,7 @@ AUZITUCK_GUNSHIP = 'Auzituck Gunship'
 AUZITUCK_GUNSHIP_CANON_NAME = 'auzituckgunship'
 
 SCURGG_H6_BOMBER = 'Scurgg H-6 Bomber'
-SCURGG_H6_BOMBER_CANON_NAME = 'scurggh6bomber'
+SCURGG_H6_BOMBER_CANON_NAME = 'scurrgh6bomber'
 
 
 EPT = "Elite Pilot Talent"
