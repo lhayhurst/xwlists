@@ -699,12 +699,12 @@ ships = {
          'upgrades': (EPT, TURRET, TORPEDO, MISSILE, CREW, BOMB, BOMB, TITLE, MOD),
          },
 
-        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Captain Nym (Scum)', 'canon_name': 'captainnym',
+        {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Captain Nym', 'canon_name': 'captainnym',
          'cost': 30,  'pilot_skill': 8,
          'upgrades': (EPT, TURRET, TORPEDO, MISSILE, CREW, BOMB, BOMB, TITLE, MOD),
          },
 
-        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Captain Nym (Rebel)', 'canon_name': 'captainnym',
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Captain Nym', 'canon_name': 'captainnym',
          'cost': 30,  'pilot_skill': 8,
          'upgrades': (EPT, TURRET, TORPEDO, MISSILE, CREW, BOMB, BOMB, TITLE, MOD),
          },
