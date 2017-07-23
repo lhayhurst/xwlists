@@ -1,4 +1,6 @@
+import json
 import re
+import sys
 
 __author__ = 'lhayhurst'
 
@@ -220,7 +222,10 @@ upgrades = {
         {'name': 'Wookiee Commandos', 'canon_name': 'wookieecommandos',
          'type': 'crew', 'cost': 1,'constraints': (REBEL_FACTION_CONSTRAINT)},
 
-        {'name': 'Cad Bane', 'canon_name': 'cadbane', 'type': 'crew', 'cost': 2,'constraints': (SCUM_FACTION_CONSTRAINT)},
+        {'name': 'Cad Bane', 'canon_name': 'cadbane', 'type': 'crew', 'cost': 2,
+         'constraints': (SCUM_FACTION_CONSTRAINT),
+          'action': [{'type': 'ADD_UPGRADE', 'value': BOMB}]
+         },
 
         {'name': 'IG-RM Thug Droids', 'canon_name': 'igrmthugdroids', 'cost': 1, },
 
@@ -273,9 +278,6 @@ upgrades = {
          'constraints': (SCUM_FACTION_CONSTRAINT), },
 
         {'name': 'IG-88D', 'canon_name': 'ig88d', 'cost': 1,
-         'constraints': (SCUM_FACTION_CONSTRAINT), },
-
-        {'name': 'Ketsu Onyo', 'canon_name': 'ketsuonyo', 'cost': 1,
          'constraints': (SCUM_FACTION_CONSTRAINT), },
 
         {'name': 'Latts Razzi', 'canon_name': 'lattsrazzi', 'cost': 2,
@@ -737,11 +739,11 @@ ships = {
          'cost': 24,  'pilot_skill': 1,
          'upgrades': (CREW, CREW, MOD),
          },
-        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wookie Liberator', 'canon_name': 'wookieliberator',
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wookiee Liberator', 'canon_name': 'wookieeliberator',
          'cost': 26,  'pilot_skill': 3,
          'upgrades': (EPT, CREW, CREW, MOD),
          },
-        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Lowhhrick', 'canon_name': 'Lowhhrick',
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Lowhhrick', 'canon_name': 'lowhhrick',
          'cost': 28,  'pilot_skill': 5,
          'upgrades': (EPT, CREW, CREW, MOD),
          },
@@ -1697,7 +1699,7 @@ ships = {
          'cost': 27,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, IMPERIAL_FACTION_CONSTRAINT),
          'upgrades': (SYSTEM, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, BOMB, MOD)},
-        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Deathrain', 'canon_name': 'Deathrain', 'pilot_skill': 6,
+        {'ship_size': SMALL_SHIP, 'faction': IMPERIAL, 'name': 'Deathrain', 'canon_name': 'deathrain', 'pilot_skill': 6,
          'cost': 26,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, IMPERIAL_FACTION_CONSTRAINT),
          'upgrades': (SYSTEM, TORPEDO, TORPEDO, MISSILE, MISSILE, BOMB, BOMB, MOD)},
@@ -1752,6 +1754,12 @@ def canonize(value):
 
 
 class XWingMetaData:
+
+    def pull_pilots(self, pilots_file):
+        #assumption here is that the ships_file is coming from https://github.com/guidokessels/xwing-data/blob/master/data/ships.js
+        pilots = json.loads(pilots_file)
+        return pilots
+
     def is_rebel(self):
         self.is_rebel = True
 
@@ -1805,3 +1813,4 @@ class XWingMetaData:
 
     def tech(self):
         return self.upgrades()(TECH)
+
