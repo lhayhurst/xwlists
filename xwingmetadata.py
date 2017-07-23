@@ -1,4 +1,6 @@
+import json
 import re
+import sys
 
 __author__ = 'lhayhurst'
 
@@ -220,7 +222,10 @@ upgrades = {
         {'name': 'Wookiee Commandos', 'canon_name': 'wookieecommandos',
          'type': 'crew', 'cost': 1,'constraints': (REBEL_FACTION_CONSTRAINT)},
 
-        {'name': 'Cad Bane', 'canon_name': 'cadbane', 'type': 'crew', 'cost': 2,'constraints': (SCUM_FACTION_CONSTRAINT)},
+        {'name': 'Cad Bane', 'canon_name': 'cadbane', 'type': 'crew', 'cost': 2,
+         'constraints': (SCUM_FACTION_CONSTRAINT),
+          'action': [{'type': 'ADD_UPGRADE', 'value': BOMB}]
+         },
 
         {'name': 'IG-RM Thug Droids', 'canon_name': 'igrmthugdroids', 'cost': 1, },
 
@@ -1749,6 +1754,12 @@ def canonize(value):
 
 
 class XWingMetaData:
+
+    def pull_pilots(self, pilots_file):
+        #assumption here is that the ships_file is coming from https://github.com/guidokessels/xwing-data/blob/master/data/ships.js
+        pilots = json.loads(pilots_file)
+        return pilots
+
     def is_rebel(self):
         self.is_rebel = True
 
@@ -1802,3 +1813,4 @@ class XWingMetaData:
 
     def tech(self):
         return self.upgrades()(TECH)
+
