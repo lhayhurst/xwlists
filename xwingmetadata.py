@@ -1327,7 +1327,7 @@ ships = {
     Z95_HEADHUNTER: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Airen Cracken', 'cost': 19,
                       'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
                       'upgrades': (MISSILE, EPT, MOD)},
-                     {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Lt. Blount', 'cost': 17,
+                     {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Lieutenant Blount', 'cost': 17,
                       'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
                       'upgrades': (MISSILE, EPT, MOD)},
                      {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Tala Squadron Pilot', 'cost': 13,
@@ -1374,7 +1374,7 @@ ships = {
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Captain Rex', 'cost': 14,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (MOD, TITLE)},
 
-        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Sabine Wren (TIE Fighter)', 'cost': 15,
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Sabine Wren', 'cost': 15,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,), 'upgrades': (EPT, MOD, TITLE)},
 
         {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Ahsoka Tano', 'cost': 17,
