@@ -13,7 +13,7 @@ from flask.ext.mail import Mail, Message
 from pytz import all_timezones, timezone
 
 from uidgen import ListUIDGen
-from xwvassal_league_bootstrap import ChallongeMatchCSVImporter
+from xwvassal_league import ChallongeMatchCSVImporter
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -333,8 +333,6 @@ def create_players(c, pm, ch, league):
                     divisions_href[division_name] = pm.get_division(division_name, league)
                 tier_player.division = divisions_href[division_name]
                 tier_player.tier = tier_player.division.tier
-                if tsv_record.has_key('challengeboards_name'):
-                    tier_player.challengeboards_handle = decode(tsv_record['challengeboards_name'])
 
                 tier_player.challonge_id = player['id']
                 if not player.has_key('group_player_ids'):
@@ -625,115 +623,40 @@ def remove_league_player_form_results():
 
 @app.route("/add_league_player_form_results", methods=['POST'])
 def add_league_player_form_results():
-    challonge_name = decode(request.form['challonge_name'])
+    player_name = decode(request.form['player_name'])
     email_address = decode(request.form['email_address'])
-    name = decode(request.form['name'])
+    person_name = decode(request.form['person_name'])
     timezone = decode(request.form['timezone'])
-    reddit_handle = decode(request.form['reddit_handle'])
-    challongeboard_handle = decode(request.form['challongeboard_handle'])
     division_id = request.form['division_dropdown']
     tier_id = request.form['tier_dropdown']
 
     pm = PersistenceManager(myapp.db_connector)
 
     # check to see if this player already exists
-    tier_player = pm.get_league_player_by_name(challonge_name, tier_id)
+    tier_player = pm.get_league_player_by_name(player_name, tier_id)
     if tier_player is not None:  # hmm, already exists
         player_stats = tier_player.get_stats()
         return render_template("league_player.html", player=tier_player, stats=player_stats)
 
     tier = pm.get_tier_by_id(tier_id)
     tier_player = TierPlayer()
-    tier_player.challengeboards_handle = challongeboard_handle
     tier_player.division = pm.get_division_by_id(division_id)
     tier_player.tier = tier
     tier_player.email_address = email_address
-    tier_player.name = challonge_name
-    tier_player.person_name = name
-    tier_player.reddit_handle = reddit_handle
+    tier_player.name = player_name
+    tier_player.person_name = person_name
     tier_player.timezone = timezone
-
-    # the player basics are in, now go lookup the player from
-    ch = ChallongeHelper(os.getenv('CHALLONGE_USER'), os.getenv('CHALLONGE_API_KEY'))
-    players = ch.participant_index(tier.get_challonge_name())
-
-    found = False
-    player_id = None
-    for player in players:
-        player = player['participant']
-        lookup_name = None
-        challonge_username_ = player['challonge_username']
-        checked_in = player['checked_in']
-        if challonge_username_ is None or checked_in is False:
-            lookup_name = player['display_name']
-            # print "player %s has not checked in " % ( player['display-name'])
-        else:
-            lookup_name = challonge_username_
-
-        if lookup_name == tier_player.name:
-            found = True
-            tier_player.checked_in = player['checked_in']
-            player_id = player['id']
-            tier_player.challonge_id = player_id
-            tier_player.group_id = player['group_player_ids'][0]
-            break
-
-    if found == False:
-        # return an error page
-        return render_template("league_player_add_failed.html", name=tier_player.name)
 
     pm.db_connector.get_session().add(tier_player)
     pm.db_connector.get_session().commit()
 
     # the player is added, now go get his/her matches
-    escrows = []
-    matchups = ch.match_index(tier.get_challonge_name())
-    for matchup in matchups:
-        matchup = matchup['match']
-        p1id = matchup['player1_id']
-        p2id = matchup['player2_id']
 
-        if p1id == tier_player.group_id or p2id == tier_player.group_id:
-            # we've found our man
-            match_result = pm.get_match_by_challonge_id(matchup['id'])
-            dbmr = None
-            if match_result is None:
-                dbmr = create_default_match_result(matchup, tier, pm)
-                if dbmr is not None:
-                    pm.db_connector.get_session().add(dbmr)
-                    escrows.append(EscrowSubscription(observer=tier_player, match=dbmr))
-
-    pm.db_connector.get_session().commit()
-
-    for escrow in escrows:
-        pm.db_connector.get_session().add(escrow)
+    # add the escrows
 
     pm.db_connector.get_session().commit()
     player_stats = tier_player.get_stats()
     return render_template("league_player.html", player=tier_player, stats=player_stats)
-
-
-@app.route("/true_up_group_ids")
-def true_up_group_ids():
-    league_id = request.args.get("league_id")
-    ch = ChallongeHelper(myapp.challonge_user, myapp.challonge_key)
-    pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league_by_id(league_id)
-
-    for tier in league.tiers:
-        players = ch.participant_index(tier.get_challonge_name())
-        for player in players:
-            player = player['participant']
-            challonge_player_id = player['id']
-            db_player = pm.get_league_player_by_challonge_id(challonge_player_id)
-            if db_player is not None:
-                gid = int(player['group_player_ids'][0])
-                dbgid = db_player.group_id
-                if gid != dbgid:
-                    print "player %s had group id change from %d to %d" % (db_player.name, dbgid, gid)
-                    db_player.group_id = gid
-    pm.db_connector.get_session().commit()
-    return redirect(url_for("league_players", league_id=league_id))
 
 
 @app.route("/add_league_player")

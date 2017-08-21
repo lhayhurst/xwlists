@@ -287,7 +287,6 @@ tier_player_table = "tier_player"
 class TierPlayer(Base):
     __tablename__ = tier_player_table
     id                = Column(Integer, primary_key=True)
-    challonge_id      = Column(Integer)
     group_id   = Column(Integer)
     tier_id       = Column(Integer, ForeignKey( '{0}.id'.format(tier_table) ) )
     division_id   = Column(Integer, ForeignKey( '{0}.id'.format(division_table) )  )
@@ -297,8 +296,6 @@ class TierPlayer(Base):
     person_name = Column(String(128))
     email_address = Column(String(128))
     timezone = Column(String(128))
-    reddit_handle = Column(String(128))
-    challengeboards_handle = Column(String(128))
     checked_in        = Column(Boolean)
     matches           = relationship("LeagueMatch", primaryjoin="or_(TierPlayer.id==LeagueMatch.player1_id,TierPlayer.id==LeagueMatch.player2_id)")
 
@@ -1575,16 +1572,10 @@ class PersistenceManager:
     def get_league_player_by_id(self, player_id):
         return self.db_connector.get_session().query(TierPlayer).filter(TierPlayer.id == player_id).first()
 
-    def get_league_player_by_challonge_id(self, challonge_id):
-        return self.db_connector.get_session().\
-            query(TierPlayer).\
-            filter(TierPlayer.challonge_id == challonge_id).first()
-
-
-    def get_league_player_by_name(self, challonge_name,tier_id):
+    def get_league_player_by_name(self, name,tier_id):
         return self.db_connector.get_session().\
             query(TierPlayer).filter(
-            TierPlayer.name == challonge_name,
+            TierPlayer.name == name,
             TierPlayer.tier_id == tier_id).first()
 
     def get_tier(self, tier_name,league):
