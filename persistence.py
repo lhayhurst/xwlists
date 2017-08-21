@@ -262,7 +262,7 @@ class Division(Base):
     id                = Column(Integer, primary_key=True)
     tier_id           = Column(Integer, ForeignKey( '{0}.id'.format(tier_table) ) )
     name              = Column(String(128))
-    challonge_name    = Column(String(128))
+    division_letter       = Column(String(128))
 
     def get_name(self):
         return decode( self.name )
@@ -287,7 +287,6 @@ tier_player_table = "tier_player"
 class TierPlayer(Base):
     __tablename__ = tier_player_table
     id                = Column(Integer, primary_key=True)
-    group_id   = Column(Integer)
     tier_id       = Column(Integer, ForeignKey( '{0}.id'.format(tier_table) ) )
     division_id   = Column(Integer, ForeignKey( '{0}.id'.format(division_table) )  )
     division      = relationship("Division",uselist=False)
@@ -1602,10 +1601,6 @@ class PersistenceManager:
 
     def get_tier_by_id(self, tier_id):
         return self.db_connector.get_session().query(Tier).filter(Tier.id == tier_id).first()
-
-    def get_tier_player_by_group_id(self, challonge_player_group_id):
-        return self.db_connector.get_session().\
-            query(TierPlayer).filter(TierPlayer.group_id == challonge_player_group_id).first()
 
     def get_tier_player_by_name(self, player_name, league_name ):
         query =  self.db_connector.get_session().query(TierPlayer).\

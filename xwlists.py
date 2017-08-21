@@ -276,7 +276,7 @@ def create_divisions(c, pm, league):
         tier = pm.get_tier(division['tier'], league)
         if tier:
             d = Division()
-            d.challonge_name = division['letter']
+            d.division_letter = division['letter']
             d.name = name
             d.tier = tier
             pm.db_connector.get_session().add(d)
@@ -335,11 +335,6 @@ def create_players(c, pm, ch, league):
                 tier_player.tier = tier_player.division.tier
 
                 tier_player.challonge_id = player['id']
-                if not player.has_key('group_player_ids'):
-                    if not len(player['group_player_ids']) > 0:
-                        print "Missing player group id for player %s, skipping " % (challonge_username_)
-                else:
-                    tier_player.group_id = player['group_player_ids'][0]
                 tier_player.name = lookup_name
                 tier_player.email_address = decode(tsv_record['email_address'])
                 tier_player.person_name = decode(tsv_record['person_name'])
@@ -494,18 +489,6 @@ def submit_interdivisional_league_match():
 
 
 def create_default_match_result(match_result, tier, pm, player1=None, player2=None):
-    if player1 is None:
-        p1id = match_result['player1_id']
-        player1 = pm.get_tier_player_by_group_id(p1id)
-        if player1 is None:
-            print "couldn't find player with id %d" % (p1id)
-            return None
-    if player2 is None:
-        p2id = match_result['player2_id']
-        player2 = pm.get_tier_player_by_group_id(p2id)
-        if player2 is None:
-            print "couldn't find player with id %d" % (p2id)
-            return None
 
     lm = LeagueMatch()
     lm.tier_id = tier.id
