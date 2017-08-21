@@ -235,7 +235,7 @@ def manage_escrows():
 @app.route("/set_up_escrow_subscription")
 def set_up_escrow_subscription():
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Four")
+    league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
 
     # first delete all the old subscriptions
     pm.delete_all_subscriptions()
@@ -763,7 +763,7 @@ def get_league_stats(league):
 @app.route("/league")
 def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Four")
+    league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
     tiers = league.tiers
     matches = pm.get_recent_league_matches(league)
 

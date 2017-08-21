@@ -10,7 +10,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 import csv
 
-CURRENT_VASSAL_LEAGUE_NAME = 'X-Wing Vassal League Season Five'
+CURRENT_VASSAL_LEAGUE_NAME = 'X-Wing Vassal League Season Four'
 
 class CaseInsensitiveDict(collections.Mapping):
     def __init__(self, d):
