@@ -18,5 +18,13 @@ CHANGE COLUMN `challonge_name` `division_letter` VARCHAR(1) NULL DEFAULT NULL CO
 ALTER TABLE `sozin$lists`.`tier_player`
 DROP COLUMN `group_id`;
 
+#match
+ALTER TABLE `sozin$lists`.`league_match`
+DROP COLUMN `challonge_loser_id`;
 
+ALTER TABLE `sozin$lists`.`league_match`
+DROP COLUMN `challonge_winner_id`;
+
+ALTER TABLE `sozin$lists`.`league_match`
+DROP COLUMN `challonge_match_id`;
 

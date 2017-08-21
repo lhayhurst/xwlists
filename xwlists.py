@@ -494,23 +494,7 @@ def create_default_match_result(match_result, tier, pm, player1=None, player2=No
     lm.tier_id = tier.id
     lm.player1 = player1
     lm.player2 = player2
-    lm.challonge_match_id = match_result['id']
     lm.state = match_result['state']
-
-    scores_csv = match_result['scores_csv']
-    p1_score = None
-    p2_score = None
-    if scores_csv is not None and len(str(scores_csv)) > 0:
-        scores = str.split(str(scores_csv), '-')
-        lm.player1_score = scores[0]
-        lm.player2_score = scores[1]
-
-    updated_at = match_result['updated_at']
-    lm.updated_at = updated_at
-    if match_result.has_key('winner_id'):
-        lm.challonge_winner_id = match_result['winner_id']
-    if match_result.has_key('loser_id'):
-        lm.challonge_loser_id = match_result['loser_id']
     return lm
 
 
@@ -655,53 +639,6 @@ def add_league_player():
         for division in tier.divisions:
             tiers_divisions[tier.get_name()].append({'name': division.get_name(), 'id': division.id})
     return render_template('add_league_player.html', league=league, tiers_divisions=tiers_divisions, tiers=tiers)
-
-
-@app.route("/cache_league_results")
-def cache_league_results():
-    c = ChallongeHelper(myapp.challonge_user, myapp.challonge_key)
-    pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Four")
-    for tier in league.tiers:
-        match_results_for_tier = c.match_index(tier.get_challonge_name())
-
-        for match_result in match_results_for_tier:
-            match_result = match_result['match']
-            match_id = match_result['id']
-            dbmr = pm.get_match_by_challonge_id(match_id)
-
-            if dbmr is None:
-                dbmr = create_default_match_result(match_result, tier, pm)
-                if dbmr is not None:
-                    changed = True
-                else:
-                    continue  # skip this record
-            else:  # some sort of update occured
-                changed = update_match_result(match_result, dbmr, pm)
-
-            # fetch the match attachment url
-            if dbmr is not None and dbmr.is_complete():
-                match_attachments = c.attachments_index(tier.get_challonge_name(), match_id)
-                if len(match_attachments) > 0:
-                    match_attachment = match_attachments[0]  # there can only be one
-                    match_attachment = match_attachment['match_attachment']
-                    match_attachment_asset_url = match_attachment['asset_url']
-                    if match_attachment_asset_url is not None:
-                        if dbmr.challonge_attachment_url is None or dbmr.challonge_attachment_url != match_attachment_asset_url:
-                            # for some reason challonge is stashing a "//" on front of these urls
-                            # remove it
-                            match_attachment_asset_url = match_attachment_asset_url[
-                                                         match_attachment_asset_url.startswith("//")
-                                                         and len("//"):]
-                            if dbmr.challonge_attachment_url != match_attachment_asset_url:  # one more go at it :-)
-                                dbmr.challonge_attachment_url = match_attachment_asset_url
-                                dbmr.updated_at = func.now()
-                                changed = True
-            if changed:
-                myapp.db_connector.get_session().add(dbmr)
-    myapp.db_connector.get_session().commit()
-    return redirect(url_for('tier_matches', tier_id=tier.id))
-
 
 @app.route("/tier_matches")
 def tier_matches():
@@ -903,13 +840,6 @@ def submit_interdivisional_league_match_report():
     match.player1_score = player1_score
     match.player2_score = player2_score
     match.completed()
-
-    if winner_id == match.player1_id:
-        match.challonge_winner_id = match.player1.group_id
-        match.challonge_loser_id = match.player2.group_id
-    else:
-        match.challonge_winner_id = match.player2.group_id
-        match.challonge_loser_id = match.player1.group_id
 
     vlog = request.files['vlog_file']
     if vlog is not None:

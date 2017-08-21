@@ -223,17 +223,19 @@ class League(Base):
 tier_table = "league_tier"
 class Tier(Base):
     __tablename__    = tier_table
-    id               = Column(Integer, primary_key=True)
-    league_id        = Column(Integer, ForeignKey( '{0}.id'.format(league_table) ) )
-    name             = Column(String(128))
-    def get_name(self):
-        return decode( self.name )
-    challonge_name             = Column(String(128))
-    players           = relationship( "TierPlayer", back_populates="tier", cascade="all,delete,delete-orphan")
+    id = Column(Integer, primary_key=True)
+    league_id = Column(Integer, ForeignKey('{0}.id'.format(league_table)))
+    name = Column(String(128))
 
-    league           = relationship( League.__name__, back_populates="tiers")
-    matches       = relationship( "LeagueMatch", back_populates="tier", cascade="all,delete,delete-orphan")
-    divisions        = relationship( "Division", back_populates="tier", cascade="all,delete,delete-orphan")
+    def get_name(self):
+        return decode(self.name)
+
+    challonge_name = Column(String(128))
+    players = relationship("TierPlayer", back_populates="tier", cascade="all,delete,delete-orphan")
+
+    league = relationship(League.__name__, back_populates="tiers")
+    matches = relationship("LeagueMatch", back_populates="tier", cascade="all,delete,delete-orphan")
+    divisions = relationship("Division", back_populates="tier", cascade="all,delete,delete-orphan")
 
     def get_challonge_url(self):
         return "http://xwingvassal.challonge.com/" + self.challonge_name
@@ -362,7 +364,6 @@ class LeagueMatch(Base):
     player1_id          = Column(Integer, ForeignKey( '{0}.id'.format(tier_player_table) ) )
     player2_id          = Column(Integer, ForeignKey( '{0}.id'.format(tier_player_table) ) )
     tier_id           = Column(Integer, ForeignKey( '{0}.id'.format(tier_table) ) )
-    challonge_match_id  = Column(Integer)
     player1_score       = Column(Integer)
     player2_score       = Column(Integer)
     was_default         = Column(Boolean)
@@ -372,8 +373,6 @@ class LeagueMatch(Base):
     player2_list_url    = Column(String(2048))
     challonge_attachment_url = Column(String(2048))
     updated_at          = Column(String(128))
-    challonge_winner_id = Column(Integer)
-    challonge_loser_id  = Column(Integer)
     scheduled_datetime  = Column(String(128))
 
     tier             = relationship( Tier.__name__, uselist=False)
@@ -541,16 +540,11 @@ class LeagueMatch(Base):
                 winner = self.player1
             elif self.player2_score > self.player1_score:
                 winner = self.player2
-            elif self.challonge_winner_id == self.player1.group_id:
-                winner = self.player1
-            elif self.challonge_winner_id == self.player2.group_id:
-                winner = self.player2
         return winner
 
     def was_draw(self):
         return self.is_complete() and \
-               self.player1_score == self.player2_score and \
-               self.challonge_winner_id == self.challonge_loser_id
+               self.player1_score == self.player2_score
 
     def player_lost(self,player):
         if self.was_draw():
@@ -1646,11 +1640,6 @@ class PersistenceManager:
         return self.db_connector.get_session().query( LeagueMatch).\
             filter( or_( LeagueMatch.player1_list_id == archtype_id,
                          LeagueMatch.player2_list_id == archtype_id)).all()
-
-
-    def get_match_by_challonge_id(self, match_result_id):
-        return self.db_connector.get_session().query(LeagueMatch).\
-            filter(LeagueMatch.challonge_match_id == match_result_id ).first()
 
     def get_tourneys(self):
         return self.db_connector.get_session().query(Tourney)
