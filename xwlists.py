@@ -13,7 +13,7 @@ from flask.ext.mail import Mail, Message
 from pytz import all_timezones, timezone
 
 from uidgen import ListUIDGen
-from xwvassal_league import ChallongeMatchCSVImporter
+from xwvassal_league import CURRENT_VASSAL_LEAGUE_NAME
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -29,7 +29,7 @@ from requests import post
 from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI, \
     VassalLeaguesAPI, VassalLeagueAPI, \
     VassalLeagueRanking, VassalLeagueMatches
-from challonge_helper import ChallongeHelper
+
 
 from cryodex import Cryodex
 from dataeditor import RankingEditor, RoundResultsEditor
@@ -347,33 +347,27 @@ def create_players(c, pm, ch, league):
     pm.db_connector.get_session().commit()
 
 
-@app.route("/add_form_results", methods=['POST'])
+@app.route("/add_league_form_results", methods=['POST'])
 def add_league_form_results():
-    league_challonge_name = decode(request.form['challonge_name'])
     league_name = decode(request.form['name'])
     season_number = decode(request.form['season_number'])
     league_file = request.files['league_file']
 
-    c = ChallongeMatchCSVImporter(league_file.stream)
     pm = PersistenceManager(myapp.db_connector)
 
     league = pm.get_league(league_name)
     if league is None:
         # create the leagues and then the tiers
-        league = League(challonge_name=league_challonge_name, name=league_name)
+        league = League(name=league_name)
         pm.db_connector.get_session().add(league)
 
     create_league_tiers(league, pm, season_number)
     pm.db_connector.get_session().commit()
 
-    challonge_user = os.getenv('CHALLONGE_USER')
-    challonge_key = os.getenv('CHALLONGE_API_KEY')
-    ch = ChallongeHelper(challonge_user, challonge_key)
-
     # create all the divisions for each tier
-    create_divisions(c, pm, league)
-    create_players(c, pm, ch, league)
-    create_matchups(c, pm, ch, league)
+    create_divisions(pm, league)
+    create_players(pm, league)
+    create_matchups(pm, league)
 
     return redirect("/league")
 
@@ -628,9 +622,8 @@ def add_league_player_form_results():
 
 @app.route("/add_league_player")
 def add_league_player():
-    c = ChallongeHelper(myapp.challonge_user, myapp.challonge_key)
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league("X-Wing Vassal League Season Four")
+    league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
     tiers_divisions = {}
     tiers = []
     for tier in league.tiers:

@@ -8,10 +8,9 @@ from decoder import decode
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
-from challonge_helper import ChallongeHelper
-import myapp
-from persistence import PersistenceManager, TierPlayer, Division, LeagueMatch
 import csv
+
+CURRENT_VASSAL_LEAGUE_NAME = 'X-Wing Vassal League Season Five'
 
 class CaseInsensitiveDict(collections.Mapping):
     def __init__(self, d):
