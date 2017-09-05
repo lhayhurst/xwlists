@@ -268,6 +268,7 @@ class Division(Base):
 
     def get_name(self):
         return decode( self.name )
+
     tier              = relationship( Tier.__name__, back_populates="divisions")
     players           = relationship( "TierPlayer", back_populates="division", cascade="all,delete,delete-orphan")
 
