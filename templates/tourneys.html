@@ -24,6 +24,7 @@
             <th>Geo</th>
             <th>Num. Players</th>
             <th>Tourney Type</th>
+            <th>Export</th>
         </tr>
         </thead>
         <tbody>
@@ -57,7 +58,13 @@
                         'targets':3
                     },
                     { 'visible': false, 'targets': 4, searchable: false}, //3: venue id, hidden
-                    { 'targets': 5, 'width': '8%'}
+                    { 'targets': 5, 'width': '8%'},
+                    { 'targets': 6, 'width': '8%'},
+                    { 'targets': 7, 'width': '8%'},
+                    { 'targets': 8, 'width': '8%', 'render': function (data, type, row) {
+                            return '<a href="/api/v1/tournament/' +row[2] + '">json</a>' + '|' +'<a href="/export_tourney_lists?tourney_id='+row[2] + '">csv</a>'
+                        }
+                    }
 
                 ],
                 "processing": true,

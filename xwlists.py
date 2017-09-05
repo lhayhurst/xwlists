@@ -13,7 +13,7 @@ from flask.ext.mail import Mail, Message
 from pytz import all_timezones, timezone
 
 from uidgen import ListUIDGen
-from xwvassal_league import CURRENT_VASSAL_LEAGUE_NAME
+from xwvassal_league import CURRENT_VASSAL_LEAGUE_NAME, XWingVassalLeagueHelper
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -179,45 +179,6 @@ def fix_archtype_dupes():
     f.fix_dupes()
     return redirect("/")
 
-
-@app.route("/apply_league_default", methods=['POST'])
-def apply_league_defaults():
-    defaults = request.get_json()
-    league_id = request.args.get('league_id')
-    pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league_by_id(league_id)
-
-    division_defaults = []
-
-    for d in defaults:
-        division_name = d["Division"]
-        winner_challonge_name = d["Winner"]
-        loser_challonge_name = d["Loser"]
-        division = pm.get_division(division_name, league)
-        tier = division.tier
-        winner = pm.get_league_player_by_name(winner_challonge_name, tier.id)
-        loser = pm.get_league_player_by_name(loser_challonge_name, tier.id)
-
-        if winner is None:
-            print "unable to lookup winner %s from division %s" % (winner_challonge_name, division_name)
-            continue
-        if loser is None:
-            print "unable to lookup loser %s from division %s" % (loser_challonge_name, division_name)
-            continue
-
-        match = pm.get_league_match(winner, loser, tier)
-        if match is None:
-            print "unable to lookup match for winner %s loser %s division %s"(winner_challonge_name,
-                                                                              loser_challonge_name, division_name)
-            continue
-
-        # finally!
-        match.apply_default(winner, loser)
-
-    pm.db_connector.get_session().commit()
-    return redirect("/league")
-
-
 @app.route("/manage_escrows")
 def manage_escrows():
     league_id = request.args.get('league_id')
@@ -270,123 +231,20 @@ def create_league():
     return render_template("add_league.html")
 
 
-def create_divisions(c, pm, league):
-    for name in c.divisions.keys():
-        division = c.divisions[name]
-        tier = pm.get_tier(division['tier'], league)
-        if tier:
-            d = Division()
-            d.division_letter = division['letter']
-            d.name = name
-            d.tier = tier
-            pm.db_connector.get_session().add(d)
-    pm.db_connector.get_session().commit()
-
-
-def create_matchups(c, pm, ch, league):
-    for tier in league.tiers:
-        matchups = ch.match_index(tier.get_challonge_name())
-        for matchup in matchups:
-            matchup = matchup['match']
-            dbmr = create_default_match_result(matchup, tier, pm)
-            if dbmr is not None:
-                pm.db_connector.get_session().add(dbmr)
-    pm.db_connector.get_session().commit()
-
-
-def create_players(c, pm, ch, league):
-    divisions_href = {}
-    cin = ""
-
-    for tier in league.tiers:
-        players = ch.participant_index(tier.get_challonge_name())
-        for player in players:
-            lookup_name = None
-            player = player['participant']
-            challonge_username_ = player['challonge_username']
-            tier_player = pm.get_league_player_by_name(challonge_username_, tier.id)
-            if tier_player:
-                continue
-            else:  # check via the display name...
-                tier_player = pm.get_league_player_by_name(player['display_name'], tier.id)
-                if tier_player:
-                    continue
-            checked_in = player['checked_in']
-            if challonge_username_ is None or checked_in is False:
-                lookup_name = player['display_name']
-            #                print "player %s has not checked in " % ( lookup_name)
-            else:
-                lookup_name = challonge_username_
-            if c.tsv_players.__contains__(lookup_name):
-
-                # we're good to go
-                tsv_record = c.tsv_players[lookup_name]
-                if checked_in is False:
-                    cin = cin + decode(tsv_record['email_address']) + ","
-
-                # create the player record
-                tier_player = TierPlayer()
-                division_name = decode(tsv_record['division_name'])
-                # print "looking up division %s for player %s" % (division_name, lookup_name)
-
-                if not divisions_href.has_key(division_name):
-                    divisions_href[division_name] = pm.get_division(division_name, league)
-                tier_player.division = divisions_href[division_name]
-                tier_player.tier = tier_player.division.tier
-
-                tier_player.challonge_id = player['id']
-                tier_player.name = lookup_name
-                tier_player.email_address = decode(tsv_record['email_address'])
-                tier_player.person_name = decode(tsv_record['person_name'])
-                if tsv_record.has_key('reddit_handle'):
-                    tier_player.reddit_handle = decode(tsv_record['reddit_handle'])
-                tier_player.timezone = decode(tsv_record['time_zone'])
-                pm.db_connector.get_session().add(tier_player)
-            else:
-                print "just couldn't find player %s" % (lookup_name)
-    pm.db_connector.get_session().commit()
-
-
 @app.route("/add_league_form_results", methods=['POST'])
 def add_league_form_results():
     league_name = decode(request.form['name'])
     season_number = decode(request.form['season_number'])
     league_file = request.files['league_file']
 
+    helper = XWingVassalLeagueHelper(league_name, season_number, league_file)
     pm = PersistenceManager(myapp.db_connector)
-
     league = pm.get_league(league_name)
-    if league is None:
-        # create the leagues and then the tiers
-        league = League(name=league_name)
-        pm.db_connector.get_session().add(league)
-
-    create_league_tiers(league, pm, season_number)
-    pm.db_connector.get_session().commit()
-
-    # create all the divisions for each tier
-    create_divisions(pm, league)
-    create_players(pm, league)
-    create_matchups(pm, league)
-
+    #if league is None:
+    helper.create_league(pm,league)
     return redirect("/league")
 
 
-def create_league_tiers(league, pm, season_number):
-    tiers = {"Deep Core": "deepcore" + season_number,
-             "Core Worlds": "coreworlds" + season_number,
-             "Inner Rim": "innerrim" + season_number,
-             "Outer Rim": "outerrim" + season_number,
-             "Unknown Reaches": "unknownreaches" + season_number
-             }
-    for tier_name in tiers.keys():
-        tier_challonge_name = tiers[tier_name]
-        lt = pm.get_tier(tier_challonge_name, league)
-        if lt is None:
-            lt = Tier(name=tier_name,
-                      challonge_name=tier_challonge_name,
-                      league=league)
-            pm.db_connector.get_session().add(lt)
 
 
 @app.route("/league_player")
@@ -429,6 +287,8 @@ def league_players():
     for tier in league.tiers:
         for player in tier.players:
             players.append(player)
+            if player.division is None:
+                print "wtf"
     return render_template("league_players.html", players=players, league=league)
 
 
@@ -474,77 +334,13 @@ def submit_interdivisional_league_match():
         'updated_at': str(now)
     }
 
-    dbmr = create_default_match_result(match_result, tier, pm, player1, player2)
-    pm.db_connector.get_session().add(dbmr)
-    pm.db_connector.get_session().add(EscrowSubscription(observer=player1, match=dbmr))
-    pm.db_connector.get_session().add(EscrowSubscription(observer=player2, match=dbmr))
-    pm.db_connector.get_session().commit()
+    #TODO: fix the below
+    #dbmr = create_default_match_result(match_result, tier, pm, player1, player2)
+    #pm.db_connector.get_session().add(dbmr)
+    #pm.db_connector.get_session().add(EscrowSubscription(observer=player1, match=dbmr))
+    #pm.db_connector.get_session().add(EscrowSubscription(observer=player2, match=dbmr))
+    #pm.db_connector.get_session().commit()
     return redirect(url_for('tier_matches', tier_id=tier.id))
-
-
-def create_default_match_result(match_result, tier, pm, player1=None, player2=None):
-
-    lm = LeagueMatch()
-    lm.tier_id = tier.id
-    lm.player1 = player1
-    lm.player2 = player2
-    lm.state = match_result['state']
-    return lm
-
-
-def update_match_result(match_result, dbmr, pm):
-    # things that can change: score... and updated it
-    if dbmr.was_default:
-        # special override for default results
-        return
-
-    changed = False
-
-    scores_csv = match_result['scores_csv']
-    p1_score = None
-    p2_score = None
-    if scores_csv is not None and len(str(scores_csv)) > 0:
-        scores = str.split(str(scores_csv), '-')
-        p1_score = int(scores[0])
-        p2_score = int(scores[1])
-        if p1_score != dbmr.player1_score:
-            changed = True
-            dbmr.player1_score = p1_score
-        if p2_score != dbmr.player2_score:
-            changed = True
-            dbmr.player2_score = p2_score
-
-    state = match_result['state']
-    if state is not None and dbmr.state != state:
-        dbmr.state = state
-        changed = True
-
-    winner_id = match_result['winner_id']
-    loser_id = match_result['loser_id']
-
-    if dbmr.challonge_winner_id is None:
-        dbmr.challonge_winner_id = winner_id
-        changed = True
-
-    if dbmr.challonge_loser_id is None:
-        dbmr.challonge_loser_id = loser_id
-        changed = True
-
-    if dbmr.challonge_winner_id is not None and dbmr.challonge_winner_id != winner_id:
-        dbmr.challonge_winner_id = winner_id
-        changed = True
-
-    if dbmr.challonge_loser_id is not None and dbmr.challonge_loser_id != loser_id:
-        dbmr.challonge_loser_id = loser_id
-        changed = True
-
-    if changed:
-        updated_at = match_result['updated_at']
-
-        if dbmr.updated_at is None or dbmr.updated_at != updated_at:
-            dbmr.updated_at = updated_at
-
-    return changed
 
 
 @app.route("/league_admin")
@@ -581,6 +377,18 @@ def remove_league_player_form_results():
     pm.db_connector.get_session().commit()
     return redirect(url_for("league_players", league_id=league_id))
 
+@app.route("/add_league_player")
+def add_league_player():
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
+    tiers_divisions = {}
+    tiers = []
+    for tier in league.tiers:
+        tiers.append(tier)
+        tiers_divisions[tier.get_name()] = []
+        for division in tier.divisions:
+            tiers_divisions[tier.get_name()].append({'name': division.get_name(), 'id': division.id})
+    return render_template('add_league_player.html', league=league, tiers_divisions=tiers_divisions, tiers=tiers)
 
 @app.route("/add_league_player_form_results", methods=['POST'])
 def add_league_player_form_results():
@@ -620,19 +428,6 @@ def add_league_player_form_results():
     return render_template("league_player.html", player=tier_player, stats=player_stats)
 
 
-@app.route("/add_league_player")
-def add_league_player():
-    pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
-    tiers_divisions = {}
-    tiers = []
-    for tier in league.tiers:
-        tiers.append(tier)
-        tiers_divisions[tier.get_name()] = []
-        for division in tier.divisions:
-            tiers_divisions[tier.get_name()].append({'name': division.get_name(), 'id': division.id})
-    return render_template('add_league_player.html', league=league, tiers_divisions=tiers_divisions, tiers=tiers)
-
 @app.route("/tier_matches")
 def tier_matches():
     tier_id = request.args.get('tier_id')
@@ -640,7 +435,6 @@ def tier_matches():
     pm = PersistenceManager(myapp.db_connector)
     tier = pm.get_tier_by_id(tier_id)
     return render_template("tier_matches.html", tier=tier, admin=admin)
-
 
 def get_league_stats(league):
     league_stats = {}
@@ -759,7 +553,6 @@ def get_league_stats(league):
 
     return overall_stats, league_stats, player_stats
 
-
 @app.route("/league")
 def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
@@ -767,7 +560,7 @@ def league_divisions():
     tiers = league.tiers
     matches = pm.get_recent_league_matches(league)
 
-    return render_template("league_s4.html",
+    return render_template("league_s5.html",
                            league=league, tiers=tiers, matches=matches)
 
 
@@ -803,6 +596,16 @@ def league_season_three():
     return render_template("league_s3.html",
                            league=league, tiers=tiers, matches=matches)
 
+
+@app.route("/league_season_four")
+def league_season_four():
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league("X-Wing Vassal League Season Four")
+    tiers = league.tiers
+    matches = pm.get_recent_league_matches(league)
+
+    return render_template("league_s4.html",
+                           league=league, tiers=tiers, matches=matches)
 
 @app.route("/report_interdivisional_match")
 def report_interdivisional_match():
@@ -1059,34 +862,6 @@ def escrow_change():
     return response
 
 
-# thanks kyle ;-)
-@app.route("/cleanup_tier_matches")
-def cleanup_tier_matches():
-    league_id = request.args.get("league_id")
-    pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league_by_id(league_id)
-    matches = {}
-    for tier in league.tiers:
-        for match in tier.matches:
-            p1id = match.player1_id
-            p2id = match.player2_id
-            key = "%d-%d" % (p1id, p2id)
-            if not matches.has_key(key):
-                matches[key] = []
-            matches[key].append(match)
-    for matchkey in matches.keys():
-        pmatches = matches[matchkey]
-        if len(pmatches) > 1:
-            # each one of these can be deleted ... except the last, assuming they are in order
-            sorted_matches = sorted(pmatches, key=lambda k: k.id)
-            # delete everything but the last one
-            for m in sorted_matches[:-1]:
-                print "deleting duplicate %d" % (m.id)
-                pm.db_connector.get_session().delete(m)
-    pm.db_connector.get_session().commit()
-    return redirect(url_for("league_players", league_id=league_id))
-
-
 @app.route("/delete_match", methods=['GET'])
 def delete_match():
     match_id = request.args.get("match_id")
@@ -1258,9 +1033,6 @@ def tourneys_page():
         ]
     query = myapp.db_connector.get_session().query().select_from(Tourney).join(TourneyVenue)
     params = request.args.to_dict()
-    #for k, v in params.items():
-    #    if v is None or len(v) == 0:
-    #        del params[k]
 
     rowtable = DataTables(params, query, columns)
     result = rowtable.output_result()
