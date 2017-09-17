@@ -126,6 +126,12 @@ class ShipType(DeclEnum):
     SCURGG_H6_BOMBER = xwingmetadata.SCURRG_H6_BOMBER_CANON_NAME, xwingmetadata.SCURRG_H6_BOMBER
     AUZITUCK_GUNSHIP = xwingmetadata.AUZITUCK_GUNSHIP_CANON_NAME, xwingmetadata.AUZITUCK_GUNSHIP
 
+    ALPHA_CLASS_STAR_WING = xwingmetadata.ALPHA_CLASS_STAR_WING_CANON_NAME, xwingmetadata.ALPHA_CLASS_STAR_WING
+    M12_L_KIMOGILA_FIGHTER = xwingmetadata.M12_L_KIMOGILA_FIGHTER_CANON_NAME, xwingmetadata.M12_L_KIMOGILA_FIGHTER
+    SHEATHIPEDE_CLASS_SHUTTLE = xwingmetadata.SHEATHIPEDE_CLASS_SHUTTLE_CANON_NAME, xwingmetadata.SHEATHIPEDE_CLASS_SHUTTLE
+    TIE_SILENCER = xwingmetadata.TIE_SILENCER_CANON_NAME, xwingmetadata.TIE_SILENCER
+    B_SF_17_BOMBER = xwingmetadata.B_SF_17_BOMBER_CANON_NAME, xwingmetadata.B_SF_17_BOMBER
+
 
 class Event(Base):
     __tablename__ = event_table

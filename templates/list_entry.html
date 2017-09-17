@@ -480,29 +480,21 @@
             updateTotals();
         }
 
+        function vaksaiEquipped(upgradeValue) {
+            return upgradeValue == 'Vaksai';
+        }
+
         function tieX1Equipped(upgradeValue) {
             return upgradeValue == "TIE/X1";
-/*            squadMemberEl.find( '.upgrade .row-value .select').each(function(i,upgrade) {
-                if ( $(upgrade).select2('data') != null ) {
-                    var uname = $(upgrade).select2('data').text;
-                    if ( uname == "TIE/X1") {
-                        isEquipped = true;
-                        return;
-                    }
-                }
-            } );
-            return isEquipped;
-*/
         }
 
         function upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue) {
             var upgradeHref = getUpgradeHref( upgradeType, upgradeValue );
             if ( upgradeHref && 'action' in upgradeHref ) {
                 var titleHack = false;
-                if ( tieX1Equipped(upgradeValue) ) {
-                    titleHack = true;
+                if ( tieX1Equipped(upgradeValue) || vaksaiEquipped(upgradeValue) ) {
+                    titleHack = upgradeValue;
                 }
-
                 var action = upgradeHref.action;
                 for ( var i = 0; i < action.length; i++ )
                 {
@@ -512,6 +504,8 @@
                         addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function (upgradeValue) {
                                 upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgrade, upgradeValue);
                         } );
+                    } else if (action[i].type == 'REMOVE_UGPRADE') {
+                        SDFASDF
                     }
                 }
             }
@@ -551,7 +545,13 @@
                 }
                 else {
                     var cost = u.cost;
-                    if ( titleHack) {
+                    if ( vaksaiEquipped(titleHack)) {
+                        cost = cost - 1;
+                        if (cost < 0) {
+                            cost = 0;
+                        }
+                    }
+                    else if ( tieX1Equipped(titleHack)) {
                         cost = u.cost - 4;
                         if (cost < 0) {
                             cost = 0;
