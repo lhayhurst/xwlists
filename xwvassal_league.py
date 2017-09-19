@@ -1,7 +1,7 @@
 import sys
 import collections
 from decoder import decode
-from persistence import League, Tier, Division, TierPlayer
+from persistence import League, Tier, Division, TierPlayer, LeagueMatch
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -70,7 +70,7 @@ class XWingVassalLeagueHelper:
         if len(league.tiers) == 0:
             self.create_league_tiers(league, pm)
 
-        #self.create_divisions(pm, league)
+        self.create_divisions(pm, league)
         self.create_players(pm, league)
         #self.create_matchups(pm, league) do this after the league is "ready" to go
 
@@ -107,31 +107,55 @@ class XWingVassalLeagueHelper:
 
 
     def create_matchups(self, pm, league):
-        #todo!
+        for tier in league.tiers:
+            for division in tier.divisions:
+                players = division.players
+                #simple round robin scheduling
+                matchups = {}
+                for player1 in players:
+                    for player2 in players:
+                        if player1.id == player2.id:
+                            continue
+                        k1 = str(player1.id) + "-vs-" + str(player2.id)
+                        k2 = str(player2.id) + "-vs-" + str(player1.id)
+                        if not matchups.has_key(k1) or \
+                           not matchups.has_key(k2):
+                            matchups[k1] = 1
+                            matchups[k2] = 1
+                            lm = LeagueMatch()
+                            lm.player1_id = player1.id
+                            lm.player2_id = player2.id
+                            lm.tier_id = tier.id
+                            lm.state = "open"
+                            pm.db_connector.get_session().add(lm)
         pm.db_connector.get_session().commit()
-
 
     def create_players(self,pm, league):
         divisions_href = {}
 
+        players = self.player_data.tsv_players.keys()
+        for player_name in players:
+            tsv_record = self.player_data.tsv_players[player_name]
+            tier_player = TierPlayer()
+            division_name = decode(tsv_record['division_name'])
+
+            if not divisions_href.has_key(division_name):
+                divisions_href[division_name] = pm.get_division(division_name, league)
+
+            tier_player.division = divisions_href[division_name]
+            tier_player.tier = tier_player.division.tier
+            tier_player.name = player_name
+            tier_player.email_address = decode(tsv_record['email_address'])
+            tier_player.person_name = decode(tsv_record['person_name'])
+            tier_player.timezone = decode(tsv_record['time_zone'])
+            pm.db_connector.get_session().add(tier_player)
+        pm.db_connector.get_session().commit()
+
+
+
+
         for tier in league.tiers:
             players = self.player_data.tsv_players.keys()
-            for player_name in players:
-                tsv_record = self.player_data.tsv_players[player_name]
-                tier_player = TierPlayer()
-                division_name = decode(tsv_record['division_name'])
-
-                if not divisions_href.has_key(division_name):
-                    divisions_href[division_name] = pm.get_division(division_name, league)
-
-                tier_player.division = divisions_href[division_name]
-                tier_player.tier = tier
-                tier_player.name = player_name
-                tier_player.email_address = decode(tsv_record['email_address'])
-                tier_player.person_name = decode(tsv_record['person_name'])
-                tier_player.timezone = decode(tsv_record['time_zone'])
-                pm.db_connector.get_session().add(tier_player)
-        pm.db_connector.get_session().commit()
 
 
 

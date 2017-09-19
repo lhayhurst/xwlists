@@ -245,7 +245,14 @@ def add_league_form_results():
     return redirect("/league")
 
 
-
+@app.route("/create_league_matches")
+def create_league_matches():
+    league_id = request.args.get('league_id')
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league_by_id(league_id)
+    helper = XWingVassalLeagueHelper(name=league.name, number=league.id)
+    helper.create_matchups(pm, league)
+    return redirect("/league")
 
 @app.route("/league_player")
 def league_player():
