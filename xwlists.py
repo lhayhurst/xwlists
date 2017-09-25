@@ -815,14 +815,14 @@ def slack_notify_escrow_change(match, pm):
           "scheduled_datetime": match.scheduled_datetime,
           "player1": {
               "name": player1.name,
-              "challonge_division_name": player1.division.name,
+              "division_name": player1.division.name,
               "list": match.player1_list_url,
               "pretty_print": match.player1_list.pretty_print_list('\n'),
               "xws": p1_xws
           },
           "player2": {
               "name": player2.name,
-              "challonge_division_name": player2.division.name,
+              "division_name": player2.division.name,
               "list": match.player2_list_url,
               "pretty_print": match.player2_list.pretty_print_list('\n'),
               "xws": p2_xws
