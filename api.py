@@ -374,17 +374,17 @@ class VassalLeaguesAPI(restful.Resource):
 
 
 LEAGUE_NAME = 'name'
-LEAGUE_CHALLONGE_NAME = 'challonge_name'
+LEAGUE_CHALLONGE_NAME = 'league_name'
 LEAGUE_TIERS = 'tiers'
 TIER_NAME = 'name'
-TIER_CHALLONGE_NAME = 'challonge_name'
+TIER_CHALLONGE_NAME = 'tier_name'
 TIER_PLAYERS = 'players'
 TIER_DIVISIONS = 'divisions'
 TIER_ID = 'tier_id'
 PLAYER_NAME = 'name'
 PLAYER_ID = 'player_id'
 DIVISION_NAME = 'name'
-DIVISION_CHALLONGE_NAME = 'challonge_name'
+DIVISION_CHALLONGE_NAME = 'division_name'
 DIVISION_ID = 'division_id'
 DIVISION_PLAYERS = 'players'
 MATCHES = 'matches'
@@ -396,7 +396,7 @@ class VassalLeagueMatches(restful.Resource):
         league = pm.get_league_by_id(league_id)
         ret = {}
         ret[LEAGUE_NAME] = league.name
-        ret[LEAGUE_CHALLONGE_NAME] = league.challonge_name
+        ret[LEAGUE_CHALLONGE_NAME] = league.name
         matches = []
         ret[MATCHES] = matches
 
@@ -418,11 +418,10 @@ class VassalLeagueMatches(restful.Resource):
                     'tier_name': t.name,
                     'scheduled_datetime': m.scheduled_datetime,
                     'state': m.state,
-                    'vlog': m.challonge_attachment_url,
                     'last_updated_at': m.updated_at,
                     'player1': {
                         'name': m.player1.name,
-                        "challonge_division_name": m.player1.division.name,
+                        "division_name": m.player1.division.name,
                         "list": m.player1_list_url,
                         "pretty_print": p1_pretty_list,
                         "xws": p1_xws,
@@ -430,7 +429,7 @@ class VassalLeagueMatches(restful.Resource):
                     },
                     'player1': {
                         'name': m.player2.name,
-                        'challonge_division_name': m.player2.division.name,
+                        'division_name': m.player2.division.name,
                         'list': m.player2_list_url,
                         'pretty_print': p2_pretty_list,
                         'xws': p2_xws,
@@ -464,7 +463,7 @@ class VassalLeagueAPI(restful.Resource):
                 for player in division.players:
                     division_players.append({PLAYER_NAME: player.name, PLAYER_ID: player.id})
                 tdata[TIER_DIVISIONS].append({DIVISION_NAME: division.name,
-                                              DIVISION_CHALLONGE_NAME: division.challonge_name,
+                                              DIVISION_CHALLONGE_NAME: division.name,
                                               DIVISION_ID: division.id,
                                               DIVISION_PLAYERS: division_players
                                               })
@@ -492,8 +491,8 @@ class VassalLeagueRanking(restful.Resource):
 
         for d in tier.divisions:
             dr = {'division_name': d.name,
-                  'division_challonge_name': d.challonge_name,
                   'division_id': d.id,
+                  'division_letter' : d.division_letter,
                   'rankings': []
                   }
             division_rankings.append(dr)
