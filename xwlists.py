@@ -564,7 +564,7 @@ def get_league_stats(league):
 def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
     league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
-    tiers = league.tiers
+    tiers = sorted(league.tiers, key= lambda x: len(x.divisions))
     matches = pm.get_recent_league_matches(league)
 
     return render_template("league_s5.html",
