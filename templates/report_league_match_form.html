@@ -32,14 +32,14 @@
         <div data-row-span="2">
 
             <div data-field-span="1">
-                <label>{{ match.player1.get_name() }}'s score</label>
+                <label>Points Destroyed by {{ match.player1.get_name() }}</label>
                 <input type="text" maxlength="3"  name="player1_score" id="player1_score"
                        style="width:100px"
                        data-parsley-range="[0, 100]" required selected/>
             </div>
 
             <div data-field-span="1">
-                <label>{{ match.player2.get_name() }}'s score</label>
+                <label>Points Destroyed by {{ match.player2.get_name() }}</label>
                 <input type="text" maxlength="3"  name="player2_score" id="player2_score"
                        style="width:100px"
                        data-parsley-range="[0, 100]" required/>
