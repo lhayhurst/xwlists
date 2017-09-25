@@ -17,7 +17,6 @@
     <th>Player 1</th>
     <th>Player 2</th>
     <th>Match State</th>
-    <th>Updated At</th>
     <th>VLog</th>
     <th>Player 1 Score</th>
     <th>Player 2 Score</th>
@@ -41,22 +40,15 @@
          <td>{{  m.player1.get_url()}}</td>
          <td>{{  m.player2.get_url()}}</td>
          <td>{{  m.state }}</td>
-         <td>{{ m.updated_at }}</td>
-        {% if m.is_interdivisional() %}
-            {% if m.is_complete() %}
+          {% if m.is_complete() %}
                  <td>{{  m.get_vlog_url() | safe }}</td>
                  <td>{{  m.player1_score }}</td>
                  <td>{{  m.player2_score }}</td>
             {% else %}
                  <td>{{  m.get_report_match_url() }}</td>
-                 <td>{{  m.get_report_match_url() }}</td>
-                 <td>{{  m.get_report_match_url() }}</td>
+                 <td></td>
+                 <td></td>
             {% endif %}
-        {% else %}
-                 <td>{{  m.get_vlog_url() | safe }}</td>
-                 <td>{{  m.player1_score }}</td>
-                 <td>{{  m.player2_score }}</td>
-        {% endif %}
          <td>{{ m.get_schedule() }}</td>
          <td >{{ m.get_player1_list_display() | safe }}
          <td >{{ m.get_player2_list_display() | safe }}

@@ -392,6 +392,12 @@ class LeagueMatch(Base):
     subscriptions       = relationship("EscrowSubscription",
                                        back_populates='match',cascade="all,delete,delete-orphan")
 
+    def get_state_url(self):
+        ret = self.state
+        if not self.is_complete():
+            ret = '<a href="' + url_for('report_league_match', match_id=self.id,_external=True ) +  '">report</a>'
+        return Markup(ret)
+
     def get_schedule(self):
         if self.is_complete():
             return self.scheduled_datetime
@@ -410,7 +416,7 @@ class LeagueMatch(Base):
         return self.player1.division_id != self.player2.division_id
 
     def get_report_match_url(self):
-        ret = '<a href="' + url_for('report_interdivisional_match', match_id=self.id,_external=True ) +  '">Report match!</a>'
+        ret = '<a href="' + url_for('report_league_match', match_id=self.id,_external=True ) +  '">Report match!</a>'
         return Markup(ret)
 
 
@@ -619,7 +625,12 @@ class LeagueMatch(Base):
         if self.challonge_attachment_url is None:
             return "None"
 
-        if self.is_interdivisional():
+        #this is a bit of a hack. pre season 5 (league id 7), interdivisional vlogs
+        #were stored as vlogs static/vlog/6, and divisional logs were stored by challonge
+        #for season 5 (league id 7 ) and beyond, all divisional logs are stored in
+        #static/vlog/league_id
+
+        if self.tier.league.id >=7 or self.is_interdivisional():
             return  '<a href="' + url_for('download_vlog', match_id=self.id, ) + '">Download</a><br>'
 
         return '<a href="http://' + self.challonge_attachment_url + '">Download</a><br>'

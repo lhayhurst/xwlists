@@ -614,12 +614,12 @@ def league_season_four():
     return render_template("league_s4.html",
                            league=league, tiers=tiers, matches=matches)
 
-@app.route("/report_interdivisional_match")
-def report_interdivisional_match():
+@app.route("/report_league_match")
+def report_league_match():
     match_id = request.args.get("match_id")
     pm = PersistenceManager(myapp.db_connector)
     match = pm.get_match(match_id)
-    return render_template("report_interdivision_league_match_form.html", match=match)
+    return render_template("report_league_match_form.html", match=match)
 
 
 @app.route('/download_vlog')
@@ -627,13 +627,14 @@ def download_vlog():
     match_id = request.args.get("match_id")
     pm = PersistenceManager(myapp.db_connector)
     match = pm.get_match(match_id)
-    return send_file(vlog_dir + "/" + match.challonge_attachment_url,
+    league_id = match.tier.league.id
+    return send_file(vlog_dir + "/" + str(league_id) + "/" + match.challonge_attachment_url,
                      as_attachment=True,
                      attachment_filename=match.challonge_attachment_url)
 
 
-@app.route("/submit_interdivisional_league_match_report", methods=['POST'])
-def submit_interdivisional_league_match_report():
+@app.route("/submit_league_match_report", methods=['POST'])
+def submit_league_match_report():
     match_id = request.form['match_id']
     pm = PersistenceManager(myapp.db_connector)
     match = pm.get_match(match_id)
@@ -650,7 +651,7 @@ def submit_interdivisional_league_match_report():
         if allowed_file(filename):
             try:
                 filename = secure_filename(filename)
-                dir = vlog_dir
+                dir = vlog_dir + "/" + str(match.tier.league.id)
                 file = os.path.join(dir, filename)
                 if os.path.isfile(file):  # if this file has already been uploaded ...
                     i = 1

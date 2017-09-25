@@ -3,12 +3,12 @@
 
 <form id="form"
       class="grid-form"
-      action="{{ url_for('submit_interdivisional_league_match_report') }}"
+      action="{{ url_for('submit_league_match_report') }}"
       method=POST
       class="add-entry"
       enctype="multipart/form-data">
     <fieldset>
-        <legend>Report your inter-divisional league match!</legend>
+        <legend>Report your league match!</legend>
         <div data-row-span="2">
             <div data-field-span="1">
                 <label>Division</label>
@@ -30,13 +30,14 @@
             </div>
         </div>
         <div data-row-span="2">
+
             <div data-field-span="1">
                 <label>{{ match.player1.get_name() }}'s score</label>
                 <input type="text" maxlength="3"  name="player1_score" id="player1_score"
                        style="width:100px"
-                       data-parsley-range="[0, 100]" required/>
-
+                       data-parsley-range="[0, 100]" required selected/>
             </div>
+
             <div data-field-span="1">
                 <label>{{ match.player2.get_name() }}'s score</label>
                 <input type="text" maxlength="3"  name="player2_score" id="player2_score"

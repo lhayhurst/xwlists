@@ -70,9 +70,15 @@
          <td>{{  m.player1.get_name()}}</td>
          <td>{{  m.player2.get_name()}}</td>
          <td>{{  m.state }}</td>
-         <td>{{  m.get_vlog_url() | safe }}</td>
-         <td>{{  m.player1_score }}</td>
-         <td>{{  m.player2_score }}</td>
+          {% if m.is_complete() %}
+                 <td>{{  m.get_vlog_url() | safe }}</td>
+                 <td>{{  m.player1_score }}</td>
+                 <td>{{  m.player2_score }}</td>
+            {% else %}
+                 <td>{{  m.get_report_match_url() }}</td>
+                 <td></td>
+                 <td></td>
+            {% endif %}
          <td >{{ m.get_player1_list_display() | safe }}
          <td >{{ m.get_player2_list_display() | safe }}
       </tr>
