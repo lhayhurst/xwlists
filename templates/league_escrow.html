@@ -7,15 +7,15 @@ P { text-align: center }
 {% if match.player1.id == selected_player_id %}
     {% set p1autofocus = "autofocus" %}
     {% set p2autofocus = "" %}
+    {% set selected_player = match.player1.name %}
 {% else %}
     {% set p2autofocus = "autofocus" %}
     {% set p1autofocus = "" %}
+    {% set selected_player = match.player2.name %}
+
 {% endif %}
 If you need help, please <a href="https://docs.google.com/document/d/1_6Il-zEbNtnm9q5SZO3Z9mHUT2LpN3LNk6bnpDPME1w/pub">see this guide for help on how to escrow your list!</a><br>
 
-After you've pasted in the link to your list, simply wait for your opponent's list to appear on the page!<br>
-
-You can also set the date and time that the match is going to be played by clicking here: {{ match.get_schedule() }}
 <br><br>
 <form id="form"
       class="grid-form"
@@ -24,7 +24,7 @@ You can also set the date and time that the match is going to be played by click
       class="add-entry"
       enctype="multipart/form-data">
     <fieldset>
-        <legend>Escrow your list!</legend>
+        <legend>Escrow {{ selected_player }}'s list!</legend>
         <div data-row-span="2">
             <div data-field-span="1">
                 <label>Player 1</label>
@@ -39,13 +39,27 @@ You can also set the date and time that the match is going to be played by click
         </div>
         <div data-row-span="2">
             <div data-field-span="1">
-                <label>Player 1</label>
-                <input type="text" id="player1_url" name="player1_url"  placeholder="Insert player1 list URL here and hit the return key" {{ p1autofocus }}/>
+                <label>Player 1's List</label>
+                <input type="text" id="player1_url" name="player1_url"
+                       {% if match.player1.id == selected_player_id %}
+                           placeholder="Insert player1 list URL here and hit the return key" {{ p1autofocus }}
+                       {% else %}
+                           disabled
+                           placeholder="Your opponent's list will appear here when escrow is complete"
+                       {%  endif %}/>
             </div>
             <div data-field-span="1">
-                <label>Player 2</label>
-                <input type="text" id="player2_url" name="player2_url"  placeholder="Insert player2 list URL here and hit the return key" {{ p2autofocus }}/>
-            </div>
+                <label>Player 2's List</label>
+                <input type="text"
+                       id="player2_url"
+                       name="player2_url"
+                       {% if match.player2.id == selected_player_id %}
+                           placeholder="Insert player2 list URL here and hit the return key" {{ p1autofocus }}
+                       {% else %}
+                           disabled
+                           placeholder="Your opponent's list will appear here when escrow is complete"
+                       {%  endif %}            />
+                </div>
         </div>
         <div data-row-span="2">
             <div data-field-span="1">
