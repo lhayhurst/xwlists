@@ -815,6 +815,7 @@ def slack_notify_league_match_schedule(match):
             "name": match.player2.name,
             "division_name": match.player2.division.name,
         },
+        "url": match.get_url(use_markup=False)
     }
 
     jsondata = json.dumps(js)
