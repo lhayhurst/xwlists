@@ -415,6 +415,7 @@ class VassalLeagueMatches(restful.Resource):
                     p2_pretty_list = m.player2_list.pretty_print_list('\n')
 
                 matches.append({
+                    'url': m.get_url(use_markup=False),
                     'tier_name': t.name,
                     'scheduled_datetime': m.scheduled_datetime,
                     'state': m.state,

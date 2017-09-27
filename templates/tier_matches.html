@@ -14,6 +14,7 @@
   <tr>
     <th>Tier</th>
     <th>Division</th>
+    <th>Id/Match Link</th>
     <th>Player 1</th>
     <th>Player 2</th>
     <th>Match State</th>
@@ -37,6 +38,7 @@
          {% else %}
              <td>{{  m.player1.division.get_name()}}</td>
          {% endif %}
+         <td>{{ m.get_url() }}</td>
          <td>{{  m.player1.get_url()}}</td>
          <td>{{  m.player2.get_url()}}</td>
          <td>{{  m.state }}</td>

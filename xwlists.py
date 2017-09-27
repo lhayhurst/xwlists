@@ -706,6 +706,8 @@ def submit_league_match_schedule():
     pm.db_connector.get_session().add(match)
     pm.db_connector.get_session().commit()
 
+    slack_notify_league_match_schedule(match)
+
     # finally, if the match has been escrowed, and there has been a datetime change, send it along
     if match.needs_escrow() == False:
         slack_notify_escrow_change(match, pm)
@@ -801,6 +803,26 @@ def reset_match_escrow():
     pm.db_connector.get_session().commit()
     return redirect(url_for('escrow', match_id=match_id, player_id=player_id))
 
+def slack_notify_league_match_schedule(match):
+    js = {
+        'scheduled_datetime': match.scheduled_datetime,
+        'tier_name': match.tier.name,
+        'player1': {
+            "name": match.player1.name,
+            "division_name": match.player1.division.name,
+        },
+        'player2': {
+            "name": match.player2.name,
+            "division_name": match.player2.division.name,
+        },
+    }
+
+    jsondata = json.dumps(js)
+    print jsondata
+    resp = post("https://cv6jcoop2e.execute-api.us-east-1.amazonaws.com/prod/match-scheduled",
+                data=jsondata)
+    print "posted, got response %d " % (resp.status_code)
+    return resp.status_code
 
 def slack_notify_escrow_change(match, pm):
     if match.slack_notified:
@@ -814,6 +836,7 @@ def slack_notify_escrow_change(match, pm):
     p2_xws = c.data
     js = {"tier_name": tier.name,
           "scheduled_datetime": match.scheduled_datetime,
+          "url": match.get_url(use_markup=False),
           "player1": {
               "name": player1.name,
               "division_name": player1.division.name,
@@ -870,6 +893,12 @@ def escrow_change():
                        escrow_complete=escrow_complete)
     return response
 
+@app.route("/league_match", methods=['GET'])
+def league_match():
+    match_id  = request.args.get("match_id")
+    pm = PersistenceManager(myapp.db_connector)
+    match = pm.get_match(match_id)
+    return render_template('league_match.html', match=match)
 
 @app.route("/delete_match", methods=['GET'])
 def delete_match():

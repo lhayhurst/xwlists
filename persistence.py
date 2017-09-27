@@ -385,6 +385,14 @@ class LeagueMatch(Base):
     subscriptions       = relationship("EscrowSubscription",
                                        back_populates='match',cascade="all,delete,delete-orphan")
 
+    def get_url(self, use_markup=True):
+        url=url_for('league_match', match_id=self.id,_external=True )
+        url_txt= '<a href="' + url +  '">' + str(self.id) + '</a>'
+        if use_markup:
+            return Markup(url_txt)
+        else:
+            return url
+
     def get_state_url(self):
         ret = self.state
         if not self.is_complete():

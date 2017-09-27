@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('submit_league_match_report') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data">
+    <fieldset>
+        <legend>League Match</legend>
+        <div data-row-span="3">
+            <div data-field-span="1">
+                <label>League</label>
+                {{ match.tier.league.name }}
+            </div>
+
+            <div data-field-span="1">
+                <label>Tier</label>
+                {{ match.tier.name }}
+            </div>
+            <div data-field-span="1">
+                <label>Divison </label>
+                {{ match.player2.division.name }}
+            </div>
+        </div>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>State</label>
+                {{ match.state }}
+                {% if not match.is_complete() %}
+                    {{ '( ' + match.get_report_match_url() + ' )' }}
+                {%  endif %}
+            </div>
+            <div data-field-span="1">
+                <label>Scheduled Date</label>
+                {{ match.get_schedule() }}
+            </div>
+        </div>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Player 1</label>
+                {{ match.player1.get_url() }}
+            </div>
+            <div data-field-span="1">
+                <label>Player 2</label>
+                {{ match.player2.get_url() }}
+            </div>
+        </div>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>List</label>
+                {{ match.get_player1_list_display() | safe }}
+            </div>
+            <div data-field-span="1">
+                <label>List</label>
+                {{ match.get_player2_list_display() | safe }}
+            </div>
+        </div>
+        {% if match.is_complete() %}
+            <div data-row-span="1">
+                <div data-field-span="1">
+                <label>Winner</label>
+                    {{ match.get_winner().name }}
+                </div>
+            </div>
+            <div data-row-span="2">
+                <div data-field-span="1">
+                    <label>Points Destroyed by {{ match.player1.get_name() }}</label>
+                    {{ match.points_killed(match.player1) }}
+                </div>
+
+                <div data-field-span="1">
+                    <label>Points Destroyed by {{ match.player2.get_name() }}</label>
+                    {{ match.points_killed(match.player2) }}
+                </div>
+            </div>
+              <div data-row-span="1">
+                <div data-field-span="1">
+                <label>Vlog</label>
+                    {{ match.get_vlog_url() | safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </fieldset>
+
+</form>
+
+<script>
+   $('#form').parsley();
+</script>
+{% endblock %}
