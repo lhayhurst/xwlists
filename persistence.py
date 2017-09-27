@@ -324,8 +324,6 @@ class TierPlayer(Base):
         return count
 
     def get_stats(self, ignore_defaults=False,ignore_interdivisional=False):
-        if self.name == 'zer0tc':
-            print "foo"
         ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0,
                 'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0, 'mov':0,
                 'interdivisional_count': 0}
@@ -339,15 +337,9 @@ class TierPlayer(Base):
                 if m.player_won(self):
                     ret['wins'] += 1
                     ret['mov'] += 100 + ( m.points_killed(self) - m.points_lost(self))
-                elif m.player_lost(self):
-                    ret['losses'] += 1
-                    if m.points_lost(self) is None or m.points_killed(self) is None:
-                        print "wtf"
-                        print m.is_complete()
-                    ret['mov'] += 100 - ( m.points_lost(self) - m.points_killed(self))
                 else:
-                    ret['draws'] += 1
-                    ret['mov'] += 100
+                    ret['losses'] += 1
+                    ret['mov'] += 100 - ( m.points_lost(self) - m.points_killed(self))
                 list_played = m.get_list(self)
                 if list_played is not None:
                     if list_played.is_rebel():
