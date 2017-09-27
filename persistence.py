@@ -381,6 +381,7 @@ class LeagueMatch(Base):
     challonge_attachment_url = Column(String(2048))
     updated_at          = Column(String(128))
     scheduled_datetime  = Column(String(128))
+    winner_id           = Column(Integer)
 
     tier             = relationship( Tier.__name__, uselist=False)
     player1             = relationship( TierPlayer.__name__, uselist=False, foreign_keys='LeagueMatch.player1_id')
@@ -549,15 +550,19 @@ class LeagueMatch(Base):
     def get_winner(self):
         winner = None
         if self.is_complete():
-            if self.player1_score > self.player2_score:
+            if self.winner_id is not None:
+                if self.winner_id == self.player1_id:
+                    winner = self.player1
+                else:
+                    winner = self.player2
+            elif self.player1_score > self.player2_score:
                 winner = self.player1
             elif self.player2_score > self.player1_score:
                 winner = self.player2
         return winner
 
     def was_draw(self):
-        return self.is_complete() and \
-               self.player1_score == self.player2_score
+        return False #no longer possible :-)
 
     def player_lost(self,player):
         if self.was_draw():

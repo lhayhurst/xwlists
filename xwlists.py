@@ -643,6 +643,7 @@ def submit_league_match_report():
     winner_id = request.form['winner_id']
     match.player1_score = player1_score
     match.player2_score = player2_score
+    match.winner_id = winner_id
     match.completed()
 
     vlog = request.files['vlog_file']
