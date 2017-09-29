@@ -812,12 +812,14 @@ def slack_notify_match_complete(match):
         'player1': {
             'name': match.player1.name,
             'division_name': match.player1.division.name,
-            'points_destroyed': match.player1_score
+            'points_destroyed': match.player1_score,
+            'mov': match.player1.get_mov(match)
         },
         'player2': {
             'name': match.player2.name,
             'division_name': match.player2.division.name,
-            'points_destroyed': match.player2_score
+            'points_destroyed': match.player2_score,
+            'mov': match.player2.get_mov(match)
         },
         'winner': match.get_winner().name,
         'tier_name': match.tier.name

@@ -323,6 +323,12 @@ class TierPlayer(Base):
                 count +=1
         return count
 
+    def get_mov(self, m):
+        if m.player_won(self):
+            return 100 + ( m.points_killed(self) - m.points_lost(self))
+        else:
+            return 100 - ( m.points_lost(self) - m.points_killed(self))
+
     def get_stats(self, ignore_defaults=False,ignore_interdivisional=False):
         ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0,
                 'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0, 'mov':0,
@@ -336,10 +342,10 @@ class TierPlayer(Base):
                 ret['total'] +=1
                 if m.player_won(self):
                     ret['wins'] += 1
-                    ret['mov'] += 100 + ( m.points_killed(self) - m.points_lost(self))
+                    ret['mov'] += self.get_mov(m)
                 else:
                     ret['losses'] += 1
-                    ret['mov'] += 100 - ( m.points_lost(self) - m.points_killed(self))
+                    ret['mov'] += self.get_mov(m)
                 list_played = m.get_list(self)
                 if list_played is not None:
                     if list_played.is_rebel():
@@ -528,16 +534,16 @@ class LeagueMatch(Base):
 
     def points_killed(self, player):
         if self.player1 is not None and player.id == self.player1.id:
-            return self.player1_score
+            return int(self.player1_score)
         if self.player2 is not None and player.id == self.player2.id:
-            return self.player2_score
+            return int(self.player2_score)
         return 0
 
     def points_lost(self, player):
         if self.player1 is not None and player.id == self.player1.id:
-            return self.player2_score
+            return int(self.player2_score)
         if self.player2 is not None and player.id == self.player2.id:
-            return self.player1_score
+            return int(self.player1_score)
         return 0
 
     def get_list(self, player):
