@@ -677,6 +677,9 @@ def submit_league_match_report():
             except Exception as e:
                 print("Unable to upload vlog file, reason: " + str(e))
     pm.db_connector.get_session().commit()
+
+    slack_notify_match_complete(match)
+
     return redirect(url_for('tier_matches', tier_id=match.tier_id))
 
 
@@ -802,6 +805,30 @@ def reset_match_escrow():
     match.delete_partial_escrow(player_id)
     pm.db_connector.get_session().commit()
     return redirect(url_for('escrow', match_id=match_id, player_id=player_id))
+
+def slack_notify_match_complete(match):
+    js = {
+        'url' : match.get_url(use_markup=False),
+        'player1': {
+            'name': match.player1.name,
+            'division_name': match.player1.division.name,
+            'points_destroyed': match.player1_score
+        },
+        'player2': {
+            'name': match.player2.name,
+            'division_name': match.player2.division.name,
+            'points_destroyed': match.player2_score
+        },
+        'winner': match.get_winner().name,
+        'tier_name': match.tier.name
+    }
+    jsondata = json.dumps(js)
+    print jsondata
+    resp = post("https://cv6jcoop2e.execute-api.us-east-1.amazonaws.com/prod/match-completed",
+                data=jsondata)
+    print "posted, got response %d " % (resp.status_code)
+    return resp.status_code
+
 
 def slack_notify_league_match_schedule(match):
     js = {
