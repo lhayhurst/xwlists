@@ -556,15 +556,15 @@ class LeagueMatch(Base):
     def get_winner(self):
         winner = None
         if self.is_complete():
-            if self.winner_id is not None:
+            if self.player1_score > self.player2_score:
+                winner = self.player1
+            elif self.player2_score > self.player1_score:
+                winner = self.player2
+            elif self.winner_id is not None:
                 if self.winner_id == self.player1_id:
                     winner = self.player1
                 else:
                     winner = self.player2
-            elif self.player1_score > self.player2_score:
-                winner = self.player1
-            elif self.player2_score > self.player1_score:
-                winner = self.player2
         return winner
 
     def was_draw(self):
