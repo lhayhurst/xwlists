@@ -160,7 +160,7 @@ class XWSToJuggler:
                         upgrade = pm.get_upgrade_canonical(upgrade_type, upgrade_name)
                         if upgrade is None:
                             raise Exception("xws lookup failed for upgrade " +  upgrade_name )
-                        if has_vaksai and upgrade_type=='mod':
+                        if has_vaksai:
                             cost = upgrade.cost
                             cost = cost - 1
                             if cost < 0:
