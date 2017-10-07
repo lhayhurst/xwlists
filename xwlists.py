@@ -621,6 +621,27 @@ def report_league_match():
     match = pm.get_match(match_id)
     return render_template("report_league_match_form.html", match=match)
 
+@app.route("/upload_vlog_file",methods=['POST'])
+def upload_vlog_file():
+    match_id = request.args.get("match_id")
+    pm = PersistenceManager(myapp.db_connector)
+    match_id = request.form['match_id']
+
+    match = pm.get_match(match_id)
+
+    vlog = request.files['vlog_file']
+
+    save_vlog(match, vlog)
+    pm.db_connector.get_session().commit()
+    return(redirect(url_for("league_match", match_id=match_id)))
+
+@app.route('/upload_vlog', )
+def upload_vlog():
+    match_id = request.args.get("match_id")
+    pm = PersistenceManager(myapp.db_connector)
+    match = pm.get_match(match_id)
+
+    return render_template('upload_vlog.html', match=match)
 
 @app.route('/download_vlog')
 def download_vlog():
@@ -647,6 +668,15 @@ def submit_league_match_report():
     match.completed()
 
     vlog = request.files['vlog_file']
+    save_vlog(match, vlog)
+    pm.db_connector.get_session().commit()
+
+    slack_notify_match_complete(match)
+
+    return redirect(url_for('tier_matches', tier_id=match.tier_id))
+
+
+def save_vlog(match, vlog):
     if vlog is not None:
         filename = vlog.filename
         if allowed_file(filename):
@@ -676,11 +706,6 @@ def submit_league_match_report():
                 match.challonge_attachment_url = url
             except Exception as e:
                 print("Unable to upload vlog file, reason: " + str(e))
-    pm.db_connector.get_session().commit()
-
-    slack_notify_match_complete(match)
-
-    return redirect(url_for('tier_matches', tier_id=match.tier_id))
 
 
 @app.route("/set_league_match_schedule")

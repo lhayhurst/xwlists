@@ -633,18 +633,20 @@ class LeagueMatch(Base):
 
     def get_vlog_url(self):
         url = None
-        if self.challonge_attachment_url is None:
+        if not self.is_complete():
             return "None"
+        elif self.challonge_attachment_url is None:
+                return  '<a href="' + url_for('upload_vlog', match_id=self.id, ) + '">Upload</a><br>'
+        else:
+            #this is a bit of a hack. pre season 5 (league id 7), interdivisional vlogs
+            #were stored as vlogs static/vlog/6, and divisional logs were stored by challonge
+            #for season 5 (league id 7 ) and beyond, all divisional logs are stored in
+            #static/vlog/league_id
 
-        #this is a bit of a hack. pre season 5 (league id 7), interdivisional vlogs
-        #were stored as vlogs static/vlog/6, and divisional logs were stored by challonge
-        #for season 5 (league id 7 ) and beyond, all divisional logs are stored in
-        #static/vlog/league_id
+            if self.tier.league.id >=7 or self.is_interdivisional():
+                return  '<a href="' + url_for('download_vlog', match_id=self.id, ) + '">Download</a><br>'
 
-        if self.tier.league.id >=7 or self.is_interdivisional():
-            return  '<a href="' + url_for('download_vlog', match_id=self.id, ) + '">Download</a><br>'
-
-        return '<a href="http://' + self.challonge_attachment_url + '">Download</a><br>'
+            return '<a href="http://' + self.challonge_attachment_url + '">Download</a><br>'
 
     def set_archtype(self, player_id, archtype):
         if player_id == self.player1_id:

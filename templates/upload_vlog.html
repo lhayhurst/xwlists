@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('upload_vlog_file') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data">
+    <fieldset>
+        <legend>Upload your vlog!</legend>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Division</label>
+                {{ match.player1.division.name }}
+            </div>
+            <div data-field-span="1">
+                <label>Divison </label>
+                {{ match.player2.division.name }}
+            </div>
+        </div>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Player 1</label>
+                {{ match.player1.get_name() }}
+            </div>
+            <div data-field-span="1">
+                <label>Player 2</label>
+                {{ match.player2.get_name() }}
+            </div>
+        </div>
+        <div data-row-span="2">
+
+            <div data-field-span="1">
+                <label>Points Destroyed by {{ match.player1.get_name() }}</label>
+                {{ match.player1_score }}
+            </div>
+
+            <div data-field-span="1">
+                <label>Points Destroyed by {{ match.player2.get_name() }}</label>
+                {{ match.player2_score }}
+            </div>
+        </div>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>Vlog file upload</label>
+                <input type="file" name="vlog_file" accepts="json" >
+            </div>
+
+        </div>
+    </fieldset>
+    <input type="hidden" name="match_id" value="{{ match.id }}" />
+    <input type="submit" class="btn" name="submit-button" id="submit-button" />
+
+</form>
+
+<script>
+   $('#form').parsley();
+</script>
+{% endblock %}
