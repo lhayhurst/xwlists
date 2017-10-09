@@ -1718,6 +1718,40 @@ class PersistenceManager:
     def get_tourney_types(self):
         return self.db_connector.get_session().query(Tourney.tourney_type).distinct()
 
+
+    def get_wave_one_lists(self, wave_one_ships, wave_one_upgrades ):
+        wave_one_ships = [ ShipType.from_string(ws) for ws in wave_one_ships]
+        lists = self.db_connector.get_session().query(ArchtypeList).all()
+#            filter(Ship.archtype_id == ArchtypeList.id).\
+#            filter(Ship.ship_pilot_id == ShipPilot.id).\
+#            filter(ShipPilot.ship_type.in_(wave_one_ships)).distinct().all()
+        print("Processing %d lists" % len(lists))
+        i = 0
+        #this could probably be done with a join but its annoying
+        ret = []
+        for l in lists:
+            i = i+1
+            if i % 1000 == 0:
+                print ("processed %d lists" % ( i ))
+            illegal_list = False
+            for s in l.ships:
+                if not s.ship_pilot.ship_type in wave_one_ships:
+                    illegal_list = True
+                    break
+            if illegal_list:
+                continue
+            for s in l.ships:
+                illegal_upgrade_found = False
+                for su in s.upgrades:
+                    if su.upgrade:
+                        if not su.upgrade.canon_name in wave_one_upgrades:
+                            illegal_upgrade_found = True
+                            break
+                if illegal_upgrade_found:
+                    continue
+            ret.append(l)
+        return ret
+
     def get_ships_by_faction(self):
         filters = [
             Ship.archtype_id == ArchtypeList.id,
@@ -1803,6 +1837,7 @@ class PersistenceManager:
             filter(archtype.id == ArchtypeList.id)
         lists = ret.all()
         return len(lists)
+
 
     def get_archtype_matches(self, archtype_id):
         ret = self.db_connector.get_session().query(RoundResult).\

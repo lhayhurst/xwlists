@@ -54,6 +54,7 @@ VOIDSTATE = "voidstate"
 
 app = myapp.create_app()
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+STATIC_ROOT = "static"
 UPLOAD_FOLDER = "static/tourneys"
 VLOG_FOLDER = "static/vlog"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -63,6 +64,7 @@ is_maintenance_mode = False
 
 here = os.path.dirname(__file__)
 static_dir = os.path.join(here, app.config['UPLOAD_FOLDER'])
+static_root = os.path.join(here, STATIC_ROOT)
 vlog_dir = os.path.join(here, VLOG_FOLDER)
 
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
@@ -73,6 +75,7 @@ ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
 from werkzeug.contrib.cache import SimpleCache
 
 simple_cache = SimpleCache()
+xwing_data   = SimpleCache()
 
 app.config.update(dict(
     DEBUG=True,
@@ -565,10 +568,10 @@ def league_divisions():
     pm = PersistenceManager(myapp.db_connector)
     league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
     tiers = sorted(league.tiers, key= lambda x: len(x.divisions))
-    matches = pm.get_recent_league_matches(league)
+    #matches = pm.get_recent_league_matches(league)
 
     return render_template("league_s5.html",
-                           league=league, tiers=tiers, matches=matches)
+                           league=league, tiers=tiers)
 
 
 @app.route("/league_season_one")
@@ -2464,6 +2467,64 @@ def edit_venue_geo():
 
 def to_float(dec):
     return float("{0:.2f}".format(float(dec) * float(100)))
+
+@app.route("/label_data")
+def label_data():
+    xwing_data = simple_cache.get('xwing-data')
+    if xwing_data is None:
+        xwing_data = {}
+        #pm = PersistenceManager(myapp.db_connector)
+        dir = os.path.join(static_root, "xwing-data")
+        ships_file = os.path.join(dir, "ships.js")
+        with open(ships_file) as data_file:
+            ships_data = json.loads(data_file.read())
+            xwing_data['ships'] = ships_data
+        source_file = os.path.join(dir, "sources.js")
+        with open(source_file) as data_file:
+            sources_data = json.loads(data_file.read())
+            xwing_data['sources'] = ships_data
+        upgrade_file = os.path.join(dir, 'upgrades.js')
+        with open(upgrade_file) as data_file:
+            upgrade_data = json.loads(data_file.read())
+            xwing_data['upgrades'] = upgrade_data
+        simple_cache.set('xwing-data', xwing_data)
+
+        ship_map= {}
+        upgrade_map = {}
+        for sd in sources_data:
+            wave = sd['wave']
+            ships = sd['contents']['ships']
+            upgrades = sd['contents']['upgrades']
+            for xwing_data_ship_id in ships:
+                if not ship_map.has_key(xwing_data_ship_id):
+                    ship_map[xwing_data_ship_id] = { 'xwing_data_id': xwing_data_ship_id,
+                                                     'wave':wave,
+                                                     'xws': None}
+            for xwing_data_upgrade_id in upgrades:
+                if not upgrade_map.has_key(xwing_data_upgrade_id):
+                    upgrade_map[xwing_data_upgrade_id] = {'xwing_data_id': xwing_data_upgrade_id, 'wave':wave, 'xws':None}
+
+        for ship in ships_data:
+            sm = ship_map[str(ship['id'])]
+            sm['xws'] = ship['xws']
+
+        for upgrade in upgrade_data:
+            um = upgrade_map[str(upgrade['id'])]
+            if um['wave'] in (0,1):
+                um['xws'] = upgrade['xws']
+
+        wave_one_ships    = [s['xws'] for s in ship_map.values() if s['wave'] in (0,1)]
+        wave_one_upgrades = {}
+        for u in upgrade_map.values():
+            if not wave_one_upgrades.has_key(u['xws']):
+                wave_one_upgrades[u['xws']] = 1
+        pm = PersistenceManager(myapp.db_connector)
+        wave_one_lists = pm.get_wave_one_lists(wave_one_ships,wave_one_upgrades)
+        xwing_data['wave_one_lists'] = wave_one_lists
+
+
+    return render_template("label_data.html", lists=xwing_data['wave_one_lists'] )
+
 
 
 if __name__ == '__main__':
