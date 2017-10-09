@@ -428,7 +428,7 @@ class VassalLeagueMatches(restful.Resource):
                         "xws": p1_xws,
                         'score': m.player1_score
                     },
-                    'player1': {
+                    'player2': {
                         'name': m.player2.name,
                         'division_name': m.player2.division.name,
                         'list': m.player2_list_url,
