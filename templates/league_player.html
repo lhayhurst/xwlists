@@ -51,6 +51,7 @@
     <th>Updated at</th>
     <th>Tier</th>
     <th>Division</th>
+    <th>Match Page</th>
     <th>Player 1</th>
     <th>Player 2</th>
     <th>Match State</th>
@@ -67,6 +68,7 @@
          <td>{{  m.updated_at}}</td>
          <td>{{  m.player1.tier.get_name() | safe}}</td>
          <td>{{  m.player1.division.get_name() | safe}}</td>
+        <td>{{ m.get_url() }}</td>
          <td>{{  m.player1.get_name()}}</td>
          <td>{{  m.player2.get_name()}}</td>
          <td>{{  m.state }}</td>
