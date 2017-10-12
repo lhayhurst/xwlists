@@ -152,10 +152,33 @@ class XWingVassalLeagueHelper:
         pm.db_connector.get_session().commit()
 
 
+    def create_matchups_for_new_player(self, pm, new_player):
+        division = new_player.division
+        for opponent in division.players:
+            if not opponent.id == new_player.id:
+                lm = LeagueMatch()
+                lm.player1 = opponent
+                lm.player2 = new_player
+                lm.tier_id = division.tier.id
+                lm.state = 'open'
+                pm.db_connector.get_session().add(lm)
 
 
-        for tier in league.tiers:
-            players = self.player_data.tsv_players.keys()
+    def add_player(self, pm, division_id, tier, email_address, player_name, person_name):
+        tier_player = TierPlayer()
+        tier_player.division = pm.get_division_by_id(division_id)
+        tier_player.tier = tier
+        tier_player.email_address = email_address
+        tier_player.name = player_name
+        tier_player.person_name = person_name
+
+        pm.db_connector.get_session().add(tier_player)
+        pm.db_connector.get_session().commit()
+
+        # the player is added, now go set all the matches for this player in their division
+        self.create_matchups_for_new_player(pm, tier_player)
+        pm.db_connector.get_session().commit()
+        return tier_player
 
 
 

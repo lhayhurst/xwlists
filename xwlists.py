@@ -360,9 +360,9 @@ def league_admin():
 
 @app.route("/remove_league_player")
 def remove_league_player():
-    league_id = request.args.get('league_id')
     pm = PersistenceManager(myapp.db_connector)
-    league = pm.get_league_by_id(league_id)
+    league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
+    pm = PersistenceManager(myapp.db_connector)
     players = []
     for tier in league.tiers:
         for player in tier.players:
@@ -402,12 +402,12 @@ def add_league_player():
 
 @app.route("/add_league_player_form_results", methods=['POST'])
 def add_league_player_form_results():
-    player_name = decode(request.form['player_name'])
+    player_name = decode(request.form['name'])
     email_address = decode(request.form['email_address'])
     person_name = decode(request.form['person_name'])
-    timezone = decode(request.form['timezone'])
     division_id = request.form['division_dropdown']
     tier_id = request.form['tier_dropdown']
+
 
     pm = PersistenceManager(myapp.db_connector)
 
@@ -418,22 +418,9 @@ def add_league_player_form_results():
         return render_template("league_player.html", player=tier_player, stats=player_stats)
 
     tier = pm.get_tier_by_id(tier_id)
-    tier_player = TierPlayer()
-    tier_player.division = pm.get_division_by_id(division_id)
-    tier_player.tier = tier
-    tier_player.email_address = email_address
-    tier_player.name = player_name
-    tier_player.person_name = person_name
-    tier_player.timezone = timezone
-
-    pm.db_connector.get_session().add(tier_player)
-    pm.db_connector.get_session().commit()
-
-    # the player is added, now go get his/her matches
-
-    # add the escrows
-
-    pm.db_connector.get_session().commit()
+    league = tier.league
+    vl = XWingVassalLeagueHelper(league.name, league.id)
+    tier_player = vl.add_player(pm, division_id, tier, email_address, player_name, person_name)
     player_stats = tier_player.get_stats()
     return render_template("league_player.html", player=tier_player, stats=player_stats)
 
