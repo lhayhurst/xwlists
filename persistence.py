@@ -171,6 +171,17 @@ class Upgrade(Base):
     cost = Column(Integer, unique=True)
 
 
+    def get_cost(self, has_vaksai, has_tiex1):
+        total = self.cost
+        if has_vaksai:
+            total = self.cost - 1
+            if total < 0:
+                total = 0
+        elif has_tiex1 and self.upgrade_type == UpgradeType.SYSTEM:
+            total = self.cost - 4
+            if total < 0:
+                total = 0
+        return total
 
 class Ship(Base):
     __tablename__ = ship_table

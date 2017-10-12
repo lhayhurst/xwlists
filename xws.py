@@ -137,9 +137,10 @@ class XWSToJuggler:
 
             if ship_pilot.has_key('upgrades'):
                 upgrades = ship_pilot['upgrades']
+
+                #this is a nasty hack but, what can you do
                 hastiex1 = False
                 has_vaksai = False
-                #this is a nasty hack but, what can you do
 
                 for upgrade_type in upgrades.keys():
                     if upgrade_type == 'title':
@@ -160,20 +161,7 @@ class XWSToJuggler:
                         upgrade = pm.get_upgrade_canonical(upgrade_type, upgrade_name)
                         if upgrade is None:
                             raise Exception("xws lookup failed for upgrade " +  upgrade_name )
-                        if has_vaksai:
-                            cost = upgrade.cost
-                            cost = cost - 1
-                            if cost < 0:
-                                cost = 0
-                            points = points + cost
-                        elif hastiex1 and upgrade_type=='system':
-                            cost = upgrade.cost
-                            cost = cost - 4
-                            if cost < 0:
-                                cost = 0
-                            points  = points + cost
-                        else:
-                            points  = points + upgrade.cost
+                        points = points + upgrade.get_cost( has_vaksai=has_vaksai, has_tiex1=hastiex1)
                         ship_upgrade = ShipUpgrade( ship=ship, upgrade=upgrade )
 
         hashkey = ArchtypeList.generate_hash_key(ships)
