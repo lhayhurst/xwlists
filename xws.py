@@ -7,7 +7,7 @@ from persistence import TourneyList, Faction, Ship, ShipUpgrade, ArchtypeList
 
 
 class XWSListConverter:
-    def __init__(self, archtype):
+    def __init__(self, archtype, provide_points = False):
         self.data = {}
         if archtype is None:
             return
@@ -16,13 +16,17 @@ class XWSListConverter:
             pass
         else:
             self.data['faction'] = str(archtype.faction.value)
+
+        if archtype is None:
+            return
+
         pilots = []
         self.data['pilots'] = pilots
         self.data['version'] = "4.2.0"
         self.data['vendor'] = { 'listjuggler': {} }
+        if provide_points:
+            self.data['points'] = archtype.points
 
-        if archtype is None:
-            return
         for ship in archtype.ships:
             sp = ship.ship_pilot
             p  = sp.pilot
@@ -30,6 +34,8 @@ class XWSListConverter:
             pilots.append( pilot_href )
             pilot_href[ "name"]   = p.canon_name
             pilot_href[ "ship"]   = str(sp.ship_type.value)
+            if provide_points:
+                pilot_href["points"]    = sp.pilot.cost
             pilot_upgrades = {}
             if len(ship.upgrades) > 0:
                 pilot_href['upgrades'] = pilot_upgrades
@@ -38,7 +44,13 @@ class XWSListConverter:
                     ut = str(ship_upgrade.upgrade.upgrade_type.value)
                     if not pilot_upgrades.has_key(ut):
                         pilot_upgrades[ut] = []
-                    pilot_upgrades[ut].append( ship_upgrade.upgrade.canon_name)
+                    if provide_points:
+                        pilot_upgrades[ut].append( {'name': ship_upgrade.upgrade.canon_name,
+                                                    'points':ship_upgrade.upgrade.get_cost(has_vaksai=archtype.has_vaksai(),
+                                                                                           has_tiex1=archtype.has_tiex1())
+                                                    } )
+                    else:
+                        pilot_upgrades[ut].append( ship_upgrade.upgrade.canon_name)
 
 class GeneralXWSFetcher:
     fab_root        = "x-wing.fabpsb.net"

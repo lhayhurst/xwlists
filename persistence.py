@@ -912,6 +912,26 @@ class ArchtypeList(Base):
 
      tags             = relationship("ArchtypeTag", uselist=True)
 
+
+     def has_vaksai(self):
+         for ship in self.ships:
+             if len(ship.upgrades) > 0:
+                 for ship_upgrade in ship.upgrades:
+                     if ship_upgrade.upgrade is not None:
+                         if ship_upgrade.upgrade.name == 'vaksai':
+                             return True
+         return False
+
+
+     def has_tiex1(self):
+         for ship in self.ships:
+             if len(ship.upgrades) > 0:
+                 for ship_upgrade in ship.upgrades:
+                     if ship_upgrade.upgrade is not None:
+                         if ship_upgrade.upgrade.name == 'tiex1':
+                             return True
+         return False
+
      def is_rebel(self):
          if self.faction is not None and self.faction == Faction.REBEL:
              return True

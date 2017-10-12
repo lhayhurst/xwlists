@@ -819,7 +819,7 @@ LONGITUDE = "lon"
 
 
 class TourneyToJsonConverter:
-    def convert(self, t):
+    def convert(self, t, provide_points=False):
         tournament = {}
         ret = {}
         ret[TOURNAMENT] = tournament
@@ -871,7 +871,7 @@ class TourneyToJsonConverter:
             # if the player has a list, xws it
             tlist = ranking.player.get_first_tourney_list()
             if tlist and tlist.archtype_list:
-                converter = XWSListConverter(tlist.archtype_list)
+                converter = XWSListConverter(tlist.archtype_list,provide_points=provide_points)
                 player[LIST] = converter.data
 
         # and now the rounds
@@ -896,6 +896,9 @@ class TourneyToJsonConverter:
                     resref[FINAL_SALVO] = result.final_salvo
 
         return ret
+
+
+
 
 
 class TournamentAPI(restful.Resource):
@@ -1041,6 +1044,26 @@ class TournamentAPI(restful.Resource):
         response = jsonify(message="deleted tourney id %d" % (tourney_id))
         response.status_code = 204
         return response
+
+class TournamentAPIWithPoints(restful.Resource):
+     def get(self, tourney_id):
+        pm = PersistenceManager(myapp.db_connector)
+        t = pm.get_tourney_by_id(tourney_id)
+        if t is None:
+            response = jsonify(message="tourney %d not found" % (tourney_id))
+            response.status_code = 404
+            return response
+
+        # and log it
+        event = Event(remote_address=myapp.remote_address(request),
+                      event_date=func.now(),
+                      event="API",
+                      event_details="tournament API: tourney GET")
+        pm.db_connector.get_session().add(event)
+        pm.db_connector.get_session().commit()
+
+        json = TourneyToJsonConverter().convert(t,provide_points=True)
+        return jsonify(json)
 
 
 class TournamentSearchAPI(restful.Resource):

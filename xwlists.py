@@ -26,7 +26,7 @@ from sqlalchemy import func
 from sqlalchemy import Date
 from werkzeug.utils import secure_filename
 from requests import post
-from api import TournamentsAPI, TournamentAPI, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI, \
+from api import TournamentsAPI, TournamentAPI, TournamentAPIWithPoints, PlayersAPI, PlayerAPI, TournamentSearchAPI, TournamentTokenAPI, \
     VassalLeaguesAPI, VassalLeagueAPI, \
     VassalLeagueRanking, VassalLeagueMatches
 
@@ -102,6 +102,8 @@ api.add_resource(VassalLeagueMatches, '/api/v1/vassal_league_matches/<int:league
 
 api.add_resource(TournamentsAPI, '/api/v1/tournaments')
 api.add_resource(TournamentAPI, '/api/v1/tournament/<int:tourney_id>')
+api.add_resource(TournamentAPIWithPoints, '/api/v2/tournament/<int:tourney_id>')
+
 api.add_resource(PlayersAPI, '/api/v1/tournament/<int:tourney_id>/players')
 api.add_resource(PlayerAPI, '/api/v1/tournament/<int:tourney_id>/player/<int:player_id>')
 
