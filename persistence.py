@@ -447,7 +447,7 @@ class LeagueMatch(Base):
     def get_escrow_reset_link(self):
         if self.is_complete():
             return "completed"
-        ret = '<a rel="nofollow" href="' + url_for('force_reset_match_escrow', match_id=self.id,_external=True ) +  '">link</a>'
+        ret = '<a  class="confirmation" rel="nofollow" href="' + url_for('force_reset_match_escrow', match_id=self.id,_external=True ) +  '">link</a>'
         return Markup(ret)
 
 
@@ -468,7 +468,7 @@ class LeagueMatch(Base):
                     return Markup(self.get_player2_list_display())
                 else:
                     link_text = "Reset "+ self.player2.get_name() + "'s escrow"
-        ret = '<a rel="nofollow" href="' + \
+        ret = '<a class="confirmation" rel="nofollow" href="' + \
               url_for('reset_match_escrow', match_id=self.id, player_id=player_id,_external=True ) +  \
               '">' + link_text + '</a>'
         return Markup(ret)
