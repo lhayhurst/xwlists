@@ -468,7 +468,7 @@ class LeagueMatch(Base):
                     return Markup(self.get_player2_list_display())
                 else:
                     link_text = "Reset "+ self.player2.get_name() + "'s escrow"
-        ret = '<a href="' + \
+        ret = '<a rel="nofollow" href="' + \
               url_for('reset_match_escrow', match_id=self.id, player_id=player_id,_external=True ) +  \
               '">' + link_text + '</a>'
         return Markup(ret)
