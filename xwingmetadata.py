@@ -405,6 +405,12 @@ upgrades = {
         {'name': 'Enforcer', 'canon_name': 'Enforcer', 'cost': 1,
          'constraints': ({'type': SHIP_TYPE, 'value': [M12_L_KIMOGILA_FIGHTER]}), },
 
+        {'name': 'Os-1 Arsenal Loadout', 'canon_name': 'os1arsenalloadout', 'type': 'title', 'cost': 2,
+          'constraints': ({'type': SHIP_TYPE, 'value': [ALPHA_CLASS_STAR_WING]}),
+          'action': [{'type': 'ADD_UPGRADE', 'value': TORPEDO}, {'type': 'ADD_UPGRADE', 'value': MISSILE}],
+         },
+
+
         {'name': 'Xg-1 Assault Configuration', 'canon_name': 'xg1assaultconfiguration', 'type': 'title', 'cost': 1,
           'constraints': ({'type': SHIP_TYPE, 'value': [ALPHA_CLASS_STAR_WING]}),
           'action': [{'type': 'ADD_UPGRADE', 'value': CANNON}, {'type': 'ADD_UPGRADE', 'value': CANNON}],
@@ -573,6 +579,9 @@ upgrades = {
         {'name': 'Conner Net', 'canon_name': 'connernet', 'cost': 4}
     ),
     CANNON: (
+
+        {'name': 'Jamming Beam', 'cost': 1},
+        {'name': 'Linked Battery', 'cost': 2},
         {'name': 'Arc Caster', 'cost': 2},
         {'name': 'Ion Cannon', 'cost': 3},
         {'name': 'AutoBlaster', 'cost': 5},
@@ -641,6 +650,7 @@ upgrades = {
 
     EPT:
         (
+            {'name': 'Saturation Salvo', 'cost': 1, 'canon_name': 'saturationsalvo', 'type':'ept'},
             {'name': 'Selflessness', 'cost': 1, 'canon_name': 'selflessness', 'type':'ept'},
             {'name': 'Intensity', 'cost': 2, 'canon_name': 'intensity', 'type':'ept'},
             {'name': 'Expertise', 'cost': 4, 'canon_name': 'Expertise'},
@@ -734,7 +744,33 @@ ships = {
          'name': u'Major Vynder',
          'pilot_skill': 7,
          'ship_size': u'small',
-         'upgrades': (EPT, MISSILE, TORPEDO, MOD, TITLE)},
+         'upgrades': (EPT, MISSILE, TORPEDO, MOD, TITLE, TITLE)},
+
+        {   'canon_name': u'nusquadronpilot',
+            'constraints': (IMPERIAL_FACTION_CONSTRAINT),
+            'cost': 18,
+            'faction': IMPERIAL,
+            'name': u'Nu Squadron Pilot',
+            'pilot_skill': 2,
+            'ship_size': u'small',
+            'upgrades': (MISSILE, TORPEDO, MOD, TITLE, TITLE)},
+        {   'canon_name': u'rhosquadronpilot',
+            'constraints': (IMPERIAL_FACTION_CONSTRAINT),
+            'cost': 21,
+            'faction': IMPERIAL,
+            'name': u'Rho Squadron Pilot',
+            'pilot_skill': 4,
+            'ship_size': u'small',
+            'upgrades': (EPT, MISSILE, TORPEDO, MOD, TITLE, TITLE)},
+        {   'canon_name': u'lieutenantkarsabi',
+            'constraints': (IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+            'cost': 24,
+            'faction': IMPERIAL,
+            'name': u'Lieutenant Karsabi',
+            'pilot_skill': 5,
+            'ship_size': u'small',
+            'upgrades': (EPT, MISSILE, TORPEDO, MOD, TITLE, TITLE)},
+
     ),
 
     M12_L_KIMOGILA_FIGHTER: (
