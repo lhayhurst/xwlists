@@ -426,6 +426,28 @@ def add_league_player_form_results():
     player_stats = tier_player.get_stats()
     return render_template("league_player.html", player=tier_player, stats=player_stats)
 
+@app.route("/merge_league_divisions")
+def merge_league_divisions():
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
+    divisions = []
+    for tier in league.tiers:
+        for division in tier.divisions:
+            divisions.append( {'name': division.get_name(), 'id': division.id} )
+    return render_template("merge_league_divisions.html", divisions=divisions,league=league)
+
+@app.route("/merge_league_division_form_results", methods=['POST'])
+def merge_league_division_form_results():
+    league_id        = decode(request.form['league_id'])
+    from_division_id = decode(request.form['from_division_dropdown'])
+    to_division_id   = decode(request.form['to_division_dropdown'])
+
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league_by_id(league_id)
+    vl = XWingVassalLeagueHelper(league.name, league.id)
+    merged_division = vl.merge_divisions(pm, from_division_id, to_division_id)
+    return redirect(url_for('tier_rankings', tier_id=merged_division.tier.id))
+
 
 @app.route("/tier_matches")
 def tier_matches():

@@ -156,12 +156,19 @@ class XWingVassalLeagueHelper:
         division = new_player.division
         for opponent in division.players:
             if not opponent.id == new_player.id:
-                lm = LeagueMatch()
-                lm.player1 = opponent
-                lm.player2 = new_player
-                lm.tier_id = division.tier.id
-                lm.state = 'open'
-                pm.db_connector.get_session().add(lm)
+                #don't create it if it already exists
+                match_exists = False
+                if len(new_player.matches):
+                    for match in new_player.matches:
+                        if match.player1_id == opponent.id or match.player2_id == opponent.id:
+                            match_exists = True
+                if not match_exists:
+                    lm = LeagueMatch()
+                    lm.player1 = opponent
+                    lm.player2 = new_player
+                    lm.tier_id = division.tier.id
+                    lm.state = 'open'
+                    pm.db_connector.get_session().add(lm)
 
 
     def add_player(self, pm, division_id, tier, email_address, player_name, person_name):
@@ -179,6 +186,28 @@ class XWingVassalLeagueHelper:
         self.create_matchups_for_new_player(pm, tier_player)
         pm.db_connector.get_session().commit()
         return tier_player
+
+    def merge_divisions(self, pm, from_division_id, to_division_id):
+
+        from_division = pm.get_division_by_id(from_division_id)
+        to_division   = pm.get_division_by_id(to_division_id)
+
+        for player in from_division.players:
+            to_division.players.append(player)
+
+        pm.db_connector.get_session().commit()
+
+        #do the matchups
+        for player in from_division.players:
+            self.create_matchups_for_new_player(pm, player)
+        pm.db_connector.get_session().commit()
+
+        #clear out the old division
+        from_division.players = []
+        pm.db_connector.get_session().commit()
+
+        return to_division
+
 
 
 

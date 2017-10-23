@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+P { text-align: center }
+</style>
+
+<form id="form"
+      class="grid-form"
+      action="{{ url_for('merge_league_division_form_results') }}"
+      method=POST
+      class="add-entry"
+      enctype="multipart/form-data">
+    <fieldset>
+        <legend>Merge League Divisions for {{ league.name }}</legend>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Merge From Division</label>
+                   <select id="from_division_dropdown" name="from_division_dropdown"  width="500" style="width: 500px;" placeholder="Select the division to merge players FROM">
+                    <option></option>
+                    {%  for d in divisions %}
+                        <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div data-field-span="1">
+                <label>Merge To Division</label>
+                   <select id="to_division_dropdown" name="to_division_dropdown"  width="500" style="width: 500px;" placeholder="Select the division to merge players TO">
+                    <option></option>
+                    {%  for d in divisions %}
+                        <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+    </fieldset>
+    <input type="hidden" name="league_id" value="{{ league.id }}" />
+    <input type="submit" class="btn" name="submit-button" id="submit-button" />
+
+</form>
+
+<script>
+    $(document).ready(function() {
+        $("#from_division_dropdown").select2();
+        $("#to_division_dropdown").select2();
+    } );
+
+</script>
+
+{% endblock %}
