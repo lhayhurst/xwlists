@@ -227,19 +227,27 @@ class XWingVassalLeagueHelper:
                 if match:
                     dirty = False
                     if match.player1_list_url is None and list1 is not None:
-                        dirty = True
                         match.player1_list_url = list1
-                        xws = fetcher.fetch(list1)
-                        converter = XWSToJuggler(xws)
-                        match.player1_list, _ = converter.convert(pm)
-                        pm.db_connector.get_session().add(match)
+                        try:
+                            xws = fetcher.fetch(list1)
+                            converter = XWSToJuggler(xws)
+                            match.player1_list, _ = converter.convert(pm)
+                            dirty = True
+                        except Exception as err:
+                            message = "unable to fetch list, reason: " + str(err)
+                            print(message)
 
                     if match.player2_list_url is None and list2 is not None:
-                        dirty = True
                         match.player2_list_url = list2
-                        xws = fetcher.fetch(list2)
-                        converter = XWSToJuggler(xws)
-                        match.player2_list, _ = converter.convert(pm)
+                        try:
+                            xws = fetcher.fetch(list2)
+                            converter = XWSToJuggler(xws)
+                            match.player2_list, _ = converter.convert(pm)
+                            dirty = True
+                        except Exception as err:
+                            message = "unable to fetch list, reason: " + str(err)
+                            print(message)
+
                     if dirty:
                         pm.db_connector.get_session().add(match)
 
