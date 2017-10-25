@@ -2,6 +2,7 @@ import sys
 import collections
 from decoder import decode
 from persistence import League, Tier, Division, TierPlayer, LeagueMatch
+from xws import XWSToJuggler, GeneralXWSFetcher
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -209,6 +210,40 @@ class XWingVassalLeagueHelper:
         return to_division
 
 
+    def update_escrowed_lists(self,pm, league, escrowed_lists):
+        fetcher   = GeneralXWSFetcher()
+
+        for el in escrowed_lists:
+            player1_name = el['player1']
+            player2_name = el['player2']
+            list1        = el['list1']
+            list2        = el['list2']
+
+            player1      = pm.get_tier_player_by_name(player1_name, league.name)
+            player2      = pm.get_tier_player_by_name(player2_name, league.name)
+            if player1 and player2:
+                match        = pm.get_match_by_players(league.id, player1.id, player2.id)
+
+                if match:
+                    dirty = False
+                    if match.player1_list_url is None and list1 is not None:
+                        dirty = True
+                        match.player1_list_url = list1
+                        xws = fetcher.fetch(list1)
+                        converter = XWSToJuggler(xws)
+                        match.player1_list, _ = converter.convert(pm)
+                        pm.db_connector.get_session().add(match)
+
+                    if match.player2_list_url is None and list2 is not None:
+                        dirty = True
+                        match.player2_list_url = list2
+                        xws = fetcher.fetch(list2)
+                        converter = XWSToJuggler(xws)
+                        match.player2_list, _ = converter.convert(pm)
+                    if dirty:
+                        pm.db_connector.get_session().add(match)
+
+        pm.db_connector.get_session().commit()
 
 
 

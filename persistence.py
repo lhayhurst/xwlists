@@ -1694,6 +1694,13 @@ class PersistenceManager:
                 print "Unable to lookup lat/lon for %s " % ( key )
         return venue
 
+    def get_match_by_players(self, league_id, player1_id, player2_id):
+        return self.db_connector.get_session().query(LeagueMatch).\
+            filter(LeagueMatch.tier_id == Tier.id).\
+            filter(Tier.league_id == league_id).\
+            filter(LeagueMatch.player1_id == player1_id).\
+            filter(LeagueMatch.player2_id == player2_id).first()
+
     def get_match(self, match_id):
         return self.db_connector.get_session().query(LeagueMatch).\
             filter(LeagueMatch.id == match_id ).first()

@@ -230,6 +230,22 @@ def escrow_subscriptions():
                 matches.append(match)
     return render_template("escrow_subscriptions.html", matches=matches)
 
+@app.route("/fix_escrow_bs")
+def fix_escrow_bs():
+    return render_template("fix_escrow_bs.html")
+
+@app.route("/fix_escrow_form_results", methods=['POST'])
+def fix_escrow_form_results():
+    escrow_json_file = request.files['escrow_file']
+    raw_json = escrow_json_file.read()
+    escrowed_lists = json.loads(raw_json)
+
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
+    helper = XWingVassalLeagueHelper(name=league.name, number=league.id)
+    helper.update_escrowed_lists(pm, league, escrowed_lists)
+    return redirect("/league")
+
 
 @app.route("/add_league")
 def create_league():
