@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 
 from datatables import ColumnDT, DataTables
-from flask import render_template, request, url_for, redirect, jsonify, Response, flash, send_file
+from flask import render_template, request, url_for, redirect, jsonify, Response, flash, send_file, send_from_directory
 from flask.ext.mail import Mail, Message
 
 from pytz import all_timezones, timezone
@@ -147,6 +147,10 @@ def check_for_maintenance():
     if is_maintenance_mode and request.path != url_for('maintenance'):
         return redirect(url_for('maintenance'))
 
+
+@app.route('/robots.txt')
+def static_from_root():
+ return send_from_directory(app.static_folder, request.path[1:])
 
 @app.route('/maintenance')
 def maintenance():
