@@ -326,8 +326,9 @@ def league_players():
 
 @app.route("/add_interdivision_league_match")
 def add_interdivision_league_game():
-    league_id = request.args.get('league_id')
     pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league(CURRENT_VASSAL_LEAGUE_NAME)
+    league_id = league.id
     league = pm.get_league_by_id(league_id)
     tier_players = {}
     for t in league.tiers:
@@ -359,20 +360,11 @@ def submit_interdivisional_league_match():
 
     tier = pm.get_tier_by_id(tier_id)
     now = datetime.now()
-    match_result = {
-        'state': 'open',
-        'id': 0,
-        'scores_csv': None,
-        'updated_at': str(now)
-    }
 
-    #TODO: fix the below
-    #dbmr = create_default_match_result(match_result, tier, pm, player1, player2)
-    #pm.db_connector.get_session().add(dbmr)
-    #pm.db_connector.get_session().add(EscrowSubscription(observer=player1, match=dbmr))
-    #pm.db_connector.get_session().add(EscrowSubscription(observer=player2, match=dbmr))
-    #pm.db_connector.get_session().commit()
-    return redirect(url_for('tier_matches', tier_id=tier.id))
+
+    helper = XWingVassalLeagueHelper(tier.league.name, tier.league.id)
+    match = helper.create_league_match(player1.division, player1, player2, pm )
+    return redirect(url_for('league_match', match_id=match.id))
 
 
 @app.route("/league_admin")

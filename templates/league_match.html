@@ -21,7 +21,11 @@
             </div>
             <div data-field-span="1">
                 <label>Divison </label>
-                {{ match.player2.division.name }}
+                {% if match.is_interdivisional() %}
+                    Interdivisional
+                {% else %}
+                    {{ match.player2.division.name }}
+                {% endif %}
             </div>
         </div>
         <div data-row-span="2">

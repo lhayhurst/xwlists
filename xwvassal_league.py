@@ -158,19 +158,22 @@ class XWingVassalLeagueHelper:
         for opponent in division.players:
             if not opponent.id == new_player.id:
                 #don't create it if it already exists
-                match_exists = False
-                if len(new_player.matches):
-                    for match in new_player.matches:
-                        if match.player1_id == opponent.id or match.player2_id == opponent.id:
-                            match_exists = True
-                if not match_exists:
-                    lm = LeagueMatch()
-                    lm.player1 = opponent
-                    lm.player2 = new_player
-                    lm.tier_id = division.tier.id
-                    lm.state = 'open'
-                    pm.db_connector.get_session().add(lm)
+                self.create_league_match(division, new_player, opponent, pm)
 
+    def create_league_match(self, division, player1, player2, pm ):
+        match_exists = False
+        if len(player1.matches):
+            for match in player1.matches:
+                if match.player1_id == player2.id or match.player2_id == player2.id:
+                    return match
+        lm = LeagueMatch()
+        lm.player1 = player2
+        lm.player2 = player1
+        lm.state = 'open'
+        lm.tier_id = division.tier.id
+        pm.db_connector.get_session().add(lm)
+        pm.db_connector.get_session().commit()
+        return lm
 
     def add_player(self, pm, division_id, tier, email_address, player_name, person_name):
         tier_player = TierPlayer()
