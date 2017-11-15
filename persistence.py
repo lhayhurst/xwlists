@@ -1,3 +1,5 @@
+import datetime
+
 __author__ = 'lhayhurst'
 
 from flask import url_for
@@ -17,7 +19,7 @@ import xwingmetadata
 from decl_enum import DeclEnum
 from sqlalchemy import Column, Integer, String, func, Date, and_, desc, Boolean, DateTime
 from sqlalchemy import ForeignKey
-
+from datetime import datetime
 
 class Match(ClauseElement):
     def __init__(self, columns, value):
@@ -641,6 +643,7 @@ class LeagueMatch(Base):
 
     def completed(self):
         self.state = 'complete'
+        self.updated_at = datetime.now()
 
     def get_vlog_url(self):
         url = None
