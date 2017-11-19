@@ -230,6 +230,12 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 upgrades = {
     CREW: (
 
+        {'name': 'Courier Droid', 'canon_name': 'courierdroid',
+         'type': 'crew', 'cost': 0},
+
+        {'name': 'Maul', 'canon_name': 'maul',
+         'type': 'crew', 'cost': 3},
+
         {'name': 'Breach Specialist', 'canon_name': 'breachspecialist',
          'type': 'crew', 'cost': 1},
 
@@ -375,6 +381,8 @@ upgrades = {
     ),
     DROID: (
 
+        {'name': '"Chopper"', 'cost': 1, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT)},
+        {'name': 'Flight-Assist Astromech', 'cost': 1},
         {'name': 'M9-G8', 'cost': 3, 'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT)},
         {'name': 'R2 Astromech', 'cost': 1},
         {'name': 'R5 Astromech', 'cost': 1},
@@ -695,6 +703,7 @@ upgrades = {
         ),
 
     ILLICIT: (
+        {'name': 'Contraband Cybernetics', 'canon_name': 'contrabandcybernetics', 'cost': 1},
         {'name': 'Ion Dischargers', 'canon_name': 'iondischargers', 'cost': 2},
         {'name': 'Scavenger Crane', 'canon_name': 'scavengercrane', 'cost': 2},
         {'name': 'EMP Device', 'canon_name': 'empdevice', 'cost': 2},
