@@ -1,5 +1,6 @@
 import datetime
 
+
 __author__ = 'lhayhurst'
 
 from flask import url_for
@@ -34,6 +35,8 @@ def _match(element, compiler, **kw):
              )
 
 
+#misc constants
+VASSAL_LEAGUE_DIVISION_SIZE = 8
 
 #TABLES
 
@@ -262,10 +265,10 @@ class Tier(Base):
     def get_challonge_name(self):
         return "%s-%s" % ( self.league.challonge_name, self.challonge_name)
 
-    def get_ranking(self,ignore_defaults,ignore_interdivisional=False):
+    def get_ranking(self,ignore_defaults,ignore_interdivisional=False,mercenary_mode=False):
         results = []
         for d in self.divisions:
-            division_rankings = d.get_ranking(ignore_defaults,ignore_interdivisional)
+            division_rankings = d.get_ranking(ignore_defaults,ignore_interdivisional,mercenary_mode)
             for dr in division_rankings:
                 results.append( dr )
         sorted_results = reversed(sorted(results, key = lambda stat: (stat['wins'], stat['mov']) ))
@@ -292,10 +295,10 @@ class Division(Base):
     players           = relationship( "TierPlayer", back_populates="division", cascade="all,delete,delete-orphan")
 
 
-    def get_ranking(self,ignore_defaults,ignore_interdivisional):
+    def get_ranking(self,ignore_defaults,ignore_interdivisional,mercenary_mode=False):
         results = []
         for p in self.players:
-            results.append(p.get_stats(ignore_defaults,ignore_interdivisional))
+            results.append(p.get_stats(ignore_defaults,ignore_interdivisional,mercenary_mode))
         sorted_stats = reversed(sorted(results, key = lambda stat: (stat['wins'], stat['mov']) ))
         ret = []
         i = 1
@@ -342,12 +345,41 @@ class TierPlayer(Base):
         else:
             return 100 - ( m.points_lost(self) - m.points_killed(self))
 
-    def get_stats(self, ignore_defaults=False,ignore_interdivisional=False):
+    def get_stats(self, ignore_defaults=False,ignore_interdivisional=False,mercenary_mode=False):
         ret = { 'wins':0, 'losses':0, 'draws':0, 'total':0,
                 'rebs':0, 'imps':0, 'scum':0, 'killed':0, 'lost':0, 'mov':0,
                 'interdivisional_count': 0}
-        for m in self.matches:
-            if m.is_complete():
+
+        #first deal with the mercenary mode. in mercenary mode, you can play more than 8 games via
+        #interdivisional play, and all results count (including your divisional)
+        #in non-mercenary mode, only your first 8 games count.
+        completed_divisional_matches = [ m for m in self.matches
+                                         if m.is_complete()
+                                         and not m.is_interdivisional()]
+
+        completed_interdivisional_matches = [ m for m in sorted(self.matches,key=lambda m: m.updated_at)
+                                              if m.is_complete()
+                                              and m.is_interdivisional()]
+        #the original reversed sort separated out all the matches where the updated at was none
+
+
+        #if you played all 8 games (or whatever your divisional size is), then 0 interdivisional games for you!
+        num_qualifying_interdivisional_matches = VASSAL_LEAGUE_DIVISION_SIZE - len(completed_divisional_matches)
+
+        #we're almost there! the scored_matches variable will contain all the matches used for scoring
+        scored_matches = [completed_divisional_matches]
+
+        if mercenary_mode:
+            #eff it, just use 'em all :-)
+            scored_matches.append(completed_interdivisional_matches)
+        else:
+            if num_qualifying_interdivisional_matches > 0:
+                # pull out the first N interdivisional matches the player played based on GAMES PLAYED FIRST
+                # without this step players could game their interdivisional score by playing a ton of games
+                scored_matches.append(completed_interdivisional_matches[0:num_qualifying_interdivisional_matches])
+
+        for match_source in scored_matches:
+            for m in match_source:
                 if ignore_defaults and m.was_default:
                     continue
                 if ignore_interdivisional and m.is_interdivisional():

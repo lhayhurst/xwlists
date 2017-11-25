@@ -284,7 +284,7 @@ def league_player():
     player_id = request.args.get('player_id')
     pm = PersistenceManager(myapp.db_connector)
     player = pm.get_league_player_by_id(player_id)
-    player_stats = player.get_stats()
+    player_stats = player.get_stats(mercenary_mode=True) #for player home page, all matches are shown
     return render_template("league_player.html", player=player, stats=player_stats)
 
 
@@ -294,6 +294,8 @@ def tier_rankings():
     ignore_defaults = request.args.get('ignore_defaults')
     ignore_interdivisional = request.args.get('ignore_interdivisional')
     consolidate_results = request.args.get('consolidate_results')
+    mercenary_mode = request.args.get('mercenary')
+
 
     if ignore_defaults is None:
         ignore_defaults = False
@@ -301,13 +303,17 @@ def tier_rankings():
     if consolidate_results is None:
         consolidate_results = False
 
+    if mercenary_mode is None:
+        mercenary_mode = False
+
     pm = PersistenceManager(myapp.db_connector)
     tier = pm.get_tier_by_id(tier_id)
     return render_template('league_tier_rankings.html',
                            tier=tier,
                            consolidate_results=consolidate_results,
                            ignore_defaults=ignore_defaults,
-                           ignore_interdivisional=ignore_interdivisional)
+                           ignore_interdivisional=ignore_interdivisional,
+                           mercenary_mode=mercenary_mode)
 
 
 @app.route("/league_players")
