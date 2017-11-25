@@ -407,7 +407,11 @@ upgrades = {
     TITLE: (
 
 
-        {'name': 'First Order Vanguard', 'canon_name': 'firstordervanguard', 'cost': 2,
+
+        {'name': 'Crossfire Formation', 'canon_name': 'crossfireformation', 'cost': 2,
+         'constraints': ({'type': SHIP_TYPE, 'value': [B_SF_17_BOMBER]}), },
+
+               {'name': 'First Order Vanguard', 'canon_name': 'firstordervanguard', 'cost': 2,
          'constraints': ({'type': SHIP_TYPE, 'value': [TIE_SILENCER]}), },
 
         {'name': 'Enforcer', 'canon_name': 'Enforcer', 'cost': 1,
@@ -614,6 +618,7 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
+        {'name': 'Deflective Plating', 'canon_name': 'deflectiveplating', 'cost': 1},
 
         {'name': 'Pulsed Ray Shield', 'canon_name': 'pulsedrayshield', 'cost': 2},
 
@@ -732,6 +737,7 @@ upgrades = {
     ),
 
     TECH: (
+        {'name': 'Advanced Optics', 'canon_name': 'advancedoptics', 'cost': 2},
         {'name': 'Hyperwave Comm Scanner', 'canon_name': 'hyperwavecommscanner', 'cost': 1},
         {'name': 'Targeting Synchronizer', 'canon_name': 'targetingsynchronizer', 'cost': 3},
         {'name': 'Primed Thrusters', 'canon_name': 'patternanalyzer', 'cost': 1},
@@ -783,14 +789,33 @@ ships = {
     ),
 
     M12_L_KIMOGILA_FIGHTER: (
+        {'canon_name': u'cartelbrute',
+         'constraints': (SCUM_FACTION_CONSTRAINT),
+         'cost': 22,
+         'faction': SCUM,
+         'name': u'Cartel Brute',
+         'pilot_skill': 3,
+         'ship_size': u'small',
+         'upgrades': (ILLICIT, MISSILE, SALVAGED_ASTROMECH_DROID, TORPEDO, MOD, TITLE)},
+
         {'canon_name': u'toranikulda',
-         'constraints': (),
+         'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
          'cost': 27,
          'faction': SCUM,
-         'name': u'Torani Kulda',
+         'name': u'Torani Kuldra',
          'pilot_skill': 8,
          'ship_size': u'small',
          'upgrades': (EPT, ILLICIT, MISSILE, SALVAGED_ASTROMECH_DROID, TORPEDO, MOD, TITLE)},
+
+        {'canon_name': u'dalanoberos',
+         'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+         'cost': 25,
+         'faction': SCUM,
+         'name': u'Dalan Oberos',
+         'pilot_skill': 7,
+         'ship_size': u'small',
+         'upgrades': (EPT, ILLICIT, MISSILE, SALVAGED_ASTROMECH_DROID, TORPEDO, MOD, TITLE)},
+
     ),
 
     SHEATHIPEDE_CLASS_SHUTTLE: (
@@ -804,6 +829,32 @@ ships = {
          'ship_size': u'small',
          'upgrades': (EPT, DROID, CREW, MOD, TITLE)},
 
+        {   'canon_name': u'ezrabridger',
+            'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+            'cost': 17,
+            'faction': REBEL,
+            'name': u'Ezra Bridger',
+            'pilot_skill': 5,
+            'ship_size': u'small',
+            'upgrades': (EPT, DROID, CREW, MOD, TITLE)},
+
+        {'canon_name': u'zeborrelios',
+         'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+         'cost': 16,
+         'faction': None,
+         'name': u'"Zeb" Orrelios',
+         'pilot_skill': 3,
+         'ship_size': u'small',
+         'upgrades': (EPT, DROID, CREW, MOD, TITLE)},
+
+        {'canon_name': u'ap5',
+         'constraints': (REBEL_FACTION_CONSTRAINT),
+         'cost': 15,
+         'faction': None,
+         'name': u'AP-5',
+         'pilot_skill': 1,
+         'ship_size': u'small',
+         'upgrades': ( DROID, CREW, MOD, TITLE)},
 
     ),
 
@@ -815,7 +866,37 @@ ships = {
          'name': u'"Crimson Leader"',
          'pilot_skill': 7,
          'ship_size': u'large',
-         'upgrades': (BOMB, BOMB, SYSTEM, TECH, MOD, TITLE)}
+         'upgrades': (BOMB, BOMB, SYSTEM, TECH, MOD, TITLE)},
+
+        {'canon_name': u'crimsonsquadronpilot',
+         'constraints': (REBEL_FACTION_CONSTRAINT),
+         'cost': 25,
+         'faction': REBEL,
+         'name': u'Crimson Squadron Pilot',
+         'pilot_skill': 1,
+         'ship_size': u'large',
+         'upgrades': (BOMB, BOMB, SYSTEM, TECH, MOD, TITLE)},
+
+        {'canon_name': u'crimsonspecialist',
+         'constraints': (REBEL_FACTION_CONSTRAINT),
+         'cost': 27,
+         'faction': REBEL,
+         'name': u'"Crimson Specialist"',
+         'pilot_skill': 4,
+         'ship_size': u'large',
+         'upgrades': (BOMB, BOMB, SYSTEM, TECH, MOD, TITLE)},
+
+        {'canon_name': u'cobaltleader',
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, REBEL_FACTION_CONSTRAINT),
+         'cost': 28,
+         'faction': REBEL,
+         'name': u'"Cobalt Leader"',
+         'pilot_skill': 6,
+         'ship_size': u'large',
+         'upgrades': (BOMB, BOMB, SYSTEM, TECH, MOD, TITLE)
+         },
+
+
     ),
 
     TIE_SILENCER: (

@@ -64,6 +64,11 @@ if __name__ == '__main__':
                    "Gozanti-class Cruiser", \
                    "C-ROC Cruiser", )
 
+    upgrade_exclusions = ( 'Targeting Coordinator', "Dodonna's Pride", 'Tantive IV', 'Bright Hope', 'Quantum Storm',
+                           'Dutyfree', "Jaina's Light",'Assailer', 'Instigator', 'Impetuous', 'Rear Admiral Chiraneau',
+                           'Requiem', 'Vector', 'Suppressor', 'Merchant One', 'Broken Horn', 'Insatiable Worrt')
+
+
     with open(ships_file) as data_file:
         ships = json.loads(data_file.read())
         for ship in ships:
@@ -90,8 +95,6 @@ if __name__ == '__main__':
                 p = pilot['name']
                 ship_xws = ship_map[ pilot['ship']]['xws']
                 if not p in ship_exclusions:
-#                    if 'Sabine' in str(p):
- #                       print pilot
                     db_pilot = pm.get_ship_pilot(pilot['ship'], p)
                     if db_pilot is None:
                         if args['--db']:
@@ -126,7 +129,7 @@ if __name__ == '__main__':
                             continue
                     upgrade_type = UpgradeType.from_description(u['slot']).value
                     ut = pm.get_upgrade_canonical(upgrade_type, u['xws'])
-                    if ut is None:
+                    if ut is None and u['name'] not in upgrade_exclusions:
                         if args['--db']:
                             print "insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( '%s', '%s', '%s', '%d');" % \
                                   ( upgrade_type, u['name'], u['xws'], u['points'])
