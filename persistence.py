@@ -36,7 +36,11 @@ def _match(element, compiler, **kw):
 
 
 #misc constants
-VASSAL_LEAGUE_DIVISION_SIZE = 8
+VASSAL_LEAGUE_DIVISION_SIZE = { "Deep Core" : 10,
+                                "Core Worlds" : 9,
+                                "Inner Rim" : 8,
+                                "Outer Rim" : 8,
+                                "Unknown Reaches" : 8 }
 
 #TABLES
 
@@ -364,7 +368,7 @@ class TierPlayer(Base):
 
 
         #if you played all 8 games (or whatever your divisional size is), then 0 interdivisional games for you!
-        num_qualifying_interdivisional_matches = VASSAL_LEAGUE_DIVISION_SIZE - len(completed_divisional_matches)
+        num_qualifying_interdivisional_matches = VASSAL_LEAGUE_DIVISION_SIZE[m.player1.division.tier.name] - len(completed_divisional_matches)
 
         #we're almost there! the scored_matches variable will contain all the matches used for scoring
         scored_matches = [completed_divisional_matches]
