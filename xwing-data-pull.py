@@ -4,7 +4,7 @@ Usage:
         xwing-data-pull.py [options] SHIP_FILE PILOTS_FILE UPGRADES_FILE all
         xwing-data-pull.py [options] SHIP_FILE PILOTS_FILE UPGRADES_FILE (ships|pilots|upgrades)
 
-        simulate.py -h
+        xwing-data-pull.py -h
 
 Arguments:
         SHIP_FILE   JSON file with ships to process (from xwing-data)
@@ -113,6 +113,7 @@ if __name__ == '__main__':
                             pp.pprint( { 'ship_size': chassis['size'], 'faction': None, 'name': pilot['name'], 'canon_name': pilot['xws'],
                                   'cost': pilot['points'],  'pilot_skill': pilot['skill'],
                                   'upgrades': (),'constraints': () } )
+                            pp.pprint(",")
 
 
 
@@ -133,5 +134,7 @@ if __name__ == '__main__':
                         if args['--db']:
                             print "insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( '%s', '%s', '%s', '%d');" % \
                                   ( upgrade_type, u['name'], u['xws'], u['points'])
+                        elif args['--metadata']:
+                            pp.pprint( { 'name': u['name'], 'canon_name': u['xws'], 'type': upgrade_type, 'cost': u['points']})
 
 

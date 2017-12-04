@@ -604,6 +604,12 @@ upgrades = {
 
     ),
     MISSILE: (
+
+        {'canon_name': u'scramblermissiles',
+         'cost': 2,
+         'name': u'Scrambler Missiles',
+         'type': 'missile'},
+
         {'name': 'Harpoon Missiles', 'canon_name': 'harpoonmissiles', 'type': 'missile', 'cost': 4},
         {'name': 'Cruise Missiles', 'canon_name': 'cruisemissiles', 'type': 'missile', 'cost': 3},
         {'name': 'Unguided Rockets', 'canon_name': 'unguidedrockets', 'type': 'missile', 'cost': 2},
@@ -663,6 +669,13 @@ upgrades = {
 
     EPT:
         (
+            {
+                'canon_name': u'debrisgambit',
+                'cost': 2,
+                'name': u'Debris Gambit',
+                'type': 'ept'
+            },
+
             {'name': 'Saturation Salvo', 'cost': 1, 'canon_name': 'saturationsalvo', 'type':'ept'},
             {'name': 'Selflessness', 'cost': 1, 'canon_name': 'selflessness', 'type':'ept'},
             {'name': 'Intensity', 'cost': 2, 'canon_name': 'intensity', 'type':'ept'},
@@ -725,6 +738,8 @@ upgrades = {
     ),
 
     SALVAGED_ASTROMECH_DROID: (
+
+        {   'canon_name': u'r5tk', 'cost': 0, 'name': u'R5-TK', 'type': 'samd'},
         {'name': 'R4-E1', 'canon_name': 'r4e1', 'type': SALVAGED_ASTROMECH_DROID_CANON, 'cost': 1},
         {'name': 'Overclocked R4', 'canon_name': 'overclockedr4', 'cost': 1},
         {'name': 'Genius', 'canon_name': 'genius', 'cost': 0},
@@ -737,6 +752,12 @@ upgrades = {
     ),
 
     TECH: (
+
+        {'canon_name': u'threattracker',
+         'cost': 3,
+         'name': u'Threat Tracker',
+         'type': 'tech'},
+
         {'name': 'Advanced Optics', 'canon_name': 'advancedoptics', 'cost': 2},
         {'name': 'Hyperwave Comm Scanner', 'canon_name': 'hyperwavecommscanner', 'cost': 1},
         {'name': 'Targeting Synchronizer', 'canon_name': 'targetingsynchronizer', 'cost': 3},
@@ -813,6 +834,15 @@ ships = {
          'faction': SCUM,
          'name': u'Dalan Oberos',
          'pilot_skill': 7,
+         'ship_size': u'small',
+         'upgrades': (EPT, ILLICIT, MISSILE, SALVAGED_ASTROMECH_DROID, TORPEDO, MOD, TITLE)},
+
+        {'canon_name': u'cartelexecutioner',
+         'constraints': (SCUM_FACTION_CONSTRAINT),
+         'cost': 24,
+         'faction': SCUM,
+         'name': u'Cartel Executioner',
+         'pilot_skill': 5,
          'ship_size': u'small',
          'upgrades': (EPT, ILLICIT, MISSILE, SALVAGED_ASTROMECH_DROID, TORPEDO, MOD, TITLE)},
 
@@ -908,6 +938,16 @@ ships = {
          'pilot_skill': 9,
          'ship_size': u'small',
          'upgrades': (EPT, SYSTEM, TECH, MOD, TITLE)},
+
+
+    {   'canon_name': u'testpilotblackout',
+        'constraints': (IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+        'cost': 31,
+        'faction': IMPERIAL,
+        'name': u'Test Pilot "Blackout"',
+        'pilot_skill': 7,
+        'ship_size': u'small',
+        'upgrades': (EPT, SYSTEM, TECH, MOD, TITLE)},
 
     ),
 
