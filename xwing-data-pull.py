@@ -113,7 +113,7 @@ if __name__ == '__main__':
                             pp.pprint( { 'ship_size': chassis['size'], 'faction': None, 'name': pilot['name'], 'canon_name': pilot['xws'],
                                   'cost': pilot['points'],  'pilot_skill': pilot['skill'],
                                   'upgrades': (),'constraints': () } )
-                            pp.pprint(",")
+
 
 
 

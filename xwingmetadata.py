@@ -949,7 +949,25 @@ ships = {
         'ship_size': u'small',
         'upgrades': (EPT, SYSTEM, TECH, MOD, TITLE)},
 
+        {'canon_name': u'sienarjaemusanalyst',
+         'constraints': (IMPERIAL_FACTION_CONSTRAINT),
+         'cost': 26,
+         'faction': IMPERIAL,
+         'name': u'Sienar-Jaemus Analyst',
+         'pilot_skill': 4,
+         'ship_size': u'small',
+         'upgrades': (SYSTEM, TECH, MOD, TITLE)},
+        {'canon_name': u'firstordertestpilot',
+         'constraints': (IMPERIAL_FACTION_CONSTRAINT),
+         'cost': 29,
+         'faction': IMPERIAL,
+         'name': u'First Order Test Pilot',
+         'pilot_skill': 6,
+         'ship_size': u'small',
+         'upgrades': (EPT, SYSTEM, TECH, MOD, TITLE)},
+
     ),
+
 
     SCURRG_H6_BOMBER: (
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Karthakk Pirate', 'canon_name': 'karthakkpirate',
