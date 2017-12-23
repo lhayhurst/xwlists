@@ -1,8 +1,7 @@
-import datetime
-
 
 __author__ = 'lhayhurst'
 
+import datetime
 from flask import url_for
 from geopy import Nominatim
 from markupsafe import Markup
