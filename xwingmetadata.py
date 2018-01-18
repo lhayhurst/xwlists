@@ -197,7 +197,8 @@ def header():
             TECH + ".1",
             TECH + ".2",
             SALVAGED_ASTROMECH_DROID,
-            ILLICIT]
+            ILLICIT + ".1",
+            ILLICIT + ".2"]
 
 
 sets_and_expansions = {'Core Set': [],
