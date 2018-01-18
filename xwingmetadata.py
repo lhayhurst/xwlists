@@ -171,18 +171,31 @@ ADD_EPT = "ADD_EPT"
 # TDO: make this less ganky
 def header():
     return ['Tourney', 'tourneyType', 'tourneyDate', 'player', FACTION, 'points', 'swiss_standing', 'elim_standing', \
-            'listId', 'Ship', 'Pilot', EPT + ".1", EPT + ".2", TITLE, \
-            CREW + ".1", CREW + ".2", CREW + ".3", \
-            DROID, SYSTEM, MOD + ".1", MOD + ".2", \
-            CANNON, MISSILE + ".1",
+            'listId', 'Ship', 'Pilot',
+            EPT + ".1",
+            EPT + ".2",
+            TITLE,
+            CREW + ".1",
+            CREW + ".2",
+            CREW + ".3",
+            DROID,
+            SYSTEM,
+            MOD + ".1",
+            MOD + ".2",
+            MOD + ".3",
+            CANNON + ".1",
+            CANNON + ".2",
+            MISSILE + ".1",
             MISSILE + ".2",
             TORPEDO + ".1",
             TORPEDO + ".2",
             BOMB + ".1",
             BOMB + ".2",
             BOMB + ".3",
+            BOMB + ".4",
             TURRET,
-            TECH,
+            TECH + ".1",
+            TECH + ".2",
             SALVAGED_ASTROMECH_DROID,
             ILLICIT]
 
