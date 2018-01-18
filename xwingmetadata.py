@@ -174,8 +174,17 @@ def header():
             'listId', 'Ship', 'Pilot', EPT + ".1", EPT + ".2", TITLE, \
             CREW + ".1", CREW + ".2", CREW + ".3", \
             DROID, SYSTEM, MOD + ".1", MOD + ".2", \
-            CANNON, MISSILE + ".1", MISSILE + ".2",
-            TORPEDO + ".1", TORPEDO + ".2", BOMB, TURRET, TECH, SALVAGED_ASTROMECH_DROID, ILLICIT]
+            CANNON, MISSILE + ".1",
+            MISSILE + ".2",
+            TORPEDO + ".1",
+            TORPEDO + ".2",
+            BOMB + ".1",
+            BOMB + ".2",
+            BOMB + ".3",
+            TURRET,
+            TECH,
+            SALVAGED_ASTROMECH_DROID,
+            ILLICIT]
 
 
 sets_and_expansions = {'Core Set': [],
