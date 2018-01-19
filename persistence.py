@@ -202,12 +202,13 @@ class Ship(Base):
     #tlist    = relationship("TourneyList", uselist=False)
     archtype = relationship("ArchtypeList", uselist=False)
 
-
     def get_upgrade(self, upgrade_name ):
 
         ret = []
 
         num_upgrades = 1
+
+
 
         if "." in upgrade_name:
             a = upgrade_name.split('.')
@@ -217,8 +218,15 @@ class Ship(Base):
         for ship_upgrade in self.upgrades:
             upgrade = ship_upgrade.upgrade
             if upgrade is not None:
-                if upgrade.upgrade_type.description == upgrade_name:
-                    ret.append( upgrade.name)
+
+                as_canon = upgrade.upgrade_type.value  == upgrade_name
+                if upgrade.upgrade_type.description == upgrade_name or upgrade.upgrade_type.value  == upgrade_name:
+                    un = None
+                    if as_canon:
+                        un = upgrade.canon_name
+                    else:
+                        un = upgrade.name
+                    ret.append( un)
 
         if num_upgrades > len(ret):
             return ""
