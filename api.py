@@ -110,6 +110,11 @@ class TournamentApiHelper:
         response.status_code = code
         return response
 
+    def extract_video_url(self, t, tourney):
+        if t.has_key(VIDEO_URL):
+            video_url = t[VIDEO_URL]
+            tourney.video_url = video_url
+
     def extract_email(self, t, tourney):
         # add email if it exists
         if t.has_key(EMAIL):
@@ -579,6 +584,7 @@ class TournamentsAPI(restful.Resource):
                 pm.db_connector.get_session().add(tourney)
 
                 helper.extract_email(t, tourney)
+                helper.extract_video_url(t,tourney)
                 helper.extract_tourney_format(t, tourney)
                 helper.extract_venue(t, tourney)
                 # now see if the players are there.  if so, add 'em
@@ -956,6 +962,7 @@ class TournamentAPI(restful.Resource):
 
                 # now try all the other fields.
                 helper.extract_email(t, tourney)
+                helper.extract_video_url(t,tourney)
                 helper.extract_tourney_format(t, tourney)
                 helper.extract_venue(t, tourney)
                 bail, tlists_by_id, tlists_by_name = helper.extract_players(t,
