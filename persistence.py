@@ -7,7 +7,7 @@ from geopy import Nominatim
 from markupsafe import Markup
 import sqlalchemy
 from sqlalchemy.dialects import mysql
-from sqlalchemy import or_, BigInteger
+from sqlalchemy import or_, BigInteger, Text
 from decoder import decode
 import random
 from sqlalchemy.orm import relationship
@@ -803,6 +803,7 @@ class Tourney(Base):
     locked            = Column(Boolean)
     api_token         = Column(String(128))
     format            = Column(String(128))
+    video_url         = Column(String(2048))
 
     tourney_lists   = relationship( "TourneyList", back_populates="tourney", cascade="all,delete,delete-orphan" )
     rounds          = relationship( "TourneyRound", back_populates="tourney", order_by="asc(TourneyRound.round_num)", cascade="all,delete,delete-orphan")
@@ -811,6 +812,15 @@ class Tourney(Base):
     sets            = relationship( "TourneySet", back_populates="tourney", cascade="all,delete,delete-orphan")
     #venue           = relationship( "TourneyVenue", back_populates="tourney", cascade="all,delete,delete-orphan", uselist=False)
     venue           = relationship( "TourneyVenue", back_populates="tourneys",  uselist=False)
+
+    def get_video_url(self):
+        if self.video_url is None:
+            return None
+        ret = self.video_url
+        if not ret.startswith("http"):
+            ret = "http://" + self.video_url
+        return ret
+
 
     def get_country(self):
         if self.venue is None:

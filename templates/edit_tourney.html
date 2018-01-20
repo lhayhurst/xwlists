@@ -467,7 +467,8 @@
         <b>Date:</b> {{ tourney.tourney_date }}
         <b>Type:</b> {{ tourney.tourney_type }}
         <b>Format:</b> {{  tourney.format }}<br>
-         <b>Venue:</b> {{ tourney.venue_string() }}
+         <b>Venue:</b> {{ tourney.venue_string() }}<br>
+        <b>Video feed</b> <a target="_blank" href="{{ tourney.get_video_url() }}">{{ tourney.video_url }}</a>
         <div id="lock-email-div" hidden><label>Enter the email address used to create this tourney</label><input type="text" id="keytext" name="keytext"/><button id="key-check" >go!</button><span class="error_text" id="key-check-status"></span><br></div>
         <br>
         <div id="edit_tourney_details_div">

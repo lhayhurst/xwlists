@@ -49,6 +49,7 @@ SCORE = 'score'
 PLAYER_NAME = 'name'
 PLAYERS = "players"
 ROUND_LENGTH = "round_length"
+VIDEO_URL = "video_url"
 TYPE = "type"
 DATE = "date"
 NAME = "name"
@@ -830,6 +831,8 @@ class TourneyToJsonConverter:
         tournament[ROUND_LENGTH] = t.round_length
         if t.format is not None:
             tournament[FORMAT] = t.format
+        if t.video_url is not None:
+            tournament[VIDEO_URL] = t.get_video_url()
 
         if t.venue is not None:
             v = t.venue

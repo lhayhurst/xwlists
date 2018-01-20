@@ -1285,6 +1285,7 @@ def update_tourney_details():
     state = decode(request.form['state'])
     city = decode(request.form['city'])
     venue = decode(request.form['venue'])
+    video_url = request.form['video_url']
 
     tourney_format = None
     if tourney_format_def is None or len(tourney_format_def) == 0:
@@ -1312,6 +1313,9 @@ def update_tourney_details():
     tourney.venue.state = state
     tourney.venue.city = city
     tourney.venue.venue = venue
+
+    if video_url is not None:
+        tourney.video_url = video_url
 
     event = Event(remote_address=myapp.remote_address(request),
                   event_date=func.now(),
@@ -1570,11 +1574,11 @@ def add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
 
 
 def create_tourney(cryodex, tourney_name, tourney_date, tourney_type,
-                   round_length, sets_used, country, state, city, venue, email, participant_count, tourney_format):
+                   round_length, sets_used, country, state, city, venue, email, participant_count, tourney_format, video_url):
     pm = PersistenceManager(myapp.db_connector)
     t = Tourney(tourney_name=tourney_name, tourney_date=tourney_date,
                 tourney_type=tourney_type, round_length=round_length, email=email, entry_date=datetime.now(),
-                participant_count=participant_count, locked=False, format=tourney_format)
+                participant_count=participant_count, locked=False, format=tourney_format, video_url=video_url)
 
     pm.db_connector.get_session().add(t)
     # add the players
@@ -1710,6 +1714,7 @@ def add_tourney():
     state = decode(request.form['state'])
     city = decode(request.form['city'])
     venue = decode(request.form['venue'])
+    video_url = request.form['video_url']
 
     round_length = None
     if round_length_dropdown is None or len(round_length_dropdown) == 0:
@@ -1741,7 +1746,7 @@ def add_tourney():
                 data = decode(data)
                 cryodex = Cryodex(data, filename)
                 t = create_tourney(cryodex, name, date, type, round_length,
-                                   sets_used, country, state, city, venue, email, participant_count, tourney_format)
+                                   sets_used, country, state, city, venue, email, participant_count, tourney_format, video_url)
                 sfilename = secure_filename(filename) + "." + str(t.id)
                 save_cryodex_file(failed=False, filename=sfilename, data=data)
 
@@ -1769,7 +1774,7 @@ def add_tourney():
             pm = PersistenceManager(myapp.db_connector)
             t = Tourney(tourney_name=name, tourney_date=date, tourney_type=type, locked=False,
                         round_length=round_length, email=email, entry_date=datetime.now(),
-                        participant_count=participant_count, format=tourney_format)
+                        participant_count=participant_count, format=tourney_format, video_url=video_url)
             pm.db_connector.get_session().add(t)
             add_sets_and_venue_to_tourney(city, country, pm, sets_used, state, t, venue)
             pm.db_connector.get_session().commit()

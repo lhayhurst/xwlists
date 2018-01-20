@@ -11,15 +11,20 @@
       data-parsley-validate >
     <fieldset>
         <legend>Click on a cell to edit tourney details</legend>
-        <div data-row-span="3">
+        <div data-row-span="4">
             <div data-field-span="1">
                 <label>Tourney name</label>
                 <input type="text" name="name" value="{{ tourney.tourney_name }}" required/>
+            </div>
+            <div data-field-span="1">
+                <label>Date played</label>
+                <input type="text" id="datepicker" name="datepicker" value="{{ tourney_date }}" required/>
             </div>
                 <div data-field-span="1">
                 <label>Tourney format</label>
                 <input type="text" name="tourney_format_custom" id="tourney_format_custom" value="{{ tourney.format }}" data-parsley-notDefaultSelection='' data-parsley-group="tourney-format-custom" />
             </div>
+
             <div data-field-span="1">
                 <label>Or pick a different format</label>
                 <select id="tourney_format_dropdown" name="tourney_format_dropdown"  placeholder="Select a format that matches your tourney" data-parsley-notDefaultSelection='' data-parsley-group="tourney-format-default">
@@ -31,11 +36,7 @@
             </div>
 
         </div>
-        <div data-row-span="4">
-            <div data-field-span="1">
-                <label>Date played</label>
-                <input type="text" id="datepicker" name="datepicker" value="{{ tourney_date }}" required/>
-            </div>
+        <div data-row-span="3">
             <div data-field-span="1">
                 <label>Type of tourney</label>
                 <select id="tourney_type" name="tourney_type" placeholder="Select a tourney type" required>
@@ -60,7 +61,15 @@
                 <label>Number of participants</label>
                 <input type="text" name="participant_count" id="participant_count" data-parsley-type="integer" value="{{ tourney.participant_count }}"  required/>
             </div>
+
         </div>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>Tourney or venue video url (Twitch, Youtube, etc)</label>
+                <input type="text" name="video_url" id="video_url" data-parsley-notDefaultSelection='' data-parsley-type="url" value="{{ tourney.get_video_url() }}" />
+            </div>
+        </div>
+
         <div data-row-span="4">
             <div data-field-span="1">
                 <label>Country</label>
