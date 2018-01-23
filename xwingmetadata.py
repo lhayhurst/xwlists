@@ -901,6 +901,33 @@ ships = {
 
     SHEATHIPEDE_CLASS_SHUTTLE: (
 
+        {'canon_name': u'ap5',
+         'constraints': (REBEL_FACTION_CONSTRAINT),
+         'cost': 15,
+         'faction': REBEL,
+         'name': u'AP-5',
+         'pilot_skill': 1,
+         'ship_size': u'small',
+         'upgrades': (DROID, CREW, MOD, TITLE)},
+
+        {'canon_name': u'zeborrelios',
+         'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+         'cost': 16,
+         'faction': REBEL,
+         'name': u'"Zeb" Orrelios',
+         'pilot_skill': 3,
+         'ship_size': u'small',
+         'upgrades': (EPT, DROID, CREW, MOD, TITLE)},
+
+        {'canon_name': u'ezrabridger',
+         'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+         'cost': 17,
+         'faction': REBEL,
+         'name': u'Ezra Bridger',
+         'pilot_skill': 5,
+         'ship_size': u'small',
+         'upgrades': (EPT, DROID, CREW, MOD, TITLE)},
+
         {'canon_name': u'fennrau',
          'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
          'cost': 20,
@@ -909,33 +936,6 @@ ships = {
          'pilot_skill': 9,
          'ship_size': u'small',
          'upgrades': (EPT, DROID, CREW, MOD, TITLE)},
-
-        {   'canon_name': u'ezrabridger',
-            'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
-            'cost': 17,
-            'faction': REBEL,
-            'name': u'Ezra Bridger',
-            'pilot_skill': 5,
-            'ship_size': u'small',
-            'upgrades': (EPT, DROID, CREW, MOD, TITLE)},
-
-        {'canon_name': u'zeborrelios',
-         'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
-         'cost': 16,
-         'faction': None,
-         'name': u'"Zeb" Orrelios',
-         'pilot_skill': 3,
-         'ship_size': u'small',
-         'upgrades': (EPT, DROID, CREW, MOD, TITLE)},
-
-        {'canon_name': u'ap5',
-         'constraints': (REBEL_FACTION_CONSTRAINT),
-         'cost': 15,
-         'faction': None,
-         'name': u'AP-5',
-         'pilot_skill': 1,
-         'ship_size': u'small',
-         'upgrades': ( DROID, CREW, MOD, TITLE)},
 
     ),
 
