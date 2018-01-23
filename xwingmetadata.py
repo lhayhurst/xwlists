@@ -1961,11 +1961,11 @@ ships = {
          'name': u'Captain Jostero',
          'pilot_skill': 4,
          'ship_size': u'small',
-         'upgrades': (EPT, TORPEDO, TITLE, MOD)},
+         'upgrades': (EPT, TORPEDO, TITLE, TITLE, MOD)},
 
 
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Black Sun Vigo', 'canon_name': 'blacksunvigo', 'cost': 27,
-         'upgrades': (TORPEDO, TITLE, MOD)},
+         'upgrades': (TORPEDO, TITLE,  TITLE, MOD)},
         {   'canon_name': u'blacksunassassin',
             'constraints': (SCUM_FACTION_CONSTRAINT),
             'cost': 28,
@@ -1982,7 +1982,7 @@ ships = {
          'name': u'Thweek',
          'pilot_skill': 4,
          'ship_size': u'small',
-         'upgrades': (TORPEDO, TITLE, MOD)},
+         'upgrades': (TORPEDO, TITLE,  TITLE, MOD)},
 
         {'canon_name': u'dalanoberos',
          'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
@@ -1991,12 +1991,12 @@ ships = {
          'name': u'Dalan Oberos',
          'pilot_skill': 6,
          'ship_size': u'small',
-         'upgrades': (EPT, TORPEDO, TITLE, MOD)},
+         'upgrades': (EPT, TORPEDO, TITLE,  TITLE, MOD)},
 
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Guri', 'canon_name': 'guri', 'cost': 30,
-         'upgrades': (EPT, TORPEDO, TITLE, MOD)},
+         'upgrades': (EPT, TORPEDO, TITLE,  TITLE, MOD)},
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Prince Xizor', 'canon_name': 'princexizor', 'cost': 31,
-         'upgrades': (EPT, TORPEDO, TITLE, MOD)},
+         'upgrades': (EPT, TORPEDO, TITLE,  TITLE, MOD)},
 
     ),
 
