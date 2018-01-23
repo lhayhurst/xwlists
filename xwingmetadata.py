@@ -1954,15 +1954,6 @@ ships = {
          'cost': 25,
          'upgrades': (TORPEDO, TITLE, MOD)},
 
-        {'canon_name': u'captainjostero',
-         'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
-         'cost': 24,
-         'faction': SCUM,
-         'name': u'Captain Jostero',
-         'pilot_skill': 4,
-         'ship_size': u'small',
-         'upgrades': (EPT, TORPEDO, TITLE, TITLE, MOD)},
-
 
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Black Sun Vigo', 'canon_name': 'blacksunvigo', 'cost': 27,
          'upgrades': (TORPEDO, TITLE,  TITLE, MOD)},
@@ -2061,18 +2052,30 @@ ships = {
             'ship_size': u'small',
             'upgrades': ((EPT, MISSILE, ILLICIT, TITLE))},
 
+        {'canon_name': u'captainjostero',
+         'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+         'cost': 24,
+         'faction': SCUM,
+         'name': u'Captain Jostero',
+         'pilot_skill': 4,
+         'ship_size': u'small',
+         'upgrades': (EPT, TORPEDO, TITLE, MOD)},
+
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Talonbane Cobra', 'canon_name': 'talonbanecobra',
          'pilot_skill': 9, 'cost': 28,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT),
          'upgrades': (EPT, MISSILE, ILLICIT,  TITLE)},
+
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Graz The Hunter', 'canon_name': 'grazthehunter',
          'pilot_skill': 6, 'cost': 25,
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, SCUM_FACTION_CONSTRAINT),
          'upgrades': (MISSILE, ILLICIT,  TITLE)},
+
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Black Sun Ace', 'canon_name': 'blacksunace',
          'pilot_skill': 5, 'cost': 23,
          'constraints': (SCUM_FACTION_CONSTRAINT),
          'upgrades': (EPT, MISSILE, ILLICIT,  TITLE)},
+
         {'ship_size': SMALL_SHIP, 'faction': SCUM, 'name': 'Cartel Marauder', 'canon_name': 'cartelmarauder',
          'pilot_skill': 2, 'cost': 20,
          'constraints': (SCUM_FACTION_CONSTRAINT),
