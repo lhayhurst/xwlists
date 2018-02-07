@@ -970,21 +970,17 @@ class ArchtypeList(Base):
 
 
      def has_vaksai(self):
-         for ship in self.ships:
-             if len(ship.upgrades) > 0:
-                 for ship_upgrade in ship.upgrades:
-                     if ship_upgrade.upgrade is not None:
-                         if ship_upgrade.upgrade.name == 'vaksai':
-                             return True
-         return False
-
+        return self.has_upgrade_name('vaksai')
 
      def has_tiex1(self):
+         return self.has_upgrade_name('tiex1')
+
+     def has_upgrade_name(self, name):
          for ship in self.ships:
              if len(ship.upgrades) > 0:
                  for ship_upgrade in ship.upgrades:
                      if ship_upgrade.upgrade is not None:
-                         if ship_upgrade.upgrade.name == 'tiex1':
+                         if ship_upgrade.upgrade.canon_name == name:
                              return True
          return False
 
