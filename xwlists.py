@@ -2561,6 +2561,32 @@ def label_data():
 
 
 
+@app.route("/merge_tourney_lists")
+def merge_tourney_lists():
+    from_tourney_id = request.args.get('from_tourney_id')
+    to_tourney_id = request.args.get('to_tourney_id')
+
+    pm = PersistenceManager(myapp.db_connector)
+    from_tourney = pm.get_tourney_by_id(from_tourney_id)
+    to_tourney   = pm.get_tourney_by_id(to_tourney_id)
+
+    #collect all the lists in the from tourney
+    list_map = {}
+    for list in from_tourney.tourney_lists:
+        if list.archtype_list is not None:
+            list_map[list.player.get_player_name()] = list
+
+    #and merge them into the to tourney
+    for to_list in to_tourney.tourney_lists:
+        #see if its in the map
+        if to_list.player.get_player_name() in list_map:
+            from_list = list_map[to_list.player.get_player_name()]
+            to_list.archtype_id = from_list.archtype_id
+
+    pm.db_connector.get_session().commit()
+    return redirect(url_for("get_tourney_details", tourney_id=to_tourney.id))
+
+
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         if sys.argv[1] == 'dev':
