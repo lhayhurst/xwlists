@@ -2125,6 +2125,7 @@ def pretty_print():
         i = i + 1
         if i % 1000 == 0:
             print("pretty_printed %d archtypes" % (i))
+            pm.db_connector.get_session().commit()
     pm.db_connector.get_session().commit()
     return redirect(url_for('tourneys'))
 
