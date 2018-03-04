@@ -2118,9 +2118,10 @@ def pretty_print():
     archtypes = pm.get_all_archtypes()
     i = 0
     for a in archtypes:
-        pp = a.pretty_print_list()
-        a.pretty = pp
-        pm.db_connector.get_session().add(a)
+        if a.pretty is None:
+            pp = a.pretty_print_list()
+            a.pretty = pp
+            pm.db_connector.get_session().add(a)
         i = i + 1
         if i % 1000 == 0:
             print("pretty_printed %d archtypes" % (i))
