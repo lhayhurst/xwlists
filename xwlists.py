@@ -2116,12 +2116,16 @@ def display_list():
 def pretty_print():
     pm = PersistenceManager(myapp.db_connector)
     archtypes = pm.get_all_archtypes()
+    i = 0
     for a in archtypes:
         pp = a.pretty_print_list()
         a.pretty = pp
         pm.db_connector.get_session().add(a)
+        i = i + 1
+        if i % 1000 == 0:
+            print("pretty_printed %d archtypes" % (i))
     pm.db_connector.get_session().commit()
-    return redirect(url_for('archtypes'))
+    return redirect(url_for('tourneys'))
 
 
 @app.route("/time_series")

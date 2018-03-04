@@ -69,9 +69,9 @@ class RoundType(DeclEnum):
 
 #factions changed in 0.3.0 of the xws spec.
 class Faction(DeclEnum):
-    IMPERIAL = "imperial", "Galactic Empire"
-    REBEL    = "rebel", "Rebel Alliance"
-    SCUM     = "scum", "Scum and Villainy"
+    IMPERIAL = "imperial", "Imperial"
+    REBEL    = "rebel", "Rebel"
+    SCUM     = "scum", "Scum"
 
 class UpgradeType(DeclEnum):
     TITLE = xwingmetadata.TITLE_CANON, xwingmetadata.TITLE
@@ -1002,9 +1002,9 @@ class ArchtypeList(Base):
 
      def pretty_print_list(self, newline="<br>"):
 
-        ret = ""
+        ret = self.faction.description + newline
         for ship in self.ships:
-            ret = ret + ship.ship_pilot.pilot.name
+            ret = ret + ship.ship_pilot.pilot.name + " (" + ship.ship_pilot.ship_type.description + ") "
             i = 1
             if ship.upgrades is not None:
                 for ship_upgrade in ship.upgrades:
