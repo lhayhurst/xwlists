@@ -874,7 +874,7 @@ ships = {
          'constraints': (SCUM_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
          'cost': 27,
          'faction': SCUM,
-         'name': u'Torani Kuldra',
+         'name': u'Torani Kulda',
          'pilot_skill': 8,
          'ship_size': u'small',
          'upgrades': (EPT, ILLICIT, MISSILE, SALVAGED_ASTROMECH_DROID, TORPEDO, MOD, TITLE)},

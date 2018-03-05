@@ -490,22 +490,20 @@
 
         function upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgradeType, upgradeValue) {
             var upgradeHref = getUpgradeHref( upgradeType, upgradeValue );
+
             if ( upgradeHref && 'action' in upgradeHref ) {
-                var titleHack = false;
-                if ( tieX1Equipped(upgradeValue) || vaksaiEquipped(upgradeValue) ) {
-                    titleHack = upgradeValue;
-                }
+
                 var action = upgradeHref.action;
                 for ( var i = 0; i < action.length; i++ )
                 {
                     if ( action[i].type == 'ADD_UPGRADE' ) {
                         var upgrade = action[i].value;
-                        upgradeItems = getUpgradeItems( squadMemberEl, upgrade, ship, faction, pilotHref, titleHack );
+                        upgradeItems = getUpgradeItems( squadMemberEl, upgrade, ship, faction, pilotHref );
                         addRow(squadMemberEl, 'upgrade', upgrade, upgradeItems, function (upgradeValue) {
                                 upgradeChosen(faction, squadMemberEl, ship, pilot, pilotHref, upgrade, upgradeValue);
                         } );
                     } else if (action[i].type == 'REMOVE_UGPRADE') {
-                        SDFASDF
+                        ; //placeholdeer
                     }
                 }
             }
@@ -536,7 +534,7 @@
             return rowEl;
         }
 
-        function getUpgradeItems(squadMemberEl, upgradeType, ship, faction, pilotHref, titleHack )
+        function getUpgradeItems(squadMemberEl, upgradeType, ship, faction, pilotHref )
         {
             var upgradeItems = upgrades[upgradeType].map(function (u) {
 
@@ -545,18 +543,6 @@
                 }
                 else {
                     var cost = u.cost;
-                    if ( vaksaiEquipped(titleHack)) {
-                        cost = cost - 1;
-                        if (cost < 0) {
-                            cost = 0;
-                        }
-                    }
-                    else if ( tieX1Equipped(titleHack)) {
-                        cost = u.cost - 4;
-                        if (cost < 0) {
-                            cost = 0;
-                        }
-                    }
                     return {text: u.name, id: u.name, cost: cost, type: upgradeType, disabled: false};
                 }
             });
@@ -719,17 +705,55 @@
                 pilotSelect =  pilot.find('.row-value .select');
                 if ( pilotSelect != null ) {
                     memberCost     = pilotSelect.select2('data').cost || 0;
+
+                    var titleHack = false;
+
+                    //hack to see if vaksai or tieX1 is equipped
+                    memberEl.find('.upgrade').each(function(k,upgrade) {
+                        var upgradeEl     = $(upgrade);
+                        var upgradeSelect = upgradeEl.find('.row-value .select');
+                        if ( upgradeSelect != null ) {
+                            var upgradeSelectEl = $(upgradeSelect).select2('data');
+                            if (upgradeSelectEl != null) {
+                                var upgradeValue = upgradeSelectEl.text;
+                                if ( tieX1Equipped(upgradeValue) || vaksaiEquipped(upgradeValue) ) {
+                                    titleHack = upgradeValue;
+                                }
+                            }
+                        }
+                    });
+
                     pilot.find( '.row-cost').text( memberCost );
                     //get all the upgrades
                     var upgradeCosts = 0;
+
                     memberEl.find('.upgrade').each( function(k, upgrade) {
                         var upgradeEl     = $(upgrade);
                         var upgradeSelect = upgradeEl.find('.row-value .select');
                         if ( upgradeSelect != null ) {
                             var upgradeSelectEl = $(upgradeSelect).select2('data');
                             if ( upgradeSelectEl != null ) {
-                                upgradeCosts += upgradeSelectEl.cost;
-                                upgradeEl.find('.row-cost').text(upgradeSelectEl.cost);
+
+                                var upgradeCost = upgradeSelectEl.cost;
+
+
+                                if( titleHack ) {
+                                    if (vaksaiEquipped(titleHack)) {
+                                        upgradeCost = upgradeCost - 1;
+                                        if (upgradeCost < 0) {
+                                            upgradeCost = 0;
+                                        }
+                                    }
+                                    else if (tieX1Equipped(titleHack)) {
+                                        upgradeCost = upgradeCost - 4;
+                                        if (upgradeCost < 0) {
+                                            upgradeCost = 0;
+                                        }
+                                    }
+                                }
+
+                                upgradeCosts += upgradeCost;
+                                upgradeEl.find('.row-cost').text(upgradeCost);
                             }
                         }
                     } ) ;
