@@ -126,6 +126,10 @@ TIE_SILENCER_CANON_NAME = 'tiesilencer'
 B_SF_17_BOMBER = 'B/SF-17 Bomber'
 B_SF_17_BOMBER_CANON_NAME = 'bsf17bomber'
 
+#Wave 13
+TIE_REAPER = 'TIE Reaper'
+TIE_REAPER_CANON_NAME = 'tiereaper'
+
 EPT = "Elite"
 EPT_CANON = 'ept'
 TITLE = "Title"
@@ -280,6 +284,22 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 # all the x-wing upgrades.
 upgrades = {
     CREW: (
+
+        {   'canon_name': u'sawgerrera',
+            'cost': 1,
+            'name': u'Saw Gerrera',
+                    'type': 'crew'
+        },
+        {   'canon_name': u'directorkrennic',
+            'cost': 5,
+            'name': u'Director Krennic',
+            'type': 'crew'
+        },
+        {   'canon_name': u'deathtroopers',
+            'cost': 2,
+            'name': u'Death Troopers',
+            'type': 'crew'
+        },
 
         {'name': 'Courier Droid', 'canon_name': 'courierdroid',
          'type': 'crew', 'cost': 0},
@@ -596,6 +616,7 @@ upgrades = {
 
     ),
     SYSTEM: (
+        {'name': 'Targeting Scrambler', 'canon_name': 'targetingscrambler', 'type': 'system', 'cost': 0},
         {'name': 'Trajectory Simulator', 'canon_name': 'trajectorysimulator', 'type': 'system', 'cost': 1},
         {'name': 'Minefield Mapper', 'canon_name': 'minefieldmapper', 'type': 'system', 'cost': 0},
         {'name': 'Collision Detector', 'canon_name': 'collisiondetector', 'cost': 0},
@@ -822,6 +843,20 @@ upgrades = {
 }
 
 ships = {
+
+    TIE_REAPER: (
+    {
+        'canon_name': u'majorvermeil',
+        'constraints': (IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+        'cost': 26,
+        'faction': IMPERIAL,
+        'name': u'Major Vermeil',
+        'pilot_skill': 6,
+        'ship_size': u'small',
+        'upgrades': (EPT, CREW, CREW, MOD)
+    },
+
+    ),
 
     ALPHA_CLASS_STAR_WING: (
         {'canon_name': u'majorvynder',
@@ -1506,7 +1541,18 @@ ships = {
              },
         ),
 
-    X_WING: ({'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Antilles', 'cost': 29,
+    X_WING: (
+        {   'canon_name': u'kullbeesperado',
+            'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+            'cost': 26,
+            'faction': REBEL,
+            'name': u'Kullbee Sperado',
+            'pilot_skill': 7,
+            'ship_size': SMALL_SHIP,
+            'upgrades': (DROID, TORPEDO, MOD, EPT)
+        },
+
+        {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Wedge Antilles', 'cost': 29,
               'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
               'upgrades': (DROID, TORPEDO, MOD, EPT)},
              {'ship_size': SMALL_SHIP, 'faction': REBEL, 'name': 'Luke Skywalker', 'cost': 28,

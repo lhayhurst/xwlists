@@ -140,6 +140,8 @@ class ShipType(DeclEnum):
     TIE_SILENCER = xwingmetadata.TIE_SILENCER_CANON_NAME, xwingmetadata.TIE_SILENCER
     B_SF_17_BOMBER = xwingmetadata.B_SF_17_BOMBER_CANON_NAME, xwingmetadata.B_SF_17_BOMBER
 
+    TIE_REAPER = xwingmetadata.TIE_REAPER_CANON_NAME, xwingmetadata.TIE_REAPER
+
 
 class Event(Base):
     __tablename__ = event_table
