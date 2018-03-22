@@ -4,7 +4,7 @@ from random import randint
 import urllib
 import uuid
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from datatables import ColumnDT, DataTables
 from flask import render_template, request, url_for, redirect, jsonify, Response, flash, send_file, send_from_directory
@@ -2592,6 +2592,19 @@ def merge_tourney_lists():
     pm.db_connector.get_session().commit()
     return redirect(url_for("get_tourney_details", tourney_id=to_tourney.id))
 
+@app.route("/auto_lock_tourneys")
+def auto_lock_tourneys():
+    pm = PersistenceManager(myapp.db_connector)
+    tourneys = pm.get_tourneys()
+    time_threshold = datetime.today() - timedelta(days=1 * 365 / 12)
+    time_threshold = time_threshold.date()
+
+    for tourney in tourneys:
+        tourney_date = tourney.tourney_date
+        if tourney_date and tourney_date < time_threshold:
+            tourney.locked = 1
+    pm.db_connector.get_session().commit()
+    return redirect(url_for("tourneys"))
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
