@@ -599,7 +599,7 @@ def league_divisions():
     tiers = sorted(league.tiers, key= lambda x: len(x.divisions))
     #matches = pm.get_recent_league_matches(league)
 
-    return render_template("league_s5.html",
+    return render_template("league_s6.html",
                            league=league, tiers=tiers)
 
 
@@ -644,6 +644,16 @@ def league_season_four():
     matches = pm.get_recent_league_matches(league)
 
     return render_template("league_s4.html",
+                           league=league, tiers=tiers, matches=matches)
+
+@app.route("/league_season_five")
+def league_season_five():
+    pm = PersistenceManager(myapp.db_connector)
+    league = pm.get_league("X-Wing Vassal League Season Five")
+    tiers = league.tiers
+    matches = pm.get_recent_league_matches(league)
+
+    return render_template("league_s5.html",
                            league=league, tiers=tiers, matches=matches)
 
 @app.route("/report_league_match")

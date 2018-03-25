@@ -8,7 +8,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 import csv
 
-CURRENT_VASSAL_LEAGUE_NAME = 'X-Wing Vassal League Season Five'
+CURRENT_VASSAL_LEAGUE_NAME = 'X-Wing Vassal League Season Six'
 
 class CaseInsensitiveDict(collections.Mapping):
     def __init__(self, d):
@@ -33,18 +33,14 @@ class LeaguePlayersCSVImporter:
         self.divisions = {}
         reader = csv.reader(input,delimiter='\t' )
         for row in reader:
-            player_name = unicode(row[0].strip())
-            person_name = unicode(row[1].strip())
-            email_address = row[2].strip()
-            time_zone = row[3].strip()
-            tier_name = row[4].strip()
-            tier_number = row[5].strip()
-            division_name = row[6].strip()
-            division_letter = row[7].strip()
+            person_name = unicode(row[0].strip())
+            player_name = unicode(row[1].strip())
+            tier_name = row[2].strip()
+            tier_number = row[3].strip()
+            division_name = row[4].strip()
+            division_letter = row[5].strip()
             self.tsv_players[player_name] = { 'person_name': person_name,
-                                            'email_address' : email_address,
                                             'player_name' : player_name,
-                                            'time_zone' : time_zone,
                                             'tier_name' : tier_name,
                                             'tier_number' : tier_number,
                                             'division_name' : division_name,
@@ -97,7 +93,8 @@ class XWingVassalLeagueHelper:
     def create_divisions(self,pm, league):
         for name in self.player_data.divisions.keys():
             division = self.player_data.divisions[name]
-            tier = pm.get_tier(division['tier'], league)
+            tier_name = division['tier'] + self.season_number
+            tier = pm.get_tier(tier_name, league)
             if tier:
                 d = Division()
                 d.division_letter = division['letter']
@@ -146,9 +143,7 @@ class XWingVassalLeagueHelper:
             tier_player.division = divisions_href[division_name]
             tier_player.tier = tier_player.division.tier
             tier_player.name = player_name
-            tier_player.email_address = decode(tsv_record['email_address'])
             tier_player.person_name = decode(tsv_record['person_name'])
-            tier_player.timezone = decode(tsv_record['time_zone'])
             pm.db_connector.get_session().add(tier_player)
         pm.db_connector.get_session().commit()
 
