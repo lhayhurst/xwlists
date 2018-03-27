@@ -377,7 +377,7 @@ class TierPlayer(Base):
 
 
         #if you played all 8 games (or whatever your divisional size is), then 0 interdivisional games for you!
-        num_qualifying_interdivisional_matches = VASSAL_LEAGUE_DIVISION_SIZE[m.player1.division.tier.name] - len(completed_divisional_matches)
+        num_qualifying_interdivisional_matches = VASSAL_LEAGUE_DIVISION_SIZE[self.tier.name] - len(completed_divisional_matches)
 
         #we're almost there! the scored_matches variable will contain all the matches used for scoring
         scored_matches = [completed_divisional_matches]
