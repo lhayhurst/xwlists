@@ -1489,7 +1489,10 @@ def get_tourney_lists_as_text(tourney, make_header=True):
             new_row = []
             new_row.extend(row_defaults)
             for i in range(len(new_row), len(header)):
-                new_row.append('')
+                if header[i] == 'player' and tourney_list.player.player_name is not None: #little hack for player name
+                    new_row.append(tourney_list.player.player_name)
+                else:
+                    new_row.append('')
             rows.append(new_row)
         else:
             for ship in tourney_list.ships():
