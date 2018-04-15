@@ -600,7 +600,7 @@ def league_divisions():
     #matches = pm.get_recent_league_matches(league)
 
     return render_template("league_s6.html",
-                           league=league, tiers=tiers)
+                           league=league, tiers=tiers, session=pm.db_connector.get_session())
 
 
 @app.route("/league_season_one")

@@ -8,18 +8,19 @@
 </style>
 <br>
 <br>
+
  <div><b>{{ league.get_name() }} Tiers</b><br>
 {% for tier in tiers %}
     {{ tier.get_name() }} : <a href="/tier_rankings?tier_id={{ tier.id }}">rankings</a> | <a href="/tier_matches?tier_id={{ tier.id }}">matches</a>
     <br>
 {% endfor %}
 {#<br><a href="/add_interdivision_league_match">Create an inter-divisional league match</a>#}
-
-     <br><a href="/manage_escrows?league_id={{ league.id }}">Esrow management page</a>
+<br>{{ league.complete_games_text(session) }} games have been completed
+<br>
+<br><a href="/manage_escrows?league_id={{ league.id }}">Esrow management page</a>
 
 <br><a href="/league_players?league_id={{ league.id }}">All Season Six players</a>
-
- <br>
+<br>
 <br>
 Here's a <a href="https://mu0n.github.io/XWVassal//">bunch of information</a> about the current season of Vassal League.
  <hr><a href="/league_season_one">Go here for old Season one data</a><br>

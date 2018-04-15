@@ -254,6 +254,21 @@ class League(Base):
     challonge_name = Column(String(128))
     tiers         = relationship( "Tier", back_populates="league", cascade="all,delete,delete-orphan")
 
+    def complete_games_text(self,session):
+
+        ret = session.query(LeagueMatch.state, func.count(LeagueMatch.id).label("count")).\
+            filter(LeagueMatch.tier_id == Tier.id).\
+            filter(Tier.league_id == League.id).\
+            filter(League.id == self.id).\
+            group_by(LeagueMatch.state)
+
+        results = ret.all()
+        complete = int(results[0][1])
+        all      = int(results[1][1])
+        perc     = float(complete) / float(all)
+        return "%d / %d (%.2f percent)" % (complete, all, perc*100)
+
+
 
 tier_table = "league_tier"
 class Tier(Base):
