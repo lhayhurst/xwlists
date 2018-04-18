@@ -58,7 +58,7 @@
             </div>
             <div data-field-span="1">
                 <label>Vlog file upload</label>
-                <input type="file" name="vlog_file" accepts="json" >
+                <input type="file" name="vlog_file" data-parsley-fileextension='vlog' >
             </div>
 
         </div>
@@ -69,6 +69,14 @@
 </form>
 
 <script>
+     window.ParsleyValidator
+        .addValidator('fileextension', function (value, requirement) {
+            var fileExtension = value.split('.').pop();
+
+            return fileExtension === requirement;
+        }, 32)
+        .addMessage('en', 'fileextension', 'Please provide a vlog file!');
+
    $('#form').parsley();
 </script>
 {% endblock %}
