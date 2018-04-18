@@ -10,7 +10,7 @@ from datatables import ColumnDT, DataTables
 from flask import render_template, request, url_for, redirect, jsonify, Response, flash, send_file, send_from_directory
 from flask.ext.mail import Mail, Message
 
-from pytz import all_timezones, timezone
+from pytz import common_timezones, timezone
 
 from uidgen import ListUIDGen
 from xwvassal_league import CURRENT_VASSAL_LEAGUE_NAME, XWingVassalLeagueHelper
@@ -757,7 +757,7 @@ def set_league_match_schedule():
     match = pm.get_match(match_id)
     today = datetime.today().strftime('%d-%m-%Y')
 
-    return render_template("league_match_schedule.html", match=match, today=today, timezones=all_timezones)
+    return render_template("league_match_schedule.html", match=match, today=today, timezones=common_timezones)
 
 
 @app.route("/submit_league_match_schedule", methods=['POST'])
