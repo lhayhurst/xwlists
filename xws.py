@@ -160,15 +160,21 @@ class XWSToJuggler:
                 #this is a nasty hack but, what can you do
                 hastiex1 = False
                 has_vaksai = False
+                has_renegade = False
 
                 for upgrade_type in upgrades.keys():
                     if upgrade_type == 'title':
                         for title in upgrades[upgrade_type]:
                             if title == 'tiex1':
                                 hastiex1 = True
-                                break
+                                break #TODO: if any one faction gets more than one way to modifiy points down, breaking here won't work!
                             if title == 'vaksai':
                                 has_vaksai = True
+                                break
+                    if upgrade_type == 'torpedo':
+                        for torp in upgrades[upgrade_type]:
+                            if torp == 'renegaderefit':
+                                has_renegade = True
                                 break
 
                 for upgrade_type in upgrades.keys():
@@ -180,7 +186,7 @@ class XWSToJuggler:
                         upgrade = pm.get_upgrade_canonical(upgrade_type, upgrade_name)
                         if upgrade is None:
                             raise Exception("xws lookup failed for upgrade " +  upgrade_name )
-                        points = points + upgrade.get_cost( has_vaksai=has_vaksai, has_tiex1=hastiex1)
+                        points = points + upgrade.get_cost( has_vaksai=has_vaksai, has_tiex1=hastiex1, has_renegade=has_renegade)
                         ship_upgrade = ShipUpgrade( ship=ship, upgrade=upgrade )
 
         hashkey = ArchtypeList.generate_hash_key(ships)
