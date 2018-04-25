@@ -181,16 +181,18 @@ class Upgrade(Base):
     cost = Column(Integer, unique=True)
 
 
-    def get_cost(self, has_vaksai, has_tiex1):
+    def get_cost(self, has_vaksai, has_tiex1, has_renegade):
         total = self.cost
         if has_vaksai:
             total = self.cost - 1
-            if total < 0:
-                total = 0
         elif has_tiex1 and self.upgrade_type == UpgradeType.SYSTEM:
             total = self.cost - 4
-            if total < 0:
-                total = 0
+        elif has_renegade and self.upgrade_type == UpgradeType.EPT:
+            total = self.cost - 1
+
+        if total < 0:
+            total = 0
+
         return total
 
 class Ship(Base):
@@ -985,6 +987,9 @@ class ArchtypeList(Base):
 
      tags             = relationship("ArchtypeTag", uselist=True)
 
+
+     def has_renegade(self):
+        return self.has_upgrade_name('renegaderefit')
 
      def has_vaksai(self):
         return self.has_upgrade_name('vaksai')

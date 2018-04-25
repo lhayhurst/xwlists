@@ -40,8 +40,10 @@ class XWSListConverter:
             if len(ship.upgrades) > 0:
                 pilot_href['upgrades'] = pilot_upgrades
 
-            has_vaksai = archtype.has_vaksai()
-            has_tiex1  = archtype.has_tiex1()
+            #queue annoying hacks!
+            has_vaksai   = archtype.has_vaksai()
+            has_tiex1    = archtype.has_tiex1()
+            has_renegade = archtype.has_renegade()
 
             for ship_upgrade in ship.upgrades:
                 if ship_upgrade.upgrade is not None:
@@ -51,7 +53,8 @@ class XWSListConverter:
                     if provide_points:
                         pilot_upgrades[ut].append( {'name': ship_upgrade.upgrade.canon_name,
                                                     'points':ship_upgrade.upgrade.get_cost(has_vaksai=has_vaksai,
-                                                                                           has_tiex1=has_tiex1)
+                                                                                           has_tiex1=has_tiex1,
+                                                                                           has_renegade=has_renegade)
                                                     } )
                     else:
                         pilot_upgrades[ut].append( ship_upgrade.upgrade.canon_name)

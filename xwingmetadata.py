@@ -284,6 +284,11 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 # all the x-wing upgrades.
 upgrades = {
     CREW: (
+        {   'canon_name': u'magvayarro',
+            'cost': 2,
+            'name': u'Magva Yarro',
+            'type': 'crew'
+        },
 
         {   'canon_name': u'sawgerrera',
             'cost': 1,
@@ -639,6 +644,13 @@ upgrades = {
     ),
     TORPEDO: (
 
+        {   'canon_name': u'renegaderefit',
+            'cost': -2,
+            'name': u'Renegade Refit',
+            'type': 'torpedo',
+            'action': [{'type': 'ADD_UPGRADE', 'value': MOD}],
+        },
+
         {'name': 'Seismic Torpedo', 'cost': 2},
         {'name': 'Flechette Torpedoes', 'cost': 2},
         {'name': 'Proton Torpedoes', 'cost': 4},
@@ -696,6 +708,15 @@ upgrades = {
         {'name': 'Adv. Homing Missiles', 'canon_name': 'advhomingmissiles', 'cost': 3},
     ),
     MOD: (
+
+
+
+        {   'canon_name': u'servomotorsfoils',
+            'cost': 0,
+            'name': u'Servomotor S-foils',
+            'type': 'mod',
+            'constraints': ({'type': SHIP_TYPE, 'value': X_WING})},
+
         {'name': 'Deflective Plating', 'canon_name': 'deflectiveplating', 'cost': 1},
 
         {'name': 'Pulsed Ray Shield', 'canon_name': 'pulsedrayshield', 'cost': 2},
@@ -1144,6 +1165,21 @@ ships = {
          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
          'pilot_skill': 6,
          },
+
+
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Saw Gerrera',
+         'cost': 26, 'canon_name': 'sawgerrera', 'upgrades': (EPT, SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill': 6,
+         },
+
+        {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Benthic Two Tubes',
+         'cost': 24, 'canon_name': 'benthictwotubes', 'upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'pilot_skill': 4,
+         },
+
+
     ),
 
     TIE_STRIKER: (
@@ -1542,6 +1578,16 @@ ships = {
         ),
 
     X_WING: (
+        {'canon_name': u'leevantenza',
+         'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+         'cost': 25,
+         'faction': REBEL,
+         'name': u'Leevan Tenza',
+         'pilot_skill': 5,
+         'ship_size': SMALL_SHIP,
+         'upgrades': (EPT, DROID, TORPEDO, MOD)
+         },
+
         {   'canon_name': u'kullbeesperado',
             'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
             'cost': 26,

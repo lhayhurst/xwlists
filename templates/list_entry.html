@@ -480,6 +480,10 @@
             updateTotals();
         }
 
+        function renegadeEquipped(upgradeValue) {
+            return upgradeValue = 'Renegade Refit'
+        }
+
         function vaksaiEquipped(upgradeValue) {
             return upgradeValue == 'Vaksai';
         }
@@ -706,9 +710,9 @@
                 if ( pilotSelect != null ) {
                     memberCost     = pilotSelect.select2('data').cost || 0;
 
-                    var titleHack = false;
+                    var costHack = false;
 
-                    //hack to see if vaksai or tieX1 is equipped
+                    //hack to see if vaksai or tieX1 or renegade is equipped
                     memberEl.find('.upgrade').each(function(k,upgrade) {
                         var upgradeEl     = $(upgrade);
                         var upgradeSelect = upgradeEl.find('.row-value .select');
@@ -716,8 +720,8 @@
                             var upgradeSelectEl = $(upgradeSelect).select2('data');
                             if (upgradeSelectEl != null) {
                                 var upgradeValue = upgradeSelectEl.text;
-                                if ( tieX1Equipped(upgradeValue) || vaksaiEquipped(upgradeValue) ) {
-                                    titleHack = upgradeValue;
+                                if ( tieX1Equipped(upgradeValue) || vaksaiEquipped(upgradeValue) || renegadeEquipped(upgradeValue) ) {
+                                    costHack = upgradeValue;
                                 }
                             }
                         }
@@ -737,15 +741,21 @@
                                 var upgradeCost = upgradeSelectEl.cost;
 
 
-                                if( titleHack ) {
-                                    if (vaksaiEquipped(titleHack)) {
+                                if( costHack ) {
+                                    if (vaksaiEquipped(costHack)) {
                                         upgradeCost = upgradeCost - 1;
                                         if (upgradeCost < 0) {
                                             upgradeCost = 0;
                                         }
                                     }
-                                    else if (tieX1Equipped(titleHack)) {
+                                    else if (tieX1Equipped(costHack)) {
                                         upgradeCost = upgradeCost - 4;
+                                        if (upgradeCost < 0) {
+                                            upgradeCost = 0;
+                                        }
+                                    }
+                                    else if (renegadeEquipped(costHack)) {
+                                        upgradeCost = upgradeCost - 1;
                                         if (upgradeCost < 0) {
                                             upgradeCost = 0;
                                         }

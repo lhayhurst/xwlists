@@ -32,7 +32,9 @@
                 <b>{{ ship.ship_pilot.ship_type.description }} -- {{  ship.ship_pilot.pilot.name }}</b><p class="alignright">{{ ship.ship_pilot.pilot.cost }}</p>
                 <br>
                 {% for ship_upgrade in ship.upgrades %}
-                    <i class="tab">{{ ship_upgrade.upgrade.name }}</i>  <p class="alignright">{{ ship_upgrade.upgrade.get_cost(tourney_list.archtype_list.has_vaksai(), tourney_list.archtype_list.has_tiex1())  }}</p><br>
+                    <i class="tab">{{ ship_upgrade.upgrade.name }}</i>  <p class="alignright">{{ ship_upgrade.upgrade.get_cost(tourney_list.archtype_list.has_vaksai(),
+                    tourney_list.archtype_list.has_tiex1(),
+                    tourney_list.archtype_list.has_renegade())  }}</p><br>
                 {% endfor %}
             {%  endfor %}
         <br>
