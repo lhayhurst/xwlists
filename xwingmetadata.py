@@ -284,6 +284,19 @@ T70_CONSTRAINT = {'type': SHIP_TYPE, 'value': T_70}
 # all the x-wing upgrades.
 upgrades = {
     CREW: (
+
+        {'canon_name': u'Tactical Officer',
+         'cost': 2,
+         'name': u'tacticalofficer',
+         'type': 'crew'
+         },
+
+        {'canon_name': u'ISB Slicer',
+         'cost': 2,
+         'name': u'isbslicer',
+         'type': 'crew'
+         },
+
         {   'canon_name': u'magvayarro',
             'cost': 2,
             'name': u'Magva Yarro',
@@ -482,7 +495,8 @@ upgrades = {
     ),
     TITLE: (
 
-
+        {'name': 'Advanced Ailerons', 'canon_name': 'advancedailerons', 'cost': 0,
+         'constraints': ({'type': SHIP_TYPE, 'value': [TIE_REAPER]}), },
 
         {'name': 'Crossfire Formation', 'canon_name': 'crossfireformation', 'cost': 2,
          'constraints': ({'type': SHIP_TYPE, 'value': [B_SF_17_BOMBER]}), },
@@ -866,6 +880,34 @@ upgrades = {
 ships = {
 
     TIE_REAPER: (
+
+        {   'canon_name': u'captainferoph',
+            'constraints': (IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+            'cost': 24,
+            'faction': IMPERIAL,
+            'name': u'Captain Feroph',
+            'pilot_skill': 4,
+            'ship_size': u'small',
+            'upgrades': (EPT, CREW, CREW, MOD, TITLE)
+        },
+        {   'canon_name': u'scarifbasepilot',
+            'constraints': (IMPERIAL_FACTION_CONSTRAINT, ),
+            'cost': 22,
+            'faction': IMPERIAL,
+            'name': u'Scarif Base Pilot',
+            'pilot_skill': 1,
+            'ship_size': u'small',
+            'upgrades': (CREW, CREW, MOD, TITLE)
+        },
+        {   'canon_name': u'vizier',
+            'constraints': (IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+            'cost': 23,
+            'faction': IMPERIAL,
+            'name': u'"Vizier"',
+            'pilot_skill': 3,
+            'ship_size': u'small',
+            'upgrades': (CREW, CREW, MOD, TITLE)
+        },
     {
         'canon_name': u'majorvermeil',
         'constraints': (IMPERIAL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
@@ -874,7 +916,7 @@ ships = {
         'name': u'Major Vermeil',
         'pilot_skill': 6,
         'ship_size': u'small',
-        'upgrades': (EPT, CREW, CREW, MOD)
+        'upgrades': (EPT, CREW, CREW, MOD, TITLE)
     },
 
     ),

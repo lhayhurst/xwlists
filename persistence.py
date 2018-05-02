@@ -185,14 +185,17 @@ class Upgrade(Base):
         total = self.cost
         if has_vaksai:
             total = self.cost - 1
+            if total < 0:
+                total = 0
         elif has_tiex1 and self.upgrade_type == UpgradeType.SYSTEM:
             total = self.cost - 4
+            if total < 0:
+                total = 0
+
         elif has_renegade and self.upgrade_type == UpgradeType.EPT:
             total = self.cost - 1
-
-        if total < 0:
-            total = 0
-
+            if total < 0:
+                total = 0
         return total
 
 class Ship(Base):

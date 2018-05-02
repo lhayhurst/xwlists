@@ -9,7 +9,3 @@ insert  ship_pilot ( ship_type, pilot_id) select 'xwing', id from pilot where na
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'crew', 'Magva Yarro', 'magvayarro', '2');
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'torpedo', 'Renegade Refit', 'renegaderefit', '-2');
 insert into upgrade ( upgrade_type, name, canon_name, cost ) values ( 'mod', 'Servomotor S-foils', 'servomotorsfoils', '0');
-
-
-
-
