@@ -14,10 +14,11 @@
     {{ tier.get_name() }} : <a href="/tier_rankings?tier_id={{ tier.id }}">rankings</a> | <a href="/tier_matches?tier_id={{ tier.id }}">matches</a>
     <br>
 {% endfor %}
-{#<br><a href="/add_interdivision_league_match">Create an inter-divisional league match</a>#}
 <br>{{ league.complete_games_text(session) }} games have been completed
 <br>
-<br><a href="/manage_escrows?league_id={{ league.id }}">Esrow management page</a>
+<br><a href="/add_interdivision_league_match">Create an inter-divisional league match</a>
+
+     <br><a href="/manage_escrows?league_id={{ league.id }}">Esrow management page</a>
 
 <br><a href="/league_players?league_id={{ league.id }}">All Season Six players</a>
 <br>
