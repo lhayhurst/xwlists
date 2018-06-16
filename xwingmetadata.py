@@ -267,7 +267,15 @@ sets_and_expansions = {'Core Set': [],
                        'Wave 11': [ TIE_AGGRESSOR + ' Expansion Pack',
                                     SCURRG_H6_BOMBER + " Expansion Pack",
                                     AUZITUCK_GUNSHIP + " Expansion Pack" ],
+                       'Wave 12': [ ALPHA_CLASS_STAR_WING + 'Expansion Pack',
+                                    M12_L_KIMOGILA_FIGHTER + 'Expansion Pack',
+                                    "Phantom II Expansion Pack"],
+                       'Wave 13': [ TIE_SILENCER + "Expansion Pack",
+                                    "Resistance Bomber Expansion Pack"],
+                       'Wave 14': [ TIE_REAPER + "Expansion Pack",
+                                    "Saw's Renegades Expansion Pack"]
                        }
+
 
 formats = {'Standard - 100 Point Dogfight', 'Epic Play - 300 points', 'Escalation'}
 format_default = 'Standard - 100 Point Dogfight'
@@ -1620,6 +1628,17 @@ ships = {
         ),
 
     X_WING: (
+
+        {'canon_name': u'cavernangelszealot',
+         'constraints': (REBEL_FACTION_CONSTRAINT),
+         'cost': 22,
+         'faction': REBEL,
+         'name': u'Cavern Angels Zealot',
+         'pilot_skill': 1,
+         'ship_size': SMALL_SHIP,
+         'upgrades': (DROID, TORPEDO, MOD)
+         },
+
         {'canon_name': u'leevantenza',
          'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
          'cost': 25,
