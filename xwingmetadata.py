@@ -643,6 +643,11 @@ upgrades = {
 
     ),
     SYSTEM: (
+        {   'canon_name': u'thrustcorrector',
+            'cost': 1,
+            'name': u'Thrust Corrector',
+            'type': 'system'
+        },
         {'name': 'Targeting Scrambler', 'canon_name': 'targetingscrambler', 'type': 'system', 'cost': 0},
         {'name': 'Trajectory Simulator', 'canon_name': 'trajectorysimulator', 'type': 'system', 'cost': 1},
         {'name': 'Minefield Mapper', 'canon_name': 'minefieldmapper', 'type': 'system', 'cost': 0},
@@ -732,6 +737,11 @@ upgrades = {
     MOD: (
 
 
+        {   'canon_name': u'multispectralcamouflage',
+            'cost': 1,
+            'name': u'Multi-spectral Camouflage',
+            'type': 'mod'
+        },
 
         {   'canon_name': u'servomotorsfoils',
             'cost': 0,
@@ -1196,36 +1206,57 @@ ships = {
 
 
     U_WING: (
+
+        {   'canon_name': u'partisanrenegade',
+            'constraints': (REBEL_FACTION_CONSTRAINT),
+            'cost': 22,
+            'faction': REBEL,
+            'name': u'Partisan Renegade',
+            'pilot_skill': 1,
+            'ship_size': u'large',
+            'upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE)
+        },
+        {   'canon_name': u'magvayarro',
+            'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,REBEL_FACTION_CONSTRAINT),
+            'cost': 25,
+            'faction': REBEL,
+            'name': u'Magva Yarro',
+            'pilot_skill': 5,
+            'ship_size': u'large',
+            'upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE)
+        },
+
         {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Blue Squadron Pathfinder',
          'cost': 23, 'canon_name': 'bluesquadronpathfinder', 'upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE),
+          'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,REBEL_FACTION_CONSTRAINT),
          'pilot_skill': 2,
          },
         {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Heff Tobber',
          'cost': 24, 'canon_name': 'hefftobber', 'upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE),
-         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,REBEL_FACTION_CONSTRAINT),
          'pilot_skill': 3,
          },
         {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Bodhi Rook',
          'cost': 25, 'canon_name': 'bodhirook', 'upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE),
-         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,REBEL_FACTION_CONSTRAINT),
          'pilot_skill': 4,
          },
         {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Cassian Andor',
          'cost': 27, 'canon_name': 'cassianandor', 'upgrades': (EPT, SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE),
-         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,REBEL_FACTION_CONSTRAINT),
          'pilot_skill': 6,
          },
 
 
         {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Saw Gerrera',
          'cost': 26, 'canon_name': 'sawgerrera', 'upgrades': (EPT, SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE),
-         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,REBEL_FACTION_CONSTRAINT),
          'pilot_skill': 6,
          },
 
         {'ship_size': LARGE_SHIP, 'faction': REBEL, 'name': 'Benthic Two Tubes',
          'cost': 24, 'canon_name': 'benthictwotubes', 'upgrades': (SYSTEM, TORPEDO, CREW, CREW, MOD, TITLE),
-         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT,),
+         'constraints': (PER_SQUAD_UNIQUE_CONSTRAINT, REBEL_FACTION_CONSTRAINT),
          'pilot_skill': 4,
          },
 
@@ -1628,6 +1659,16 @@ ships = {
         ),
 
     X_WING: (
+
+        {   'canon_name': u'edriotwotubes',
+            'constraints': (REBEL_FACTION_CONSTRAINT, PER_SQUAD_UNIQUE_CONSTRAINT),
+            'cost': 24,
+            'faction': REBEL,
+            'name': u'Edrio Two Tubes',
+            'pilot_skill': 4,
+            'ship_size': u'small',
+            'upgrades': (EPT, DROID, TORPEDO, MOD)
+        },
 
         {'canon_name': u'cavernangelszealot',
          'constraints': (REBEL_FACTION_CONSTRAINT),
