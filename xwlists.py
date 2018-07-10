@@ -359,17 +359,22 @@ def submit_interdivisional_league_match():
     player1 = pm.get_league_player_by_id(player1_id)
     player2 = pm.get_league_player_by_id(player2_id)
 
+    print(player1.division.get_name())
+    allow_duplicate = False
     if player1.division == player2.division:
-        flash("Please select two players that are not in the same division!")
-        return redirect(url_for("add_interdivision_league_game",
-                                league_id=league_id))
+        if not player1.division.tier.get_name() == "Deep Core":
+            flash("Please select two players that are not in the same division!")
+            return redirect(url_for("add_interdivision_league_game",
+                                    league_id=league_id))
+        else:
+            allow_duplicate = True
 
     tier = pm.get_tier_by_id(tier_id)
     now = datetime.now()
 
 
     helper = XWingVassalLeagueHelper(tier.league.name, tier.league.id)
-    match = helper.create_league_match(player1.division, player1, player2, pm )
+    match = helper.create_league_match(player1.division, player1, player2, pm, allow_duplicate )
     return redirect(url_for('league_match', match_id=match.id))
 
 

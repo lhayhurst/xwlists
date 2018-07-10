@@ -155,12 +155,13 @@ class XWingVassalLeagueHelper:
                 #don't create it if it already exists
                 self.create_league_match(division, new_player, opponent, pm)
 
-    def create_league_match(self, division, player1, player2, pm ):
+    def create_league_match(self, division, player1, player2, pm, allow_duplicate=False ):
         match_exists = False
-        if len(player1.matches):
-            for match in player1.matches:
-                if match.player1_id == player2.id or match.player2_id == player2.id:
-                    return match
+        if allow_duplicate == False:
+            if len(player1.matches):
+                for match in player1.matches:
+                    if match.player1_id == player2.id or match.player2_id == player2.id:
+                        return match
         lm = LeagueMatch()
         lm.player1 = player2
         lm.player2 = player1
