@@ -426,13 +426,15 @@ class VassalLeagueMatches(restful.Resource):
                     'scheduled_datetime': m.scheduled_datetime,
                     'state': m.state,
                     'last_updated_at': m.updated_at,
+                    'logfile_url': m.challonge_attachment_url,
                     'player1': {
                         'name': m.player1.name,
                         "division_name": m.player1.division.name,
                         "list": m.player1_list_url,
                         "pretty_print": p1_pretty_list,
                         "xws": p1_xws,
-                        'score': m.player1_score
+                        'score': m.player1_score,
+                        'id': m.player1.id
                     },
                     'player2': {
                         'name': m.player2.name,
@@ -440,7 +442,8 @@ class VassalLeagueMatches(restful.Resource):
                         'list': m.player2_list_url,
                         'pretty_print': p2_pretty_list,
                         'xws': p2_xws,
-                        'score': m.player2_score
+                        'score': m.player2_score,
+                        'id': m.player2.id
                     }
                 })
         return jsonify(ret)
