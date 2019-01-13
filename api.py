@@ -6,7 +6,7 @@ import uuid
 import json
 
 from flask import jsonify, request, abort
-from flask.ext import restful
+import flask_restful as restful
 import dateutil.parser
 from sqlalchemy import func, or_
 
