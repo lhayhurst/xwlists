@@ -1,6 +1,6 @@
 BeautifulSoup==3.2.1
 Flask>=0.12.3
-Flask-Cors==2.0.0
+Flask-Cors==3.0.7
 Flask-Mail==0.9.1
 Flask-RESTful==0.3.4
 Jinja2==2.7.3

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 from datatables import ColumnDT, DataTables
 from flask import render_template, request, url_for, redirect, jsonify, Response, flash, send_file, send_from_directory
-from flask.ext.mail import Mail, Message
+from flask_mail import Mail, Message
 
 from pytz import common_timezones, timezone
 
