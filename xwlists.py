@@ -45,7 +45,8 @@ from rollup import ShipPilotTimeSeriesData, ShipTotalHighchartOptions, FactionTo
 from search import Search
 import xwingmetadata
 from xws import VoidStateXWSFetcher, XWSToJuggler, YASBFetcher, FabFetcher, GeneralXWSFetcher, XWSListConverter
-from flask.ext import restful
+import flask_restful as restful
+#from flask.ext import restful
 from flask_cors import CORS
 
 YASB = 'yasb'
